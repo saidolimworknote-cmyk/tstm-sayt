@@ -1,0 +1,32 @@
+# --- Muharrir / vosita sozlamalari (loyihaga aloqasi yo'q) ---
+.idea/
+.vscode/
+.claude/
+
+# --- Vaqtinchalik sinov fayllari ---
+# Audit/sinov stendlari hamisha "_" bilan boshlanadi va ish oxirida o'chiriladi
+_*.html
+*.log
+*.bak
+*.tmp
+
+# --- Maxfiy / ish jarayoni ma'lumotlari (repoga TUSHMASIN) ---
+# data.json — MySQL'ga ko'chishdan oldingi eski ombor. Ichida admin parolining
+#   XESHI (auth.passwordHash) bor, shuning uchun versiya nazoratiga qo'yilmaydi.
+#   db.php uni faqat birinchi ishga tushirishda (baza bo'sh bo'lsa) o'qiydi;
+#   usiz seed.php standart qiymatlar bilan ishga tushadi.
+data.json
+# login_attempts.json — brute-force himoyasi holati, IP manzillarni saqlaydi
+login_attempts.json
+# views.json — ko'rishlar hisoblagichi, server ish jarayonida o'zgaradi
+views.json
+
+# --- OS artefaktlari ---
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# ESLATMA: uploads/ ATAYLAB kuzatiladi — admin orqali yuklangan rasm va
+# hujjatlar sayt kontentining bir qismi. Ular bir marta yo'qolib qolgan
+# (loyiha va htdocs orasidagi bir tomonlama sync sababli), shuning uchun
+# git ularni himoya qilib turadi.

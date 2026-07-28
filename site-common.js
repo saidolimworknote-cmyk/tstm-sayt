@@ -1,0 +1,577 @@
+/* ============================================================
+   TSTM — umumiy sayt logikasi (header + footer + helperlar)
+   Har bir ichki sahifa shu fayldan header/footer oladi.
+   ============================================================ */
+(function (w) {
+  // ---------- helpers ----------
+  const lang = (function(){ try { return localStorage.getItem('tstm_site_lang') || 'uz'; } catch(e){ return 'uz'; } })();
+  const T = (k) => (w.I18N ? w.I18N.t(k) : k);
+  const mlGet = (v, l) => {
+    if (v && typeof v === 'object') return v[l || lang] || v.uz || v.ru || v.en || '';
+    // oddiy satr — kategoriya/tur kabi yorliqlarni lug'at orqali tarjima qilishga urinamiz
+    return w.I18N ? w.I18N.tl(v || '', l) : (v || '');
+  };
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  // ---------- Displey sarlavha ----------
+  // Nashrlarning ilmiy sarlavhalari juda uzun bo'lishi mumkin (145 belgigacha) —
+  // ular bannerni va ro'yxat kartalarini buzadi. Admin ixtiyoriy "Qisqa sarlavha"
+  // yozishi mumkin: BOR bo'lsa banner/karta/brauzer sarlavhasida o'sha ishlatiladi,
+  // YO'Q bo'lsa to'liq sarlavhaga qaytamiz (eski yozuvlar tahrirsiz ishlayveradi).
+  // To'liq sarlavha nashr sahifasi ichida alohida blokda hamisha to'liq ko'rsatiladi.
+  const dispTitle = (it, l) => {
+    if (!it) return '';
+    const s = mlGet(it.shortTitle, l);
+    return (s && String(s).trim()) ? s : mlGet(it.title, l);
+  };
+  const MONTHS = (w.I18N ? w.I18N.months() : ['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentabr','Oktabr','Noyabr','Dekabr']);
+  const fmtDate = (d) => { if(!d) return ''; const p = String(d).split('-'); return p[2]+'.'+p[1]+'.'+p[0]; };
+  const dayMonth = (d) => { if(!d) return {dd:'',mm:''}; const p = String(d).split('-'); return { dd: p[2], mm: MONTHS[parseInt(p[1],10)-1] || '' }; };
+  const qs = (k) => new URLSearchParams(location.search).get(k);
+  const settings = () => { try { return Store.settings(); } catch(e){ return {}; } };
+
+  // ---------- Brend nomi (admin -> Sozlamalar -> "Markaz nomi") ----------
+  // Brend ikki qatorli lockup, admindagi `siteName` esa bitta matn. Nomni so'z
+  // chegarasidan ikki muvozanatli qatorga bo'lamiz (mavjud dizayn shakli saqlanadi).
+  // Nom bo'sh bo'lsa — i18n'dagi standart matnga qaytamiz.
+  function brandLines(){
+    const nm = String(mlGet(settings().siteName) || '').trim();
+    if (!nm) return { top: T('org_name'), bot: T('org_tagline') };
+    const ws = nm.split(/\s+/);
+    if (ws.length < 2) return { top: nm.toUpperCase(), bot: '' };
+    let cut = 1, best = Infinity;
+    for (let i = 1; i < ws.length; i++){
+      let d = Math.abs(ws.slice(0, i).join(' ').length - ws.slice(i).join(' ').length);
+      // Qisqa bog'lovchi ("va", "и", "and") qator oxirida osilib qolmasin
+      if (ws[i - 1].length <= 3) d += 12;
+      if (d < best) { best = d; cut = i; }
+    }
+    return { top: ws.slice(0, cut).join(' ').toUpperCase(), bot: ws.slice(cut).join(' ') };
+  }
+  const shortName = () => String(settings().shortName || 'TSTM');
+
+  // Nom sozlamadan keladi, ya'ni uzunligi oldindan noma'lum. Brend matni menyu
+  // ustiga chiqib ketmasligi uchun mavjud joyga qarab shriftni kichraytiramiz.
+  // Standart o'zbekcha nom 17px'da sig'adi — unga tegilmaydi; uzunroq RU/EN
+  // nomlari esa 12px'gacha kichrayadi.
+  function fitBrand(){
+    const nm = document.querySelector('header .brand .nm');
+    if (!nm) return;
+    const b = nm.querySelector('b'), sm = nm.querySelector('small');
+    if (!b) return;
+    // O'ng tomondagi to'siq — ko'rinib turgan menyu yoki burger tugmasi
+    const nav = document.querySelector('header nav.main');
+    const burger = document.querySelector('header #navBurger');
+    const stop = (nav && nav.offsetParent !== null) ? nav
+               : ((burger && burger.offsetParent !== null) ? burger : null);
+    if (!stop) return;
+    const limit = stop.getBoundingClientRect().left - nm.getBoundingClientRect().left - 18;
+    if (!(limit > 80)) return; // o'lchov ishonchsiz — tegmaymiz
+    let size = 17, guard = 0;
+    b.style.fontSize = size + 'px'; if (sm) sm.style.fontSize = size + 'px';
+    while (size > 12 && nm.scrollWidth > limit && guard++ < 40) {
+      size -= 0.5;
+      b.style.fontSize = size + 'px'; if (sm) sm.style.fontSize = size + 'px';
+    }
+  }
+
+  // ---------- Yoqilgan tillar (admin -> Sozlamalar -> "Tillar") ----------
+  // Sozlama yuklanmagan bo'lsa (offline) — uchalasi ham yoqilgan deb hisoblaymiz.
+  const ALL_LANGS = ['uz', 'ru', 'en'];
+  function enabledLangs(){
+    const L = settings().langs || {};
+    const on = ALL_LANGS.filter(l => L[l] !== false);
+    return on.length ? on : ['uz']; // hammasi o'chirilgan bo'lsa sayt tilsiz qolmasin
+  }
+  // Joriy til o'chirib qo'yilgan bo'lsa — ruxsat etilgan birinchi tilga o'tamiz.
+  // Qayta yuklangach lang ro'yxatda bo'ladi, ya'ni takror reload bo'lmaydi.
+  (function(){
+    try {
+      const on = enabledLangs();
+      if (on.indexOf(lang) < 0) { localStorage.setItem('tstm_site_lang', on[0]); location.reload(); }
+    } catch(e){}
+  })();
+  // Til almashtirgich tugmalari — faqat yoqilgan tillar
+  const LANG_LABEL = { uz: "O'zbekcha", ru: 'Русский', en: 'English' };
+  function langButtons(cls){
+    return enabledLangs().map(l =>
+      `<span class="${lang === l ? 'on' : ''}" data-l="${l}" role="button" tabindex="0" aria-label="${esc(LANG_LABEL[l])}" aria-pressed="${lang === l}">${l.toUpperCase()}</span>`
+    ).join('');
+  }
+
+  // ---------- nav model ----------
+  const NAV = [
+    { tk: 'nav_about', href: 'markaz-haqida.html', key: 'about', children: [
+      { tk: 'nav_about_goal', href: 'markaz-haqida.html?slug=maqsad' },
+      { tk: 'nav_about_leadership', href: 'rahbariyat.html' }
+    ]},
+    { tk: 'nav_research', href: 'tadqiqotlar.html', key: 'research', children: [
+      { tk: 'nav_research_foreign', href: 'nashrlar.html?cat=Tashqi+siyosat' },
+      { tk: 'nav_research_security', href: 'nashrlar.html?cat=Xavfsizlik' },
+      { tk: 'nav_research_economy', href: 'nashrlar.html?cat=Iqtisodiyot' },
+      { tk: 'nav_research_ca', href: 'nashrlar.html?cat=Markaziy+Osiyo' }
+    ]},
+    { tk: 'nav_pubs', href: 'nashrlar.html', key: 'pubs' },
+    { tk: 'nav_news', href: 'yangiliklar.html', key: 'news' },
+    { tk: 'nav_events', href: 'tadbirlar.html', key: 'events' },
+    { tk: 'nav_media', href: 'media.html', key: 'media', children: [
+      { tk: 'nav_media_photo', href: 'media.html?tab=photo' },
+      { tk: 'nav_media_video', href: 'media.html?tab=video' },
+      { tk: 'nav_media_info', href: 'media.html?tab=info' }
+    ]},
+    { tk: 'nav_contact', href: 'aloqa.html', key: 'contact' }
+  ];
+
+  const ICON = {
+    search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3" stroke-linecap="round"/></svg>',
+    sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M4.4 4.4l1.4 1.4M18.2 18.2l1.4 1.4M2.5 12h2M19.5 12h2M4.4 19.6l1.4-1.4M18.2 5.8l1.4-1.4"/></svg>',
+    moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>',
+    burger: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M3 12h18M3 18h18"/></svg>',
+    a11y: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>',
+    close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+    tg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.5 4.3 2.9 11.4c-.9.4-.9 1.6.1 1.9l4.6 1.4 1.8 5.6c.2.7 1.1.9 1.6.3l2.5-2.5 4.7 3.5c.6.4 1.4 0 1.5-.7L23 5.4c.2-.9-.7-1.5-1.5-1.1Z"/></svg>',
+    yt: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 12s0-3.2-.4-4.7c-.2-.8-.9-1.5-1.7-1.7C19.4 5.2 12 5.2 12 5.2s-7.4 0-8.9.4c-.8.2-1.5.9-1.7 1.7C1 8.8 1 12 1 12s0 3.2.4 4.7c.2.8.9 1.5 1.7 1.7 1.5.4 8.9.4 8.9.4s7.4 0 8.9-.4c.8-.2 1.5-.9 1.7-1.7C23 15.2 23 12 23 12ZM9.8 15.3V8.7l6 3.3-6 3.3Z"/></svg>',
+    fb: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.7l-.4 2.9h-2.3v7A10 10 0 0 0 22 12Z"/></svg>',
+    x: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 3h3l-6.6 7.5L21.7 21h-6l-4.7-6.1L5.6 21H2.5l7-8L2 3h6.2l4.2 5.6L17.5 3Zm-1 16h1.6L7.6 4.7H5.9L16.5 19Z"/></svg>'
+  };
+
+  // ---------- THEME ----------
+  const THEME_KEY = 'tstm_site_theme';
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme', t);
+    document.querySelectorAll('.theme-tog').forEach(b => b.innerHTML = t === 'dark' ? ICON.sun : ICON.moon);
+  }
+  // Tashrifchi o'zi tanlagan tema ustun; tanlamagan bo'lsa — admindagi standart tema.
+  let theme = 'light';
+  try { theme = localStorage.getItem(THEME_KEY) || settings().theme || 'light'; } catch(e){}
+  // apply immediately (before render) to avoid flash
+  document.documentElement.setAttribute('data-theme', theme);
+  window.TSTM_SITE_THEME = theme; // a11y.js shu qiymatni hurmat qiladi (admin standart temasi yo'qolmasin)
+  function toggleTheme(){
+    theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    try { localStorage.setItem(THEME_KEY, theme); } catch(e){}
+    window.TSTM_SITE_THEME = theme;
+    applyTheme(theme);
+  }
+
+  // ---------- HEADER ----------
+  function renderHeader(activeKey){
+    const s = settings();
+    const B = brandLines(), SN = shortName();
+    // <title> dagi qisqa nom ("Yangiliklar — TSTM") ham sozlamadan kelsin
+    document.title = document.title.replace(/—\s*TSTM\s*$/, '— ' + SN);
+    const navHTML = NAV.map(n => {
+      const car = n.children ? ' <i class="car"></i>' : '';
+      const drop = n.children ? '<div class="drop">' + n.children.map(c => `<a href="${c.href}">${esc(T(c.tk))}</a>`).join('') + '</div>' : '';
+      const active = n.key === activeKey ? ' active' : '';
+      return `<div class="item${active}"><a href="${n.href}">${esc(T(n.tk))}${car}</a>${drop}</div>`;
+    }).join('');
+
+    const el = document.createElement('header');
+    el.id = 'hdr';
+    el.className = 'solid';
+    el.innerHTML = `
+      <div class="util"><div class="wrap">
+        <span>${esc(T('util_country'))}</span>
+        <a href="mailto:${esc(s.email||'info@markaz.uz')}">${esc(s.email||'info@markaz.uz')}</a>
+        <a href="tel:${esc((s.phone||'').replace(/\s/g,''))}">${esc(s.phone||'+998 71 000 00 00')}</a>
+        <span class="sp"></span>
+        <div class="langs" role="group" aria-label="Til / Язык / Language">${langButtons()}</div>
+      </div></div>
+      <div class="bar"><div class="wrap">
+        <a class="brand" href="Bosh sahifa - Hi-Fi.html" aria-label="${esc(SN)}" style="flex-direction:row;align-items:center;justify-content:flex-start;padding:0;margin:0 0 0 -35px;width:384px;height:55px">
+          <img class="logo logo-c" src="logo-mark.png" alt="${esc(SN)}">
+          <span class="divider"></span>
+          <span class="nm" style="max-width:none"><b style="font-family:Spectral;font-size:17px;font-weight:600;line-height:1.3;display:block;white-space:nowrap">${esc(B.top)}</b><small style="font-family:Spectral;font-size:17px;font-weight:600;letter-spacing:0.2px;line-height:1.3;display:block;white-space:nowrap;margin-top:0;text-transform:none;opacity:1">${esc(B.bot)}</small></span>
+        </a>
+        <nav class="main" aria-label="${esc(T('a11y_mainnav')||'Asosiy menyu')}">
+          ${navHTML}
+          <div class="ic theme-tog" title="Rejim" role="button" tabindex="0" aria-label="${esc(T('theme_toggle')||'Yorug\u2018/quyuq rejim')}"></div>
+          <div class="ic a11y-btn" title="${esc(T('a11y_title'))}" role="button" tabindex="0" aria-label="${esc(T('a11y_title'))}">${ICON.a11y}</div>
+          <a class="ic" href="#" data-gs-open role="button" title="${esc(T('search_title'))}" aria-label="${esc(T('search_title'))}">${ICON.search}</a>
+        </nav>
+        <div class="nav-burger" id="navBurger" role="button" tabindex="0" aria-label="${esc(T('a11y_menu')||'Menyu')}" aria-expanded="false">${ICON.burger}</div>
+      </div></div>`;
+    document.body.prepend(el);
+    // skip-to-content havola (WCAG: klaviatura foydalanuvchilari uchun)
+    if (!document.getElementById('skip-link')) {
+      const sk = document.createElement('a');
+      sk.id = 'skip-link'; sk.href = '#main-content'; sk.className = 'skip-link';
+      sk.textContent = T('a11y_skip') || 'Asosiy kontentga o\u2018tish';
+      document.body.prepend(sk);
+    }
+    var mainEl = document.querySelector('main'); if (mainEl && !mainEl.id) { mainEl.id = 'main-content'; mainEl.setAttribute('role','main'); }
+
+    // logo override from settings (til bo'yicha) + standart 3 tilli marka
+    const DEFLOGO = { uz: 'logo-mark.png', ru: 'logo-mark-ru.png', en: 'logo-mark-en.png' };
+    const lg = (s.logos && s.logos[lang]) || s.logo || DEFLOGO[lang] || DEFLOGO.uz;
+    if (lg) el.querySelectorAll('.brand .logo').forEach(img => img.src = lg);
+
+    // mobile drawer
+    const drawer = document.createElement('div');
+    drawer.className = 'mnav';
+    // Drawer boshida til almashtirgich + tema tugmasi (mobil foydalanuvchi uchun — bosh sahifadagidek)
+    drawer.innerHTML =
+      `<div class="mnav-head">
+        <span class="ic theme-tog" role="button" tabindex="0" aria-label="${esc(T('theme_toggle')||'Yorug‘/quyuq rejim')}"></span>
+        <span class="ic a11y-btn" role="button" tabindex="0" title="${esc(T('a11y_title'))}" aria-label="${esc(T('a11y_title'))}">${ICON.a11y}</span>
+        <a class="ic" href="#" data-gs-open role="button" title="${esc(T('search_title'))}" aria-label="${esc(T('search_title'))}">${ICON.search}</a>
+        <div class="mnav-langs" role="group" aria-label="Til / Язык / Language">${langButtons()}</div>
+        <div class="close" id="mClose" role="button" tabindex="0" aria-label="${esc(T('close')||'Yopish')}">${ICON.close}</div>
+      </div>` +
+      NAV.map(n => `<a href="${n.href}">${esc(T(n.tk))}</a>` +
+        (n.children ? n.children.map(c => `<a class="sub" href="${c.href}">${esc(T(c.tk))}</a>`).join('') : '')
+      ).join('');
+    document.body.appendChild(drawer);
+    const closeDrawer = () => { drawer.classList.remove('open'); el.querySelector('#navBurger').setAttribute('aria-expanded','false'); document.body.style.overflow=''; };
+    el.querySelector('#navBurger').addEventListener('click', ()=> { drawer.classList.add('open'); el.querySelector('#navBurger').setAttribute('aria-expanded','true'); document.body.style.overflow='hidden'; });
+    drawer.querySelector('#mClose').addEventListener('click', closeDrawer);
+    // Menyu havolasi / utilita tugmasi bosilganda drawer yopilsin (a11y & qidiruv panel ustidan ochilsin)
+    drawer.querySelectorAll('a, .a11y-btn').forEach(a => a.addEventListener('click', closeDrawer));
+
+    // theme toggles
+    applyTheme(document.documentElement.getAttribute('data-theme'));
+    document.querySelectorAll('.theme-tog').forEach(b => b.addEventListener('click', toggleTheme));
+    // language (header util paneli + mobil drawer ichidagi tugmalar)
+    document.querySelectorAll('.langs span, .mnav-langs span').forEach(sp => {
+      const go = () => { try { localStorage.setItem('tstm_site_lang', sp.dataset.l); } catch(e){} location.reload(); };
+      sp.addEventListener('click', go);
+      sp.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+    });
+    // klaviatura: ic role=button elementlari Enter/Space bilan ishlasin (header + drawer)
+    el.querySelectorAll('.ic[role=button], #navBurger').forEach(b => {
+      b.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); b.click(); } });
+    });
+    drawer.querySelectorAll('.ic[role=button], #mClose').forEach(b => {
+      b.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); b.click(); } });
+    });
+    // Escape bilan drawer yopilsin
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && drawer.classList.contains('open')) closeDrawer(); });
+
+    // Brend matnini joyga moslash (layout hisoblangandan keyin + oyna o'lchami o'zgarganda)
+    requestAnimationFrame(fitBrand);
+    let fitT; w.addEventListener('resize', () => { clearTimeout(fitT); fitT = setTimeout(fitBrand, 150); });
+  }
+
+  // ---------- FOOTER ----------
+  function renderFooter(){
+    const s = settings();
+    const soc = s.social || {};
+    const B = brandLines(), SN = shortName();
+    const el = document.createElement('footer');
+    el.innerHTML = `<div class="wrap">
+      <div class="f-top">
+        <div>
+          <div class="f-brand">
+            <img class="flogo-c" src="${(s.logos && s.logos[lang]) || s.logo || ({uz:'logo-mark.png',ru:'logo-mark-ru.png',en:'logo-mark-en.png'}[lang]) || 'logo-mark.png'}" alt="${esc(SN)}">
+            <img class="flogo-w" src="logo-mark-white.png" alt="${esc(SN)}">
+            <span class="fd"></span>
+            <span><b>${esc(B.top)}</b><small>${esc(B.bot)}</small></span>
+          </div>
+          <p class="f-about">${esc(T('footer_about'))}</p>
+          <div class="socials">${[
+            {u:soc.telegram, i:ICON.tg, n:'Telegram'},
+            {u:soc.youtube,  i:ICON.yt, n:'YouTube'},
+            {u:soc.facebook, i:ICON.fb, n:'Facebook'},
+            {u:soc.x,        i:ICON.x,  n:'X'}
+          ].filter(l => l.u && l.u !== '#')
+           .map(l => `<a href="${esc(l.u)}" target="_blank" rel="noopener" aria-label="${l.n}">${l.i}</a>`).join('')}</div>
+        </div>
+        <div class="f-col"><h5>${esc(T('footer_sections'))}</h5>
+          <a href="markaz-haqida.html">${esc(T('nav_about'))}</a><a href="rahbariyat.html">${esc(T('nav_about_leadership'))}</a>
+          <a href="tadqiqotlar.html">${esc(T('nav_research'))}</a><a href="nashrlar.html">${esc(T('nav_pubs'))}</a>
+          <a href="yangiliklar.html">${esc(T('nav_news'))}</a><a href="tadbirlar.html">${esc(T('nav_events'))}</a></div>
+        <div class="f-col"><h5>${esc(T('footer_media'))}</h5>
+          <a href="media.html?tab=photo">${esc(T('nav_media_photo'))}</a><a href="media.html?tab=video">${esc(T('nav_media_video'))}</a>
+          <a href="media.html?tab=info">${esc(T('nav_media_info'))}</a><a href="aloqa.html">${esc(T('footer_press'))}</a></div>
+        <div class="f-contact">
+          <h5>${esc(T('footer_contact'))}</h5>
+          <div><span class="lab">${esc(T('footer_address'))}</span>${esc(mlGet(s.address)||"Toshkent sh., O'zbekiston")}</div>
+          <div><span class="lab">${esc(T('footer_email'))}</span>${esc(s.email||'info@markaz.uz')}</div>
+          <div><span class="lab">${esc(T('footer_phone'))}</span>${esc(s.phone||'+998 71 000 00 00')}</div>
+        </div>
+      </div>
+      <div class="f-bot">
+        <span>${esc(T('footer_copyright'))}</span>
+        <div style="display:flex;gap:24px"><a href="#">${esc(T('footer_privacy'))}</a><a href="#">${esc(T('footer_terms'))}</a></div>
+      </div>
+    </div>`;
+    document.body.appendChild(el);
+  }
+
+  // ---------- reveal-on-scroll ----------
+  function initReveal(){
+    if (!('IntersectionObserver' in window)) {
+      // juda eski brauzer — animatsiyasiz bo'lsa ham kontent ko'rinsin
+      document.querySelectorAll('.rv').forEach(el=>el.classList.add('in'));
+      return;
+    }
+    const io = new IntersectionObserver((es)=>{
+      es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+    },{threshold:.1, rootMargin:'0px 0px -6% 0px'});
+    document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+  }
+
+  // ---------- banner background ----------
+  // sahifa fayli -> banner kaliti
+  const BANNER_MAP = {
+    'yangiliklar.html':'news','yangilik.html':'news','tadbirlar.html':'events',
+    'nashrlar.html':'pubs','nashr.html':'pubs','tadqiqotlar.html':'research','yonalish.html':'research',
+    'markaz-haqida.html':'about','rahbariyat.html':'leadership','media.html':'media',
+    'aloqa.html':'contact','qidiruv.html':'search'
+  };
+  function applyBanner(activeKey){
+    const banners = (settings() || {}).banners || {};
+    const file = decodeURIComponent((location.pathname.split('/').pop() || '').toLowerCase());
+    const key = BANNER_MAP[file] || activeKey;
+    if (!key) return;
+    let url = banners[key];
+    const CK = 'tstm_banner_' + key;
+    const loadedOk = banners && Object.keys(banners).length > 0; // store yuklandi
+    try {
+      if (url) localStorage.setItem(CK, url);
+      else if (loadedOk) localStorage.removeItem(CK); // admin o'chirgan — zaxirani tozalaymiz
+      else url = localStorage.getItem(CK) || ''; // store bo'sh (reload lahzasi) — zaxiradan
+    } catch(e){}
+    const el = document.querySelector('.page-banner');
+    if (el && url){
+      el.classList.add('has-img');
+      el.style.setProperty('--banner-img', `url("${url}")`);
+    }
+  }
+
+  // ---------- Obuna (subscribe) modali — tashrif boshida bir marta ----------
+  // MUHIM: "obuna bo'ldingiz" xabari FAQAT server tasdiqlagandan keyin
+  // ko'rsatiladi. Avval natija umuman tekshirilmasdi — e-pochta hech qayerga
+  // yozilmasa ham foydalanuvchi obuna bo'ldim deb o'ylab ketardi.
+  var SUB_SEEN = 'tstm_sub_seen';   // muvaffaqiyatli obuna yoki ataylab yopish
+  var SUB_SNOOZE = 'tstm_sub_snooze'; // vaqtincha (xatodan keyin qayta urinish uchun)
+
+  function subSeen(){
+    try {
+      if (localStorage.getItem(SUB_SEEN)) return true;
+      var t = parseInt(localStorage.getItem(SUB_SNOOZE) || '0', 10);
+      return t && Date.now() < t;
+    } catch(e){ return false; }
+  }
+
+  function showSubscribe(){
+    if (subSeen()) return;
+
+    var lastFocus = document.activeElement;
+    var ov = document.createElement('div');
+    ov.className = 'sub-ov';
+    ov.innerHTML = '<div class="sub-modal" role="dialog" aria-modal="true" aria-labelledby="subTitle" tabindex="-1">'
+      + '<button class="sub-x" type="button" aria-label="'+esc(T('close')||'Yopish')+'">'
+      +   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/></svg>'
+      + '</button>'
+      + '<div class="sub-body">'
+      +   '<div class="sub-head">'
+      +     '<div class="sub-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div>'
+      +     '<span class="sub-badge">'+esc(T('sub_badge'))+'</span>'
+      +   '</div>'
+      +   '<h3 id="subTitle">'+esc(T('sub_title'))+'</h3><p class="sub-lead">'+esc(T('sub_text'))+'</p>'
+      +   '<form class="sub-form" novalidate>'
+      +     '<div class="sub-field">'
+      // Avtoto'ldirish uchun: brauzer taklifni type+name+autocomplete uchligiga
+      // qarab beradi — name bo'lmasa Chrome/Safari taklifni ko'pincha ko'rsatmaydi.
+      // inputmode/autocapitalize/spellcheck — mobilda to'g'ri klaviatura va
+      // birinchi harfning katta bo'lib ketmasligi uchun.
+      +       '<input type="email" name="email" id="subEmail" autocomplete="email" inputmode="email"'
+      +         ' spellcheck="false" autocapitalize="off" autocorrect="off"'
+      +         ' placeholder="'+esc(T('sub_ph'))+'" aria-label="'+esc(T('sub_ph'))+'">'
+      +       '<button type="submit" class="btn"><span class="lbl">'+esc(T('sub_btn'))+'</span><span class="sub-spin" aria-hidden="true"></span></button>'
+      +     '</div>'
+      +     '<div class="sub-alert" role="alert"></div>'
+      +   '</form>'
+      +   '<p class="sub-privacy">'+esc(T('sub_privacy'))+'</p>'
+      +   '<button class="sub-later" type="button">'+esc(T('sub_later'))+'</button>'
+      + '</div>'
+      + '<div class="sub-done" role="status">'
+      +   '<div class="sub-done-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12.5 9.5 18 20 7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
+      +   '<h3>'+esc(T('sub_ok'))+'</h3><p>'+esc(T('sub_ok_text'))+'</p>'
+      + '</div>'
+      + '</div>';
+
+    var modal = ov.querySelector('.sub-modal');
+    var form  = ov.querySelector('.sub-form');
+    var input = ov.querySelector('.sub-form input');
+    var btn   = ov.querySelector('.sub-form .btn');
+    var alertEl = ov.querySelector('.sub-alert');
+
+    var closed = false;
+    // dismiss=true — foydalanuvchi ataylab yopdi yoki obuna bo'ldi: boshqa ko'rsatmaymiz.
+    // dismiss=false — xatodan keyin yopildi: 1 kundan so'ng yana taklif qilamiz.
+    function close(dismiss){
+      if (closed) return; closed = true;
+      try {
+        if (dismiss) localStorage.setItem(SUB_SEEN, '1');
+        else localStorage.setItem(SUB_SNOOZE, String(Date.now() + 86400000));
+      } catch(e){}
+      document.removeEventListener('keydown', onKey, true);
+      ov.classList.remove('open');
+      setTimeout(function(){ ov.remove(); try { lastFocus && lastFocus.focus(); } catch(e){} }, 300);
+    }
+
+    function onKey(e){
+      if (e.key === 'Escape') { e.preventDefault(); close(true); return; }
+      if (e.key !== 'Tab') return;
+      // Fokus modal ichida qolsin (fokus tuzog'i)
+      var f = modal.querySelectorAll('button, input, a[href]');
+      var vis = [];
+      for (var i=0;i<f.length;i++) if (f[i].offsetParent !== null && !f[i].disabled) vis.push(f[i]);
+      if (!vis.length) return;
+      var first = vis[0], last = vis[vis.length-1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+
+    function showErr(key){
+      alertEl.textContent = T(key);
+      alertEl.classList.add('show');
+      input.classList.add('err');
+      // Tugma yuborish paytida disabled bo'lgani uchun fokus <body>ga tushib
+      // qoladi — klaviatura bilan ishlatadigan foydalanuvchi yo'qolmasin.
+      try { input.focus(); } catch(e){}
+    }
+
+    document.body.appendChild(ov);
+    // Fokusni MODALGA beramiz, input'ga emas: bu chaqirilmagan oyna, mobilda
+    // darhol klaviatura ochilib ketmasin. Ekran o'quvchi dialog matnini o'qiydi,
+    // Escape va Tab (fokus tuzog'i) darrov ishlaydi.
+    requestAnimationFrame(function(){
+      ov.classList.add('open');
+      try { modal.focus(); } catch(e){}
+    });
+    document.addEventListener('keydown', onKey, true);
+
+    ov.addEventListener('click', function(e){ if (e.target === ov) close(true); });
+    ov.querySelector('.sub-x').addEventListener('click', function(){ close(true); });
+    ov.querySelector('.sub-later').addEventListener('click', function(){ close(true); });
+    input.addEventListener('input', function(){
+      alertEl.classList.remove('show'); input.classList.remove('err');
+    });
+
+    var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      if (btn.disabled) return;                       // ikki marta bosishdan himoya
+      var em = input.value.trim();
+      if (!emailRe.test(em)) { showErr('sub_err_email'); return; }
+
+      btn.disabled = true; btn.classList.add('loading');
+      alertEl.classList.remove('show'); input.classList.remove('err');
+
+      Promise.resolve(Store.subscribe(em, (w.I18N ? w.I18N.lang : 'uz'))).then(function(res){
+        if (res && res.ok) {
+          modal.classList.add('done');
+          try { localStorage.setItem(SUB_SEEN, '1'); } catch(err){}
+          setTimeout(function(){ close(true); }, 2600);
+          return;
+        }
+        var err = (res && res.error) || 'failed';
+        showErr(err === 'too_many' ? 'sub_err_many'
+              : err === 'bad_email' ? 'sub_err_email'
+              : 'sub_err_fail');
+      }).catch(function(){
+        showErr('sub_err_fail');
+      }).finally(function(){
+        btn.disabled = false; btn.classList.remove('loading');
+      });
+    });
+  }
+
+  // ---------- Chop etish (print) — toza, mustaqil hujjat ----------
+  // Sahifaning murakkab tuzilishiga bog'liq bo'lmasligi uchun chop qilinadigan
+  // kontentni yashirin iframe ichida yangidan, toza tartibda quramiz va o'shani chop qilamiz.
+  function printDoc(opts){
+    opts = opts || {};
+    var abs = function (u) { try { return u ? new URL(u, location.href).href : ''; } catch (e) { return u || ''; } };
+    var _b = brandLines(); var org = _b.top, tag = _b.bot;
+    var date = fmtDate(new Date().toISOString().slice(0, 10));
+    var logo = abs('logo-mark.png');
+    var img = opts.image ? abs(opts.image) : '';
+
+    var css = ''
+      + '*{box-sizing:border-box;margin:0;padding:0;}'
+      + '@page{margin:18mm 16mm;}'
+      + "body{font-family:'Inter',Arial,sans-serif;color:#111;font-size:11.5pt;line-height:1.55;-webkit-print-color-adjust:exact;print-color-adjust:exact;}"
+      + '.ph{display:flex;align-items:center;gap:13px;border-bottom:2px solid #0f5689;padding-bottom:12px;margin-bottom:22px;}'
+      + '.ph img{height:46px;width:auto;}'
+      + ".ph b{font-family:'Spectral',Georgia,serif;font-size:13.5pt;font-weight:600;text-transform:uppercase;color:#0f2540;display:block;line-height:1.15;}"
+      + ".ph span{font-family:'Spectral',Georgia,serif;font-size:10.5pt;color:#37506a;display:block;}"
+      + "h1{font-family:'Spectral',Georgia,serif;font-weight:600;font-size:21pt;line-height:1.15;color:#000;margin:0 0 10px;}"
+      + ".meta{display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:9pt;color:#555;border-bottom:1px solid #ccc;padding-bottom:10px;margin-bottom:18px;}"
+      + '.meta .tag{color:#0f5689;border:1px solid #0f5689;padding:1px 8px;text-transform:uppercase;letter-spacing:.08em;}'
+      + ".lead{font-family:'Spectral',Georgia,serif;font-size:13pt;font-weight:500;line-height:1.5;color:#111;border-left:3px solid #0f5689;padding-left:14px;margin:0 0 18px;}"
+      + '.img{margin:0 0 18px;text-align:center;}'
+      + '.img img{max-width:100%;max-height:92mm;width:auto;height:auto;object-fit:contain;border:1px solid #ccc;border-radius:10px;display:inline-block;}'
+      + '.content{font-size:11.5pt;line-height:1.6;color:#111;}'
+      + '.content p{margin:0 0 12px;}'
+      + ".content h2,.content h3{font-family:'Spectral',Georgia,serif;color:#000;margin:16px 0 8px;line-height:1.2;}"
+      + '.content ul,.content ol{margin:0 0 12px;padding-left:22px;}.content li{margin-bottom:6px;}'
+      + '.content img{max-width:100%;height:auto;margin:10px 0;}'
+      + '.content blockquote{border-left:3px solid #0f5689;padding-left:14px;font-style:italic;margin:12px 0;}'
+      + '.content a{color:#000;text-decoration:none;}'
+      + ".foot{display:flex;justify-content:space-between;gap:16px;border-top:1px solid #ccc;margin-top:26px;padding-top:10px;font-family:'IBM Plex Mono',monospace;font-size:8.5pt;color:#555;}"
+      + '.foot span{word-break:break-all;}';
+
+    var html = ''
+      + '<div class="ph">' + (logo ? '<img src="' + logo + '" alt="">' : '') + '<div><b>' + esc(org) + '</b><span>' + esc(tag) + '</span></div></div>'
+      + '<h1>' + esc(opts.title || '') + '</h1>'
+      + (opts.meta ? '<div class="meta">' + opts.meta + '</div>' : '')
+      + (opts.lead ? '<div class="lead">' + opts.lead + '</div>' : '')
+      + (img ? '<div class="img"><img src="' + img + '" alt=""></div>' : '')
+      + '<div class="content">' + (opts.content || '') + '</div>'
+      + '<div class="foot"><span>' + esc(T('print_source')) + ': ' + esc(location.href) + '</span><span>' + esc(T('print_date')) + ': ' + date + '</span></div>';
+
+    var fonts = '<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">';
+    var ifr = document.createElement('iframe');
+    ifr.setAttribute('aria-hidden', 'true');
+    ifr.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0;';
+    document.body.appendChild(ifr);
+    var doc = ifr.contentWindow.document;
+    doc.open();
+    doc.write('<!doctype html><html lang="' + lang + '"><head><meta charset="utf-8"><title>' + esc(opts.title || 'TSTM') + '</title>' + fonts + '<style>' + css + '</style></head><body>' + html + '</body></html>');
+    doc.close();
+
+    var printed = false;
+    var go = function () {
+      if (printed) return; printed = true;
+      try { ifr.contentWindow.focus(); ifr.contentWindow.print(); } catch (e) {}
+      setTimeout(function () { try { ifr.remove(); } catch (e) {} }, 1200);
+    };
+    // rasm(lar) yuklanishini kutamiz, aks holda 1.5s dan so'ng baribir chop qilamiz
+    var imgs = doc.images, left = imgs ? imgs.length : 0;
+    if (left) {
+      var tick = function () { if (--left <= 0) go(); };
+      for (var i = 0; i < imgs.length; i++) {
+        if (imgs[i].complete) tick();
+        else { imgs[i].onload = tick; imgs[i].onerror = tick; }
+      }
+      setTimeout(go, 1500);
+    } else {
+      setTimeout(go, 350);
+    }
+  }
+
+  // ---------- page bootstrap ----------
+  // Har bir bosqich alohida himoyalangan: bittasi yiqilsa ham qolganlari
+  // (ayniqsa initReveal) ishlashi SHART — aks holda .rv elementlar opacity:0
+  // da qolib, sahifa "ko'rinmas" bo'ladi (2026-07-16 dagi api.php avariyasi saboqi).
+  function initPage(opts){
+    opts = opts || {};
+    document.body.classList.add('inner');
+    try { renderHeader(opts.active); } catch(e){ console.error('renderHeader:', e); }
+    try { if (w.I18N) w.I18N.translate(document); } catch(e){ console.error(e); }
+    if (typeof opts.render === 'function') {
+      try { opts.render(); } catch(e){ console.error(e); }
+    }
+    try { applyBanner(opts.active); } catch(e){ console.error('applyBanner:', e); }
+    try { renderFooter(); } catch(e){ console.error('renderFooter:', e); }
+    try { if (w.I18N) w.I18N.translate(document); } catch(e){ console.error(e); }
+    initReveal();
+    setTimeout(showSubscribe, 2500);
+  }
+
+  w.Site = { initPage, renderHeader, renderFooter, mlGet, dispTitle, esc, fmtDate, dayMonth, qs, settings, lang, t: T, ICON, NAV, initReveal, showSubscribe, printDoc };
+})(window);

@@ -1,0 +1,478 @@
+<?php
+/* ============================================================
+   TSTM — MySQL (MariaDB) ma'lumotlar qatlami
+   ------------------------------------------------------------
+   • PDO + prepared statements (SQL-injection'dan himoya)
+   • Avtomatik baza + jadval yaratish (indekslar bilan)
+   • Tranzaksiyalar (atomiklik)
+   • collection -> jadval xaritasi ($SCHEMA)
+   api.php shu fayldan foydalanadi.
+   ============================================================ */
+
+/* -------------------- Sozlamalar (hostingda o'zgartiring) -------------------- */
+$DB_HOST = '127.0.0.1';
+$DB_PORT = '3306';
+$DB_NAME = 'tstm';
+$DB_USER = 'root';
+$DB_PASS = '';        // XAMPP'da odatda bo'sh. Hostingda o'z parolingizni qo'ying.
+$DB_CHARSET = 'utf8mb4';
+
+/* -------------------- Collection -> jadval xaritasi --------------------
+   type: 'str' | 'date' | 'int' | 'bool' | 'json'
+   key  = frontend JSON kaliti (masalan 'order'), col = DB ustuni (masalan 'sort_order').
+   Bir xil bo'lsa faqat 'key' berilsa kifoya. Har jadvalda PK = `id` (VARCHAR).
+--------------------------------------------------------------------------- */
+$SCHEMA = [
+  'users' => ['table' => 'users', 'cols' => [
+    ['key' => 'name'], ['key' => 'login'], ['key' => 'email'],
+    ['key' => 'role'], ['key' => 'status'], ['key' => 'last'],
+  ]],
+  'news' => ['table' => 'news', 'cols' => [
+    ['key' => 'title', 'type' => 'json'], ['key' => 'category'],
+    ['key' => 'date', 'type' => 'date'], ['key' => 'status'], ['key' => 'cover'],
+    ['key' => 'excerpt', 'type' => 'json'], ['key' => 'body', 'type' => 'json'],
+    ['key' => 'region'], ['key' => 'author'],
+  ]],
+  'events' => ['table' => 'events', 'cols' => [
+    ['key' => 'title', 'type' => 'json'], ['key' => 'date', 'type' => 'date'],
+    ['key' => 'time'], ['key' => 'location', 'type' => 'json'],
+    ['key' => 'type'], ['key' => 'status'], ['key' => 'body', 'type' => 'json'],
+  ]],
+  'experts' => ['table' => 'experts', 'cols' => [
+    ['key' => 'name', 'type' => 'json'], ['key' => 'role', 'type' => 'json'],
+    ['key' => 'sub', 'type' => 'json'], ['key' => 'photo'],
+    ['key' => 'bio', 'type' => 'json'], ['key' => 'expertise', 'type' => 'json'],
+    ['key' => 'phone'], ['key' => 'email'], ['key' => 'url'], ['key' => 'hours'],
+    ['key' => 'order', 'col' => 'sort_order', 'type' => 'int'],
+  ]],
+  'publications' => ['table' => 'publications', 'cols' => [
+    ['key' => 'title', 'type' => 'json'],
+    // Qisqa (displey) sarlavha — banner va ro'yxat kartalarida ishlatiladi.
+    // Bo'sh bo'lsa to'liq `title` ishlatiladi (Site.dispTitle qarang).
+    ['key' => 'shortTitle', 'col' => 'short_title', 'type' => 'json'],
+    ['key' => 'type'], ['key' => 'category'],
+    ['key' => 'region'], ['key' => 'author'], ['key' => 'year'], ['key' => 'status'],
+    ['key' => 'cover'], ['key' => 'pdf'], ['key' => 'desc', 'col' => 'descr', 'type' => 'json'],
+  ]],
+  'heroSlides' => ['table' => 'hero_slides', 'cols' => [
+    ['key' => 'category', 'type' => 'json'], ['key' => 'headline', 'type' => 'json'],
+    ['key' => 'link'], ['key' => 'image'], ['key' => 'status'],
+    ['key' => 'order', 'col' => 'sort_order', 'type' => 'int'],
+  ]],
+  'partners' => ['table' => 'partners', 'cols' => [
+    ['key' => 'name'], ['key' => 'url'], ['key' => 'logo'],
+  ]],
+  'pages' => ['table' => 'pages', 'cols' => [
+    ['key' => 'title', 'type' => 'json'], ['key' => 'slug'],
+    ['key' => 'body', 'type' => 'json'], ['key' => 'status'],
+  ]],
+  'media' => ['table' => 'media', 'cols' => [
+    ['key' => 'type'], ['key' => 'url'], ['key' => 'title', 'type' => 'json'],
+    ['key' => 'date', 'type' => 'date'], ['key' => 'photos', 'type' => 'json'],
+    ['key' => 'cover'], ['key' => 'kind'], ['key' => 'name'], ['key' => 'thumb'],
+  ]],
+  'messages' => ['table' => 'messages', 'cols' => [
+    ['key' => 'name'], ['key' => 'email'], ['key' => 'subject'],
+    ['key' => 'text'], ['key' => 'date', 'type' => 'date'],
+    ['key' => 'read', 'col' => 'is_read', 'type' => 'bool'],
+  ]],
+  'subscribers' => ['table' => 'subscribers', 'cols' => [
+    ['key' => 'email'], ['key' => 'lang'], ['key' => 'status'],
+    ['key' => 'source'], ['key' => 'date', 'type' => 'date'],
+  ]],
+];
+
+// load() javobidagi collection tartibi (eski data.json bilan bir xil ko'rinish uchun)
+$COLL_ORDER = ['users', 'news', 'events', 'experts', 'publications', 'heroSlides', 'partners', 'pages', 'media', 'messages', 'subscribers'];
+
+// Ommaviy 'load' javobida BO'SH qaytadigan bo'limlar — shaxsiy ma'lumot.
+// Yangi shaxsiy bo'lim qo'shsangiz, uni shu yerga ham yozing.
+$PRIVATE_COLLS = ['users', 'messages', 'subscribers'];
+
+/* -------------------- Ulanish -------------------- */
+function db() {
+  static $pdo = null;
+  if ($pdo !== null) return $pdo;
+  global $DB_HOST, $DB_PORT, $DB_NAME, $DB_USER, $DB_PASS, $DB_CHARSET;
+
+  // 1) Serverga ulanamiz (baza hali bo'lmasligi mumkin) va bazani yaratamiz
+  $dsn0 = "mysql:host=$DB_HOST;port=$DB_PORT;charset=$DB_CHARSET";
+  $opt = [
+    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES => false,
+  ];
+  $root = new PDO($dsn0, $DB_USER, $DB_PASS, $opt);
+  $root->exec("CREATE DATABASE IF NOT EXISTS `$DB_NAME` CHARACTER SET $DB_CHARSET COLLATE {$DB_CHARSET}_unicode_ci");
+
+  // 2) Bazaga ulanamiz
+  $dsn = "mysql:host=$DB_HOST;port=$DB_PORT;dbname=$DB_NAME;charset=$DB_CHARSET";
+  $pdo = new PDO($dsn, $DB_USER, $DB_PASS, $opt);
+  provision($pdo);
+  return $pdo;
+}
+
+/* -------------------- Jadvallarni yaratish (indekslar bilan) -------------------- */
+function provision($pdo) {
+  $c = "utf8mb4";
+  $tail = " ENGINE=InnoDB DEFAULT CHARSET=$c COLLATE {$c}_unicode_ci";
+
+  $pdo->exec("CREATE TABLE IF NOT EXISTS settings (
+    id TINYINT PRIMARY KEY DEFAULT 1,
+    data LONGTEXT NOT NULL
+  )$tail");
+
+  $pdo->exec("CREATE TABLE IF NOT EXISTS auth (
+    id TINYINT PRIMARY KEY DEFAULT 1,
+    username VARCHAR(191) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL DEFAULT ''
+  )$tail");
+
+  // seq = qo'shilish tartibi (auto-increment). ORDER BY seq DESC => eng yangisi birinchi (frontend unshift bilan mos)
+  $seq = "seq BIGINT NOT NULL AUTO_INCREMENT, UNIQUE KEY seq_idx (seq)";
+
+  $pdo->exec("CREATE TABLE IF NOT EXISTS users (
+    id VARCHAR(40) PRIMARY KEY,
+    name VARCHAR(255), login VARCHAR(191), email VARCHAR(191),
+    role VARCHAR(80), status VARCHAR(40), last VARCHAR(20),
+    $seq, INDEX(status)
+  )$tail");
+
+  $pdo->exec("CREATE TABLE IF NOT EXISTS news (
+    id VARCHAR(40) PRIMARY KEY,
+    title LONGTEXT, category VARCHAR(120), date DATE NULL, status VARCHAR(40),
+    cover VARCHAR(500), excerpt LONGTEXT, body LONGTEXT,
+    region VARCHAR(120), author VARCHAR(191),
+    $seq, INDEX(status), INDEX(date), INDEX(category)
+  )$tail");
+
+  $pdo->exec("CREATE TABLE IF NOT EXISTS events (
+    id VARCHAR(40) PRIMARY KEY,
+    title LONGTEXT, date DATE NULL, time VARCHAR(20), location LONGTEXT,
+    type VARCHAR(120), status VARCHAR(40), body LONGTEXT,
+    $seq, INDEX(status), INDEX(date)
+  )$tail");
+
+  $pdo->exec("CREATE TABLE IF NOT EXISTS experts (
+    id VARCHAR(40) PRIMARY KEY,
+    name LONGTEXT, role LONGTEXT, sub LONGTEXT, photo VARCHAR(500),
+    bio LONGTEXT, expertise LONGTEXT,
+    phone VARCHAR(80), email VARCHAR(191), url VARCHAR(500), hours VARCHAR(191),
+    sort_order INT DEFAULT 0,
+    $seq, INDEX(sort_order)
+  )$tail");
+
+  $pdo->exec("CREATE TABLE IF NOT EXISTS publications (
+    id VARCHAR(40) PRIMARY KEY,
+    title LONGTEXT, short_title LONGTEXT, type VARCHAR(120), category VARCHAR(120), region VARCHAR(120),
+    author VARCHAR(191), year VARCHAR(10), status VARCHAR(40),
+    cover VARCHAR(500), pdf VARCHAR(500), descr LONGTEXT,
+    $seq, INDEX(status), INDEX(category), INDEX(year)
+  )$tail");
+
+  $pdo->exec("CREATE TABLE IF NOT EXISTS hero_slides (
+    id VARCHAR(40) PRIMARY KEY,
+    category LONGTEXT, headline LONGTEXT, link VARCHAR(500), image VARCHAR(500),
+    status VARCHAR(40), sort_order INT DEFAULT 0,
+    $seq, INDEX(status), INDEX(sort_order)
+  )$tail");
+
+  $pdo->exec("CREATE TABLE IF NOT EXISTS partners (
+    id VARCHAR(40) PRIMARY KEY,
+    name VARCHAR(255), url VARCHAR(500), logo VARCHAR(500),
+    $seq
+  )$tail");
+
+  $pdo->exec("CREATE TABLE IF NOT EXISTS pages (
+    id VARCHAR(40) PRIMARY KEY,
+    title LONGTEXT, slug VARCHAR(191), body LONGTEXT, status VARCHAR(40),
+    $seq, INDEX(slug), INDEX(status)
+  )$tail");
+
+  $pdo->exec("CREATE TABLE IF NOT EXISTS media (
+    id VARCHAR(40) PRIMARY KEY,
+    type VARCHAR(40), url VARCHAR(500), title LONGTEXT, date DATE NULL,
+    photos LONGTEXT, cover VARCHAR(500), kind VARCHAR(40),
+    name VARCHAR(255), thumb VARCHAR(500),
+    $seq, INDEX(type)
+  )$tail");
+
+  $pdo->exec("CREATE TABLE IF NOT EXISTS messages (
+    id VARCHAR(40) PRIMARY KEY,
+    name VARCHAR(255), email VARCHAR(191), subject VARCHAR(400),
+    text LONGTEXT, date DATE NULL, is_read TINYINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX(is_read), INDEX(created_at)
+  )$tail");
+
+  // Obunachilar. email UNIQUE — bir odam ikki marta obuna bo'lsa yangi yozuv
+  // yaratilmaydi (coll_upsert id bo'yicha ishlaydi, shuning uchun takrorni
+  // api.php'dagi 'subscribe' amali email bo'yicha tekshiradi).
+  $pdo->exec("CREATE TABLE IF NOT EXISTS subscribers (
+    id VARCHAR(40) PRIMARY KEY,
+    email VARCHAR(191) NOT NULL, lang VARCHAR(5), status VARCHAR(20) DEFAULT 'active',
+    source VARCHAR(40), date DATE NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    $seq, UNIQUE KEY email_idx (email), INDEX(status)
+  )$tail");
+
+  $pdo->exec("CREATE TABLE IF NOT EXISTS views (
+    k VARCHAR(120) PRIMARY KEY,
+    cnt INT DEFAULT 0
+  )$tail");
+
+  $pdo->exec("CREATE TABLE IF NOT EXISTS login_attempts (
+    ip VARCHAR(64) PRIMARY KEY,
+    cnt INT DEFAULT 0, t INT DEFAULT 0, locked_until INT DEFAULT 0
+  )$tail");
+
+  $pdo->exec("CREATE TABLE IF NOT EXISTS msg_throttle (
+    ip VARCHAR(64) PRIMARY KEY,
+    hits LONGTEXT
+  )$tail");
+
+  $pdo->exec("CREATE TABLE IF NOT EXISTS audit_log (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    action VARCHAR(40), coll VARCHAR(40), item_id VARCHAR(40),
+    ip VARCHAR(64), at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX(at)
+  )$tail");
+
+  migrate($pdo);
+}
+
+/* -------------------- Migratsiya --------------------
+   CREATE TABLE IF NOT EXISTS mavjud jadvalga yangi ustun QO'SHMAYDI.
+   Shuning uchun sxemaga ustun qo'shilganda uni shu yerda ham e'lon qiling —
+   eski bazalar ham avtomatik yangilanadi.
+--------------------------------------------------------------------------- */
+function migrate($pdo) {
+  ensure_cols($pdo, 'experts', [
+    'expertise' => 'LONGTEXT',
+    'phone'     => 'VARCHAR(80)',
+    'email'     => 'VARCHAR(191)',
+    'url'       => 'VARCHAR(500)',
+    'hours'     => 'VARCHAR(191)',
+  ]);
+  ensure_cols($pdo, 'publications', [
+    'short_title' => 'LONGTEXT',
+  ]);
+}
+
+// Jadvalda yo'q ustunlarni qo'shadi (bor bo'lsa tegmaydi)
+function ensure_cols($pdo, $table, $defs) {
+  $have = [];
+  foreach ($pdo->query("SHOW COLUMNS FROM `$table`")->fetchAll() as $r) {
+    $have[strtolower($r['Field'])] = true;
+  }
+  foreach ($defs as $col => $ddl) {
+    if (isset($have[strtolower($col)])) continue;
+    $pdo->exec("ALTER TABLE `$table` ADD COLUMN `$col` $ddl");
+  }
+}
+
+/* -------------------- Qiymatlarni kodlash/dekodlash -------------------- */
+// DB'dan o'qilgan xom qiymatni frontend kutgan turga o'giradi
+function decode_val($type, $raw) {
+  if ($raw === null) return ($type === 'json') ? null : (($type === 'bool') ? false : (($type === 'int') ? 0 : ''));
+  switch ($type) {
+    case 'json': $d = json_decode($raw, true); return $d;
+    case 'bool': return (bool)((int)$raw);
+    case 'int':  return (int)$raw;
+    case 'date': return $raw ? substr((string)$raw, 0, 10) : '';
+    default:     return (string)$raw;
+  }
+}
+// Frontend qiymatini DB'ga yozish uchun tayyorlaydi
+function encode_val($type, $v) {
+  switch ($type) {
+    case 'json': return ($v === null) ? null : json_encode($v, JSON_UNESCAPED_UNICODE);
+    case 'bool': return !empty($v) ? 1 : 0;
+    case 'int':  return (int)$v;
+    case 'date': $s = is_string($v) ? substr($v, 0, 10) : ''; return preg_match('/^\d{4}-\d{2}-\d{2}$/', $s) ? $s : null;
+    default:     return ($v === null) ? '' : (string)$v;
+  }
+}
+
+/* -------------------- Bitta collection'ni o'qish -------------------- */
+function coll_load($pdo, $coll) {
+  global $SCHEMA;
+  if (!isset($SCHEMA[$coll])) return [];
+  $t = $SCHEMA[$coll]['table'];
+  if ($coll === 'experts' || $coll === 'heroSlides') $order = ' ORDER BY sort_order ASC, seq DESC';
+  elseif ($coll === 'messages') $order = ' ORDER BY created_at DESC';
+  else $order = ' ORDER BY seq DESC'; // eng yangi qo'shilgani birinchi
+  $rows = $pdo->query("SELECT * FROM `$t`$order")->fetchAll();
+  $out = [];
+  foreach ($rows as $r) {
+    $item = ['id' => $r['id']];
+    foreach ($SCHEMA[$coll]['cols'] as $c) {
+      $col = isset($c['col']) ? $c['col'] : $c['key'];
+      $type = isset($c['type']) ? $c['type'] : 'str';
+      $val = array_key_exists($col, $r) ? $r[$col] : null;
+      $dec = decode_val($type, $val);
+      // json bo'sh bo'lsa (null) — kalitni tushirib qoldiramiz (eski sparse ko'rinish)
+      if ($type === 'json' && $dec === null) continue;
+      $item[$c['key']] = $dec;
+    }
+    $out[] = $item;
+  }
+  return $out;
+}
+
+/* -------------------- Bitta yozuvni upsert qilish -------------------- */
+function coll_upsert($pdo, $coll, $item) {
+  global $SCHEMA;
+  if (!isset($SCHEMA[$coll])) return false;
+  $t = $SCHEMA[$coll]['table'];
+  if (empty($item['id'])) $item['id'] = uidgen();
+
+  $colNames = ['id'];
+  $place = [':id'];
+  $params = [':id' => (string)$item['id']];
+  $updates = [];
+  foreach ($SCHEMA[$coll]['cols'] as $c) {
+    $col = isset($c['col']) ? $c['col'] : $c['key'];
+    $type = isset($c['type']) ? $c['type'] : 'str';
+    $val = array_key_exists($c['key'], $item) ? $item[$c['key']] : null;
+    $colNames[] = "`$col`";
+    $place[] = ":$col";
+    $params[":$col"] = encode_val($type, $val);
+    $updates[] = "`$col`=VALUES(`$col`)";
+  }
+  $sql = "INSERT INTO `$t` (" . implode(',', $colNames) . ") VALUES (" . implode(',', $place) . ") "
+       . "ON DUPLICATE KEY UPDATE " . implode(',', $updates);
+  $st = $pdo->prepare($sql);
+  $st->execute($params);
+  return $item;
+}
+
+/* -------------------- Bitta yozuvni o'chirish -------------------- */
+function coll_delete($pdo, $coll, $id) {
+  global $SCHEMA;
+  if (!isset($SCHEMA[$coll])) return false;
+  $t = $SCHEMA[$coll]['table'];
+  $st = $pdo->prepare("DELETE FROM `$t` WHERE id = :id");
+  $st->execute([':id' => (string)$id]);
+  return true;
+}
+
+/* -------------------- Bitta collection'ni to'liq almashtirish (tranzaksiya ichida chaqiriladi) -------------------- */
+function coll_replace($pdo, $coll, $items) {
+  global $SCHEMA;
+  if (!isset($SCHEMA[$coll])) return;
+  $t = $SCHEMA[$coll]['table'];
+  $pdo->exec("DELETE FROM `$t`");
+  if (!is_array($items)) return;
+  // Teskari tartibda kiritamiz: massivning [0]-elementi eng katta seq'ni oladi,
+  // shunda coll_load (ORDER BY seq DESC) massiv tartibini aynan saqlaydi.
+  foreach (array_reverse(array_values($items)) as $it) { if (is_array($it)) coll_upsert($pdo, $coll, $it); }
+}
+
+/* -------------------- Settings -------------------- */
+function settings_load($pdo) {
+  $r = $pdo->query("SELECT data FROM settings WHERE id=1")->fetch();
+  if (!$r) return null;
+  return json_decode($r['data'], true);
+}
+function settings_save($pdo, $obj) {
+  $st = $pdo->prepare("INSERT INTO settings (id, data) VALUES (1, :d) ON DUPLICATE KEY UPDATE data=VALUES(data)");
+  $st->execute([':d' => json_encode($obj, JSON_UNESCAPED_UNICODE)]);
+}
+
+/* -------------------- Auth -------------------- */
+function auth_load($pdo) {
+  $r = $pdo->query("SELECT username, password_hash FROM auth WHERE id=1")->fetch();
+  return $r ?: null;
+}
+function auth_save($pdo, $username, $hash) {
+  $st = $pdo->prepare("INSERT INTO auth (id, username, password_hash) VALUES (1, :u, :h)
+                       ON DUPLICATE KEY UPDATE username=VALUES(username), password_hash=VALUES(password_hash)");
+  $st->execute([':u' => $username, ':h' => $hash]);
+}
+
+/* -------------------- Butun bazani o'qish (frontend uchun to'liq obyekt) -------------------- */
+// $private = TRUE faqat tizimga kirgan admin uchun (api.php sessiyani tekshiradi).
+//
+// XAVFSIZLIK: 'load' ommaviy endpoint — sayt kontentini shu orqali oladi.
+// Shaxsiy bo'limlar (fuqaro murojaatlari, obunachilar e-pochtasi, admin
+// foydalanuvchilar) ommaviy chaqiruvda BO'SH qaytadi. Kalitning o'zi qoladi,
+// chunki admin-store.js ensureShape() yo'q kalitni "buzuq" deb hisoblab,
+// serverga qayta yozishga urinadi.
+function db_load_all($pdo, $private = false) {
+  global $COLL_ORDER, $PRIVATE_COLLS;
+  $out = [];
+  $s = settings_load($pdo);
+  if ($s !== null) $out['settings'] = $s;
+  $a = auth_load($pdo);
+  // Parol xeshi HECH QACHON clientga chiqmaydi. Admin login nomi ham faqat
+  // kirgandan keyin — aks holda u brute-force uchun tayyor yarim ma'lumot.
+  $out['auth'] = ['username' => ($private && $a) ? $a['username'] : ''];
+  foreach ($COLL_ORDER as $coll) {
+    if (!$private && in_array($coll, $PRIVATE_COLLS, true)) { $out[$coll] = []; continue; }
+    $out[$coll] = coll_load($pdo, $coll);
+  }
+  return $out;
+}
+
+/* -------------------- id generatori (client uid uslubi) -------------------- */
+function uidgen() {
+  return base_convert((string)mt_rand(1, PHP_INT_MAX), 10, 36) . base_convert((string)mt_rand(1, 0x7fffffff), 10, 36);
+}
+
+/* -------------------- Bazada hech narsa yo'qmi? (birinchi ishga tushirish) -------------------- */
+function db_is_empty($pdo) {
+  $n = (int)$pdo->query("SELECT COUNT(*) c FROM auth")->fetch()['c'];
+  $s = (int)$pdo->query("SELECT COUNT(*) c FROM settings")->fetch()['c'];
+  return ($n === 0 && $s === 0);
+}
+
+/* -------------------- To'liq db massivini bazaga import qilish (tranzaksiya) --------------------
+   $db = eski data.json ko'rinishidagi massiv (settings, auth, users, news, ...).
+   Collection'lar to'liq almashtiriladi. Auth xeshi saqlanadi. */
+function db_import($pdo, $db) {
+  global $COLL_ORDER;
+  if (!is_array($db)) return false;
+  $pdo->beginTransaction();
+  try {
+    // settings
+    if (isset($db['settings']) && is_array($db['settings'])) settings_save($pdo, $db['settings']);
+
+    // auth — xesh yoki oddiy parol yoki bo'sh
+    $username = 'markaz_admini';
+    $hash = '';
+    if (isset($db['auth']) && is_array($db['auth'])) {
+      $a = $db['auth'];
+      if (!empty($a['username'])) $username = $a['username'];
+      if (!empty($a['passwordHash'])) $hash = $a['passwordHash'];
+      elseif (!empty($a['password'])) $hash = password_hash((string)$a['password'], PASSWORD_DEFAULT);
+    }
+    auth_save($pdo, $username, $hash);
+
+    // collection'lar
+    foreach ($COLL_ORDER as $coll) {
+      if (isset($db[$coll]) && is_array($db[$coll])) coll_replace($pdo, $coll, $db[$coll]);
+    }
+    $pdo->commit();
+    return true;
+  } catch (Exception $e) {
+    $pdo->rollBack();
+    return false;
+  }
+}
+
+/* -------------------- Birinchi ishga tushirish: data.json'dan yoki standart seed'dan to'ldirish -------------------- */
+function db_bootstrap_if_empty($pdo) {
+  if (!db_is_empty($pdo)) return;
+  $jsonFile = __DIR__ . '/data.json';
+  $db = null;
+  if (file_exists($jsonFile)) {
+    $raw = file_get_contents($jsonFile);
+    $db = json_decode($raw, true);
+  }
+  if (!is_array($db)) {
+    require_once __DIR__ . '/seed.php';
+    $db = default_seed();
+  }
+  db_import($pdo, $db);
+}

@@ -1,0 +1,63 @@
+# TSTM — Apache sozlamalari (XAMPP)
+# Rasm/ma'lumot hajmi katta bo'lishi mumkin (base64), shuning uchun limitlarni oshiramiz
+<IfModule mod_php.c>
+  php_value upload_max_filesize 64M
+  php_value post_max_size 64M
+  php_value memory_limit 256M
+</IfModule>
+<IfModule mod_php7.c>
+  php_value upload_max_filesize 64M
+  php_value post_max_size 64M
+  php_value memory_limit 256M
+</IfModule>
+<IfModule mod_php8.c>
+  php_value upload_max_filesize 64M
+  php_value post_max_size 64M
+  php_value memory_limit 256M
+</IfModule>
+
+# Ma'lumot fayllarini (parol, xabarlar, login urinishlari) tashqaridan to'g'ridan-to'g'ri
+# o'qishni taqiqlash — bularning barchasi faqat api.php orqali (kerakli tekshiruvlar bilan) o'qiladi
+<FilesMatch "\.(json)$">
+  Require all denied
+</FilesMatch>
+
+# Papka tarkibini ro'yxat qilib ko'rsatishni o'chiramiz (masalan /uploads/ ochilganda)
+Options -Indexes
+
+DirectoryIndex index.php
+
+# Brauzer HTML/JS/CSS'ni eski keshdan ko'rsatib qo'ymasin — har safar yangisini tekshirsin.
+# (Shunda saytdagi o'zgarishlar foydalanuvchiga darhol ko'rinadi, "eski holida" muammosi bo'lmaydi.)
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|htm|php|js|css)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+  # ---- Xavfsizlik sarlavhalari ----
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+</IfModule>
+
+# Yashirin / xizmat fayllarini tashqaridan ochishni taqiqlash
+<FilesMatch "^\.(htaccess|htpasswd|git)">
+  Require all denied
+</FilesMatch>
+<FilesMatch "\.(md|log|bak|sql|ini)$">
+  Require all denied
+</FilesMatch>
+
+# Ishlab chiqish papkalari (.idea, .claude, .git, .vscode) — butun papka yopiladi.
+# FilesMatch faqat FAYL nomiga qaraydi, shuning uchun `.idea/workspace.xml` ochiq qolgan edi
+# (2026-07-28'da topildi: HTTP 200 qaytarardi). RedirectMatch esa to'liq YO'Lni tekshiradi.
+# .xml ni umuman bloklab bo'lmaydi — sitemap.xml ochiq qolishi kerak.
+RedirectMatch 404 (?i)/\.(idea|claude|git|vscode|env)(/|$)
+
+# Backend ichki fayllari (DB config + seed) — faqat api.php ichidan (server tomonda) chaqiriladi,
+# tashqaridan to'g'ridan-to'g'ri ochib bo'lmaydi (baza login/parolini himoya qilish uchun).
+<FilesMatch "^(db|seed)\.php$">
+  Require all denied
+</FilesMatch>

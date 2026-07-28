@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /api.php
+Disallow: /uploads/
+
+# Domeningizni qo'ygandan so'ng sitemap manzilini yangilang:
+Sitemap: https://SIZNING-DOMENINGIZ.uz/sitemap.xml

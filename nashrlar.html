@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nashrlar — TSTM</title>
+<meta name="description" content="TSTM markazining tadqiqot, hisobot va tahliliy nashrlari.">
+<link rel="icon" href="logo-mark.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="TSTM">
+<meta property="og:title" content="Nashrlar — TSTM">
+<meta property="og:description" content="TSTM markazining tadqiqot, hisobot va tahliliy nashrlari.">
+<meta property="og:image" content="logo-mark.png">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css?v=76">
+<style>
+  /* nashrlar — qidiruv/filtr paneli */
+  .pubtools{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:22px;}
+  .pubsearch{position:relative;flex:1;min-width:240px;display:flex;align-items:center;}
+  .pubsearch svg{position:absolute;left:16px;width:19px;height:19px;color:var(--muted);pointer-events:none;}
+  .pubsearch input{width:100%;padding:14px 16px 14px 46px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;font-family:var(--sans);font-size:0.95rem;outline:none;transition:border-color .15s, box-shadow .15s;}
+  .pubsearch input:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent);}
+  .pubsel{position:relative;}
+  .pubsel select{appearance:none;-webkit-appearance:none;padding:14px 42px 14px 16px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;font-family:var(--mono);font-size:0.72rem;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;outline:none;transition:border-color .15s;}
+  .pubsel select:focus{border-color:var(--accent);}
+  .pubsel::after{content:"";position:absolute;right:17px;top:50%;width:7px;height:7px;border-right:1.5px solid var(--muted);border-bottom:1.5px solid var(--muted);transform:translateY(-70%) rotate(45deg);pointer-events:none;}
+  .rescount{font-family:var(--mono);font-size:0.6875rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:26px;}
+  /* .pub karta uslublari (cover-link, pub-actions) site.css'da — expert.html ham ishlatadi.
+     Muallif kartadan olib tashlandi — u endi nashr sahifasi oxirida (.pub-byline). */
+  @media(max-width:760px){
+    .pubtools{gap:10px;margin-bottom:18px;}
+    .pubsearch input{padding:11px 14px 11px 42px;}
+    .pubsearch svg{width:17px;height:17px;left:14px;}
+    .pubsel select{padding:11px 38px 11px 14px;}
+    .rescount{margin-bottom:20px;}
+  }
+  @media(max-width:620px){.pubsel,.pubsel select{width:100%}}
+</style>
+</head>
+<body>
+<main>
+  <div class="page-banner"><div class="wrap">
+    <div class="crumb"><a href="Bosh sahifa - Hi-Fi.html" data-i18n="home">Bosh sahifa</a><span class="sep">/</span><span data-i18n="nav_pubs">Nashrlar</span></div>
+    <h1 data-i18n="p_pubs_title">Tadqiqotlar va nashrlar</h1>
+    <p class="lead" data-i18n="p_pubs_lead">Hisobotlar, tahliliy sharhlar va monografiyalar — yuklab olish uchun ochiq.</p>
+  </div></div>
+  <section class="block"><div class="wrap">
+    <div class="pubtools">
+      <div class="pubsearch">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3" stroke-linecap="round"/></svg>
+        <input type="search" id="q" autocomplete="off" aria-label="Qidiruv">
+      </div>
+      <div class="pubsel"><select id="typeSel" aria-label="Tur"></select></div>
+      <div class="pubsel"><select id="sortSel" aria-label="Saralash"></select></div>
+    </div>
+    <div class="filterbar" id="filters"></div>
+    <div class="rescount" id="count"></div>
+    <div class="pub-grid" id="list"></div>
+  </div></section>
+</main>
+
+<script src="i18n.js?v=51"></script>
+<script src="admin-store.js?v=46"></script>
+<script src="site-common.js?v=63"></script>
+<script src="search.js?v=46"></script>
+<script src="a11y.js?v=52"></script>
+<script>
+  Site.initPage({ active:'pubs', render(){
+    const T = Site.t, esc = Site.esc, ml = Site.mlGet;
+    const L = (window.I18N ? I18N.lang : 'uz');
+    const TT = {
+      ph:  {uz:"Nashrlarni qidirish…", ru:"Поиск публикаций…", en:"Search publications…"},
+      allT:{uz:"Barcha turlar", ru:"Все типы", en:"All types"},
+      sNew:{uz:"Avval yangi", ru:"Сначала новые", en:"Newest first"},
+      sOld:{uz:"Avval eski", ru:"Сначала старые", en:"Oldest first"},
+      sAz: {uz:"Nomi (A–Z)", ru:"Название (А–Я)", en:"Title (A–Z)"},
+      cnt: {uz:"ta nashr", ru:"публикаций", en:"publications"}
+    };
+    const tt = k => (TT[k][L] || TT[k].uz);
+
+    const wrap = document.getElementById('list');
+    const fb = document.getElementById('filters');
+    const qEl = document.getElementById('q');
+    const typeSel = document.getElementById('typeSel');
+    const sortSel = document.getElementById('sortSel');
+    const countEl = document.getElementById('count');
+
+    const allPubs = Store.all('publications').filter(p=>p.status==='published');
+    const cats  = ['', ...Array.from(new Set(allPubs.map(p=>p.category).filter(Boolean)))];
+    const types = Array.from(new Set(allPubs.map(p=>p.type).filter(Boolean)));
+
+    let cat = (Site.qs('cat')||'').replace(/\+/g,' '); if(cats.indexOf(cat)<0) cat='';
+    let type='', q='', sort='new';
+
+    qEl.placeholder = tt('ph');
+    typeSel.innerHTML = `<option value="">${esc(tt('allT'))}</option>` + types.map(t=>`<option value="${esc(t)}">${esc(ml(t))}</option>`).join('');
+    sortSel.innerHTML = `<option value="new">${esc(tt('sNew'))}</option><option value="old">${esc(tt('sOld'))}</option><option value="az">${esc(tt('sAz'))}</option>`;
+
+    const phCover = `<div class="ph" style="position:absolute;inset:0;border:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></svg></div>`;
+    const coverHTML = p => p.cover ? `<img src="${esc(p.cover)}" alt="">` : phCover;
+    const dlSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 19h14" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    const arrowSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+    function chips(){
+      fb.innerHTML = cats.map(c=>`<button class="fchip ${c===cat?'on':''}" data-c="${esc(c)}">${c===''?esc(T('all')):esc(ml(c))}</button>`).join('');
+      fb.querySelectorAll('.fchip').forEach(b=> b.onclick=()=>{ cat=b.dataset.c; render2(); });
+    }
+    function filtered(){
+      let items = allPubs.slice();
+      if(cat)  items = items.filter(p=>p.category===cat);
+      if(type) items = items.filter(p=>p.type===type);
+      if(q){
+        const s = q.toLowerCase();
+        // qidiruv ikkala sarlavhani ham qamraydi — foydalanuvchi qisqa yoki to'liq
+        // nomdagi so'zni yozsa ham nashr topiladi
+        items = items.filter(p=> [ml(p.title), ml(p.shortTitle||''), ml(p.category||''), ml(p.type||''), (p.author||''), String(p.year||'')]
+          .join(' ').toLowerCase().includes(s));
+      }
+      items.sort((a,b)=>{
+        if(sort==='az') return Site.dispTitle(a).localeCompare(Site.dispTitle(b));
+        const cmp = String(b.year||'').localeCompare(String(a.year||''));
+        return sort==='old' ? -cmp : cmp;
+      });
+      return items;
+    }
+    function render2(){
+      chips();
+      const items = filtered();
+      countEl.textContent = items.length + ' ' + tt('cnt');
+      if(!items.length){ wrap.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="t">${esc(T('no_pubs'))}</div></div>`; return; }
+      wrap.innerHTML = items.map(p=>{
+        const href = `nashr.html?id=${p.id}`;
+        return `<div class="pub rv">
+          <a class="cover-link" href="${href}" aria-label="${esc(Site.dispTitle(p))}"><div class="cover">${p.type?`<span class="badge">${esc(ml(p.type))}</span>`:''}${coverHTML(p)}</div></a>
+          <div class="body">
+            <div class="t">${esc(ml(p.category||''))}${p.year?' · '+esc(p.year):''}</div>
+            <h3><a href="${href}" title="${esc(ml(p.title))}">${esc(Site.dispTitle(p))}</a></h3>
+            <div class="pub-actions">
+              <a class="dl" href="${href}">${arrowSvg}${esc(T('read_more')||'Batafsil')}</a>
+              ${p.pdf?`<a class="dl pdf" href="${esc(p.pdf)}" download>${dlSvg}${esc((String(p.pdf).match(/\.(\w+)$/)||[,'FAYL'])[1].toUpperCase())}</a>`:''}
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+      Site.initReveal();
+    }
+
+    qEl.oninput = ()=>{ q=qEl.value.trim(); render2(); };
+    typeSel.onchange = ()=>{ type=typeSel.value; render2(); };
+    sortSel.onchange = ()=>{ sort=sortSel.value; render2(); };
+    render2();
+  }});
+</script>
+</body>
+</html>

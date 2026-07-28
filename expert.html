@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ekspert — TSTM</title>
+<meta name="description" content="TSTM markazi eksperti — biografiya va tadqiqot yo'nalishlari.">
+<link rel="icon" href="logo-mark.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="TSTM">
+<meta property="og:title" content="Ekspert — TSTM">
+<meta property="og:description" content="TSTM markazi eksperti — biografiya va tadqiqot yo'nalishlari.">
+<meta property="og:image" content="logo-mark.png">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css?v=76">
+<style>
+  .exp-detail{display:grid;grid-template-columns:300px 1fr;gap:54px;align-items:start;}
+  .exp-detail .photo{border:1px solid var(--line);background:var(--bg-2);aspect-ratio:3/4;overflow:hidden;border-radius:var(--r-media,12px);transition:box-shadow .28s, border-color .28s;}
+  .exp-detail .photo:hover{box-shadow:var(--glow-soft);border-color:transparent;}
+  .exp-detail .photo img{width:100%;height:100%;object-fit:cover;}
+  .exp-detail .photo .ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);}
+  .exp-detail .photo .ph svg{width:60px;height:60px;opacity:.4;}
+  .exp-detail .role{font-family:var(--mono);font-size:0.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);}
+  .exp-detail h1{font-family:var(--serif);font-weight:600;font-size:clamp(26px,3vw,38px);line-height:1.1;margin:12px 0 8px;}
+  .exp-detail .sub{color:var(--muted);font-size:1.03rem;margin-bottom:24px;}
+
+  /* Aloqa kartasi — portret ostida */
+  .exp-contact{margin-top:22px;border:1px solid var(--line);border-radius:var(--r-card,12px);background:var(--panel);padding:20px;display:flex;flex-direction:column;gap:13px;}
+  .exp-contact .lab{font-family:var(--mono);font-size:0.625rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;}
+  .exp-contact a,.exp-contact span.row{display:flex;align-items:flex-start;gap:11px;color:var(--ink-2);text-decoration:none;font-size:0.9rem;line-height:1.45;word-break:break-word;transition:color .15s;}
+  .exp-contact a:hover{color:var(--accent);}
+  .exp-contact svg{width:16px;height:16px;color:var(--accent);flex:none;margin-top:2px;}
+
+  /* Ekspertiza yo'nalishlari — chiplar */
+  .exp-tags{display:flex;flex-wrap:wrap;gap:9px;margin:0 0 26px;}
+  .exp-tags a{font-family:var(--mono);font-size:0.6875rem;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--ink-2);text-decoration:none;transition:border-color .15s, color .15s, background .15s;}
+  .exp-tags a:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);}
+
+  @media(max-width:760px){
+    .exp-detail{grid-template-columns:1fr;gap:30px;}
+    .exp-detail .photo{max-width:260px;}
+    .exp-contact{max-width:none;}
+  }
+</style>
+</head>
+<body>
+<main id="main"></main>
+
+<script src="i18n.js?v=51"></script>
+<script src="admin-store.js?v=46"></script>
+<script src="site-common.js?v=63"></script>
+<script src="search.js?v=46"></script>
+<script src="a11y.js?v=52"></script>
+<script>
+  Site.initPage({ active:'about', render(){
+    const T = Site.t, esc = Site.esc, ml = Site.mlGet;
+    const id = Site.qs('id');
+    const e = id ? Store.find('experts', id) : null;
+    const main = document.getElementById('main');
+    if(!e){
+      main.innerHTML = `<div class="page-banner"><div class="wrap"><div class="crumb"><a href="Bosh sahifa - Hi-Fi.html">${T('home')}</a><span class="sep">/</span><a href="rahbariyat.html">${T('nav_about_leadership')}</a></div><h1>${T('not_found_t')||'Topilmadi'}</h1></div></div>
+        <section class="block"><div class="wrap"><div class="empty"><div class="t">${T('not_found_t')}</div><div style="margin-top:20px"><a class="btn outline" href="rahbariyat.html">← ${T('all_team')}</a></div></div></div></section>`;
+      return;
+    }
+    const name = ml(e.name);
+    document.title = name + ' — TSTM';
+    const bio = ml(e.bio);
+
+    // Muallif maydoni ekspert ismiga mos kelsa — uning materiali deb hisoblaymiz.
+    // MUHIM: muallif maydoniga endi ism-familiya BILAN BIRGA unvon yoziladi
+    // (masalan "Daria Gorelkina, bosh ilmiy xodim"), shuning uchun qat'iy tenglik
+    // yetmaydi — ikki tomonlama "ichida bormi" tekshiruvi qilamiz (registr va
+    // ortiqcha bo'shliqlarga bog'liq bo'lmagan holda).
+    const norm = s => String(s||'').toLowerCase().replace(/\s+/g,' ').trim();
+    const byThisExpert = it => {
+      const a = norm(it.author), n = norm(name);
+      if(!a || !n) return false;
+      return a.indexOf(n) > -1 || n.indexOf(a) > -1;
+    };
+    const articles = Store.all('news')
+      .filter(n => n.status==='published' && byThisExpert(n))
+      .sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+    const pubs = Store.all('publications')
+      .filter(p => p.status==='published' && byThisExpert(p))
+      .sort((a,b)=>String(b.year||'').localeCompare(String(a.year||'')));
+
+    // "Tashqi siyosat, Xavfsizlik" -> chiplar; nashrlar sahifasidagi filtrga havola qiladi
+    const tags = ml(e.expertise||'').split(/[,;·|]/).map(s=>s.trim()).filter(Boolean);
+
+    const I = Site.ICON;
+    const IC = {
+      mail:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
+      phone:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/></svg>',
+      link:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>',
+      clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
+    };
+    const phSvg = `<div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><circle cx="12" cy="9" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg></div>`;
+    const phCover = `<div class="ph" style="position:absolute;inset:0;border:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></svg></div>`;
+    const dlSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 19h14" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    const arrowSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+    const contactRows = [
+      e.email ? `<a href="mailto:${esc(e.email)}">${IC.mail}${esc(e.email)}</a>` : '',
+      e.phone ? `<a href="tel:${esc(e.phone.replace(/\s+/g,''))}">${IC.phone}${esc(e.phone)}</a>` : '',
+      e.url   ? `<a href="${esc(e.url)}" target="_blank" rel="noopener">${IC.link}${esc(e.url.replace(/^https?:\/\//,''))}</a>` : '',
+      e.hours ? `<span class="row">${IC.clock}${esc(e.hours)}</span>` : ''
+    ].filter(Boolean).join('');
+
+    main.innerHTML = `
+      <div class="page-banner"><div class="wrap">
+        <div class="crumb"><a href="Bosh sahifa - Hi-Fi.html">${T('home')}</a><span class="sep">/</span><a href="rahbariyat.html">${T('nav_about_leadership')}</a><span class="sep">/</span><span>${esc(name)}</span></div>
+      </div></div>
+      <section class="block"><div class="wrap"><div class="exp-detail">
+        <div>
+          <div class="photo">${e.photo?`<img src="${esc(e.photo)}" alt="${esc(name)}">`:phSvg}</div>
+          ${contactRows?`<div class="exp-contact"><div class="lab">${T('expert_contact')}</div>${contactRows}</div>`:''}
+        </div>
+        <div>
+          <div class="role">${esc(ml(e.role))}</div>
+          <h1>${esc(name)}</h1>
+          <div class="sub">${esc(ml(e.sub))}</div>
+          ${tags.length?`<div class="kicker" style="margin:0 0 12px">${T('expert_expertise')}</div>
+            <div class="exp-tags">${tags.map(t=>`<a href="nashrlar.html?cat=${encodeURIComponent(t)}">${esc(t)}</a>`).join('')}</div>`:''}
+          ${bio?`<div class="kicker" style="margin:8px 0 14px">${T('expert_bio')}</div><div class="prose">${bio}</div>`:''}
+          <div class="share-row"><span class="lab">${T('share')||'Ulashish'}</span>
+            <a href="#" aria-label="Telegram">${I.tg}</a><a href="#" aria-label="Facebook">${I.fb}</a><a href="#" aria-label="X">${I.x}</a>
+          </div>
+        </div>
+      </div></div></section>
+
+      <section class="block" style="padding-top:0"><div class="wrap">
+        <div class="sec-head"><div><div class="kicker">${T('expert_pubs')}</div></div></div>
+        ${pubs.length?`<div class="pub-grid">${pubs.map(p=>{
+          const href = `nashr.html?id=${p.id}`;
+          return `<div class="pub rv">
+            <a class="cover-link" href="${href}" aria-label="${esc(Site.dispTitle(p))}"><div class="cover">${p.type?`<span class="badge">${esc(ml(p.type))}</span>`:''}${p.cover?`<img src="${esc(p.cover)}" alt="">`:phCover}</div></a>
+            <div class="body">
+              <div class="t">${esc(ml(p.category||''))}${p.year?' · '+esc(p.year):''}</div>
+              <h3><a href="${href}" title="${esc(ml(p.title))}">${esc(Site.dispTitle(p))}</a></h3>
+              <div class="pub-actions">
+                <a class="dl" href="${href}">${arrowSvg}${esc(T('read_more')||'Batafsil')}</a>
+                ${p.pdf?`<a class="dl pdf" href="${esc(p.pdf)}" download>${dlSvg}PDF</a>`:''}
+              </div>
+            </div>
+          </div>`;
+        }).join('')}</div>`
+        :`<div class="empty"><div class="t">${T('expert_none_pub')}</div></div>`}
+      </div></section>
+
+      <section class="block" style="padding-top:0"><div class="wrap">
+        <div class="sec-head"><div><div class="kicker">${T('expert_articles')}</div></div></div>
+        ${articles.length?`<div class="cards">${articles.map(n=>`
+          <a class="ncard rv" href="yangilik.html?id=${n.id}">
+            <div class="img">${n.cover?`<img src="${esc(n.cover)}" alt="">`:`<div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.8"/><path d="m3 17 5-4 4 3 3-3 6 5"/></svg></div>`}
+              <div class="ovl">${n.category?`<span class="tag">${esc(ml(n.category))}</span>`:''}<h3>${esc(ml(n.title))}</h3></div></div>
+            <div class="body"><span class="dt">${Site.fmtDate(n.date)}</span></div>
+          </a>`).join('')}</div>`
+        :`<div class="empty"><div class="t">${T('expert_none_art')}</div></div>`}
+      </div></section>`;
+    Site.initReveal();
+  }});
+</script>
+</body>
+</html>

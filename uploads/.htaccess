@@ -1,0 +1,18 @@
+# Yuklangan fayllar ichida skript ishga tushishining oldini olamiz (himoya chuqurligi uchun).
+# api.php faqat rasm (png/jpg/webp/gif), hujjat (pdf/doc/docx) va infografika (html) yozadi,
+# lekin serverni har ehtimolga qarshi qulflaymiz.
+<IfModule mod_php.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+  php_flag engine off
+</IfModule>
+
+<FilesMatch "\.(php|phtml|php\d|pl|py|cgi|asp|aspx|sh|exe|htaccess)$">
+  Require all denied
+</FilesMatch>
+
+Options -Indexes -ExecCGI
