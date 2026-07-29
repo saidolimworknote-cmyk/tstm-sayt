@@ -312,19 +312,17 @@
   // Nashr kartalarida qisqa (displey) sarlavha — bo'sh bo'lsa to'liq sarlavha.
   // site-common.js'dagi Site.dispTitle bilan bir xil mantiq (bu fayl alohida nusxa).
   function dispT(it){ if(!it) return ''; const s=mlg(it.shortTitle); return (s&&String(s).trim())?s:mlg(it.title); }
-  const MON = (window.I18N ? I18N.months() : ['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentabr','Oktabr','Noyabr','Dekabr']);
   function imgTag(src, fallbackData){
     return src ? '<img src="'+src+'" alt="" style="width:100%;height:100%;object-fit:cover">' : '';
   }
   function renderHome(){
-    let news=[],pubs=[],exps=[],events=[];
+    // Tadbirlar bu yerda o'qilmaydi — bosh sahifada tadbirlar bo'limi yo'q
+    // (pastdagi izohga qarang). Ular `tadbirlar.html` sahifasida ko'rsatiladi.
+    let news=[],pubs=[],exps=[];
     try{
       news = Store.all('news').filter(n=>n.status==='published').sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
       pubs = Store.all('publications').filter(p=>p.status==='published').slice(0,3);
       exps = Store.all('experts').sort((a,b)=>(a.order||0)-(b.order||0)).slice(0,4);
-      const today = new Date().toISOString().slice(0,10);
-      events = Store.all('events').filter(e=>e.status==='published').sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));
-      const up = events.filter(e=>(e.date||'')>=today); events = (up.length?up:events).slice(0,3);
     }catch(e){ return; }
 
     // ---- Bo'sh holat ----
@@ -433,17 +431,15 @@
       }
     }
 
-    // EVENTS
-    const evWrap = document.querySelector('.events .rv');
-    if(evWrap && events.length){
-      evWrap.innerHTML = events.map(e=>{
-        const p=String(e.date||'').split('-'); const dd=p[2]||''; const mm=MON[parseInt(p[1],10)-1]||'';
-        return '<a class="ev" href="tadbirlar.html" style="cursor:pointer;color:inherit">'
-          + '<div class="date"><span class="dd">'+dd+'</span><span class="mm">'+mm+'</span></div>'
-          + '<div><h3>'+mlg(e.title)+'</h3><div class="loc">'+(e.time?'◷ '+e.time+' · ':'')+mlg(e.location)+'</div></div>'
-          + '</a>';
-      }).join('');
-    }
+    // TADBIRLAR bo'limi bosh sahifada ATAYLAB yo'q — HTML'da `.events` elementi
+    // ham yo'q, shuning uchun uni to'ldiradigan kod ham olib tashlandi (o'lik
+    // shox bo'lib qolgan edi: querySelector hamisha null qaytarardi).
+    //
+    // Qaytarmoqchi bo'lsangiz e'tiborga oling: eski kod kelgusi tadbir
+    // topilmasa O'TGANlariga tushib ketardi — bosh sahifada eskirgan sanalar
+    // chiqib, sayt tashlab qo'yilgandek ko'rinardi. Yangi variantda faqat
+    // kelgusi tadbirlar ko'rsatilsin, ular bo'lmasa bo'lim yashirilsin.
+    // Tadbirlar hozir ham `tadbirlar.html` sahifasida to'liq ko'rinadi.
   }
   // MUHIM: renderHome xato bersa ham skript davom etsin — aks holda pastdagi
   // reveal (.rv) ulanmay qoladi va butun sahifa opacity:0 da "ko'rinmas" bo'ladi
