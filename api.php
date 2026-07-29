@@ -436,8 +436,29 @@ switch ($action) {
     $chk->execute([':id' => $iid]);
     if (!$chk->fetch()) jexit(['count' => 0]);
     $key = $coll . ':' . $iid;
-    $up = $pdo->prepare("INSERT INTO views (k, cnt) VALUES (:k, 1) ON DUPLICATE KEY UPDATE cnt = cnt + 1");
-    $up->execute([':k' => $key]);
+
+    // Tezlik chegarasi. Hisoblagichni oshirish so'rovini brauzer yuboradi,
+    // ya'ni uni konsoldan tsiklda chaqirib raqamni istagancha shishirish
+    // mumkin edi. Bitta IP 10 daqiqada eng ko'pi 30 marta hisoblanadi —
+    // odam uchun bemalol yetarli, skript uchun foydasiz.
+    // Chegaradan oshsa xato qaytarmaymiz: joriy sonni ko'rsatamiz, lekin
+    // OSHIRMAYMIZ (hujumchiga chegara borligi bilinmasin).
+    $VIEW_WINDOW = 600; $VIEW_MAX = 30; $now = time(); $vkey = 'view:' . client_ip();
+    $st = $pdo->prepare("SELECT hits FROM msg_throttle WHERE ip = :ip");
+    $st->execute([':ip' => $vkey]);
+    $row = $st->fetch();
+    $hits = $row ? json_decode($row['hits'], true) : [];
+    if (!is_array($hits)) $hits = [];
+    $hits = array_values(array_filter($hits, function ($t) use ($now, $VIEW_WINDOW) { return $now - $t < $VIEW_WINDOW; }));
+
+    if (count($hits) < $VIEW_MAX) {
+      $up = $pdo->prepare("INSERT INTO views (k, cnt) VALUES (:k, 1) ON DUPLICATE KEY UPDATE cnt = cnt + 1");
+      $up->execute([':k' => $key]);
+      $hits[] = $now;
+      $tu = $pdo->prepare("INSERT INTO msg_throttle (ip, hits) VALUES (:ip,:h) ON DUPLICATE KEY UPDATE hits=VALUES(hits)");
+      $tu->execute([':ip' => $vkey, ':h' => json_encode($hits)]);
+    }
+
     $st = $pdo->prepare("SELECT cnt FROM views WHERE k = :k");
     $st->execute([':k' => $key]);
     $r = $st->fetch();

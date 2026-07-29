@@ -341,6 +341,34 @@
   }
   function isAuthed() { return sessionStorage.getItem(SESS_KEY) === '1'; }
 
+  // Sessiyani SERVERDAN tasdiqlash.
+  //
+  // isAuthed() faqat sessionStorage'ni o'qiydi — uni brauzer konsolidan
+  // qo'lda o'rnatib qo'yish mumkin. Server bunday "adminni" hech qachon
+  // qabul qilmaydi (barcha yozuv amallari 401 qaytaradi, shaxsiy bo'limlar
+  // bo'sh keladi), lekin admin interfeysining O'ZI ochilib qolardi —
+  // ma'lumotsiz bo'lsa ham, bu auditda kamchilik sifatida yoziladi.
+  //
+  // Shuning uchun panel ochilishidan oldin server so'raladi: haqiqatan
+  // sessiya bormi? Yo'q bo'lsa — mahalliy bayroq tozalanadi va login
+  // ekrani ko'rsatiladi.
+  function verifySession() {
+    if (!API_OK) return Promise.resolve(isAuthed()); // PHP yo'q rejimi (mahalliy sinov)
+    return fetch(API + '?action=session', { headers: { 'Accept': 'application/json' } })
+      .then(r => r.ok ? r.json() : null)
+      .then(function (s) {
+        var ok = !!(s && s.authed);
+        if (ok) { if (s.csrf) CSRF = s.csrf; sessionStorage.setItem(SESS_KEY, '1'); }
+        else { sessionStorage.removeItem(SESS_KEY); CSRF = null; }
+        return ok;
+      })
+      .catch(function () {
+        // Tarmoq uzilgan — mavjud holatni saqlaymiz, serverdan ma'lumot
+        // baribir kelmaydi, ya'ni bo'sh panel ochiladi.
+        return isAuthed();
+      });
+  }
+
   // ---------- Rasm yuklash (server fayli) ----------
   // dataURL beriladi; PHP bor bo'lsa serverga fayl qilib yozadi va yo'l qaytaradi.
   // PHP yo'q bo'lsa dataURL'ning o'zini qaytaradi (localStorage rejimi).
@@ -491,6 +519,6 @@
 
   w.Store = {
     uid, ml, all, find, upsert, remove, settings, setSettings,
-    checkLogin, changePassword, login, logout, isAuthed, addMessage, subscribe, uploadImage, uploadPdf, uploadHtml, bumpView, getView, reset, raw: load
+    checkLogin, changePassword, login, logout, isAuthed, verifySession, addMessage, subscribe, uploadImage, uploadPdf, uploadHtml, bumpView, getView, reset, raw: load
   };
 })(window);

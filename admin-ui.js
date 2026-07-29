@@ -289,7 +289,12 @@
       if (g) location.hash = g.getAttribute('data-go');
     });
 
-    if (Store.isAuthed()) showApp(); else $('#login').classList.add('show');
+    // Panelni SERVER tasdiqlagandan keyingina ko'rsatamiz. sessionStorage
+    // bayrog'ini brauzer konsolidan qo'lda yozib qo'yish mumkin — u yolg'iz
+    // o'zi yetarli asos emas. Qarang: admin-store.js -> verifySession().
+    Store.verifySession().then(function (ok) {
+      if (ok) showApp(); else $('#login').classList.add('show');
+    });
   }
 
   function showApp() {
