@@ -357,9 +357,11 @@
       ng.innerHTML =
         '<a class="feat rv" href="yangilik.html?id='+f.id+'" style="cursor:pointer">'
         + (f.cover?'<div class="ph" style="padding:0">'+imgTag(f.cover)+'</div>':'<div class="ph" data-l="asosiy yangilik"></div>')
+        + '<div class="fbody">'
         + '<div class="meta">'+(f.category?'<span class="tag">'+mlg(f.category)+'</span>':'')+'<span class="d mono muted">'+fmtDate(f.date)+'</span></div>'
         + '<h3>'+mlg(f.title)+'</h3>'
         + (mlg(f.excerpt)?'<p>'+mlg(f.excerpt)+'</p>':'')
+        + '</div>'
         + '</a>'
         + '<div class="nlist rv">'
         + rest.map(n=>'<a class="nitem" href="yangilik.html?id='+n.id+'">'
