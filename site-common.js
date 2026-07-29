@@ -12,6 +12,24 @@
     return w.I18N ? w.I18N.tl(v || '', l) : (v || '');
   };
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  // ---------- Xavfsiz URL ----------
+  // src/href atributiga qo'yiladigan har qanday saqlangan qiymat (rasm yo'li, PDF
+  // havolasi, hamkor sayti) shu yerdan o'tadi. Ikki ish qiladi:
+  //   1) `javascript:` / `vbscript:` / rasm bo'lmagan `data:` sxemalarini bloklaydi
+  //      — aks holda kontent muharriri bosilganda kod ishga tushadigan havola
+  //      qoldirishi mumkin edi;
+  //   2) natijani esc() qiladi — qiymat ichidagi qo'shtirnoq atributdan chiqib
+  //      ketib yangi atribut (masalan onerror=) qo'sha olmaydi.
+  const safeUrl = (u) => {
+    const s = String(u == null ? '' : u).trim();
+    if (!s) return '';
+    // Brauzer URL sxemasidan boshqaruv belgilari va probelni tashlab yuboradi,
+    // shuning uchun tekshirishdan oldin biz ham ularni olib tashlaymiz.
+    const probe = s.split("").filter(function (ch) { return ch > " "; }).join("").toLowerCase();
+    if (/^(javascript|vbscript|file):/.test(probe)) return '';
+    if (/^data:/.test(probe) && !/^data:image\//.test(probe)) return '';
+    return esc(s);
+  };
   // ---------- Displey sarlavha ----------
   // Nashrlarning ilmiy sarlavhalari juda uzun bo'lishi mumkin (145 belgigacha) —
   // ular bannerni va ro'yxat kartalarini buzadi. Admin ixtiyoriy "Qisqa sarlavha"
@@ -274,7 +292,7 @@
             {u:soc.facebook, i:ICON.fb, n:'Facebook'},
             {u:soc.x,        i:ICON.x,  n:'X'}
           ].filter(l => l.u && l.u !== '#')
-           .map(l => `<a href="${esc(l.u)}" target="_blank" rel="noopener" aria-label="${l.n}">${l.i}</a>`).join('')}</div>
+           .map(l => `<a href="${safeUrl(l.u)}" target="_blank" rel="noopener" aria-label="${l.n}">${l.i}</a>`).join('')}</div>
         </div>
         <div class="f-col"><h5>${esc(T('footer_sections'))}</h5>
           <a href="markaz-haqida.html">${esc(T('nav_about'))}</a><a href="rahbariyat.html">${esc(T('nav_about_leadership'))}</a>
@@ -335,7 +353,9 @@
     const el = document.querySelector('.page-banner');
     if (el && url){
       el.classList.add('has-img');
-      el.style.setProperty('--banner-img', `url("${url}")`);
+      // CSS qiymatiga qo'shtirnoq/qavs tushsa url() dan chiqib boshqa e'lon
+      // qo'shish mumkin edi — shuning uchun kodlab beramiz.
+      el.style.setProperty('--banner-img', `url("${encodeURI(url).replace(/"/g, '%22')}")`);
     }
   }
 
@@ -573,5 +593,5 @@
     setTimeout(showSubscribe, 2500);
   }
 
-  w.Site = { initPage, renderHeader, renderFooter, mlGet, dispTitle, esc, fmtDate, dayMonth, qs, settings, lang, t: T, ICON, NAV, initReveal, showSubscribe, printDoc };
+  w.Site = { initPage, renderHeader, renderFooter, mlGet, dispTitle, esc, safeUrl, fmtDate, dayMonth, qs, settings, lang, t: T, ICON, NAV, initReveal, showSubscribe, printDoc };
 })(window);

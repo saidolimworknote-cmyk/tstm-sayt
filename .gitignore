@@ -11,6 +11,9 @@ _*.html
 *.tmp
 
 # --- Maxfiy / ish jarayoni ma'lumotlari (repoga TUSHMASIN) ---
+# config.php — baza logini/paroli va birinchi kirish paroli. Har bir muhitda
+#   (mahalliy, hosting) o'ziniki bo'ladi. Namunasi: config.sample.php (u repoda).
+config.php
 # data.json — MySQL'ga ko'chishdan oldingi eski ombor. Ichida admin parolining
 #   XESHI (auth.passwordHash) bor, shuning uchun versiya nazoratiga qo'yilmaydi.
 #   db.php uni faqat birinchi ishga tushirishda (baza bo'sh bo'lsa) o'qiydi;

@@ -33,8 +33,11 @@ if (empty($_SESSION['csrf'])) {
   $_SESSION['csrf'] = bin2hex(random_bytes(32));
 }
 
-$DEFAULT_USER = 'markaz_admini';
-$DEFAULT_PASS = 'PAROL-TARIXDAN-OLIB-TASHLANDI';
+// Login/parol KODDA saqlanmaydi. Ular config.php dan keladi (git'ga tushmaydi),
+// bo'lmasa — birinchi kirish paroli umuman yo'q va parolsiz kirib bo'lmaydi.
+// Qarang: config.sample.php.
+$DEFAULT_USER = (string)cfg('admin_user', 'markaz_admini');
+$DEFAULT_PASS = (string)cfg('admin_bootstrap_password', '');
 $LOGIN_MAX_ATTEMPTS = 5;
 $LOGIN_LOCK_SECONDS = 600;
 
@@ -64,6 +67,29 @@ function audit($pdo, $action, $coll = '', $id = '') {
   try {
     $st = $pdo->prepare("INSERT INTO audit_log (action, coll, item_id, ip) VALUES (:a,:c,:i,:ip)");
     $st->execute([':a' => $action, ':c' => $coll, ':i' => (string)$id, ':ip' => client_ip()]);
+    // Jurnal cheksiz o'smasin: 180 kundan eski yozuvlar tozalanadi. Har safar
+    // emas, ~1% hollarda — har bir yozuvda DELETE ishlatish ortiqcha yuk bo'lardi.
+    if (mt_rand(1, 100) === 1) {
+      $pdo->exec("DELETE FROM audit_log WHERE at < (NOW() - INTERVAL 180 DAY)");
+    }
+  } catch (Exception $e) {}
+}
+
+/* Spam hisoblagichlarining eskilarini tozalash (msg_throttle cheksiz o'smasin).
+   Har bir yozuv `hits` ichida vaqt tamg'alari massivini saqlaydi; eng oxirgi
+   urinishdan bir kun o'tgan bo'lsa, qator umuman keraksiz. */
+function prune_throttle($pdo) {
+  try {
+    if (mt_rand(1, 50) !== 1) return;
+    $cut = time() - 86400;
+    foreach ($pdo->query("SELECT ip, hits FROM msg_throttle")->fetchAll() as $r) {
+      $h = json_decode($r['hits'], true);
+      $last = (is_array($h) && $h) ? max($h) : 0;
+      if ($last < $cut) {
+        $d = $pdo->prepare("DELETE FROM msg_throttle WHERE ip = :ip");
+        $d->execute([':ip' => $r['ip']]);
+      }
+    }
   } catch (Exception $e) {}
 }
 
@@ -189,8 +215,11 @@ switch ($action) {
     if ($u !== '' && hash_equals((string)$validUser, $u)) {
       if ($hash !== '' && password_verify($p, $hash)) {
         $ok = true;
-      } elseif ($hash === '' && hash_equals($DEFAULT_PASS, $p)) {
-        // xesh bo'sh (seed) — standart parol bilan kirildi, endi xeshlab saqlaymiz
+      } elseif ($hash === '' && $DEFAULT_PASS !== '' && $p !== '' && hash_equals($DEFAULT_PASS, $p)) {
+        // Baza yangi (xesh bo'sh) va config.php da birinchi kirish paroli
+        // berilgan — u bilan kirildi, endi bcrypt xeshlab saqlaymiz.
+        // $DEFAULT_PASS/$p bo'sh bo'lsa bu shox UMUMAN ishlamaydi: aks holda
+        // hash_equals('','') === true bo'lib, parolsiz kirish ochilardi.
         $ok = true;
         auth_save($pdo, $validUser, password_hash($p, PASSWORD_DEFAULT));
       }
@@ -219,11 +248,17 @@ switch ($action) {
     $b = body_json();
     $cur = isset($b['current']) ? (string)$b['current'] : '';
     $new = isset($b['new']) ? (string)$b['new'] : '';
-    if (strlen($new) < 8) jexit(['ok' => false, 'error' => 'weak'], 400);
+    // Kamida 12 belgi. Tekshiruv SERVERDA — brauzerdagi tekshiruvni chetlab
+    // o'tib to'g'ridan-to'g'ri API'ga so'rov yuborish mumkin.
+    if (strlen($new) < 12) jexit(['ok' => false, 'error' => 'weak'], 400);
+    if ($new === $cur) jexit(['ok' => false, 'error' => 'same'], 400);
     $a = auth_load($pdo);
     $hash = ($a && !empty($a['password_hash'])) ? $a['password_hash'] : '';
     global $DEFAULT_PASS;
-    $curOk = ($hash !== '') ? password_verify($cur, $hash) : hash_equals($DEFAULT_PASS, $cur);
+    // Xesh bo'sh bo'lganda ham bo'sh joriy parol qabul qilinmaydi (hash_equals('','') === true tuzog'i)
+    $curOk = ($hash !== '')
+      ? password_verify($cur, $hash)
+      : ($DEFAULT_PASS !== '' && $cur !== '' && hash_equals($DEFAULT_PASS, $cur));
     if (!$curOk) jexit(['ok' => false, 'error' => 'wrong_current'], 403);
     auth_save($pdo, ($a ? $a['username'] : $DEFAULT_USER), password_hash($new, PASSWORD_DEFAULT));
     audit($pdo, 'change_password');
@@ -247,6 +282,9 @@ switch ($action) {
     $ext = strtolower($mm[1]); if ($ext === 'jpeg') $ext = 'jpg';
     $bin = base64_decode(substr($data, strpos($data, ',') + 1), true);
     if ($bin === false || $bin === '') jexit(['ok' => false, 'error' => 'decode'], 400);
+    // Hajm chegarasi — hujjat yuklashda bor edi, rasmda yo'q edi: bitta so'rov
+    // bilan diskni to'ldirib yuborish mumkin bo'lardi.
+    if (strlen($bin) > 12 * 1024 * 1024) jexit(['ok' => false, 'error' => 'too large'], 413);
     $info = @getimagesizefromstring($bin);
     $allowed = ['png' => 'image/png', 'jpg' => 'image/jpeg', 'webp' => 'image/webp', 'gif' => 'image/gif'];
     if ($info === false || !isset($allowed[$ext]) || $info['mime'] !== $allowed[$ext]) jexit(['ok' => false, 'error' => 'not a valid image'], 400);
@@ -332,6 +370,7 @@ switch ($action) {
       $hits[] = $now;
       $up = $pdo->prepare("INSERT INTO msg_throttle (ip, hits) VALUES (:ip,:h) ON DUPLICATE KEY UPDATE hits=VALUES(hits)");
       $up->execute([':ip' => $ip, ':h' => json_encode($hits)]);
+      prune_throttle($pdo);
       jexit(['ok' => true]);
     } catch (Exception $e) { jexit(['ok' => false, 'error' => 'db'], 500); }
     break;
@@ -376,16 +415,26 @@ switch ($action) {
       $hits[] = $now;
       $up = $pdo->prepare("INSERT INTO msg_throttle (ip, hits) VALUES (:ip,:h) ON DUPLICATE KEY UPDATE hits=VALUES(hits)");
       $up->execute([':ip' => $tkey, ':h' => json_encode($hits)]);
+      prune_throttle($pdo);
       jexit(['ok' => true]);
     } catch (Exception $e) { jexit(['ok' => false, 'error' => 'db'], 500); }
     break;
   }
 
   case 'view': {
+    // Ommaviy hisoblagich. Kalit oldin faqat tozalanardi, lekin CHEKLANMASDI —
+    // ixtiyoriy `coll`/`id` bilan cheksiz yangi qator yaratib, views jadvalini
+    // shishirib yuborish mumkin edi. Endi: faqat ma'lum bo'limlar + uzunlik
+    // chegarasi + yozuv haqiqatan bazada bormi degan tekshiruv.
+    global $SCHEMA;
     $b = body_json();
-    $coll = isset($b['coll']) ? preg_replace('/[^a-z]/', '', $b['coll']) : '';
-    $iid  = isset($b['id']) ? preg_replace('/[^a-z0-9]/i', '', $b['id']) : '';
-    if (!$coll || !$iid) jexit(['count' => 0]);
+    $coll = isset($b['coll']) ? preg_replace('/[^a-z]/i', '', (string)$b['coll']) : '';
+    $iid  = isset($b['id']) ? substr(preg_replace('/[^a-z0-9]/i', '', (string)$b['id']), 0, 40) : '';
+    if (!$coll || !$iid || !isset($SCHEMA[$coll])) jexit(['count' => 0]);
+    // Mavjud bo'lmagan id uchun qator ochmaymiz
+    $chk = $pdo->prepare("SELECT 1 FROM `" . $SCHEMA[$coll]['table'] . "` WHERE id = :id");
+    $chk->execute([':id' => $iid]);
+    if (!$chk->fetch()) jexit(['count' => 0]);
     $key = $coll . ':' . $iid;
     $up = $pdo->prepare("INSERT INTO views (k, cnt) VALUES (:k, 1) ON DUPLICATE KEY UPDATE cnt = cnt + 1");
     $up->execute([':k' => $key]);

@@ -2,8 +2,10 @@
 /* ============================================================
    TSTM — standart boshlang'ich kontent (fallback seed)
    Faqat data.json topilmagan holatda ishlatiladi. Odatda import
-   mavjud data.json'dan bo'ladi. Auth paroli bo'sh — birinchi login
-   api.php'dagi standart parol (PAROL-TARIXDAN-OLIB-TASHLANDI) orqali o'tadi va xeshlanadi.
+   mavjud data.json'dan bo'ladi. Auth paroli bo'sh qoladi — birinchi
+   kirish config.php dagi `admin_bootstrap_password` orqali bo'ladi va
+   o'sha zahoti bcrypt bilan xeshlanib saqlanadi. U bo'sh bo'lsa
+   parolsiz kirish MUMKIN EMAS (qarang: config.sample.php).
    ============================================================ */
 function default_seed() {
   $ml = function ($uz, $ru = '', $en = '') { return ['uz' => $uz, 'ru' => $ru, 'en' => $en]; };

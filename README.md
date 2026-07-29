@@ -9,6 +9,9 @@ Sayt + boshqaruv paneli (admin). XAMPP'da ishlash uchun PHP backend bilan.
 - **admin.html** — boshqaruv paneli (login bilan)
 - `api.php` — PHP backend (ma'lumotlarni **MySQL/MariaDB**'da saqlaydi)
 - `db.php` — MySQL qatlami (PDO, jadval sxemasi, avtomatik yaratish)
+- `config.sample.php` — maxfiy sozlamalar namunasi (baza logini/paroli).
+  Undan `config.php` yasaladi; `config.php` git'ga **tushmaydi**
+- `page-*.js` — har bir sahifaning skripti (CSP talabi bilan HTML'dan ajratilgan)
 - `seed.php` — standart boshlang'ich kontent (data.json bo'lmasa)
 - `index.php` — bosh sahifaga yo'naltiradi
 - `.htaccess` — Apache sozlamalari
@@ -22,10 +25,13 @@ Sayt + boshqaruv paneli (admin). XAMPP'da ishlash uchun PHP backend bilan.
 
 ## 🚀 XAMPP'da ishga tushirish
 
-1. **XAMPP**'ni o'rnating va **Apache**'ni ishga tushiring (Start).
+1. **XAMPP**'ni o'rnating, **Apache** va **MySQL**'ni ishga tushiring (Start).
 2. Ushbu `tstm-sayt` papkasini XAMPP'ning **`htdocs`** papkasiga ko'chiring.
    Masalan: `C:\xampp\htdocs\tstm-sayt`
-3. Brauzerda oching:
+3. *(Ixtiyoriy)* `config.sample.php` ni `config.php` deb nusxalang. Mahalliy
+   XAMPP uchun shart emas — `config.php` bo'lmasa standart qiymatlar
+   (`root`, parolsiz) ishlatiladi.
+4. Brauzerda oching:
    - **Sayt:** `http://localhost/tstm-sayt/`
    - **Admin panel:** `http://localhost/tstm-sayt/admin.html`
 
@@ -35,11 +41,18 @@ Sayt + boshqaruv paneli (admin). XAMPP'da ishlash uchun PHP backend bilan.
 
 ## 🔐 Admin panelga kirish
 
-- **Login:** `markaz_admini`
-- **Parol:** `PAROL-TARIXDAN-OLIB-TASHLANDI`
+**Manzil:** `http://localhost/tstm-sayt/admin.html` · **Login:** `markaz_admini`
 
-> Parolni o'zgartirish: `api.php` faylidagi `$DEFAULT_PASS` qiymatini (yoki birinchi
-> ishga tushgandan keyin `data.json` ichidagi `auth` qismini) tahrirlang.
+Parol **kodda saqlanmaydi** va bu hujjatda ham yozilmaydi — u serverda faqat
+bcrypt xesh holida (`auth` jadvali) turadi. Parolni saytga mas'ul shaxsdan
+so'rang.
+
+**Parolni almashtirish:** Admin panel → Sozlamalar → «Xavfsizlik — kirish
+paroli». Kamida 12 belgi.
+
+**Butunlay yangi (bo'sh) bazani birinchi marta ochish:** `config.php` dagi
+`admin_bootstrap_password` ga vaqtincha kuchli parol yozing, tizimga kiring
+(parol avtomatik xeshlanib saqlanadi), so'ng bu qatorni qaytib bo'shating.
 
 ---
 
@@ -51,7 +64,8 @@ Sayt + boshqaruv paneli (admin). XAMPP'da ishlash uchun PHP backend bilan.
   Agar loyihada eski `data.json` bo'lsa — u avtomatik MySQL'ga **import qilinadi**
   (kontent + parol xeshi saqlanadi). Bo'lmasa — `seed.php`dagi standart kontent.
 - Ma'lumot bazasidan tashqari **hech qanday sozlash shart emas** — XAMPP'da MySQL
-  ishlab tursa kifoya. Baza login/parolini `db.php` boshidagi sozlamalardan o'zgartiring.
+  ishlab tursa kifoya. Baza login/parolini `config.php` dan o'zgartiring
+  (namunasi: `config.sample.php`).
 - Agar fayllar PHP'siz (`file://`) ochilsa — ma'lumotlar brauzerning
   o'zida (localStorage) saqlanadi (faqat sinov uchun).
 
@@ -85,22 +99,28 @@ Sayt 3 tilli: **UZ / RU / EN**. Har bir kontent admin panelda 3 tilda tahrirlana
   `settings`, `auth`, `views`, `login_attempts`, `audit_log`.
 - Ko'p tilli maydonlar (`title`, `body`, …) `LONGTEXT`da JSON sifatida, filtrlanadigan
   maydonlar (`status`, `date`, `category`, …) alohida ustunlarda **indeks** bilan saqlanadi.
-- Baza login/parolini o'zgartirish: **`db.php`** boshidagi `$DB_HOST/$DB_NAME/$DB_USER/$DB_PASS`.
+- Baza login/parolini o'zgartirish: **`config.php`** (`db_host`, `db_name`, `db_user`,
+  `db_pass`). Bu fayl git'ga tushmaydi; namunasi — `config.sample.php`.
+- Jadvallar ro'yxatiga `subscribers` va `msg_throttle` ham kiradi.
 
 ---
 
-## 🔒 Xavfsizlik — hostingga chiqarishdan oldin
+## 🔒 Xavfsizlik
 
-- **Standart parolni albatta almashtiring.** Admin panelga kirib, parolni o'zgartiring
-  (yoki `change_password` endpoint orqali). Parol serverda faqat **bcrypt xesh** holida
-  (`auth` jadvali) saqlanadi — oddiy matnda hech qachon yozilmaydi.
-- **Baza parolini qo'ying.** Hostingda `db.php`dagi `$DB_PASS`ni bo'sh qoldirmang.
-- Yozuv amallari **CSRF token** bilan himoyalangan (faqat login qilgan admin + to'g'ri token).
-- Barcha so'rovlar **PDO prepared statement** — SQL-injection mumkin emas.
-- Login urinishlari cheklangan (1 soat ichida 5 marta xato — 10 daqiqaga bloklanadi).
-- Aloqa formasi spamdan himoyalangan: bitta IP 10 daqiqada eng ko'pi 5 ta xabar;
-  bo'sh murojaatlar rad etiladi; jami 5000 tadan oshmaydi.
-- Rasm yuklash faqat PNG/JPG/WEBP/GIF (SVG ataylab o'chirilgan — XSS xavfi).
-- `db.php`, `seed.php`, `*.json` fayllari `.htaccess` orqali tashqaridan to'g'ridan-to'g'ri
-  ochilishdan himoyalangan.
-- Admin amallari (`upsert`/`remove`/`login`/…) `audit_log` jadvalida qayd etiladi.
+To'liq tavsif — **[SECURITY.md](SECURITY.md)** (arxitektura, himoya choralari,
+ma'lum cheklovlar).
+
+Hostingga chiqarish cheklisti — **[DEPLOY.md](DEPLOY.md)** (baza foydalanuvchisi,
+HTTPS/HSTS, fayl huquqlari, tekshiruv ro'yxati).
+
+Qisqacha:
+
+- Parol **koddan tashqarida** (`config.php`, git'ga tushmaydi), serverda bcrypt xesh
+- Yozuv amallari: sessiya + **CSRF token**; barcha so'rovlar **PDO prepared statement**
+- **CSP** yoqilgan — `script-src` da `'unsafe-inline'` va `'unsafe-eval'` yo'q
+- `src`/`href` ga tushadigan barcha qiymatlar `safeUrl()` filtridan o'tadi
+- Fuqarolar murojaatlari, obunachilar va foydalanuvchilar ommaviy API'da **bo'sh** qaytadi
+- Login urinishlari cheklangan (5 xato → 10 daqiqa blok); aloqa formasi spamdan himoyalangan
+- Rasm yuklash faqat PNG/JPG/WEBP/GIF (SVG ataylab o'chirilgan); hujjatlar **fayl imzosi** bo'yicha tekshiriladi
+- `config.php`, `db.php`, `seed.php`, `*.json` — `.htaccess` orqali tashqaridan yopiq
+- Admin amallari `audit_log` jadvalida qayd etiladi

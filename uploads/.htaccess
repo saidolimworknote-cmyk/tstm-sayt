@@ -16,3 +16,25 @@
 </FilesMatch>
 
 Options -Indexes -ExecCGI
+
+# Yuklangan infografika HTML fayllari sayt bilan BIR XIL domendan beriladi.
+# media.html ularni `sandbox` iframe ichida ochadi (allow-same-origin YO'Q), lekin
+# faylni to'g'ridan-to'g'ri /uploads/info_*.html manzili bilan ochish ham mumkin —
+# u holda sandbox bo'lmasdi va ichidagi skript sayt origin'ida ishlab, admin
+# sessiyasi bilan api.php ga murojaat qila olardi.
+#
+# CSP `sandbox` direktivasi shu teshikni yopadi: fayl qanday ochilishidan qat'i
+# nazar alohida (opaque) origin'ga tushadi. Interaktiv infografika ishlayveradi,
+# lekin saytning cookie/localStorage'iga va API'siga tegolmaydi.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|htm|svg)$">
+    # Avval yuqoridagi (loyiha ildizidagi) CSP'ni olib tashlaymiz. Aks holda
+    # brauzerga IKKI CSP sarlavhasi ketadi va u ikkalasining KESISHMASINI
+    # qo'llaydi: ildizdagi `default-src 'self'` + bu yerdagi `sandbox` birga
+    # kelganda "self" opaque origin uchun hech nimaga to'g'ri kelmay qoladi va
+    # infografikaning o'z ichidagi rasm/uslublari ham bloklanib ketardi.
+    Header unset Content-Security-Policy
+    Header set Content-Security-Policy "sandbox allow-scripts allow-popups allow-forms allow-downloads"
+    Header set X-Content-Type-Options "nosniff"
+  </FilesMatch>
+</IfModule>

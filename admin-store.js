@@ -318,6 +318,21 @@
     const a = load().auth;
     return Promise.resolve(!!pw && u.trim() === a.username && pw === a.password);
   }
+  // Parolni almashtirish. Tekshiruv va xeshlash butunlay serverda
+  // (api.php -> change_password): joriy parol tasdiqlanadi, yangisi bcrypt
+  // bilan xeshlanib saqlanadi. Bu yerda parol hech qayerga yozilmaydi.
+  function changePassword(current, next) {
+    if (!API_OK) return Promise.resolve({ ok: false, error: 'no_server' });
+    const t = getCsrf();
+    return fetch(API + '?action=change_password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': t || '' },
+      body: JSON.stringify({ current: current, new: next })
+    })
+      .then(r => r.json().catch(() => ({})))
+      .then(j => (j && j.ok) ? { ok: true } : { ok: false, error: (j && j.error) || 'failed' })
+      .catch(() => ({ ok: false, error: 'network' }));
+  }
   function login() { sessionStorage.setItem(SESS_KEY, '1'); }
   function logout() {
     sessionStorage.removeItem(SESS_KEY);
@@ -476,6 +491,6 @@
 
   w.Store = {
     uid, ml, all, find, upsert, remove, settings, setSettings,
-    checkLogin, login, logout, isAuthed, addMessage, subscribe, uploadImage, uploadPdf, uploadHtml, bumpView, getView, reset, raw: load
+    checkLogin, changePassword, login, logout, isAuthed, addMessage, subscribe, uploadImage, uploadPdf, uploadHtml, bumpView, getView, reset, raw: load
   };
 })(window);

@@ -9,12 +9,26 @@
    api.php shu fayldan foydalanadi.
    ============================================================ */
 
-/* -------------------- Sozlamalar (hostingda o'zgartiring) -------------------- */
-$DB_HOST = '127.0.0.1';
-$DB_PORT = '3306';
-$DB_NAME = 'tstm';
-$DB_USER = 'root';
-$DB_PASS = '';        // XAMPP'da odatda bo'sh. Hostingda o'z parolingizni qo'ying.
+/* -------------------- Sozlamalar --------------------
+   Maxfiy qiymatlar (baza paroli, birinchi kirish paroli) KODDA saqlanmaydi —
+   ular git'ga tushmaydigan `config.php` faylidan o'qiladi. Namuna uchun:
+   `config.sample.php` ni `config.php` deb nusxalang.
+
+   config.php bo'lmasa — quyidagi XAMPP standartlariga qaytamiz, ya'ni
+   mahalliy ishlab chiqish hech qanday sozlashsiz ishlayveradi.
+-------------------------------------------------------------------------- */
+$CFG = [];
+if (is_file(__DIR__ . '/config.php')) {
+  $__c = require __DIR__ . '/config.php';
+  if (is_array($__c)) $CFG = $__c;
+}
+function cfg($k, $def = '') { global $CFG; return array_key_exists($k, $CFG) ? $CFG[$k] : $def; }
+
+$DB_HOST = cfg('db_host', '127.0.0.1');
+$DB_PORT = cfg('db_port', '3306');
+$DB_NAME = cfg('db_name', 'tstm');
+$DB_USER = cfg('db_user', 'root');
+$DB_PASS = cfg('db_pass', '');
 $DB_CHARSET = 'utf8mb4';
 
 /* -------------------- Collection -> jadval xaritasi --------------------

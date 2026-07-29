@@ -5,6 +5,17 @@
   const $ = (s, r) => (r || document).querySelector(s);
   const $$ = (s, r) => [...(r || document).querySelectorAll(s)];
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  // src/href atributiga qo'yiladigan saqlangan qiymatlar shu yerdan o'tadi:
+  // `javascript:` kabi sxemalar bloklanadi, qolgani esc() qilinadi — qiymat
+  // ichidagi qo'shtirnoq atributdan chiqib onerror= qo'sha olmasin.
+  const safeUrl = (u) => {
+    const s = String(u == null ? '' : u).trim();
+    if (!s) return '';
+    const probe = s.split('').filter(ch => ch > ' ').join('').toLowerCase();
+    if (/^(javascript|vbscript|file):/.test(probe)) return '';
+    if (/^data:/.test(probe) && !/^data:image\//.test(probe)) return '';
+    return esc(s);
+  };
   const mlGet = (v) => (v && typeof v === 'object') ? (v.uz || v.ru || v.en || '') : (v || '');
   const fmtDate = (d) => { if (!d) return '—'; const [y, m, day] = d.split('-'); return day + '.' + m + '.' + y; };
   const stripTags = (h) => (h || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
@@ -268,6 +279,16 @@
     }
     window.addEventListener('hashchange', route);
 
+    // Navigatsiya tugmalari (`data-go="#/..."`). Ilgari bular inline
+    // `onclick="location.hash='...'"` edi — inline handler CSP tomonidan
+    // bloklanadi ('unsafe-inline' siz), shuning uchun delegatsiyaga o'tkazildi.
+    // Delegatsiya document darajasida: tugmalar har render'da qayta yaratiladi,
+    // ya'ni ularga alohida listener bog'lab bo'lmaydi.
+    document.addEventListener('click', (e) => {
+      const g = e.target.closest('[data-go]');
+      if (g) location.hash = g.getAttribute('data-go');
+    });
+
     if (Store.isAuthed()) showApp(); else $('#login').classList.add('show');
   }
 
@@ -480,7 +501,7 @@
 
     c.innerHTML = `
       <div class="page-head"><div><div class="h">Xush kelibsiz 👋</div><div class="d">TSTM sayti kontentini shu yerdan boshqaring</div></div><div class="sp"></div>
-        <button class="btn primary" onclick="location.hash='#/news/new'">${ic('plus')} Yangi yangilik</button></div>
+        <button class="btn primary" data-go="#/news/new">${ic('plus')} Yangi yangilik</button></div>
       <div class="stat-grid">${cards.map(s => {
         const inner = `<div class="ico">${ic(s.ic)}</div><div class="v">${s.v}</div><div class="l">${s.l}</div><div class="tr">${s.tr}</div>`;
         return s.href ? `<a class="stat-card${s.accent ? ' accent' : ''}" href="${s.href}" style="text-decoration:none">${inner}</a>`
@@ -516,11 +537,11 @@
       <div class="card" style="margin-top:20px;padding:22px">
         <b style="font-family:var(--serif);font-size:17px;display:block;margin-bottom:14px">Tezkor amallar</b>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn" onclick="location.hash='#/events/new'">${ic('events')} Tadbir qo'shish</button>
-          <button class="btn" onclick="location.hash='#/publications/new'">${ic('pub')} Nashr yuklash</button>
-          <button class="btn" onclick="location.hash='#/heroSlides'">${ic('hero')} Hero slayder</button>
-          <button class="btn" onclick="location.hash='#/experts/new'">${ic('experts')} Ekspert qo'shish</button>
-          <button class="btn" onclick="location.hash='#/settings'">${ic('settings')} Sozlamalar</button>
+          <button class="btn" data-go="#/events/new">${ic('events')} Tadbir qo'shish</button>
+          <button class="btn" data-go="#/publications/new">${ic('pub')} Nashr yuklash</button>
+          <button class="btn" data-go="#/heroSlides">${ic('hero')} Hero slayder</button>
+          <button class="btn" data-go="#/experts/new">${ic('experts')} Ekspert qo'shish</button>
+          <button class="btn" data-go="#/settings">${ic('settings')} Sozlamalar</button>
         </div>
       </div>`;
 
@@ -566,7 +587,7 @@
         let disp = col.ml ? mlGet(val) : (val || '—');
         if (col.thumb) {
           const img = x[col.thumb];
-          const t = img ? `<img class="thumb" src="${img}">` : `<div class="thumb" style="display:flex;align-items:center;justify-content:center;color:var(--muted)">${ic(cfg.icon)}</div>`;
+          const t = img ? `<img class="thumb" src="${safeUrl(img)}">` : `<div class="thumb" style="display:flex;align-items:center;justify-content:center;color:var(--muted)">${ic(cfg.icon)}</div>`;
           return `<td><div style="display:flex;align-items:center;gap:12px">${t}<span class="t-title" style="max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(disp)}</span></div></td>`;
         }
         return `<td><span class="${col.k === cfg.columns[0].k ? 't-title' : ''}">${esc(disp)}</span></td>`;
@@ -613,7 +634,7 @@
 
     c.innerHTML = `
       <div class="page-head">
-        <button class="btn ghost" onclick="location.hash='#/${state.coll}'">${ic('back')} Orqaga</button>
+        <button class="btn ghost" data-go="#/${state.coll}">${ic('back')} Orqaga</button>
         <div><div class="h">${isNew ? 'Yangi ' + esc(cfg.singular) : esc(mlGet(item[cfg.fields[0].k]) || 'Tahrirlash')}</div>
         <div class="d">${cfg.label}</div></div><div class="sp"></div>${langBar}</div>
       <form id="entForm">
@@ -623,7 +644,7 @@
         </div>
         <div class="form-actions">
           <button class="btn primary" type="submit">${ic('save')} Saqlash</button>
-          <button class="btn ghost" type="button" onclick="location.hash='#/${state.coll}'">Bekor qilish</button>
+          <button class="btn ghost" type="button" data-go="#/${state.coll}">Bekor qilish</button>
           <div class="sp"></div>
           ${!isNew ? `<button class="btn danger" type="button" id="delBtn">${ic('trash')} O'chirish</button>` : ''}
         </div>
@@ -781,7 +802,7 @@
     if (f.type === 'image' || f.type === 'file') {
       const isImg = f.type === 'image';
       const prev = isImg
-        ? (val ? `<img class="prev" src="${val}">` : `<div class="prev">${ic('image')}</div>`)
+        ? (val ? `<img class="prev" src="${safeUrl(val)}">` : `<div class="prev">${ic('image')}</div>`)
         : `<div class="prev">${ic('pdf')}</div>`;
       const cur = (!isImg && val) ? `<div class="hint" data-fname>Joriy: ${esc(val)}</div>` : '<div class="hint" data-fname></div>';
       return `<div class="field" data-k="${f.k}" data-type="${f.type}" data-upload>${lab}
@@ -919,7 +940,7 @@
           valEl.value = saved;
           let prev2 = $('.prev', field);
           if (prev2.tagName === 'IMG') { prev2.src = saved; prev2.style.opacity = ''; }
-          else { prev2.outerHTML = `<img class="prev" src="${saved}">`; }
+          else { prev2.outerHTML = `<img class="prev" src="${safeUrl(saved)}">`; }
           uploadBusy(-1);
         });
       });
@@ -1106,7 +1127,7 @@
       if ((m.type || 'photo') === 'video') {
         const th = videoThumb(m);
         return `<div class="media-item video" data-id="${m.id}">
-          ${th ? `<img src="${th}">` : `<div class="vthumb">${ic('media')}</div>`}
+          ${th ? `<img src="${safeUrl(th)}">` : `<div class="vthumb">${ic('media')}</div>`}
           <div class="vbadge">${ic('play')}</div>
           <div class="nm">${esc(mlGet(m.title) || m.url)}</div>
           <div class="ov"><button class="icon-btn" data-act="open" title="Ochish">${ic('eye')}</button><button class="icon-btn" data-act="del" title="O'chirish">${ic('trash')}</button></div>
@@ -1163,7 +1184,7 @@
     const photos = Array.isArray(a.photos) ? a.photos : [];
     const cover = a.cover || (photos[0] && photos[0].url) || '';
     return `<div class="media-item album" data-id="${a.id}">
-      ${cover ? `<img src="${cover}">` : `<div class="vthumb">${ic('media')}</div>`}
+      ${cover ? `<img src="${safeUrl(cover)}">` : `<div class="vthumb">${ic('media')}</div>`}
       <div style="position:absolute;top:8px;right:8px;background:rgba(8,12,16,.62);color:#fff;border-radius:999px;padding:3px 10px;font-size:11px;font-family:var(--mono,monospace)">${photos.length}</div>
       <div class="nm">${esc(mlGet(a.title) || 'Albom')}</div>
       <div class="ov"><button class="icon-btn" data-act="edit" title="Ochish / tahrirlash">${ic('edit')}</button><button class="icon-btn" data-act="del" title="O'chirish">${ic('trash')}</button></div>
@@ -1228,7 +1249,7 @@
     function photoTile(p, i) {
       const isCover = cover && p.url === cover;
       return `<div class="media-item" data-idx="${i}" style="cursor:pointer" title="Muqova qilish uchun bosing">
-        <img src="${p.url}">
+        <img src="${safeUrl(p.url)}">
         ${isCover ? `<div style="position:absolute;top:8px;left:8px;background:var(--accent,#0f5689);color:#fff;border-radius:4px;padding:3px 8px;font-size:10px;letter-spacing:.08em;font-family:var(--mono,monospace)">MUQOVA</div>` : ''}
         <div class="ov"><button class="icon-btn" data-act="del" title="O'chirish">${ic('trash')}</button></div>
       </div>`;
@@ -1366,6 +1387,18 @@
           <span id="bulkTrLog" style="color:var(--muted);font-size:13px"></span>
         </div>
       </div>
+      <div class="card" style="padding:24px;margin-top:20px"><b style="font-family:var(--serif);font-size:17px;display:block;margin-bottom:6px">Xavfsizlik — kirish paroli</b>
+        <div style="color:var(--muted);font-size:13px;margin-bottom:16px">Parol serverda bcrypt bilan xeshlanadi va hech qayerda ochiq saqlanmaydi. Kamida <b>12 ta belgi</b> bo'lishi shart; harf, raqam va belgilar aralashmasi tavsiya etiladi.</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;max-width:760px">
+          <div class="field"><label>Joriy parol</label><input class="ctl" type="password" id="pwCur" autocomplete="current-password"></div>
+          <div class="field"><label>Yangi parol</label><input class="ctl" type="password" id="pwNew" autocomplete="new-password"></div>
+          <div class="field"><label>Yangi parolni takrorlang</label><input class="ctl" type="password" id="pwNew2" autocomplete="new-password"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:16px">
+          <button type="button" class="btn" id="pwSave">${ic('save')} Parolni almashtirish</button>
+          <span id="pwMsg" style="font-size:13px"></span>
+        </div>
+      </div>
       <div class="form-actions"><button class="btn primary" id="setSave">${ic('save')} Sozlamalarni saqlash</button><div class="sp"></div>
         <button class="btn danger" id="setReset">${ic('trash')} Barcha ma'lumotlarni tiklash</button></div>`;
 
@@ -1420,7 +1453,7 @@
     if (!logos.uz && s.logo) logos.uz = s.logo; // orqaga moslik
     $('#logoGrid').innerHTML = ['uz', 'ru', 'en'].map(l => `
       <div class="uploader tall" data-lk="${l}" style="margin-bottom:12px">
-        <img class="prev" src="${logos[l] || DEF_LOGO[l]}">
+        <img class="prev" src="${safeUrl(logos[l] || DEF_LOGO[l])}">
         <div><div style="font-weight:600;font-size:13px;margin-bottom:6px">${LGL[l]}</div>
           <button type="button" class="btn sm" data-lpick>${ic('upload')} Tanlash</button>
           ${logos[l] ? `<button type="button" class="btn sm ghost" data-lclear>O'chirish</button>` : ''}
@@ -1457,6 +1490,34 @@
       upd.stats = statsData;
       Store.setSettings(upd); applyTheme(upd.theme); toast('Sozlamalar saqlandi');
     };
+    // ---- Parolni almashtirish ----
+    // api.php'da `change_password` amali ancha vaqtdan beri bor edi, lekin uni
+    // chaqiradigan interfeys yo'q edi — ya'ni parolni panel orqali umuman
+    // almashtirib bo'lmasdi. Shu bo'shliq to'ldirildi.
+    $('#pwSave').onclick = () => {
+      const msg = $('#pwMsg');
+      const cur = $('#pwCur').value, nw = $('#pwNew').value, nw2 = $('#pwNew2').value;
+      const say = (t, bad) => { msg.textContent = t; msg.style.color = bad ? 'var(--danger, #c0392b)' : 'var(--ok, #1e8449)'; };
+      if (!cur) return say('Joriy parolni kiriting', 1);
+      if (nw.length < 12) return say('Yangi parol kamida 12 ta belgidan iborat bo\'lsin', 1);
+      if (nw !== nw2) return say('Yangi parol takrori mos kelmadi', 1);
+      if (nw === cur) return say('Yangi parol eskisidan farq qilishi kerak', 1);
+      $('#pwSave').disabled = true; say('Yuborilmoqda…');
+      Store.changePassword(cur, nw).then(r => {
+        $('#pwSave').disabled = false;
+        if (r && r.ok) {
+          $('#pwCur').value = $('#pwNew').value = $('#pwNew2').value = '';
+          say('Parol almashtirildi. Keyingi kirishda yangisini ishlating.');
+          toast('Parol almashtirildi');
+        } else {
+          const e = r && r.error;
+          say(e === 'wrong_current' ? 'Joriy parol noto\'g\'ri'
+            : e === 'weak' ? 'Parol juda qisqa'
+            : 'Almashtirib bo\'lmadi — qayta urinib ko\'ring', 1);
+        }
+      });
+    };
+
     $('#setReset').onclick = () => confirmModal('Ma\'lumotlarni tiklash', 'Barcha o\'zgarishlar o\'chiriladi va boshlang\'ich holatga qaytadi. Davom etasizmi?', () => { Store.reset(); applyTheme(Store.settings().theme); renderSidebar(); location.hash = '#/dashboard'; toast('Ma\'lumotlar tiklandi'); });
     { const bt = $('#bulkTr'); if (bt) bt.onclick = () => confirmModal('Kontent tarjimasi', 'Barcha kontentdagi bo\'sh EN/RU maydonlari o\'zbekchadan avtomatik to\'ldiriladi. Bu bir necha daqiqa olishi mumkin. Davom etasizmi?', () => bulkFillTranslations(bt, $('#bulkTrLog'))); }
   }
