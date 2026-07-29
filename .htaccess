@@ -97,9 +97,9 @@ DirectoryIndex index.php
 # .xml ni umuman bloklab bo'lmaydi — sitemap.xml ochiq qolishi kerak.
 RedirectMatch 404 (?i)/\.(idea|claude|git|vscode|env)(/|$)
 
-# Backend ichki fayllari (DB config + seed + maxfiy sozlamalar) — faqat api.php ichidan.
-# ichidan (server tomonda) chaqiriladi, tashqaridan to'g'ridan-to'g'ri ochib
-# bo'lmaydi (baza login/parolini himoya qilish uchun).
+# Backend ichki fayllari (DB config + seed + maxfiy sozlamalar) — ular faqat
+# api.php ichidan (server tomonda) chaqiriladi, tashqaridan to'g'ridan-to'g'ri
+# ochib bo'lmaydi (baza login/parolini himoya qilish uchun).
 # config.php — baza paroli shu yerda; config.sample.php ham yopiladi, chunki u
 # tuzilmani (qaysi kalitlar borligini) oshkor qiladi.
 <FilesMatch "^(db|seed|config|config\.sample)\.php$">

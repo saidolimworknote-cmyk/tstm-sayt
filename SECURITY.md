@@ -141,7 +141,54 @@ Jadvallar cheksiz o'smaydi: `messages` — oxirgi 5000 ta, `audit_log` — 180 k
 `ip`, `at`. Kirishlar, o'zgartirishlar, o'chirishlar va parol almashtirish
 qamrab olingan.
 
-## 10. Ma'lum cheklovlar
+## 10. Klient tomonga ishonmaslik (F12 / DevTools masalasi)
+
+**Savol:** brauzerning ishlab chiquvchi vositalari (F12) orqali sahifa kodini
+o'zgartirib qoidalarni chetlab o'tish mumkinmi?
+
+**Javob:** yo'q — chunki loyihada **hech qanday qaror klient tomonda qabul
+qilinmaydi**. Brauzerdagi JavaScript faqat serverdan kelgan ma'lumotni
+ko'rsatadi. Har bir tekshiruv serverda takrorlanadi:
+
+| Klient nima "aytishi" mumkin | Server nima qiladi |
+|---|---|
+| «men adminman» (sessionStorage) | PHP sessiyasini tekshiradi — mos kelmasa 401 |
+| «bu yozuvni saqla» | sessiya + CSRF tokenini talab qiladi |
+| «menga murojaatlar ro'yxatini ber» | sessiyasiz bo'sh massiv qaytaradi |
+| «parol to'g'ri edi» | e'tiborga olinmaydi; parol serverda bcrypt bilan solishtiriladi |
+| «bu maqola 10 000 marta ko'rilgan» | IP bo'yicha tezlik chegarasi qo'llaydi |
+| «bu foydalanuvchining paroli — X» | `save` amalida klient `auth` bloki butunlay tashlab yuboriladi |
+
+**Tekshirilgan.** Hujum simulyatsiyasi o'tkazildi: brauzer konsolidan
+`sessionStorage`ga admin bayrog'i qo'yildi. Natija — server sessiyani tan
+olmadi, shaxsiy bo'limlar bo'sh keldi, parol xeshi chiqmadi, yozuv amali
+haqiqiy CSRF tokeni bilan ham 401 qaytardi. Topilgan yagona kamchilik —
+admin panelining bo'sh qobig'i ochilib qolishi — `Store.verifySession()`
+bilan yopildi: panel endi server tasdiqlagandan keyingina ko'rsatiladi.
+
+### F12 ATAYLAB bloklanmagan
+
+Loyihada o'ng tugmani bloklash, `debugger` tuzoqlari yoki klavish ushlash
+kabi «DevTools himoyasi» **qasddan qo'llanilmagan**. Sabablari:
+
+1. **Samarasiz.** Bunday himoya JavaScriptni o'chirish, `curl`/Postman
+   ishlatish yoki boshqa brauzerdan kirish bilan bir necha soniyada chetlab
+   o'tiladi. U faqat oddiy foydalanuvchini bezovta qiladi, hujumchini emas.
+2. **Zararli.** Ekran o'quvchi va boshqa yordamchi texnologiyalar shu
+   mexanizmlarga tayanadi — ularni to'sish davlat resurslariga qo'yiladigan
+   qulaylik (accessibility) talabini buzadi.
+3. **Noto'g'ri joyda himoya.** Kod foydalanuvchining qurilmasida ishlaydi,
+   ya'ni u yerda hech narsani sir tutib bo'lmaydi. Yagona ishonchli chegara —
+   server. Klientni «qulflashga» sarflangan kuch shu chegarani mustahkamlashga
+   sarflangani ma'qul.
+
+> Amaliy misol: agar sayt «kursni tugatdim» degan xabarni klientdan qabul
+> qilib sertifikat bersa, uni F12 bloklash qutqarmaydi — foydalanuvchi
+> so'rovni to'g'ridan-to'g'ri yuboradi. To'g'ri yechim — tugallanishni
+> serverda qayd etish. Shu loyihada barcha holat ma'lumotlari (kontent,
+> huquqlar, hisoblagichlar) faqat serverda va MySQL'da saqlanadi.
+
+## 11. Ma'lum cheklovlar
 
 Halol bo'lish uchun — hozircha bajarilmagan, lekin bilib turilgan narsalar:
 
