@@ -305,6 +305,9 @@
   buildHero();
 
   // ---- render homepage sections from Store (CMS-connected) ----
+  // Umumiy yordamchilar (ilgari faqat ayrim bloklar ichida mahalliy e'lon qilingan edi)
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+  function T(k){ return window.I18N ? I18N.t(k) : k; }
   function mlg(v){ if (v && typeof v==='object'){ const L=(window.I18N?I18N.lang:'uz'); return v[L]||v.uz||v.ru||v.en||''; } return (window.I18N?I18N.tl(v||''):(v||'')); }
   // Nashr kartalarida qisqa (displey) sarlavha — bo'sh bo'lsa to'liq sarlavha.
   // site-common.js'dagi Site.dispTitle bilan bir xil mantiq (bu fayl alohida nusxa).
@@ -324,18 +327,34 @@
       const up = events.filter(e=>(e.date||'')>=today); events = (up.length?up:events).slice(0,3);
     }catch(e){ return; }
 
-    // STATS — admin paneldan (settings.stats)
+    // ---- Bo'sh holat ----
+    // HTML ichida har bir bo'lim uchun namuna kontent yozib qo'yilgan edi
+    // (soxta yangilik sarlavhalari, o'ylab topilgan ekspert ismlari va h.k.).
+    // Baza bo'sh bo'lganda o'sha to'qima matn HAQIQIY ma'lumotdek ko'rinardi —
+    // toza o'rnatishda yoki bo'lim tozalanganda xatoga olib keladi.
+    // Endi bunday holatda ochiq-oydin "hozircha ma'lumot yo'q" chiqadi.
+    const EMPTY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 10h8M8 14h5" stroke-linecap="round"/></svg>';
+    const emptyState = (key) => '<div class="empty-state">' + EMPTY_ICON + '<div class="t">' + esc(T(key)) + '</div></div>';
+
+    // STATS — admin paneldan (settings.stats). Sozlama bo'sh bo'lsa butun
+    // bo'lim yashiriladi: raqamsiz "statistika" lentasi ma'nosiz.
     try{
       const sd = (Store.settings().stats)||[];
       const sc = document.querySelector('.stats');
-      if(sc && sd.length){
-        sc.innerHTML = sd.map(function(s){ return '<div class="stat"><div class="n">'+mlg(s.n)+'</div><div class="c">'+mlg(s.c)+'</div></div>'; }).join('');
+      if(sc){
+        if(sd.length){
+          sc.innerHTML = sd.map(function(s){ return '<div class="stat"><div class="n">'+mlg(s.n)+'</div><div class="c">'+mlg(s.c)+'</div></div>'; }).join('');
+        } else {
+          const sec = sc.closest('section');
+          if(sec) sec.hidden = true; else sc.hidden = true;
+        }
       }
     }catch(e){}
 
     // NEWS: featured + list
     const ng = document.querySelector('.news-grid');
-    if(ng && news.length){
+    if(ng && !news.length){ ng.innerHTML = emptyState('home_no_news'); }
+    else if(ng){
       const f = news[0]; const rest = news.slice(1,6);
       ng.innerHTML =
         '<a class="feat rv" href="yangilik.html?id='+f.id+'" style="cursor:pointer">'
@@ -353,7 +372,8 @@
 
     // PUBLICATIONS
     const pg = document.querySelector('.pub-grid');
-    if(pg && pubs.length){
+    if(pg && !pubs.length){ pg.innerHTML = emptyState('home_no_pubs'); }
+    else if(pg){
       pg.innerHTML = pubs.map(p=>'<a class="pub rv" href="nashr.html?id='+p.id+'" style="cursor:pointer">'
         + '<div class="cover">'+(p.type?'<span class="badge">'+mlg(p.type)+'</span>':'')
         + (p.cover?imgTag(p.cover):'<div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></svg></div>')+'</div>'
@@ -364,7 +384,8 @@
 
     // EXPERTS
     const eg = document.querySelector('.exp-grid');
-    if(eg && exps.length){
+    if(eg && !exps.length){ eg.innerHTML = emptyState('home_no_experts'); }
+    else if(eg){
       eg.innerHTML = exps.map(e=>'<a class="exp rv" href="expert.html?id='+e.id+'" style="cursor:pointer">'
         + (e.photo?'<div class="ph" style="padding:0">'+imgTag(e.photo)+'</div>':'<div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="9" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg></div>')
         + '<div class="role">'+mlg(e.role)+'</div><h4>'+mlg(e.name)+'</h4><div class="sub">'+mlg(e.sub)+'</div></a>').join('');
@@ -375,7 +396,6 @@
     if(pm){
       let partners=[]; try{ partners = Store.all('partners'); }catch(e){}
       if(partners.length){
-        const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
         // monogramma: nomdan bosh harflar
         const initials = n => { const w=String(n||'?').trim().split(/\s+/); return (w.length>=2 ? (w[0][0]+w[1][0]) : String(n||'?').slice(0,2)).toUpperCase(); };
         // nomdan barqaror rang (harmonik palitra)
@@ -405,7 +425,12 @@
           track.style.setProperty('--pdur', dur.toFixed(1)+'s');
           track.style.setProperty('--pshift', (100/reps).toFixed(4)+'%');
         });
-      } else { pm.closest('section').style.display='none'; }
+      } else {
+        // Hamkor yo'q — butun bo'lim yashiriladi (sarlavhasi bor, ichi bo'sh
+        // lenta ma'nosiz). closest() null qaytarishi mumkin — tekshiramiz.
+        const sec = pm.closest('section');
+        if(sec) sec.style.display='none'; else pm.style.display='none';
+      }
     }
 
     // EVENTS

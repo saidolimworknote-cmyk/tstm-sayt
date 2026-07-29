@@ -308,6 +308,12 @@
   .ev .etag{font-family:var(--mono);font-size:0.6875rem;letter-spacing:.1em;text-transform:uppercase;color:#fff;border:1px solid rgba(255,255,255,.35);padding:7px 15px;white-space:nowrap;}
 
   /* partners — avto-aylanma lenta (marquee): logolar to'xtovsiz suriladi, hover'da to'xtaydi */
+  /* Bo'lim bo'sh bo'lganda ko'rsatiladigan holat. Bu fayl site.css'ni
+     yuklamaydi (mustaqil nusxa), shuning uchun qoida shu yerda takrorlanadi. */
+  .empty-state{grid-column:1/-1;text-align:center;padding:64px 20px;color:var(--muted);}
+  .empty-state svg{width:42px;height:42px;margin:0 auto 14px;opacity:.35;display:block;}
+  .empty-state .t{font-family:var(--serif);font-size:1.125rem;color:var(--ink-2);}
+  @media(max-width:680px){.empty-state{padding:44px 16px;}}
   .pmarquee{position:relative;overflow:hidden;padding:12px 0;
     -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 7%,#000 93%,transparent 100%);
             mask-image:linear-gradient(90deg,transparent 0,#000 7%,#000 93%,transparent 100%);}
@@ -897,11 +903,11 @@
   </div>
 </footer>
 
-<script src="i18n.js?v=51"></script>
+<script src="i18n.js?v=52"></script>
 <script src="admin-store.js?v=47"></script>
 <script src="a11y.js?v=52"></script>
 <script src="search.js?v=46"></script>
-<script src="page-home.js?v=1"></script>
+<script src="page-home.js?v=2"></script>
 </body>
 </html>
 

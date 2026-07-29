@@ -292,7 +292,15 @@
     soon_text:   { uz: "Matn tez orada qo'shiladi.", ru: 'Текст скоро будет добавлен.', en: 'Text coming soon.' },
     none_data:   { uz: "Ma'lumot yo'q", ru: 'Нет данных', en: 'No data' },
     no_news_cat: { uz: "Bu kategoriyada yangilik yo'q", ru: 'В этой категории нет новостей', en: 'No news in this category' },
-    no_pubs:     { uz: 'Nashr topilmadi', ru: 'Публикации не найдены', en: 'No publications found' }
+    no_pubs:     { uz: 'Nashr topilmadi', ru: 'Публикации не найдены', en: 'No publications found' },
+
+    /* ---- bosh sahifa: bo'lim bo'sh bo'lgandagi holat ----
+       Ilgari bu bo'limlarda namuna uchun yozilgan to'qima kontent (soxta
+       yangilik sarlavhalari, o'ylab topilgan ekspert ismlari) turardi va
+       baza bo'sh bo'lsa u haqiqiy ma'lumotdek ko'rinardi. */
+    home_no_news:    { uz: "Hozircha yangilik yo'q", ru: 'Новостей пока нет', en: 'No news yet' },
+    home_no_pubs:    { uz: "Hozircha nashr yo'q", ru: 'Публикаций пока нет', en: 'No publications yet' },
+    home_no_experts: { uz: "Ma'lumot hozircha kiritilmagan", ru: 'Данные пока не добавлены', en: 'No information added yet' }
   };
 
   function t(key, l) {
