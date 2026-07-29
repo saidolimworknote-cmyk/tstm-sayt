@@ -364,7 +364,7 @@
         + '<div class="nlist rv">'
         + rest.map(n=>'<a class="nitem" href="yangilik.html?id='+n.id+'">'
             + (n.cover?'<div class="ph" style="padding:0">'+imgTag(n.cover)+'</div>':'<div class="ph" data-l="foto"></div>')
-            + '<div><div class="d">'+fmtDate(n.date)+(n.category?' · '+mlg(n.category):'')+'</div><h4>'+mlg(n.title)+'</h4></div></a>').join('')
+            + '<div class="nbody"><div class="d">'+fmtDate(n.date)+(n.category?' · '+mlg(n.category):'')+'</div><h4>'+mlg(n.title)+'</h4></div></a>').join('')
         + '</div>';
     }
 
