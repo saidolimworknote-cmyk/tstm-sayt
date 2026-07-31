@@ -53,6 +53,62 @@ Loyihaning texnik xavfsizlik holati: [SECURITY.md](SECURITY.md)
 - [ ] Apache'da `AllowOverride All` yoqilgan, aks holda `.htaccess` umuman
       o'qilmaydi va **barcha himoya qoidalari ishlamaydi**.
 
+## 2b. PHP sozlamalari (php.ini)
+
+- [ ] `post_max_size` va `upload_max_filesize` — **kamida 48M**.
+
+      ⚠️ Bu MUHIM: fayl serverga `base64` ko'rinishida yuboriladi va hajmi ~33%
+      oshadi. Kod 30 MB gacha hujjatga ruxsat beradi, lekin 30 MB fayl so'rov
+      tanasida ~40 MB bo'ladi. `post_max_size = 40M` bo'lsa PHP so'rovni **kod
+      ishga tushishidan oldin** rad etadi va foydalanuvchi tushunarsiz xato
+      ko'radi. 48M zaxira beradi.
+
+- [ ] `memory_limit` — kamida `256M` (o'lchangan sarf 6 MB/so'rov, lekin Word
+      matni joylashtirilgan yirik nashrlar uchun zaxira kerak).
+- [ ] `display_errors = Off` (kodda `error_reporting(0)` bor, lekin server
+      darajasida ham yopilishi kerak).
+- [ ] `max_execution_time` — kamida 60.
+
+## 2c. Tezlik: siqish va kesh
+
+Bu ikki blok `.htaccess` ga qo'shilmasa sayt **ishlaydi, lekin sezilarli sekin**.
+
+- [ ] **gzip siqish yoqilgan** (`mod_deflate`). O'lchangan tejov: CSS/JS/HTML
+      **316 KB → 90 KB (72%)**.
+
+      ```apache
+      <IfModule mod_deflate.c>
+        AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml
+        AddOutputFilterByType DEFLATE application/javascript application/json
+        AddOutputFilterByType DEFLATE image/svg+xml
+      </IfModule>
+      ```
+
+- [ ] **Statik fayllar uchun kesh sarlavhalari** (`mod_expires`).
+
+      Loyihada `?v=` versiyalash sxemasi bor (fayl o'zgarganda raqam oshadi),
+      lekin u faqat brauzer fayllarni **keshlasa** ma'noga ega. Kesh sarlavhasi
+      bo'lmasa takroriy tashrifchi har safar hamma narsani qayta yuklaydi.
+
+      ```apache
+      <IfModule mod_expires.c>
+        ExpiresActive On
+        ExpiresByType text/css              "access plus 1 year"
+        ExpiresByType application/javascript "access plus 1 year"
+        ExpiresByType image/png             "access plus 6 months"
+        ExpiresByType image/jpeg            "access plus 6 months"
+        ExpiresByType image/webp            "access plus 6 months"
+        ExpiresDefault                      "access plus 1 day"
+      </IfModule>
+      ```
+
+      > `1 year` xavfsiz: fayl o'zgarganda `?v=` raqami oshadi va brauzer uni
+      > **yangi manzil** deb biladi. HTML esa keshlanmaydi (`ExpiresDefault`
+      > 1 kun) — shuning uchun yangi versiya raqami darhol yetib boradi.
+
+- [ ] Tekshiruv: `curl -sI -H "Accept-Encoding: gzip" https://saytingiz.uz/site.css`
+      javobida `Content-Encoding: gzip` va `Cache-Control`/`Expires` bo'lsin.
+
 ## 3. HTTPS
 
 - [ ] SSL sertifikat o'rnatilgan (Let's Encrypt bepul).

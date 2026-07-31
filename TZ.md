@@ -156,9 +156,176 @@ Tizim quyidagilar uchun mo'ljallangan:
 - Til tanlash sahifa sarlavhasi, navigatsiya va butun kontentga ta'sir qiladi.
 
 #### 4.3.4. Texnik ta'minotga talablar
-- Server: Apache 2.4+, PHP 8.2+, MariaDB 10.4+ (yoki MySQL mos versiya);
-- Brauzerlar: zamonaviy Chrome, Firefox, Edge, Safari (mobil va desktop);
-- Responsive dizayn: mobil (≥360px), planshet, desktop.
+
+Quyidagi ko'rsatkichlar **taxminiy emas** — ishlab chiqilgan tizimning haqiqiy
+o'lchovlari asosida hisoblangan (o'lchov sanasi: 2026-07-31).
+
+##### 4.3.4.1. Dasturiy ta'minot
+
+| Komponent | Minimal | Tavsiya etiladi | Izoh |
+|-----------|---------|-----------------|------|
+| Operatsion tizim | Linux (Ubuntu 22.04 / Debian 12 / AlmaLinux 9) | Ubuntu 22.04 LTS | Windows Server ham mumkin, lekin `.htaccess` va fayl huquqlari Linux uchun sozlangan |
+| Veb-server | Apache 2.4 | Apache 2.4 + `mod_deflate`, `mod_expires`, `mod_headers`, `mod_rewrite` | `.htaccess` ishlashi uchun `AllowOverride All` shart |
+| PHP | 8.2 | 8.2 yoki 8.3 | Kengaytmalar: `pdo_mysql`, `mbstring`, `json`, `session`, `fileinfo`, `gd` yoki `exif` |
+| Ma'lumotlar bazasi | MariaDB 10.4 / MySQL 8.0 | MariaDB 10.11 LTS | InnoDB, `utf8mb4_unicode_ci` |
+| TLS sertifikati | — | Let's Encrypt (bepul, avto-yangilanish) | Davlat resursi uchun HTTPS majburiy |
+
+**PHP sozlamalari (php.ini) — majburiy qiymatlar:**
+
+| Parametr | Talab | Sabab |
+|----------|-------|-------|
+| `memory_limit` | ≥ 256M | O'lchangan eng yuqori sarf — 6 MB/so'rov, lekin Word matni joylashtirilgan yirik nashrlar uchun zaxira kerak |
+| `post_max_size` | **≥ 48M** | Fayl base64 ko'rinishida yuboriladi va hajmi ~33% oshadi: 30 MB hujjat → ~40 MB so'rov tanasi. 40M chegarasi **yetarli emas** |
+| `upload_max_filesize` | ≥ 48M | Yuqoridagi bilan bir xil |
+| `max_execution_time` | ≥ 60 | Yirik fayl yuklash |
+| `display_errors` | `Off` | Axborot oqishining oldini olish (kodda ham `error_reporting(0)`) |
+| `session.cookie_httponly` | `On` | Sessiya o'g'irlanishiga qarshi |
+
+##### 4.3.4.2. Apparat resurslari
+
+| Resurs | Minimal | **Tavsiya etiladi** | Zaxira bilan |
+|--------|---------|---------------------|--------------|
+| Protsessor | 2 vCPU | **2–4 vCPU** | 4 vCPU |
+| Operativ xotira (RAM) | 2 GB | **4 GB** | 8 GB |
+| Disk (SSD) | 20 GB | **40 GB** | 80 GB |
+| Tarmoq kanali | 10 Mbit/s | **100 Mbit/s** | 100 Mbit/s |
+
+**RAM taqsimoti (4 GB konfiguratsiyasida):**
+
+| Iste'molchi | Hajm | Izoh |
+|-------------|------|------|
+| Operatsion tizim | 300–500 MB | Minimal Linux server |
+| MariaDB | 1–1.5 GB | InnoDB buffer pool ~1 GB (baza kichik, lekin kesh tezlikni oshiradi) |
+| Apache + PHP | 400–800 MB | Har bir ishchi jarayon ~20–25 MB; 20–30 parallel so'rov |
+| Zaxira (kesh, tepalik yuk) | ~1 GB | Trafik ko'tarilishi va zaxira nusxa olish uchun |
+
+> **2 GB nima uchun minimal:** tizim ishlaydi, lekin MariaDB buffer pool'i kichik
+> bo'ladi va bir vaqtda 30+ tashrifchi bo'lganda javob sekinlashadi. Ishlab
+> turgan davlat resursi uchun **4 GB** tavsiya etiladi.
+
+##### 4.3.4.3. Disk hajmi hisob-kitobi
+
+**Hozirgi holat (o'lchangan):**
+
+| Element | Hajm |
+|---------|------|
+| Dastur kodi, uslublar, logotiplar | 1.8 MB |
+| Yuklangan fayllar (`uploads/`, 106 fayl) | 21.4 MB |
+| Ma'lumotlar bazasi (`tstm`, 18 jadval) | 2.3 MB |
+| **Jami** | **~26 MB** |
+
+**Bir kontent birligining o'rtacha "og'irligi" (o'lchangan):**
+
+| Kontent turi | Bazada | Fayllarda | Jami |
+|--------------|--------|-----------|------|
+| Nashr (3 tilda, Word matni bilan) | 188 KB | PDF ~450 KB + muqova ~190 KB | **~830 KB** |
+| Yangilik | 1.4 KB | muqova rasm ~190 KB | **~190 KB** |
+| Tadbir | ~1 KB | rasm ~190 KB | **~190 KB** |
+| Albomdagi bitta surat | — | ~190 KB | **~190 KB** |
+| Interaktiv infografika | ~1 KB | ~5 KB | **~6 KB** |
+
+> Eng ko'p joy **nashrlar** va **fotoalbomlar** egallaydi. Nashrning matni
+> bazada uch tilda saqlanadi (LONGTEXT), shuning uchun bitta nashr bazada
+> ~188 KB joy oladi — bu boshqa kontent turlaridan 100 barobar ko'p.
+
+**O'sish prognozi.** Quyidagi jadval markazning **o'rtacha faolligi** uchun
+hisoblangan: oyiga 6 ta yangilik, 2–3 ta nashr, 2 ta tadbir va 2 ta fotoalbom
+(har birida ~15 surat).
+
+| Muddat | Yangilik | Nashr | Albom surati | `uploads/` | Baza | **Jami** |
+|--------|----------|-------|--------------|-----------|------|----------|
+| Hozir | 6 | 7 | ~90 | 21 MB | 2 MB | **26 MB** |
+| 1 yil | +72 | +30 | +360 | ~125 MB | ~10 MB | **~140 MB** |
+| 3 yil | +216 | +90 | +1080 | ~335 MB | ~25 MB | **~365 MB** |
+| 5 yil | +360 | +150 | +1800 | ~545 MB | ~40 MB | **~590 MB** |
+
+**Disk hajmi to'liq hisobi (5 yillik istiqbol):**
+
+| Element | Hajm |
+|---------|------|
+| Operatsion tizim + Apache + PHP + MariaDB | ~8 GB |
+| Sayt fayllari va yuklangan kontent (5 yil) | ~0.6 GB |
+| Ma'lumotlar bazasi | ~0.05 GB |
+| **Zaxira nusxalar** (kunlik 7 + oylik 12, siqilgan) | ~3–5 GB |
+| Jurnal fayllari (Apache access/error, 1 yil) | ~2–3 GB |
+| Vaqtinchalik fayllar, tizim yangilanishlari zaxirasi | ~5 GB |
+| **Jami** | **~20 GB** |
+
+> **20 GB — minimal, 40 GB — tavsiya etiladi.** Farq zaxira nusxalar chuqurligi
+> va kutilmagan o'sish (masalan yirik videoarxiv yoki skanerlangan hujjatlar
+> joylash) uchun. Video **saytga yuklanmaydi** — YouTube havolasi orqali
+> ko'rsatiladi, shuning uchun disk sarfiga ta'sir qilmaydi.
+
+##### 4.3.4.4. Tarmoq trafigi
+
+**Sahifa og'irligi (o'lchangan):**
+
+| Holat | Siqishsiz | **gzip bilan** |
+|-------|-----------|----------------|
+| Barcha CSS + JS (birinchi tashrif) | 316 KB | **90 KB** (72% tejov) |
+| Bosh sahifa HTML | 23 KB | **5 KB** |
+| Rasmlar (hero + kartalar) | ~600 KB | ~600 KB (allaqachon siqilgan) |
+| **Birinchi tashrif jami** | ~940 KB | **~700 KB** |
+| **Takroriy tashrif** (CSS/JS keshdan) | ~50 KB | ~30 KB |
+
+> ⚠️ **Hozirda `mod_deflate` YOQILMAGAN** — matnli fayllar to'liq hajmda
+> uzatilmoqda. Uni yoqish trafikni **72% ga kamaytiradi** va sahifa ochilish
+> tezligini sezilarli oshiradi. Hostingga chiqarishda birinchi navbatda
+> bajarilishi kerak (qarang: DEPLOY.md).
+
+**Oylik trafik prognozi:**
+
+| Kunlik tashrif | Oylik trafik (gzip bilan) | Oylik trafik (siqishsiz) |
+|----------------|---------------------------|--------------------------|
+| 100 | ~2 GB | ~3 GB |
+| 300 | ~6 GB | ~8,5 GB |
+| 1000 | ~20 GB | ~28 GB |
+| 3000 (tepalik) | ~60 GB | ~85 GB |
+
+Hisobda qidiruv robotlari (Google, Yandex) va RSS/sitemap so'rovlari uchun
+~20% qo'shilgan. **100 Mbit/s kanal** 3000 kunlik tashrifni ham bemalol
+ko'taradi; cheklov odatda kanal emas, oylik trafik kvotasi bo'ladi —
+hosting tarifida **kamida 50 GB/oy** bo'lishi tavsiya etiladi.
+
+##### 4.3.4.5. Klient tomoni (tashrifchi qurilmasi)
+
+| Talab | Qiymat |
+|-------|--------|
+| Brauzerlar | Chrome 90+, Firefox 88+, Edge 90+, Safari 14+ (mobil va desktop) |
+| Ekran kengligi | 360 px dan boshlab (responsive: mobil / planshet / desktop) |
+| JavaScript | **Majburiy** — kontent `page-*.js` orqali render qilinadi |
+| Internet tezligi | 1 Mbit/s da sahifa ~2–3 soniyada ochiladi (gzip bilan) |
+| Maxsus dasturiy ta'minot | **Talab qilinmaydi** — brauzerdan boshqa hech narsa kerak emas |
+
+> Brauzer talablari `backdrop-filter`, `color-mix()` va CSS `aspect-ratio`
+> qo'llanilishi bilan bog'liq. Eskiroq brauzerlarda sayt **ochiladi va o'qiladi**,
+> lekin ayrim vizual effektlar (shaffof panellar, yumshoq soyalar) ko'rinmaydi.
+
+##### 4.3.4.6. Zaxiralash va tiklash
+
+| Element | Chastota | Saqlash muddati | Hajm (siqilgan) |
+|---------|----------|-----------------|-----------------|
+| Ma'lumotlar bazasi (`mysqldump`) | Kunlik | 7 kun + 12 oy | ~5 MB/nusxa |
+| `uploads/` papkasi | Haftalik (inkremental) | 3 oy | ~100–500 MB |
+| Dastur kodi | Har o'zgarishda (git) | Cheksiz | ~2 MB |
+| `config.php` (maxfiy) | Qo'lda, alohida saqlanadi | — | < 1 KB |
+
+Tiklash vaqti (RTO): baza ~2 daqiqa, to'liq tizim ~30 daqiqa.
+
+##### 4.3.4.7. Hosting turini tanlash
+
+| Variant | Mosligi | Izoh |
+|---------|---------|------|
+| **VPS / VDS** (2–4 vCPU, 4 GB RAM, 40 GB SSD) | ✅ **Tavsiya etiladi** | To'liq nazorat, `.htaccess`, PHP sozlamalari va zaxiralashni o'zingiz boshqarasiz |
+| Umumiy hosting (shared) | ⚠️ Shartli | `AllowOverride All`, PHP 8.2, `post_max_size` 48M va MySQL bazasi berilsa ishlaydi |
+| Davlat bulut infratuzilmasi (UzInfocom) | ✅ Mos | Yuqoridagi minimal talablar qanoatlantirilsa |
+| Statik hosting (Netlify, GitHub Pages) | ❌ **Mos emas** | PHP va MySQL yo'q — tizim ishlamaydi |
+
+**Xulosa — buyurtma uchun qisqa spetsifikatsiya:**
+
+> Linux VPS: **2–4 vCPU, 4 GB RAM, 40 GB SSD, 100 Mbit/s, 50 GB/oy trafik**,
+> Apache 2.4 + PHP 8.2 + MariaDB 10.11, TLS sertifikati, kunlik zaxiralash.
+> Bu konfiguratsiya kamida **5 yillik o'sishni** zaxira bilan qoplaydi.
 
 #### 4.3.5. Ma'lumotlar ta'minotiga talablar
 Ma'lumotlar bazasi **`tstm`**, 18 jadval:
