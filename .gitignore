@@ -33,3 +33,4 @@ desktop.ini
 # hujjatlar sayt kontentining bir qismi. Ular bir marta yo'qolib qolgan
 # (loyiha va htdocs orasidagi bir tomonlama sync sababli), shuning uchun
 # git ularni himoya qilib turadi.
+cache_public.json

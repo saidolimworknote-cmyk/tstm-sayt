@@ -20,7 +20,22 @@ $__https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
 session_set_cookie_params([
   'lifetime' => 0, 'path' => '/', 'httponly' => true, 'samesite' => 'Lax', 'secure' => $__https,
 ]);
-session_start();
+
+/* Sessiyani ochish qimmat amal (fayl yaratish + qulflash) va u eng ko'p
+   chaqiriladigan `load` so'rovining asosiy to'sig'i edi.
+
+   Oddiy tashrifchida sessiya cookie'si UMUMAN YO'Q — unga sessiya kerak emas
+   ham: u faqat ommaviy kontentni o'qiydi. Shuning uchun cookie bo'lmasa va
+   so'rov `load` bo'lsa, sessiyani ochmaymiz.
+
+   XAVFSIZLIK: qolgan BARCHA amallar uchun sessiya har doim ochiladi, ya'ni
+   `require_auth()` va `require_csrf()` tekshiruvlari o'zgarishsiz ishlaydi.
+   Cookie bor bo'lsa (admin) — sessiya baribir ochiladi va `load` to'liq
+   ma'lumot qaytaradi. */
+$__has_sess_cookie = isset($_COOKIE[session_name()]);
+$__action_peek = isset($_GET['action']) ? $_GET['action'] : '';
+$__skip_session = ($__action_peek === 'load' && !$__has_sess_cookie);
+if (!$__skip_session) session_start();
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
@@ -29,7 +44,9 @@ header('X-Content-Type-Options: nosniff');
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { exit; }
 
 // ---- CSRF token (sessiya bilan bog'liq) ----
-if (empty($_SESSION['csrf'])) {
+// Sessiya ochilmagan bo'lsa token ham kerak emas — u faqat yozuv amallarida
+// ishlatiladi, ular esa doim sessiya bilan keladi.
+if (!$__skip_session && empty($_SESSION['csrf'])) {
   $_SESSION['csrf'] = bin2hex(random_bytes(32));
 }
 
@@ -164,7 +181,13 @@ switch ($action) {
     // Ommaviy: sayt kontenti. Shaxsiy bo'limlar (murojaatlar, obunachilar,
     // admin foydalanuvchilar) faqat tizimga kirgan admin uchun to'liq qaytadi —
     // qolganlarga bo'sh massiv. Qarang: db.php -> $PRIVATE_COLLS.
-    echo json_encode(db_load_all($pdo, !empty($_SESSION['tstm_admin'])), JSON_UNESCAPED_UNICODE);
+    if (!empty($_SESSION['tstm_admin'])) {
+      // Admin: to'liq ma'lumot, KESHSIZ — tahrirdan keyin darhol yangi holat.
+      echo json_encode(db_load_all($pdo, true), JSON_UNESCAPED_UNICODE);
+    } else {
+      // Ommaviy: tayyor javob keshdan (db.php -> db_load_public_cached).
+      echo db_load_public_cached($pdo);
+    }
     break;
 
   case 'csrf':
@@ -184,6 +207,7 @@ switch ($action) {
     if (!isset($SCHEMA[$coll]) || $item === null) jexit(['ok' => false, 'error' => 'bad_request'], 400);
     try {
       $saved = coll_upsert($pdo, $coll, $item);
+      cache_invalidate(); // commit'dan keyin: parallel so'rov eski holatni keshlab qo'ymasin
       audit($pdo, 'upsert', $coll, isset($saved['id']) ? $saved['id'] : '');
       jexit(['ok' => true, 'item' => $saved]);
     } catch (Exception $e) { jexit(['ok' => false, 'error' => 'db'], 500); }
@@ -199,6 +223,7 @@ switch ($action) {
     if (!isset($SCHEMA[$coll]) || $id === '') jexit(['ok' => false, 'error' => 'bad_request'], 400);
     try {
       coll_delete($pdo, $coll, $id);
+      cache_invalidate(); // commit'dan keyin: parallel so'rov eski holatni keshlab qo'ymasin
       audit($pdo, 'remove', $coll, $id);
       jexit(['ok' => true]);
     } catch (Exception $e) { jexit(['ok' => false, 'error' => 'db'], 500); }
@@ -212,6 +237,7 @@ switch ($action) {
     if ($s === null) jexit(['ok' => false, 'error' => 'bad_request'], 400);
     try {
       settings_save($pdo, $s);
+      cache_invalidate(); // commit'dan keyin: parallel so'rov eski holatni keshlab qo'ymasin
       audit($pdo, 'settings');
       jexit(['ok' => true]);
     } catch (Exception $e) { jexit(['ok' => false, 'error' => 'db'], 500); }
@@ -226,6 +252,7 @@ switch ($action) {
     unset($b['auth']); // client auth e'tiborga olinmaydi
     try {
       db_import($pdo, $b + ['auth' => auth_load($pdo)]);
+      cache_invalidate(); // commit'dan keyin: parallel so'rov eski holatni keshlab qo'ymasin
       audit($pdo, 'save');
       jexit(['ok' => true]);
     } catch (Exception $e) { jexit(['ok' => false, 'error' => 'db'], 500); }
@@ -239,6 +266,7 @@ switch ($action) {
     $seed['auth'] = auth_load($pdo); // parol saqlanadi
     try {
       db_import($pdo, $seed);
+      cache_invalidate(); // commit'dan keyin: parallel so'rov eski holatni keshlab qo'ymasin
       audit($pdo, 'reset');
       jexit(['ok' => true]);
     } catch (Exception $e) { jexit(['ok' => false, 'error' => 'db'], 500); }
@@ -555,6 +583,23 @@ switch ($action) {
     $acts = $pdo->query("SELECT DISTINCT action FROM audit_log ORDER BY action")->fetchAll(PDO::FETCH_COLUMN);
     $total = (int)$pdo->query("SELECT COUNT(*) FROM audit_log")->fetch(PDO::FETCH_COLUMN);
     echo json_encode(['ok' => true, 'rows' => $rows, 'actions' => $acts, 'total' => $total], JSON_UNESCAPED_UNICODE);
+    break;
+  }
+
+  case 'item': {
+    // OMMAVIY: bitta yozuvni TO'LIQ qaytaradi (og'ir maydonlar bilan).
+    // `load` javobida nashr matni qisqartirilgan holda keladi — batafsil sahifa
+    // (nashr.html?id=X) to'liq matnni shu yerdan oladi.
+    // Shaxsiy bo'limlar bu yerdan HECH QACHON berilmaydi (load bilan bir xil qoida).
+    $coll = isset($_GET['coll']) ? preg_replace('/[^a-zA-Z]/', '', (string)$_GET['coll']) : '';
+    $id   = isset($_GET['id']) ? (string)$_GET['id'] : '';
+    if ($coll === '' || $id === '') jexit(['ok' => false, 'error' => 'bad request'], 400);
+    if (in_array($coll, $PRIVATE_COLLS, true) && empty($_SESSION['tstm_admin'])) {
+      jexit(['ok' => false, 'error' => 'unauthorized'], 401);
+    }
+    $item = coll_find($pdo, $coll, $id);
+    if (!$item) jexit(['ok' => false, 'error' => 'not found'], 404);
+    echo json_encode(['ok' => true, 'item' => $item], JSON_UNESCAPED_UNICODE);
     break;
   }
 

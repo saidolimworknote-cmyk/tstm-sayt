@@ -340,6 +340,20 @@
       .then(function (j) { return (j && j.ok) ? j : { ok: false, rows: [], actions: [], total: 0 }; })
       .catch(function () { return { ok: false, error: 'network', rows: [], actions: [], total: 0 }; });
   }
+  // Bitta yozuvni serverdan TO'LIQ olish (og'ir maydonlar bilan).
+  //
+  // NEGA KERAK: ommaviy `load` javobida nashr matni (`desc`) joy tejash uchun
+  // qisqartirilgan holda keladi — aks holda har bir sahifa 1.3 MB yuklardi.
+  // Batafsil sahifa to'liq matnni shu funksiya orqali oladi.
+  // Qaytadi: { ok, item } yoki { ok:false }.
+  function item(coll, id) {
+    if (!API_OK) return Promise.resolve({ ok: false, error: 'no_server' });
+    var qs = '?action=item&coll=' + encodeURIComponent(coll) + '&id=' + encodeURIComponent(id);
+    return fetch(API + qs, { headers: { 'Accept': 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { return (j && j.ok) ? j : { ok: false }; })
+      .catch(function () { return { ok: false, error: 'network' }; });
+  }
   // Diagnostika jurnalini o'qish (faqat admin). O'qish amali — CSRF shart emas.
   // Qaytadi: { ok, rows:[{id,kind,message,source,line,cause,hits,last_at,...}], kinds:[...], open, total }.
   function errorLog(opts) {
@@ -550,6 +564,6 @@
 
   w.Store = {
     uid, ml, all, find, upsert, remove, settings, setSettings,
-    checkLogin, changePassword, login, logout, isAuthed, verifySession, auditLog, errorLog, errorResolve, addMessage, subscribe, uploadImage, uploadPdf, uploadHtml, bumpView, getView, reset, raw: load
+    checkLogin, changePassword, login, logout, isAuthed, verifySession, auditLog, errorLog, errorResolve, item, addMessage, subscribe, uploadImage, uploadPdf, uploadHtml, bumpView, getView, reset, raw: load
   };
 })(window);

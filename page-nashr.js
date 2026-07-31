@@ -22,7 +22,12 @@
     // chop etish uchun: rasmiy sarlavha (idora nomi) + manba/sana footeri
     const printHead = `<div class="print-head"><img src="${Site.safeUrl(Site.brandLogo())}" alt=""><div class="ph-txt"><b>${Site.esc(T('org_name'))}</b><span>${Site.esc(T('org_tagline'))}</span></div></div>`;
     const printFoot = `<div class="print-foot"><span>${Site.esc(T('print_source'))}: ${Site.esc(location.href)}</span><span>${Site.esc(T('print_date'))}: ${Site.fmtDate(new Date().toISOString().slice(0,10))}</span></div>`;
-    const desc = Site.mlGet(p.desc) || '<p class="muted">'+Site.esc(T('soon_text'))+'</p>';
+    // `desc` ommaviy `load` javobida QISQARTIRILGAN holda keladi (HTML'siz, faqat
+    // matn) — to'liq matn 1.3 MB joy olardi va HAR BIR sahifada yuklanardi.
+    // Shuning uchun avval qisqa variantni ko'rsatamiz (sahifa darhol ochiladi),
+    // so'ng to'liq HTML'ni alohida so'rov bilan olib almashtiramiz.
+    // Qarang: db.php -> $HEAVY_FIELDS, api.php -> action=item.
+    let desc = Site.mlGet(p.desc) || '<p class="muted">'+Site.esc(T('soon_text'))+'</p>';
     const phSvg = `<div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></svg></div>`;
     const dlBtn = p.pdf
       ? `<a class="btn dlbtn" href="${Site.safeUrl(p.pdf)}" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:16px;height:16px"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 19h14" stroke-linecap="round" stroke-linejoin="round"/></svg>${T('download_pdf')}</a>`
@@ -88,6 +93,21 @@
           </a>`).join('')}</div>
       </div></section>`:''}`;
     Site.initReveal();
+
+    // To'liq matnni (HTML formatlash bilan) serverdan olib almashtiramiz.
+    // Xato bo'lsa sahifada qisqartirilgan matn qoladi — kontent yo'qolmaydi.
+    if (p.desc && Store.item) {
+      Store.item('publications', id).then(function (res) {
+        if (!res || !res.ok || !res.item) return;
+        var full = Site.mlGet(res.item.desc);
+        if (!full || !String(full).trim()) return;
+        var el = document.querySelector('.prose');
+        if (el) el.innerHTML = full;
+        desc = full;               // chop etishda ham to'liq matn ishlatilsin
+        if (Site.initReveal) Site.initReveal();
+      });
+    }
+
     (function(){
       var row=document.getElementById('actRow'); if(!row) return;
       // Chop etishda rasmiy hujjat kerak — TO'LIQ nom; ulashishda esa ixcham displey nomi.

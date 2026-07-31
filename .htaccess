@@ -56,10 +56,16 @@ Options -Indexes
 
 DirectoryIndex index.php
 
-# Brauzer HTML/JS/CSS'ni eski keshdan ko'rsatib qo'ymasin — har safar yangisini tekshirsin.
-# (Shunda saytdagi o'zgarishlar foydalanuvchiga darhol ko'rinadi, "eski holida" muammosi bo'lmaydi.)
+# HTML va PHP keshlanmaydi — sahifadagi o'zgarish va yangi `?v=` raqami
+# tashrifchiga DARHOL yetib borishi uchun.
+#
+# MUHIM: .js va .css bu ro'yxatda ATAYLAB YO'Q. Ilgari ular ham `no-store` olardi
+# va natijada har bir sahifa ochilishida 316 KB CSS/JS qayta yuklanardi — ya'ni
+# loyihadagi `?v=` versiyalash sxemasi butunlay bekorga ishlardi. Endi ular uzoq
+# keshlanadi (quyidagi mod_expires bloki), bu XAVFSIZ: fayl o'zgarganda HTML'dagi
+# `?v=` raqami oshadi va brauzer uni YANGI manzil deb biladi.
 <IfModule mod_headers.c>
-  <FilesMatch "\.(html|htm|php|js|css)$">
+  <FilesMatch "\.(html|htm|php)$">
     Header set Cache-Control "no-cache, no-store, must-revalidate"
     Header set Pragma "no-cache"
     Header set Expires "0"
@@ -105,3 +111,45 @@ RedirectMatch 404 (?i)/\.(idea|claude|git|vscode|env)(/|$)
 <FilesMatch "^(db|seed|config|config\.sample)\.php$">
   Require all denied
 </FilesMatch>
+
+# ############################################################################
+# TEZLIK — siqish va brauzer keshi
+# ----------------------------------------------------------------------------
+# O'lchangan ta'sir: CSS/JS/HTML 316 KB -> 90 KB (72% tejov).
+# ############################################################################
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml
+  AddOutputFilterByType DEFLATE application/javascript application/json
+  AddOutputFilterByType DEFLATE image/svg+xml
+  # Eski brauzerlarning buzuq siqish amalga oshiruvlari (xavfsizlik uchun standart)
+  BrowserMatch ^Mozilla/4 gzip-only-text/html
+  BrowserMatch ^Mozilla/4\.0[678] no-gzip
+  BrowserMatch \bMSIE\s7 !no-gzip !gzip-only-text/html
+</IfModule>
+
+# Statik fayllar uzoq keshlanadi. Bu XAVFSIZ, chunki loyihada `?v=` versiyalash
+# sxemasi bor: fayl o'zgarganda HTML'dagi raqam oshadi va brauzer uni YANGI
+# manzil deb biladi. HTML esa qisqa muddat keshlanadi — yangi versiya raqami
+# tashrifchiga darhol yetib borishi uchun.
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css               "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType image/png              "access plus 6 months"
+  ExpiresByType image/jpeg             "access plus 6 months"
+  ExpiresByType image/webp             "access plus 6 months"
+  ExpiresByType image/gif              "access plus 6 months"
+  ExpiresByType image/svg+xml          "access plus 6 months"
+  ExpiresByType text/html              "access plus 10 minutes"
+  ExpiresDefault                       "access plus 1 day"
+</IfModule>
+
+# api.php javoblari HECH QACHON keshlanmasligi kerak — kontent o'zgarganda
+# tashrifchi eski ma'lumotni ko'rmasin. (api.php o'zi ham `Cache-Control:
+# no-store` yuboradi; bu qo'shimcha kafolat.)
+<IfModule mod_headers.c>
+  <FilesMatch "\.php$">
+    Header set Cache-Control "no-store, must-revalidate"
+  </FilesMatch>
+</IfModule>

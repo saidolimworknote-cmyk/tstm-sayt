@@ -287,7 +287,54 @@ Hisobda qidiruv robotlari (Google, Yandex) va RSS/sitemap so'rovlari uchun
 ko'taradi; cheklov odatda kanal emas, oylik trafik kvotasi bo'ladi —
 hosting tarifida **kamida 50 GB/oy** bo'lishi tavsiya etiladi.
 
-##### 4.3.4.5. Klient tomoni (tashrifchi qurilmasi)
+##### 4.3.4.5. Bir vaqtda xizmat ko'rsatiladigan foydalanuvchilar soni
+
+O'lchov mahalliy muhitda (Windows/XAMPP, 4 yadro) `ab` (Apache Bench) bilan
+o'tkazilgan. **Haqiqiy Linux serverda ko'rsatkichlar 2–3 barobar yuqori bo'ladi**
+— Windows'dagi Apache MPM sezilarli sekinroq ishlaydi.
+
+**O'lchangan o'tkazuvchanlik:**
+
+| So'rov turi | So'rov/sekund | Javob vaqti (95%) |
+|-------------|---------------|-------------------|
+| Statik fayl (CSS/JS/rasm) | ~2500 | < 10 ms |
+| `api.php?action=load` (optimallashtirilgandan **keyin**) | **~190** | 160 ms (25 parallel) |
+| `api.php?action=load` (optimallashtirishdan **oldin**) | ~65 | 205 ms |
+
+**Bu nechta foydalanuvchi degani.** Tashrifchi sahifani ochib, o'rtacha 30–60
+soniya o'qiydi va shundan keyin keyingi sahifaga o'tadi. Ya'ni bitta faol
+tashrifchi taxminan **1 so'rov / 40 soniya** hosil qiladi.
+
+| Ko'rsatkich | Mahalliy o'lchov | Linux VPS (kutilgan) |
+|-------------|------------------|----------------------|
+| Bir vaqtda saytni **o'qiyotgan** foydalanuvchi | **~7 000** | ~15 000 |
+| Bir soniyada sahifa ochilishi (tepalik) | ~190 | ~400 |
+| Xatosiz ko'targan parallel ulanish | 50 | 100+ |
+
+> Amalda cheklov odatda **tepalik** bo'ladi: masalan rasmiy e'lon chiqqanda yoki
+> ijtimoiy tarmoqdan havola tarqalganda hammasi bir vaqtda kiradi. Yuqoridagi
+> konfiguratsiya (4 GB RAM, 2–4 vCPU) sekundiga ~400 sahifa ochilishini
+> ko'taradi — bu markaz miqyosidagi resurs uchun katta zaxira.
+
+**Nima qilingani (optimallashtirish tarixi).** Dastlab har bir sahifa ochilishida
+`api.php` **1.33 MB** JSON qaytarardi va uni har safar qaytadan yasardi. Uch
+o'zgarish kiritildi:
+
+| Chora | Ta'sir |
+|-------|--------|
+| Og'ir maydonlarni ommaviy javobdan chiqarish (`$HEAVY_FIELDS`) | Javob 1.33 MB → 200 KB (**86%**) |
+| Ommaviy javobni fayl keshiga olish (`cache_public.json`) | So'rov narxi ~43 ms → ~0.1 ms |
+| Oddiy tashrifchi uchun sessiyani ochmaslik | c=10 da 139 → 171 so'rov/sek |
+| gzip siqish + brauzer keshi (`.htaccess`) | Trafik **72%** kamaydi |
+| PHP OPcache yoqildi | Skript har so'rovda qayta kompilyatsiya qilinmaydi |
+
+> **Eng muhimi — kelajakdagi o'sish.** Ilgari javob hajmi kontent bilan chiziqli
+> o'sardi: 150 ta nashrda u ~28 MB bo'lardi va sayt amalda ishlamay qolardi.
+> Endi nashr matni ommaviy javobga umuman tushmaydi (batafsil sahifa uni alohida
+> `action=item` so'rovi bilan oladi), shuning uchun javob hajmi kontent
+> o'sganda ham deyarli o'zgarmaydi.
+
+##### 4.3.4.6. Klient tomoni (tashrifchi qurilmasi)
 
 | Talab | Qiymat |
 |-------|--------|
@@ -301,7 +348,7 @@ hosting tarifida **kamida 50 GB/oy** bo'lishi tavsiya etiladi.
 > qo'llanilishi bilan bog'liq. Eskiroq brauzerlarda sayt **ochiladi va o'qiladi**,
 > lekin ayrim vizual effektlar (shaffof panellar, yumshoq soyalar) ko'rinmaydi.
 
-##### 4.3.4.6. Zaxiralash va tiklash
+##### 4.3.4.7. Zaxiralash va tiklash
 
 | Element | Chastota | Saqlash muddati | Hajm (siqilgan) |
 |---------|----------|-----------------|-----------------|
@@ -312,7 +359,7 @@ hosting tarifida **kamida 50 GB/oy** bo'lishi tavsiya etiladi.
 
 Tiklash vaqti (RTO): baza ~2 daqiqa, to'liq tizim ~30 daqiqa.
 
-##### 4.3.4.7. Hosting turini tanlash
+##### 4.3.4.8. Hosting turini tanlash
 
 | Variant | Mosligi | Izoh |
 |---------|---------|------|

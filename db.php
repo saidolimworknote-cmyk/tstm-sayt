@@ -337,20 +337,38 @@ function coll_load($pdo, $coll) {
   else $order = ' ORDER BY seq DESC'; // eng yangi qo'shilgani birinchi
   $rows = $pdo->query("SELECT * FROM `$t`$order")->fetchAll();
   $out = [];
-  foreach ($rows as $r) {
-    $item = ['id' => $r['id']];
-    foreach ($SCHEMA[$coll]['cols'] as $c) {
-      $col = isset($c['col']) ? $c['col'] : $c['key'];
-      $type = isset($c['type']) ? $c['type'] : 'str';
-      $val = array_key_exists($col, $r) ? $r[$col] : null;
-      $dec = decode_val($type, $val);
-      // json bo'sh bo'lsa (null) — kalitni tushirib qoldiramiz (eski sparse ko'rinish)
-      if ($type === 'json' && $dec === null) continue;
-      $item[$c['key']] = $dec;
-    }
-    $out[] = $item;
-  }
+  foreach ($rows as $r) $out[] = row_to_item($coll, $r);
   return $out;
+}
+
+/* Bazadagi satrni klient kutadigan yozuvga o'giradi.
+   coll_load() va coll_find() ikkalasi ham shu funksiyani ishlatadi — mantiq
+   bitta joyda turishi uchun. */
+function row_to_item($coll, $r) {
+  global $SCHEMA;
+  $item = ['id' => $r['id']];
+  foreach ($SCHEMA[$coll]['cols'] as $c) {
+    $col = isset($c['col']) ? $c['col'] : $c['key'];
+    $type = isset($c['type']) ? $c['type'] : 'str';
+    $val = array_key_exists($col, $r) ? $r[$col] : null;
+    $dec = decode_val($type, $val);
+    // json bo'sh bo'lsa (null) — kalitni tushirib qoldiramiz (eski sparse ko'rinish)
+    if ($type === 'json' && $dec === null) continue;
+    $item[$c['key']] = $dec;
+  }
+  return $item;
+}
+
+/* Bitta yozuvni id bo'yicha TO'LIQ qaytaradi (og'ir maydonlar qisqartirilmaydi).
+   `action=item` endpointi shuni ishlatadi. */
+function coll_find($pdo, $coll, $id) {
+  global $SCHEMA;
+  if (!isset($SCHEMA[$coll])) return null;
+  $t = $SCHEMA[$coll]['table'];
+  $st = $pdo->prepare("SELECT * FROM `$t` WHERE id = :id LIMIT 1");
+  $st->execute([':id' => (string)$id]);
+  $r = $st->fetch();
+  return $r ? row_to_item($coll, $r) : null;
 }
 
 /* -------------------- Bitta yozuvni upsert qilish -------------------- */
@@ -377,6 +395,7 @@ function coll_upsert($pdo, $coll, $item) {
        . "ON DUPLICATE KEY UPDATE " . implode(',', $updates);
   $st = $pdo->prepare($sql);
   $st->execute($params);
+  cache_invalidate(); // kontent o'zgardi — ommaviy javob qaytadan yasalsin
   return $item;
 }
 
@@ -387,6 +406,7 @@ function coll_delete($pdo, $coll, $id) {
   $t = $SCHEMA[$coll]['table'];
   $st = $pdo->prepare("DELETE FROM `$t` WHERE id = :id");
   $st->execute([':id' => (string)$id]);
+  cache_invalidate();
   return true;
 }
 
@@ -411,6 +431,7 @@ function settings_load($pdo) {
 function settings_save($pdo, $obj) {
   $st = $pdo->prepare("INSERT INTO settings (id, data) VALUES (1, :d) ON DUPLICATE KEY UPDATE data=VALUES(data)");
   $st->execute([':d' => json_encode($obj, JSON_UNESCAPED_UNICODE)]);
+  cache_invalidate(); // sozlamalar ommaviy javobda ham bor
 }
 
 /* -------------------- Auth -------------------- */
@@ -432,8 +453,69 @@ function auth_save($pdo, $username, $hash) {
 // foydalanuvchilar) ommaviy chaqiruvda BO'SH qaytadi. Kalitning o'zi qoladi,
 // chunki admin-store.js ensureShape() yo'q kalitni "buzuq" deb hisoblab,
 // serverga qayta yozishga urinadi.
+/* Og'ir maydonlar: ommaviy `load` javobiga TO'LIQ holda tushmaydi.
+   Format: 'kolleksiya' => ['maydon', ...].
+
+   NEGA: nashrning `desc` maydoni Word'dan joylashtirilgan matn bo'lib, uch tilda
+   ~190 KB joy oladi. 7 ta nashrda bu 1.3 MB — va u HAR BIR sahifada, hatto
+   "Aloqa" sahifasida ham yuklanardi. Kontent o'sgani sayin javob chiziqli
+   o'sadi: 150 ta nashrda ~28 MB bo'lardi va sayt amalda ishlamay qolardi.
+
+   To'liq matn faqat bitta joyda kerak — `nashr.html?id=X`. U endi uni alohida
+   `action=item` so'rovi bilan oladi. */
+$HEAVY_FIELDS = ['publications' => ['desc']];
+
+/* Og'ir maydonni qidiruv uchun soddalashtiradi: HTML teglari olib tashlanadi va
+   uzunligi cheklanadi. Bu qidiruvni BUZMAYDI, aksincha yaxshilaydi — ilgari
+   indeksda `<span style=...>` kabi markup ham bor edi va "style" so'zini
+   qidirsangiz matnga aloqasi yo'q natijalar chiqardi. */
+function slim_text($v, $maxPerLang = 6000) {
+  $one = function ($s) use ($maxPerLang) {
+    $t = strip_tags((string)$s);
+    $t = html_entity_decode($t, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    $t = preg_replace('/\s+/u', ' ', $t);
+    $t = trim($t);
+    return mb_substr($t, 0, $maxPerLang);
+  };
+  if (is_array($v)) { $o = []; foreach ($v as $lang => $s) $o[$lang] = $one($s); return $o; }
+  return $one($v);
+}
+
+/* -------------------- Ommaviy javob keshi --------------------
+   `load` javobini yig'ish ~43 ms oladi (baza o'qish + JSON dekodlash +
+   `slim_text`). Bu HAR BIR sahifa ochilishida takrorlanardi va serverning
+   asosiy to'sig'i edi.
+
+   Kontent faqat admin yozganda o'zgaradi, ya'ni javobni bir marta yasab,
+   keyingi so'rovlarga tayyor faylni berish mumkin. Natija: ~43 ms -> ~0.1 ms.
+
+   MUHIM: kesh FAQAT ommaviy (autentifikatsiyasiz) javob uchun. Admin panel
+   to'liq ma'lumot oladi va keshdan O'QIMAYDI — aks holda tahrirdan keyin eski
+   holatni ko'rib qolardi.
+
+   Kesh fayli `.json` kengaytmasi bilan — u `.htaccess` orqali tashqaridan
+   allaqachon 403 qaytaradi. */
+function cache_file() { return __DIR__ . '/cache_public.json'; }
+
+/* Kontent o'zgarganda chaqiriladi — keyingi so'rov javobni qaytadan yasaydi. */
+function cache_invalidate() { @unlink(cache_file()); }
+
+/* Ommaviy javobni keshdan qaytaradi. Kesh yo'q bo'lsa — yasaydi va saqlaydi. */
+function db_load_public_cached($pdo) {
+  $f = cache_file();
+  $hit = @file_get_contents($f);
+  if ($hit !== false && $hit !== '') return $hit;
+  $json = json_encode(db_load_all($pdo, false), JSON_UNESCAPED_UNICODE);
+  // Atomik yozish: yarim yozilgan fayl o'qilib qolmasin (bir vaqtda ikki so'rov).
+  $tmp = $f . '.' . getmypid() . '.tmp';
+  if (@file_put_contents($tmp, $json, LOCK_EX) !== false) {
+    if (!@rename($tmp, $f)) @unlink($tmp);
+  }
+  return $json;
+}
+
 function db_load_all($pdo, $private = false) {
-  global $COLL_ORDER, $PRIVATE_COLLS;
+  global $COLL_ORDER, $PRIVATE_COLLS, $HEAVY_FIELDS;
   $out = [];
   $s = settings_load($pdo);
   if ($s !== null) $out['settings'] = $s;
@@ -443,7 +525,18 @@ function db_load_all($pdo, $private = false) {
   $out['auth'] = ['username' => ($private && $a) ? $a['username'] : ''];
   foreach ($COLL_ORDER as $coll) {
     if (!$private && in_array($coll, $PRIVATE_COLLS, true)) { $out[$coll] = []; continue; }
-    $out[$coll] = coll_load($pdo, $coll);
+    $items = coll_load($pdo, $coll);
+    // Admin panelga TO'LIQ ma'lumot kerak (tahrirlash uchun) — faqat ommaviy
+    // javobda soddalashtiramiz.
+    if (!$private && isset($HEAVY_FIELDS[$coll])) {
+      foreach ($items as &$it) {
+        foreach ($HEAVY_FIELDS[$coll] as $f) {
+          if (isset($it[$f])) $it[$f] = slim_text($it[$f]);
+        }
+      }
+      unset($it);
+    }
+    $out[$coll] = $items;
   }
   return $out;
 }
