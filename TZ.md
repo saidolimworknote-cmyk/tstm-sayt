@@ -105,6 +105,7 @@ Tizim quyidagilar uchun mo'ljallangan:
 | Media | Fotoalbom (2 bosqichli), video, interaktiv infografika | ✅ |
 | Aloqa | Kontakt ma'lumotlari + murojaat formasi + Google xarita | ✅ |
 | Global qidiruv | Barcha kontent bo'yicha, kategoriya filtri, natija ajratish (highlight) | ✅ |
+| **Bildirishnomaga obuna** | Brauzer push-bildirishnomasi. E-pochta so'ralmaydi, shaxsiy ma'lumot saqlanmaydi. Taklif oynasi o'qish boshlangach chiqadi | ✅ (HTTPS talab qiladi) |
 | Ko'p tillilik | UZ/RU/EN almashtirish (navigatsiya, kontent, sahifa sarlavhasi) | ✅ |
 
 #### 4.2.2. Boshqaruv paneli (admin)
@@ -119,6 +120,7 @@ Tizim quyidagilar uchun mo'ljallangan:
 | Murojaatlar | Fuqaro xabarlarini ko'rish, o'qilgan deb belgilash | ✅ |
 | **Audit loglar** | Kim/qachon/nima o'zgartirdi jurnali (filtr bilan, o'qish uchun) | ✅ |
 | **Xatoliklar (diagnostika)** | Sayt va server xatolari — sababi, yechimi, takrorlanish soni; "hal qilindi" belgisi | ✅ |
+| **Bildirishnoma** | Obunachilar soni; bir bosishda barcha obunachilarga so'nggi yangilik haqida xabar | ✅ |
 | Sozlamalar | Sayt nomi, tillar, tema, statistika, parol almashtirish | ✅ |
 
 ### 4.3. Ta'minot turlariga talablar
@@ -375,10 +377,22 @@ Tiklash vaqti (RTO): baza ~2 daqiqa, to'liq tizim ~30 daqiqa.
 > Bu konfiguratsiya kamida **5 yillik o'sishni** zaxira bilan qoplaydi.
 
 #### 4.3.5. Ma'lumotlar ta'minotiga talablar
-Ma'lumotlar bazasi **`tstm`**, 18 jadval:
+> ⚠️ **Push-bildirishnoma HTTPS talab qiladi.** Brauzer standarti bo'yicha
+> Service Worker va Push API faqat xavfsiz ulanishda ishlaydi (`localhost` —
+> ishlab chiqish uchun istisno). Sayt `http://` bilan chiqarilsa obuna oynasi
+> umuman ko'rinmaydi va bo'lim ishlamaydi. `.htaccess` dagi HTTPS bloki
+> yoqilishi shart — qarang: DEPLOY.md, 3-bo'lim.
+
+Ma'lumotlar bazasi **`tstm`**, 20 jadval:
 `news`, `events`, `experts`, `publications`, `hero_slides`, `partners`, `pages`, `media` (kontent);
 `users`, `messages`, `subscribers` (shaxsiy);
-`settings`, `auth`, `views`, `login_attempts`, `msg_throttle`, `audit_log`, `error_log` (tizim).
+`settings`, `auth`, `views`, `login_attempts`, `msg_throttle`, `audit_log`, `error_log`,
+`push_subs`, `push_vapid` (tizim).
+
+> `push_subs` da **shaxsiy ma'lumot yo'q**: `endpoint` — brauzer bergan anonim
+> manzil, `p256dh`/`auth` — shifrlash kalitlari. Ular orqali foydalanuvchini
+> aniqlab bo'lmaydi. Bu e-pochta yig'ishdan farqli o'laroq shaxsiy ma'lumotlarni
+> qayta ishlash majburiyatini umuman keltirib chiqarmaydi.
 Ko'p tilli maydonlar `LONGTEXT` (JSON), filtrlanadigan maydonlar (`status`, `date`, `category`) alohida ustun + indeks.
 
 ---

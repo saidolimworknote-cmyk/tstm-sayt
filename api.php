@@ -135,6 +135,74 @@ function log_error($pdo, $kind, $message, $source = '', $line = 0, $col = 0, $st
   } catch (Exception $e) {}
 }
 
+/* -------------------- Web Push: VAPID JWT va yuborish --------------------
+
+   VAPID — server o'zini push xizmatiga (FCM, Mozilla, WNS) tanitadigan usul:
+   ES256 bilan imzolangan JWT `Authorization` sarlavhasida boradi.
+
+   ES256 imzosi JWT'da 64 baytli R||S shaklida bo'lishi kerak, openssl esa DER
+   qaytaradi — shuning uchun quyida DER'ni ochib R va S ni ajratamiz. */
+function der_to_rs($der) {
+  $o = 0;
+  if (ord($der[$o++]) !== 0x30) return null;         // SEQUENCE
+  if (ord($der[$o]) & 0x80) $o += (ord($der[$o]) & 0x7f) + 1; else $o++;
+  $part = function () use ($der, &$o) {
+    if (ord($der[$o++]) !== 0x02) return null;       // INTEGER
+    $len = ord($der[$o++]);
+    $v = substr($der, $o, $len); $o += $len;
+    $v = ltrim($v, "\x00");                          // yetakchi nol baytlar
+    return str_pad($v, 32, "\x00", STR_PAD_LEFT);    // 32 baytga to'ldiramiz
+  };
+  $r = $part(); $s = $part();
+  return ($r === null || $s === null) ? null : $r . $s;
+}
+
+function vapid_jwt($pem, $audience) {
+  $header  = b64url_encode(json_encode(['typ' => 'JWT', 'alg' => 'ES256']));
+  $payload = b64url_encode(json_encode([
+    'aud' => $audience,
+    'exp' => time() + 12 * 3600,           // standart bo'yicha 24 soatdan oshmasin
+    'sub' => 'mailto:' . cfg('admin_email', 'info@markaz.uz')
+  ], JSON_UNESCAPED_SLASHES));
+  $data = $header . '.' . $payload;
+  $key = openssl_pkey_get_private($pem);
+  if (!$key) return null;
+  if (!openssl_sign($data, $der, $key, OPENSSL_ALGO_SHA256)) return null;
+  $rs = der_to_rs($der);
+  return $rs ? $data . '.' . b64url_encode($rs) : null;
+}
+
+/* Bitta obunaga "turtki" yuboradi (payloadsiz).
+   Qaytadi: 'ok' | 'gone' (obuna eskirgan) | 'fail'. */
+function push_send_one($keys, $endpoint) {
+  $p = parse_url($endpoint);
+  if (empty($p['scheme']) || empty($p['host'])) return 'fail';
+  $aud = $p['scheme'] . '://' . $p['host'];
+  $jwt = vapid_jwt($keys['pem'], $aud);
+  if (!$jwt) return 'fail';
+
+  $ch = curl_init($endpoint);
+  curl_setopt_array($ch, [
+    CURLOPT_POST => true,
+    CURLOPT_POSTFIELDS => '',                 // payload YO'Q — sw.js o'zi oladi
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_TIMEOUT => 10,
+    CURLOPT_HTTPHEADER => [
+      'Authorization: vapid t=' . $jwt . ', k=' . $keys['public'],
+      'TTL: 86400',
+      'Content-Length: 0',
+      'Urgency: normal'
+    ],
+  ]);
+  curl_exec($ch);
+  $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+  curl_close($ch);
+
+  if ($code >= 200 && $code < 300) return 'ok';
+  if ($code === 404 || $code === 410) return 'gone';
+  return 'fail';
+}
+
 function audit($pdo, $action, $coll = '', $id = '') {
   try {
     $st = $pdo->prepare("INSERT INTO audit_log (action, coll, item_id, ip) VALUES (:a,:c,:i,:ip)");
@@ -583,6 +651,99 @@ switch ($action) {
     $acts = $pdo->query("SELECT DISTINCT action FROM audit_log ORDER BY action")->fetchAll(PDO::FETCH_COLUMN);
     $total = (int)$pdo->query("SELECT COUNT(*) FROM audit_log")->fetch(PDO::FETCH_COLUMN);
     echo json_encode(['ok' => true, 'rows' => $rows, 'actions' => $acts, 'total' => $total], JSON_UNESCAPED_UNICODE);
+    break;
+  }
+
+  /* ==================== PUSH-BILDIRISHNOMA ====================
+     E-pochta o'rniga brauzer bildirishnomasi. Shaxsiy ma'lumot saqlanmaydi.
+
+     Xabar PAYLOADSIZ yuboriladi: push xizmatiga bo'sh "turtki" boradi, service
+     worker (sw.js) esa o'zi API'dan so'nggi yangilikni olib bildirishnoma
+     ko'rsatadi. Bu RFC 8291 (aes128gcm + ECDH shifrlash) ni chetlab o'tadi —
+     kutubxonasiz PHP'da uni amalga oshirish juda murakkab bo'lardi.
+     Bizga faqat VAPID JWT (ES256) kerak. */
+
+  case 'push_key': {
+    // OMMAVIY: brauzerga obuna bo'lish uchun ochiq kalit kerak.
+    $k = vapid_keys($pdo);
+    if (!$k) jexit(['ok' => false, 'error' => 'no_keys'], 500);
+    echo json_encode(['ok' => true, 'key' => $k['public']]);
+    break;
+  }
+
+  case 'push_subscribe': {
+    // OMMAVIY: brauzer bergan obunani saqlaymiz.
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') jexit(['ok' => false], 405);
+    $b = body_json();
+    $ep = isset($b['endpoint']) ? (string)$b['endpoint'] : '';
+    // Faqat haqiqiy push xizmati manzillari (https). Ixtiyoriy URL yozib
+    // bo'lmasin — aks holda server begona manzilga so'rov yuboradigan
+    // vositaga aylanadi (SSRF).
+    if ($ep === '' || !preg_match('#^https://[a-z0-9.\-]+\.(mozilla\.com|googleapis\.com|windows\.com|apple\.com|mozaws\.net)/#i', $ep)) {
+      jexit(['ok' => false, 'error' => 'bad_endpoint'], 400);
+    }
+    if (strlen($ep) > 500) jexit(['ok' => false, 'error' => 'too_long'], 400);
+    $lang = isset($b['lang']) ? preg_replace('/[^a-z]/', '', substr((string)$b['lang'], 0, 5)) : 'uz';
+    $ua = isset($_SERVER['HTTP_USER_AGENT']) ? mb_substr((string)$_SERVER['HTTP_USER_AGENT'], 0, 200) : '';
+    $st = $pdo->prepare("INSERT INTO push_subs (endpoint, p256dh, auth, lang, ua)
+                         VALUES (:e,:p,:a,:l,:u)
+                         ON DUPLICATE KEY UPDATE p256dh=VALUES(p256dh), auth=VALUES(auth),
+                                                 lang=VALUES(lang), fails=0");
+    $st->execute([
+      ':e' => $ep,
+      ':p' => isset($b['p256dh']) ? substr((string)$b['p256dh'], 0, 200) : '',
+      ':a' => isset($b['auth']) ? substr((string)$b['auth'], 0, 100) : '',
+      ':l' => $lang ?: 'uz', ':u' => $ua
+    ]);
+    jexit(['ok' => true]);
+    break;
+  }
+
+  case 'push_unsubscribe': {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') jexit(['ok' => false], 405);
+    $b = body_json();
+    $ep = isset($b['endpoint']) ? (string)$b['endpoint'] : '';
+    if ($ep === '') jexit(['ok' => false, 'error' => 'bad_endpoint'], 400);
+    $st = $pdo->prepare("DELETE FROM push_subs WHERE endpoint = :e");
+    $st->execute([':e' => $ep]);
+    jexit(['ok' => true]);
+    break;
+  }
+
+  case 'push_stats': {
+    // FAQAT admin: obunachilar soni (admin panel uchun).
+    require_auth();
+    $n = (int)$pdo->query("SELECT COUNT(*) FROM push_subs")->fetch(PDO::FETCH_COLUMN);
+    $k = vapid_keys($pdo);
+    echo json_encode(['ok' => true, 'count' => $n, 'ready' => (bool)$k]);
+    break;
+  }
+
+  case 'push_send': {
+    // FAQAT admin: barcha obunachilarga "turtki" yuboradi.
+    require_auth(); require_csrf();
+    $k = vapid_keys($pdo);
+    if (!$k) jexit(['ok' => false, 'error' => 'no_keys'], 500);
+    $rows = $pdo->query("SELECT id, endpoint FROM push_subs")->fetchAll();
+    if (!$rows) jexit(['ok' => true, 'sent' => 0, 'gone' => 0, 'failed' => 0]);
+
+    $sent = 0; $gone = 0; $failed = 0;
+    foreach ($rows as $r) {
+      $res = push_send_one($k, $r['endpoint']);
+      if ($res === 'ok') { $sent++; }
+      elseif ($res === 'gone') {
+        // 404/410 — obuna eskirgan (brauzer o'chirilgan yoki ruxsat olingan).
+        $gone++;
+        $d = $pdo->prepare("DELETE FROM push_subs WHERE id = :i"); $d->execute([':i' => $r['id']]);
+      } else {
+        $failed++;
+        $u = $pdo->prepare("UPDATE push_subs SET fails = fails + 1 WHERE id = :i"); $u->execute([':i' => $r['id']]);
+      }
+    }
+    // 5 marta ketma-ket muvaffaqiyatsiz bo'lganlarni tozalaymiz
+    $pdo->exec("DELETE FROM push_subs WHERE fails >= 5");
+    audit($pdo, 'push_send', '', (string)$sent);
+    jexit(['ok' => true, 'sent' => $sent, 'gone' => $gone, 'failed' => $failed]);
     break;
   }
 

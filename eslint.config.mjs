@@ -26,7 +26,19 @@ const browser = {
   getComputedStyle: "readonly", matchMedia: "readonly", screen: "readonly",
   speechSynthesis: "readonly", SpeechSynthesisUtterance: "readonly",
   XMLHttpRequest: "readonly", AbortController: "readonly",
-  btoa: "readonly", atob: "readonly", crypto: "readonly"
+  btoa: "readonly", atob: "readonly", crypto: "readonly",
+  // Push-bildirishnoma oqimi (site-common.js)
+  Notification: "readonly", caches: "readonly", Response: "readonly",
+  Request: "readonly", Headers: "readonly", Uint8Array: "readonly"
+};
+
+// Service worker BOSHQA muhitda ishlaydi: `window` yo'q, o'rniga `self`.
+// Shuning uchun sw.js uchun alohida global'lar ro'yxati.
+const serviceWorker = {
+  self: "readonly", clients: "readonly", caches: "readonly",
+  fetch: "readonly", Response: "readonly", Request: "readonly", Headers: "readonly",
+  console: "readonly", URL: "readonly", location: "readonly",
+  setTimeout: "readonly", clearTimeout: "readonly"
 };
 
 // Sayt fayllari orasida `window` orqali bo'lishiladigan global'lar.
@@ -42,8 +54,18 @@ const projectGlobals = {
 
 export default [
   {
+    // Service worker — sayt skriptlaridan alohida muhit (window emas, self).
+    files: ["sw.js"],
+    languageOptions: { ecmaVersion: 2022, sourceType: "script", globals: serviceWorker },
+    rules: {
+      "no-undef": "error",
+      "no-unused-vars": ["warn", { args: "none", caughtErrors: "all" }],
+      "no-empty": ["warn", { allowEmptyCatch: true }]
+    }
+  },
+  {
     files: ["**/*.js"],
-    ignores: ["uploads/**", "eslint.config.mjs"],
+    ignores: ["uploads/**", "eslint.config.mjs", "sw.js"],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "script",

@@ -381,53 +381,82 @@
     } catch{ return false; }
   }
 
+  /* ---------- Push-bildirishnomaga obuna ----------
+     E-pochta SO'RALMAYDI. Foydalanuvchi bitta tugmani bosadi, brauzer o'z
+     ruxsat oynasini ko'rsatadi va shu bilan tamom. Serverda shaxsiy ma'lumot
+     saqlanmaydi — faqat brauzer bergan anonim manzil.
+
+     Bu oyna brauzerning O'Z ruxsat so'rovidan OLDIN chiqadi ("yumshoq so'rov").
+     Sababi: brauzer ruxsatini foydalanuvchi bir marta rad etsa, uni qayta
+     so'rab bo'lmaydi — u qo'lda sozlamalardan yoqishi kerak bo'ladi. Shuning
+     uchun avval o'zimiz tushuntiramiz va faqat rozi bo'lgandagina brauzerga
+     o'tkazamiz. */
+
+  function pushSupported(){
+    return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+  }
+
+  // VAPID ochiq kaliti base64url matn — PushManager esa Uint8Array kutadi.
+  function b64ToBytes(s){
+    var pad = new Array((4 - s.length % 4) % 4 + 1).join('=');
+    var raw = atob((s + pad).replace(/-/g, '+').replace(/_/g, '/'));
+    var out = new Uint8Array(raw.length);
+    for (var i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+    return out;
+  }
+
   function showSubscribe(){
     if (subSeen()) return;
+    // Brauzer qo'llab-quvvatlamasa (yoki HTTPS yo'q bo'lsa) — bezovta qilmaymiz.
+    if (!pushSupported()) return;
+    // Ruxsat allaqachon berilgan yoki rad etilgan bo'lsa — so'rashning ma'nosi yo'q.
+    if (Notification.permission !== 'default') return;
 
     var lastFocus = document.activeElement;
     var ov = document.createElement('div');
     ov.className = 'sub-ov';
     ov.innerHTML = '<div class="sub-modal" role="dialog" aria-modal="true" aria-labelledby="subTitle" tabindex="-1">'
-      + '<button class="sub-x" type="button" aria-label="'+esc(T('close')||'Yopish')+'">'
+      + '<button class="sub-x" type="button" aria-label="' + esc(T('close') || 'Yopish') + '">'
       +   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/></svg>'
       + '</button>'
       + '<div class="sub-body">'
       +   '<div class="sub-head">'
-      +     '<div class="sub-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div>'
-      +     '<span class="sub-badge">'+esc(T('sub_badge'))+'</span>'
+      +     '<div class="sub-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">'
+      +       '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke-linecap="round" stroke-linejoin="round"/>'
+      +       '<path d="M13.7 21a2 2 0 0 1-3.4 0" stroke-linecap="round"/></svg></div>'
+      +     '<span class="sub-badge">' + esc(T('sub_badge')) + '</span>'
       +   '</div>'
-      +   '<h3 id="subTitle">'+esc(T('sub_title'))+'</h3><p class="sub-lead">'+esc(T('sub_text'))+'</p>'
-      +   '<form class="sub-form" novalidate>'
-      +     '<div class="sub-field">'
-      // Avtoto'ldirish uchun: brauzer taklifni type+name+autocomplete uchligiga
-      // qarab beradi — name bo'lmasa Chrome/Safari taklifni ko'pincha ko'rsatmaydi.
-      // inputmode/autocapitalize/spellcheck — mobilda to'g'ri klaviatura va
-      // birinchi harfning katta bo'lib ketmasligi uchun.
-      +       '<input type="email" name="email" id="subEmail" autocomplete="email" inputmode="email"'
-      +         ' spellcheck="false" autocapitalize="off" autocorrect="off"'
-      +         ' placeholder="'+esc(T('sub_ph'))+'" aria-label="'+esc(T('sub_ph'))+'">'
-      +       '<button type="submit" class="btn"><span class="lbl">'+esc(T('sub_btn'))+'</span><span class="sub-spin" aria-hidden="true"></span></button>'
-      +     '</div>'
-      +     '<div class="sub-alert" role="alert"></div>'
-      +   '</form>'
-      +   '<p class="sub-privacy">'+esc(T('sub_privacy'))+'</p>'
-      +   '<button class="sub-later" type="button">'+esc(T('sub_later'))+'</button>'
+      +   '<h3 id="subTitle">' + esc(T('sub_title')) + '</h3>'
+      +   '<p class="sub-lead">' + esc(T('sub_text')) + '</p>'
+      +   '<ul class="sub-perks">'
+      +     '<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 12.5 9.5 18 20 7" stroke-linecap="round" stroke-linejoin="round"/></svg>' + esc(T('sub_perk_noemail')) + '</li>'
+      +     '<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 12.5 9.5 18 20 7" stroke-linecap="round" stroke-linejoin="round"/></svg>' + esc(T('sub_perk_off')) + '</li>'
+      +   '</ul>'
+      +   '<div class="sub-actions">'
+      +     '<button type="button" class="btn sub-go">'
+      +       '<span class="lbl">' + esc(T('sub_btn')) + '</span><span class="sub-spin" aria-hidden="true"></span>'
+      +     '</button>'
+      +     '<button type="button" class="sub-later">' + esc(T('sub_later')) + '</button>'
+      +   '</div>'
+      +   '<div class="sub-alert" role="alert"></div>'
       + '</div>'
       + '<div class="sub-done" role="status">'
       +   '<div class="sub-done-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12.5 9.5 18 20 7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
-      +   '<h3>'+esc(T('sub_ok'))+'</h3><p>'+esc(T('sub_ok_text'))+'</p>'
+      +   '<h3>' + esc(T('sub_ok')) + '</h3><p>' + esc(T('sub_ok_text')) + '</p>'
+      + '</div>'
+      + '<div class="sub-blocked" role="status">'
+      +   '<div class="sub-done-ic warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
+      +   '<h3>' + esc(T('sub_blocked')) + '</h3><p>' + esc(T('sub_blocked_text')) + '</p>'
       + '</div>'
       + '</div>';
 
     var modal = ov.querySelector('.sub-modal');
-    var form  = ov.querySelector('.sub-form');
-    var input = ov.querySelector('.sub-form input');
-    var btn   = ov.querySelector('.sub-form .btn');
+    var goBtn = ov.querySelector('.sub-go');
     var alertEl = ov.querySelector('.sub-alert');
 
     var closed = false;
-    // dismiss=true — foydalanuvchi ataylab yopdi yoki obuna bo'ldi: boshqa ko'rsatmaymiz.
-    // dismiss=false — xatodan keyin yopildi: 1 kundan so'ng yana taklif qilamiz.
+    // dismiss=true — ataylab yopdi yoki natija chiqdi: boshqa ko'rsatmaymiz.
+    // dismiss=false — texnik xato: 1 kundan so'ng yana taklif qilamiz.
     function close(dismiss){
       if (closed) return; closed = true;
       try {
@@ -443,11 +472,11 @@
       if (e.key === 'Escape') { e.preventDefault(); close(true); return; }
       if (e.key !== 'Tab') return;
       // Fokus modal ichida qolsin (fokus tuzog'i)
-      var f = modal.querySelectorAll('button, input, a[href]');
+      var f = modal.querySelectorAll('button, a[href]');
       var vis = [];
-      for (var i=0;i<f.length;i++) if (f[i].offsetParent !== null && !f[i].disabled) vis.push(f[i]);
+      for (var i = 0; i < f.length; i++) if (f[i].offsetParent !== null && !f[i].disabled) vis.push(f[i]);
       if (!vis.length) return;
-      var first = vis[0], last = vis[vis.length-1];
+      var first = vis[0], last = vis[vis.length - 1];
       if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
       else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     }
@@ -455,16 +484,13 @@
     function showErr(key){
       alertEl.textContent = T(key);
       alertEl.classList.add('show');
-      input.classList.add('err');
-      // Tugma yuborish paytida disabled bo'lgani uchun fokus <body>ga tushib
-      // qoladi — klaviatura bilan ishlatadigan foydalanuvchi yo'qolmasin.
-      try { input.focus(); } catch{}
+      goBtn.disabled = false; goBtn.classList.remove('loading');
+      try { goBtn.focus(); } catch{}
     }
 
     document.body.appendChild(ov);
-    // Fokusni MODALGA beramiz, input'ga emas: bu chaqirilmagan oyna, mobilda
-    // darhol klaviatura ochilib ketmasin. Ekran o'quvchi dialog matnini o'qiydi,
-    // Escape va Tab (fokus tuzog'i) darrov ishlaydi.
+    // Fokus MODALGA beriladi (tugmaga emas): chaqirilmagan oyna bo'lgani uchun
+    // tasodifan Enter bosilsa obuna qilib qo'ymasin. Ekran o'quvchi matnni o'qiydi.
     requestAnimationFrame(function(){
       ov.classList.add('open');
       try { modal.focus(); } catch{}
@@ -474,37 +500,108 @@
     ov.addEventListener('click', function(e){ if (e.target === ov) close(true); });
     ov.querySelector('.sub-x').addEventListener('click', function(){ close(true); });
     ov.querySelector('.sub-later').addEventListener('click', function(){ close(true); });
-    input.addEventListener('input', function(){
-      alertEl.classList.remove('show'); input.classList.remove('err');
-    });
 
-    var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    form.addEventListener('submit', function(e){
-      e.preventDefault();
-      if (btn.disabled) return;                       // ikki marta bosishdan himoya
-      var em = input.value.trim();
-      if (!emailRe.test(em)) { showErr('sub_err_email'); return; }
-
-      btn.disabled = true; btn.classList.add('loading');
-      alertEl.classList.remove('show'); input.classList.remove('err');
-
-      Promise.resolve(Store.subscribe(em, (w.I18N ? w.I18N.lang : 'uz'))).then(function(res){
-        if (res && res.ok) {
+    goBtn.addEventListener('click', function(){
+      if (goBtn.disabled) return;
+      goBtn.disabled = true; goBtn.classList.add('loading');
+      alertEl.classList.remove('show');
+      doSubscribe().then(function(res){
+        if (res === 'ok') {
           modal.classList.add('done');
           try { localStorage.setItem(SUB_SEEN, '1'); } catch{}
-          setTimeout(function(){ close(true); }, 2600);
-          return;
+          setTimeout(function(){ close(true); }, 2800);
+        } else if (res === 'denied') {
+          // Brauzer darajasida bloklandi — qayta so'rab bo'lmaydi, tushuntiramiz.
+          modal.classList.add('blocked');
+          try { localStorage.setItem(SUB_SEEN, '1'); } catch{}
+          setTimeout(function(){ close(true); }, 4500);
+        } else {
+          showErr('sub_err_fail');
         }
-        var err = (res && res.error) || 'failed';
-        showErr(err === 'too_many' ? 'sub_err_many'
-              : err === 'bad_email' ? 'sub_err_email'
-              : 'sub_err_fail');
-      }).catch(function(){
-        showErr('sub_err_fail');
-      }).finally(function(){
-        btn.disabled = false; btn.classList.remove('loading');
-      });
+      }).catch(function(){ showErr('sub_err_fail'); });
     });
+  }
+
+  /* Oynani QACHON ko'rsatish.
+
+     Ilgari u sahifa ochilgandan 2.5 soniya keyin chiqardi — foydalanuvchi hali
+     hech narsa o'qimasdan turib taklif olardi va odatda o'ylamasdan yopardi.
+     Push uchun bu ayniqsa zararli: brauzer ruxsati bir marta rad etilsa,
+     qaytadan so'rab bo'lmaydi.
+
+     Endi taklif foydalanuvchi QIZIQISH BILDIRGANDAN keyin chiqadi:
+       • sahifaning ~40% i aylantirilganda, YOKI
+       • 25 soniya o'qigandan keyin (uzun sahifada skroll kam bo'lishi mumkin).
+     Qaysi biri oldin bo'lsa — o'sha. */
+  function armSubscribePrompt(){
+    if (subSeen() || !pushSupported() || Notification.permission !== 'default') return;
+
+    var fired = false;
+    var timer = null;
+
+    function fire(){
+      if (fired) return; fired = true;
+      window.removeEventListener('scroll', onScroll);
+      if (timer) clearTimeout(timer);
+      showSubscribe();
+    }
+    function onScroll(){
+      var h = document.documentElement;
+      var max = h.scrollHeight - h.clientHeight;
+      if (max <= 0) return;                       // aylantiriladigan joy yo'q
+      if ((h.scrollTop || document.body.scrollTop) / max >= 0.4) fire();
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    timer = setTimeout(fire, 25000);
+  }
+
+  /* Ruxsat so'rash -> service worker -> obuna -> serverga saqlash.
+     Qaytadi: 'ok' | 'denied' | 'fail'. */
+  function doSubscribe(){
+    return Promise.resolve()
+      .then(function(){ return Notification.requestPermission(); })
+      .then(function(perm){
+        if (perm === 'denied') return 'denied';
+        if (perm !== 'granted') return 'fail';   // foydalanuvchi brauzer oynasini yopdi
+        return navigator.serviceWorker.register('sw.js')
+          .then(function(reg){
+            return navigator.serviceWorker.ready.then(function(){ return reg; });
+          })
+          .then(function(reg){
+            // Tilni SW o'qiy oladigan joyga yozamiz — bildirishnoma matni
+            // foydalanuvchi tanlagan tilda chiqsin.
+            try {
+              caches.open('tstm-push').then(function(c){
+                c.put('lang', new Response(lang || 'uz'));
+              });
+            } catch{}
+            return fetch('api.php?action=push_key', { headers: { Accept: 'application/json' } })
+              .then(function(r){ return r.json(); })
+              .then(function(j){
+                if (!j || !j.ok || !j.key) throw new Error('no key');
+                return reg.pushManager.subscribe({
+                  userVisibleOnly: true,               // standart talabi
+                  applicationServerKey: b64ToBytes(j.key)
+                });
+              });
+          })
+          .then(function(sub){
+            var s = sub.toJSON ? sub.toJSON() : {};
+            var k = s.keys || {};
+            return fetch('api.php?action=push_subscribe', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                endpoint: sub.endpoint,
+                p256dh: k.p256dh || '', auth: k.auth || '',
+                lang: lang || 'uz'
+              })
+            });
+          })
+          .then(function(r){ return r.ok ? 'ok' : 'fail'; });
+      })
+      .catch(function(){ return 'fail'; });
   }
 
   // ---------- Chop etish (print) — toza, mustaqil hujjat ----------
@@ -598,7 +695,7 @@
     try { renderFooter(); } catch(e){ console.error('renderFooter:', e); }
     try { if (w.I18N) w.I18N.translate(document); } catch(e){ console.error(e); }
     initReveal();
-    setTimeout(showSubscribe, 2500);
+    armSubscribePrompt();
   }
 
   w.Site = { initPage, renderHeader, renderFooter, mlGet, dispTitle, esc, safeUrl, fmtDate, dayMonth, qs, settings, lang, brandLogo, t: T, ICON, NAV, initReveal, showSubscribe, printDoc };

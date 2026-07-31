@@ -127,6 +127,36 @@ Qisqacha:
 
 ---
 
+## 🔔 Bildirishnomaga obuna
+
+Tashrifchi **e-pochta qoldirmaydi** — bitta tugma bosadi va brauzer o'zi xabar
+beradi. Serverda shaxsiy ma'lumot saqlanmaydi.
+
+**Qanday ishlaydi:**
+
+1. Tashrifchi sahifaning ~40% ini o'qigach (yoki 25 soniyadan keyin) taklif
+   oynasi chiqadi — «Obuna bo'lish» va «Keyinroq».
+2. «Obuna bo'lish» bosilsa brauzerning o'z ruxsat oynasi chiqadi.
+3. Ruxsat berilsa, `sw.js` (Service Worker) ro'yxatdan o'tadi va obuna
+   `push_subs` jadvaliga yoziladi.
+4. Admin panel → **Bildirishnoma** → «Yuborish». Server barcha obunachilarga
+   "turtki" yuboradi, `sw.js` esa **eng so'nggi e'lon qilingan yangilikni**
+   API'dan olib, tashrifchining tilida ko'rsatadi.
+
+> Xabar matni yuborishdan oldin yozilmaydi — u yuborilgan paytda aniqlanadi.
+> Shuning uchun tartib: avval yangilikni «e'lon qilingan» holatida saqlang,
+> keyin yuboring.
+
+**Taklif oynasi nega darhol chiqmaydi:** brauzer ruxsatini foydalanuvchi bir
+marta rad etsa, uni qayta so'rab bo'lmaydi — u qo'lda sozlamalardan yoqishi
+kerak bo'ladi. Shuning uchun avval o'z oynamizda tushuntiramiz va faqat rozi
+bo'lgandagina brauzerga o'tkazamiz.
+
+> ⚠️ **HTTPS majburiy.** Push API xavfsiz ulanishsiz ishlamaydi (`localhost` —
+> ishlab chiqish uchun istisno). `http://` da obuna oynasi umuman ko'rinmaydi.
+
+---
+
 ## 🩺 Diagnostika ("nima xato ketdi?")
 
 Sayt o'zi xatolarni yig'adi va **sababini o'zbek tilida** tushuntiradi — F12 ochish shart emas.

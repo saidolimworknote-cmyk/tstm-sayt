@@ -86,6 +86,14 @@ DirectoryIndex index.php
     Header set X-Robots-Tag "noindex, nofollow, noarchive"
   </FilesMatch>
 
+  # Service worker KESHLANMASIN. U `?v=` versiyasisiz yuklanadi (brauzer uni
+  # o'zi boshqaradi), shuning uchun keshlansa yangi versiya kechikib yetadi va
+  # bildirishnoma mantig'i eskirgan holicha qolaveradi.
+  <FilesMatch "^sw\.js$">
+    Header set Cache-Control "no-cache, must-revalidate"
+    Header unset Expires
+  </FilesMatch>
+
   # Content-Security-Policy — brauzer darajasidagi ikkinchi mudofaa chizig'i.
   # 'unsafe-inline' hozircha zarur: sahifalar ichida <script> bloklari va
   # inline style'lar bor. Shunga qaramay CSP quyidagilarni bloklaydi:
@@ -145,6 +153,9 @@ RedirectMatch 404 (?i)/\.(idea|claude|git|vscode|env)(/|$)
 <IfModule mod_expires.c>
   ExpiresActive On
   ExpiresByType text/css               "access plus 1 year"
+  # Apache .js ni `text/javascript` deb beradi (`application/javascript` emas) —
+  # ikkalasi ham yozilmasa JS fayllar uzoq keshlanmay qoladi.
+  ExpiresByType text/javascript        "access plus 1 year"
   ExpiresByType application/javascript "access plus 1 year"
   ExpiresByType image/png              "access plus 6 months"
   ExpiresByType image/jpeg             "access plus 6 months"

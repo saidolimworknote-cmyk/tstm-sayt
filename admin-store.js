@@ -340,6 +340,27 @@
       .then(function (j) { return (j && j.ok) ? j : { ok: false, rows: [], actions: [], total: 0 }; })
       .catch(function () { return { ok: false, error: 'network', rows: [], actions: [], total: 0 }; });
   }
+  // Push-bildirishnoma: obunachilar soni (faqat admin).
+  function pushStats() {
+    if (!API_OK) return Promise.resolve({ ok: false, count: 0, ready: false });
+    return fetch(API + '?action=push_stats', { headers: { 'Accept': 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { return (j && j.ok) ? j : { ok: false, count: 0, ready: false }; })
+      .catch(function () { return { ok: false, count: 0, ready: false }; });
+  }
+  // Barcha obunachilarga bildirishnoma yuborish (faqat admin, CSRF bilan).
+  // Qaytadi: { ok, sent, gone, failed }.
+  function pushSend() {
+    if (!API_OK) return Promise.resolve({ ok: false, error: 'no_server' });
+    var t = getCsrf();
+    return fetch(API + '?action=push_send', {
+      method: 'POST',
+      headers: { 'X-CSRF-Token': t || '', 'Accept': 'application/json' }
+    })
+      .then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (j) { return (j && j.ok) ? j : { ok: false, error: (j && j.error) || 'failed' }; })
+      .catch(function () { return { ok: false, error: 'network' }; });
+  }
   // Bitta yozuvni serverdan TO'LIQ olish (og'ir maydonlar bilan).
   //
   // NEGA KERAK: ommaviy `load` javobida nashr matni (`desc`) joy tejash uchun
@@ -564,6 +585,6 @@
 
   w.Store = {
     uid, ml, all, find, upsert, remove, settings, setSettings,
-    checkLogin, changePassword, login, logout, isAuthed, verifySession, auditLog, errorLog, errorResolve, item, addMessage, subscribe, uploadImage, uploadPdf, uploadHtml, bumpView, getView, reset, raw: load
+    checkLogin, changePassword, login, logout, isAuthed, verifySession, auditLog, errorLog, errorResolve, item, pushStats, pushSend, addMessage, subscribe, uploadImage, uploadPdf, uploadHtml, bumpView, getView, reset, raw: load
   };
 })(window);

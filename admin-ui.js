@@ -209,7 +209,7 @@
     { group: 'Asosiy', items: [{ key: 'dashboard', label: 'Boshqaruv paneli', icon: 'dashboard', view: 'dashboard' }] },
     { group: 'Kontent', items: ['news', 'events', 'publications', 'pages'] },
     { group: 'Sayt elementlari', items: ['heroSlides', 'experts', 'partners', { key: 'media', label: 'Media kutubxona', icon: 'media', view: 'media' }, { key: 'aboutPage', label: 'Markaz haqida', icon: 'pages', view: 'aboutPage' }] },
-    { group: 'Tizim', items: [{ key: 'messages', label: 'Murojaatlar', icon: 'mail', view: 'messages' }, 'subscribers', 'users', { key: 'audit', label: 'Audit loglar', icon: 'audit', view: 'audit' }, { key: 'errors', label: 'Xatoliklar', icon: 'bug', view: 'errors' }, { key: 'settings', label: 'Sozlamalar', icon: 'settings', view: 'settings' }] }
+    { group: 'Tizim', items: [{ key: 'messages', label: 'Murojaatlar', icon: 'mail', view: 'messages' }, 'subscribers', 'users', { key: 'audit', label: 'Audit loglar', icon: 'audit', view: 'audit' }, { key: 'errors', label: 'Xatoliklar', icon: 'bug', view: 'errors' }, { key: 'push', label: 'Bildirishnoma', icon: 'bell', view: 'push' }, { key: 'settings', label: 'Sozlamalar', icon: 'settings', view: 'settings' }] }
   ];
 
   /* -------------------- State / boot -------------------- */
@@ -458,6 +458,7 @@
     if (state.view === 'messages') return viewMessages(c);
     if (state.view === 'audit') return viewAudit(c);
     if (state.view === 'errors') return viewErrors(c);
+    if (state.view === 'push') return viewPush(c);
     if (state.view === 'aboutPage') return viewAboutPage(c);
     if (state.view === 'settings') return viewSettings(c);
     if (state.coll) {
@@ -1209,6 +1210,93 @@
         Store.errorResolve('all').then(function (r) {
           if (r.ok) { toast('Barcha xatolar hal qilindi deb belgilandi'); viewErrors(c); }
           else { ra.disabled = false; toast('Amal bajarilmadi', 1); }
+        });
+      };
+    });
+  }
+
+  /* ==================== BILDIRISHNOMA (push) ====================
+     Saytga obuna bo'lgan brauzerlarga "turtki" yuboradi. Xabar matni bu yerda
+     yozilmaydi — service worker (sw.js) uni yuborilgan paytda API'dan oladi va
+     ENG SO'NGGI e'lon qilingan yangilikni ko'rsatadi.
+
+     Ya'ni tartib: avval yangilikni "e'lon qilingan" holatida saqlang, keyin shu
+     yerdan yuboring. */
+  function viewPush(c) {
+    setTitle('Bildirishnoma');
+    c.innerHTML = `
+      <div class="page-head"><div><div class="h">Bildirishnoma</div>
+        <div class="d">Obuna bo'lgan tashrifchilarga so'nggi yangilik haqida xabar yuborish</div></div><div class="sp"></div></div>
+      <div class="card"><div class="empty">${ic('bell')}<div class="t">Yuklanmoqda…</div></div></div>`;
+
+    Store.pushStats().then(function (st) {
+      const n = (st && st.count) || 0;
+      const latest = Store.all('news')
+        .filter(x => x.status === 'published')
+        .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))[0];
+
+      c.innerHTML = `
+        <div class="page-head"><div><div class="h">Bildirishnoma</div>
+          <div class="d">Obuna bo'lgan tashrifchilarga so'nggi yangilik haqida xabar yuborish</div></div><div class="sp"></div></div>
+
+        <div class="two-col" style="gap:14px;align-items:start">
+          <div class="card" style="padding:20px">
+            <div class="mono" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Obunachilar</div>
+            <div style="font-size:34px;font-weight:700;color:var(--ink);line-height:1.1;margin:6px 0 4px">${n}</div>
+            <div style="font-size:13px;color:var(--muted)">brauzer obuna bo'lgan</div>
+            ${!st || !st.ready ? `<div style="margin-top:12px;padding:9px 11px;background:var(--panel-2);border-radius:8px;font-size:12.5px;color:var(--muted)">
+              Kalitlar hali yaratilmagan — birinchi obuna bo'lganda avtomatik yaratiladi.</div>` : ''}
+          </div>
+
+          <div class="card" style="padding:20px">
+            <div class="mono" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Nima yuboriladi</div>
+            ${latest ? `
+              <div style="font-weight:600;color:var(--ink);margin:8px 0 4px;line-height:1.35">${esc(mlGet(latest.title))}</div>
+              <div class="mono" style="font-size:12px;color:var(--muted)">${latest.date ? fmtDate(latest.date) : ''}${latest.category ? ' · ' + esc(mlGet(latest.category)) : ''}</div>
+            ` : `<div style="margin-top:8px;color:var(--muted);font-size:13px">E'lon qilingan yangilik yo'q — avval yangilik qo'shing.</div>`}
+            <div style="margin-top:12px;font-size:12.5px;color:var(--muted);line-height:1.5">
+              Matn yuborish paytida aniqlanadi: tashrifchi eng so'nggi e'lon qilingan yangilikni o'z tilida oladi.
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:14px;padding:20px">
+          <div class="form-actions" style="margin:0">
+            <button class="btn primary" id="pushSend" ${(!n || !latest) ? 'disabled' : ''}>${ic('bell')} Bildirishnoma yuborish</button>
+            <div class="sp"></div>
+          </div>
+          <div id="pushRes" style="margin-top:12px"></div>
+          ${!n ? `<div style="margin-top:10px;font-size:13px;color:var(--muted)">Hali obunachi yo'q. Saytga kirib, taklif oynasida «Obuna bo'lish»ni bosib sinab ko'rishingiz mumkin.</div>` : ''}
+          ${n && !latest ? `<div style="margin-top:10px;font-size:13px;color:var(--muted)">Yuborish uchun kamida bitta e'lon qilingan yangilik bo'lishi kerak.</div>` : ''}
+        </div>
+
+        <div class="card" style="margin-top:14px;padding:18px 20px">
+          <div style="font-size:13px;color:var(--ink-2);line-height:1.65">
+            <b style="color:var(--ink)">Eslatma.</b> Bildirishnoma faqat <b>HTTPS</b> orqali ishlaydi
+            (<code>localhost</code> — sinov uchun istisno). Sayt hostingga <code>http://</code> bilan
+            chiqarilsa, obuna oynasi umuman ko'rinmaydi. <code>.htaccess</code> dagi HTTPS bloki
+            yoqilishi shart — qarang: DEPLOY.md.
+          </div>
+        </div>`;
+
+      const btn = $('#pushSend');
+      if (btn) btn.onclick = function () {
+        btn.disabled = true;
+        const res = $('#pushRes');
+        res.innerHTML = `<div style="color:var(--muted);font-size:13px">Yuborilmoqda…</div>`;
+        Store.pushSend().then(function (r) {
+          if (!r || !r.ok) {
+            res.innerHTML = `<div style="color:var(--danger,#9a3b52);font-size:13px">Yuborib bo'lmadi (${esc((r && r.error) || 'xato')})</div>`;
+            btn.disabled = false;
+            return;
+          }
+          res.innerHTML = `<div style="display:flex;gap:16px;flex-wrap:wrap;font-size:13px">
+            <span style="color:#2e7d6b"><b>${r.sent}</b> ta yuborildi</span>
+            ${r.gone ? `<span style="color:var(--muted)"><b>${r.gone}</b> ta eskirgan obuna o'chirildi</span>` : ''}
+            ${r.failed ? `<span style="color:#8a5a2b"><b>${r.failed}</b> ta yetmadi</span>` : ''}
+          </div>`;
+          toast('Bildirishnoma yuborildi: ' + r.sent + ' ta');
+          setTimeout(function () { viewPush(c); }, 1800);
         });
       };
     });

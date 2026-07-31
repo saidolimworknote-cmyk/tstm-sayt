@@ -111,6 +111,11 @@ Bu ikki blok `.htaccess` ga qo'shilmasa sayt **ishlaydi, lekin sezilarli sekin**
 
 ## 3. HTTPS
 
+> ⚠️ **HTTPS bu yerda ixtiyoriy emas.** Push-bildirishnomaga obuna (Service
+> Worker + Push API) brauzer standarti bo'yicha faqat xavfsiz ulanishda
+> ishlaydi. `http://` da obuna oynasi umuman ko'rinmaydi va admin paneldagi
+> «Bildirishnoma» bo'limi foydasiz qoladi.
+
 - [ ] SSL sertifikat o'rnatilgan (Let's Encrypt bepul).
 - [ ] `.htaccess` boshidagi HTTPS bloki yoqilgan (`#` lar olib tashlangan).
 - [ ] HSTS avval `max-age=300` bilan sinalgan, so'ng `31536000` ga ko'tarilgan.

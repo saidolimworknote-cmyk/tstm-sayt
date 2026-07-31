@@ -465,8 +465,22 @@ a:focus-visible,button:focus-visible,[role=button]:focus-visible,input:focus-vis
 .sub-alert{display:none;margin-top:11px;font-size:0.84375rem;line-height:1.5;color:var(--danger,#d64545);}
 .sub-alert.show{display:block;}
 .sub-privacy{color:var(--muted);font-size:0.71875rem;line-height:1.5;margin:14px 0 0;}
-.sub-later{margin-top:14px;background:none;border:0;color:var(--muted);font-size:0.8125rem;cursor:pointer;padding:4px 0;transition:color .15s;}
-.sub-later:hover{color:var(--ink-2);}
+/* Nima olishini aytadigan qisqa ro'yxat. Asosiy savdo nuqtasi — e-pochta
+   so'ralmasligi, shuning uchun u birinchi turadi. */
+.sub-perks{list-style:none;margin:0 0 22px;padding:0;display:flex;flex-direction:column;gap:9px;}
+.sub-perks li{display:flex;align-items:center;gap:10px;font-size:0.875rem;color:var(--ink-2);line-height:1.4;}
+.sub-perks svg{width:15px;height:15px;flex:none;color:var(--accent);}
+/* Amallar ustma-ust: asosiy tugma keng, "keyinroq" past bosim bilan ostida */
+.sub-actions{display:flex;flex-direction:column;align-items:stretch;gap:2px;}
+.sub-actions .btn.sub-go{position:relative;width:100%;border-radius:999px;background:var(--accent);border-color:var(--accent);color:#fff;
+  padding:14px 20px;font-size:0.9375rem;display:inline-flex;align-items:center;justify-content:center;transition:background .16s,border-color .16s,transform .16s;}
+.sub-actions .btn.sub-go:hover:not(:disabled){background:var(--accent-d);border-color:var(--accent-d);transform:translateY(-1px);}
+.sub-actions .btn.sub-go:active:not(:disabled){transform:none;}
+.sub-actions .btn.sub-go:disabled{opacity:.75;cursor:default;}
+.sub-actions .btn.sub-go.loading .lbl{visibility:hidden;}
+.sub-actions .btn.sub-go.loading .sub-spin{display:block;}
+.sub-later{margin-top:10px;background:none;border:0;color:var(--muted);font-size:0.8125rem;cursor:pointer;padding:9px 0;border-radius:999px;transition:color .15s,background .15s;}
+.sub-later:hover{color:var(--ink-2);background:var(--bg-2);}
 /* muvaffaqiyat holati — forma o'rnini butunlay egallaydi */
 .sub-done{display:none;padding:44px 32px 40px;text-align:center;}
 .sub-modal.done .sub-body{display:none;}
@@ -476,6 +490,14 @@ a:focus-visible,button:focus-visible,[role=button]:focus-visible,input:focus-vis
 @keyframes sub-pop{from{transform:scale(.6);opacity:0;}to{transform:none;opacity:1;}}
 .sub-done h3{margin-bottom:8px;}
 .sub-done p{color:var(--ink-2);font-size:0.90625rem;line-height:1.6;margin:0;}
+/* Brauzer bloklagan holat — muvaffaqiyat bilan bir xil tuzilish, boshqa rang.
+   Bu ayblov emas, tushuntirish: qanday qilib qayta yoqish mumkinligini aytadi. */
+.sub-blocked{display:none;padding:44px 32px 40px;text-align:center;}
+.sub-modal.blocked .sub-body{display:none;}
+.sub-modal.blocked .sub-blocked{display:block;}
+.sub-done-ic.warn{background:color-mix(in srgb,var(--warn,#c98a2b) 15%,transparent);color:var(--warn,#c98a2b);}
+.sub-blocked h3{margin-bottom:8px;}
+.sub-blocked p{color:var(--ink-2);font-size:0.875rem;line-height:1.6;margin:0;}
 @media(max-width:480px){
   .sub-body{padding:28px 22px 22px;}
   .sub-field{flex-direction:column;}

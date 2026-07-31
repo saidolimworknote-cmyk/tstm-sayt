@@ -271,8 +271,72 @@ function provision($pdo) {
     INDEX(last_at), INDEX(kind), INDEX(resolved)
   )$tail");
 
+  /* Push-bildirishnoma obunalari (brauzer). E-pochta EMAS — bu yerda shaxsiy
+     ma'lumot saqlanmaydi: `endpoint` brauzer bergan anonim manzil, `p256dh`/`auth`
+     esa shifrlash kalitlari. Kim ekanini aniqlab bo'lmaydi. */
+  $pdo->exec("CREATE TABLE IF NOT EXISTS push_subs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    endpoint VARCHAR(500) NOT NULL,
+    p256dh VARCHAR(200), auth VARCHAR(100),
+    lang VARCHAR(5) DEFAULT 'uz',
+    ua VARCHAR(200),
+    fails INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_ep (endpoint(191)),
+    INDEX(created_at)
+  )$tail");
+
+  /* VAPID kalit jufti — server o'zini push xizmatiga tanitadi.
+     Bir marta yasaladi va shu yerda qoladi (parol xeshi kabi, bazada). */
+  $pdo->exec("CREATE TABLE IF NOT EXISTS push_vapid (
+    id TINYINT PRIMARY KEY,
+    public_key VARCHAR(200) NOT NULL,
+    private_pem TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )$tail");
+
   migrate($pdo);
 }
+
+/* -------------------- Web Push: VAPID kalitlari --------------------
+   Kalitlar bir marta yasaladi va bazada saqlanadi. Ochiq kalit brauzerga
+   beriladi, maxfiy kalit HECH QACHON serverdan chiqmaydi. */
+function vapid_keys($pdo) {
+  $r = $pdo->query("SELECT public_key, private_pem FROM push_vapid WHERE id=1")->fetch();
+  if ($r) return ['public' => $r['public_key'], 'pem' => $r['private_pem']];
+
+  // XAMPP'da openssl.cnf yo'li sozlanmagan bo'lishi mumkin — mavjudini topamiz.
+  $conf = null;
+  foreach (['C:/xampp/apache/conf/openssl.cnf', 'C:/xampp/php/extras/openssl/openssl.cnf',
+            '/etc/ssl/openssl.cnf', '/usr/lib/ssl/openssl.cnf'] as $c) {
+    if (@is_file($c)) { $conf = $c; break; }
+  }
+  $args = ['curve_name' => 'prime256v1', 'private_key_type' => OPENSSL_KEYTYPE_EC];
+  if ($conf) $args['config'] = $conf;
+
+  $key = @openssl_pkey_new($args);
+  if (!$key) return null;
+  $det = openssl_pkey_get_details($key);
+  if (empty($det['ec']['x']) || empty($det['ec']['y'])) return null;
+
+  // Ochiq kalit push standarti talab qilgan siqilmagan (uncompressed) shaklda:
+  // 0x04 || X(32) || Y(32), so'ng base64url.
+  $pub = b64url_encode("\x04" . str_pad($det['ec']['x'], 32, "\0", STR_PAD_LEFT)
+                             . str_pad($det['ec']['y'], 32, "\0", STR_PAD_LEFT));
+  $pem = '';
+  if ($conf) @openssl_pkey_export($key, $pem, null, ['config' => $conf]);
+  else @openssl_pkey_export($key, $pem);
+  if (!$pem) return null;
+
+  $st = $pdo->prepare("INSERT INTO push_vapid (id, public_key, private_pem) VALUES (1,:p,:k)
+                       ON DUPLICATE KEY UPDATE public_key=VALUES(public_key), private_pem=VALUES(private_pem)");
+  $st->execute([':p' => $pub, ':k' => $pem]);
+  return ['public' => $pub, 'pem' => $pem];
+}
+
+/* base64url — push standarti oddiy base64 emas, shu shaklni talab qiladi. */
+function b64url_encode($b) { return rtrim(strtr(base64_encode($b), '+/', '-_'), '='); }
+function b64url_decode($s) { return base64_decode(strtr($s, '-_', '+/') . str_repeat('=', (4 - strlen($s) % 4) % 4)); }
 
 /* -------------------- Migratsiya --------------------
    CREATE TABLE IF NOT EXISTS mavjud jadvalga yangi ustun QO'SHMAYDI.
