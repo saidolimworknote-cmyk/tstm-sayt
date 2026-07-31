@@ -188,7 +188,58 @@ kabi «DevTools himoyasi» **qasddan qo'llanilmagan**. Sabablari:
 > serverda qayd etish. Shu loyihada barcha holat ma'lumotlari (kontent,
 > huquqlar, hisoblagichlar) faqat serverda va MySQL'da saqlanadi.
 
-## 11. Ma'lum cheklovlar
+## 11. robots.txt — bu himoya EMAS
+
+Tez-tez uchraydigan tushunmovchilik: internetdagi maslahatlarda «himoya» sifatida
+quyidagiga o'xshash namuna tarqalgan:
+
+```
+User-agent: *
+Disallow: /admin/
+Disallow: /private-files/
+Disallow: /drafts/
+```
+
+**Bu himoya emas.** `robots.txt` — qidiruv robotlariga *iltimos*, to'siq emas:
+
+| Nima qiladi | Nima QILMAYDI |
+|-------------|---------------|
+| Halol robotlarga (Google, Yandex) "bu yerni indekslama" deydi | Kirishni **to'smaydi** — manzilni brauzerga yozgan har kim ochadi |
+| SEO gigiyenasi: keraksiz sahifalar indeksda chiqmaydi | Yomon niyatli botni **to'xtatmaydi** — u e'tiborsiz qoldiradi |
+
+Bundan tashqari `robots.txt` **har kimga ochiq** (`saytingiz.uz/robots.txt`).
+Maxfiy yo'lni u yerga yozish uni yashirmaydi — aksincha, hujumchiga tayyor
+ro'yxat berib qo'yadi. Buni pentestchilar birinchi navbatda o'qiydi.
+
+### Bu loyihada haqiqiy himoya qanday qurilgan
+
+| Nima himoyalangan | Qanday | Tekshiruv |
+|-------------------|--------|-----------|
+| `config.php`, `db.php`, `seed.php` | `.htaccess` → **403** | `curl -I .../config.php` |
+| `*.json` (kesh, ma'lumot), `*.md`, `*.log`, `*.bak` | `.htaccess` → **403** | `curl -I .../cache_public.json` |
+| Admin amallari (audit, xatoliklar, CRUD) | Sessiya + CSRF → **401/403** | `curl .../api.php?action=audit_log` |
+| Fuqaro murojaatlari, obunachilar, foydalanuvchilar | `$PRIVATE_COLLS` — ommaviy API'da **bo'sh** | 2-bo'limga qarang |
+| `admin.html` qidiruv natijalarida chiqmasligi | `X-Robots-Tag: noindex` (HTTP sarlavhasi) | `curl -I .../admin.html` |
+| `uploads/` ichida kod ishga tushishi | `uploads/.htaccess` — PHP o'chirilgan, CSP sandbox | 6-bo'limga qarang |
+
+> **Nega `X-Robots-Tag` robots.txt dan kuchli:** `robots.txt` faqat sahifani
+> **o'qishni** (crawl) to'xtatadi. Agar boshqa saytda admin sahifasiga havola
+> bo'lsa, Google uni o'qimasdan turib ham manzilni natijalarga qo'shishi mumkin.
+> `noindex` sarlavhasi esa indeksdan butunlay chiqaradi.
+
+### `uploads/` ataylab ochiq
+
+Ilgari `robots.txt` da `Disallow: /uploads/` bor edi. U olib tashlandi: markaz
+nashrlari (PDF/Word) o'sha papkada saqlanadi va ularni to'sish markazning asosiy
+vazifasiga — tadqiqotlarni jamoatchilikka yetkazishga — qarshi ishlardi
+(hujjatlar Google'da topilmay qolardi).
+
+Bu xavfsiz, chunki `uploads/` da **maxfiy ma'lumot saqlanmaydi**: murojaatlar,
+obunachilar va foydalanuvchilar bazada turadi. Agar kelajakda u yerga ichki
+hujjat qo'yish kerak bo'lsa — uni `uploads/` ga **umuman qo'ymaslik** kerak,
+`robots.txt` ga yozish yetarli emas.
+
+## 12. Ma'lum cheklovlar
 
 Halol bo'lish uchun — hozircha bajarilmagan, lekin bilib turilgan narsalar:
 

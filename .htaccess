@@ -76,6 +76,16 @@ DirectoryIndex index.php
   Header set Referrer-Policy "strict-origin-when-cross-origin"
   Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
 
+  # Boshqaruv paneli qidiruv natijalarida CHIQMASIN.
+  #
+  # NEGA robots.txt yetarli emas: u faqat sahifani O'QISHNI (crawl) to'xtatadi.
+  # Agar kimdir admin sahifasiga havola qo'ysa, Google uni o'qimasdan turib ham
+  # manzilni natijalarga qo'shib qo'yishi mumkin. `noindex` sarlavhasi esa
+  # indeksdan butunlay chiqaradi — bu robots.txt dan kuchliroq chora.
+  <FilesMatch "^(admin\.html)$">
+    Header set X-Robots-Tag "noindex, nofollow, noarchive"
+  </FilesMatch>
+
   # Content-Security-Policy — brauzer darajasidagi ikkinchi mudofaa chizig'i.
   # 'unsafe-inline' hozircha zarur: sahifalar ichida <script> bloklari va
   # inline style'lar bor. Shunga qaramay CSP quyidagilarni bloklaydi:

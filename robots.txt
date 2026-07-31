@@ -1,8 +1,41 @@
+# TSTM — qidiruv robotlari uchun ko'rsatma
+#
+# DIQQAT: robots.txt HIMOYA VOSITASI EMAS. U qidiruv robotlariga iltimos,
+# to'siq emas — uni har kim ochib o'qiy oladi va yomon niyatli bot e'tiborsiz
+# qoldiradi. Bu yerga maxfiy yo'lni yozish uni YASHIRMAYDI, aksincha
+# hujumchiga ko'rsatib qo'yadi.
+#
+# Haqiqiy himoya boshqa joyda:
+#   • config.php, db.php, seed.php, *.json, *.md  -> .htaccess orqali 403
+#   • admin API amallari                          -> sessiya + CSRF (401/403)
+#   • admin.html qidiruvda chiqmasligi            -> X-Robots-Tag: noindex
+#   • uploads/ ichida PHP ishlamaydi              -> uploads/.htaccess
+# Batafsil: SECURITY.md
+
 User-agent: *
 Allow: /
+
+# Boshqaruv paneli — indekslash ham, o'qish ham keraksiz.
+# (Asosiy chora .htaccess dagi `X-Robots-Tag: noindex` — quyidagisi qo'shimcha.)
 Disallow: /admin.html
+
+# API — bu sahifa emas, JSON interfeysi. Indekslashdan foyda yo'q.
 Disallow: /api.php
-Disallow: /uploads/
+
+# Eski yo'naltiruvchi sahifa (bosh sahifaga o'tkazadi) — qidiruv indeksida
+# dublikat bo'lmasin.
+Disallow: /qidiruv.html
+
+# uploads/ ATAYLAB ochiq qoldirilgan (ilgari to'silgan edi).
+#
+# Markaz nashrlari (PDF/Word) va rasmlar shu papkada saqlanadi. Ularni to'sish
+# markazning asosiy vazifasiga — tadqiqotlarni jamoatchilikka yetkazishga
+# (TZ 2.1) qarshi ishlaydi: hujjatlar Google'da topilmay qoladi va ilmiy
+# muomalaga kirmaydi.
+#
+# Xavfsiz, chunki uploads/ da maxfiy ma'lumot saqlanmaydi: fuqaro murojaatlari,
+# obunachilar va foydalanuvchilar BAZADA turadi va ommaviy API'da bo'sh
+# qaytadi ($PRIVATE_COLLS).
 
 # Domeningizni qo'ygandan so'ng sitemap manzilini yangilang:
 Sitemap: https://SIZNING-DOMENINGIZ.uz/sitemap.xml
