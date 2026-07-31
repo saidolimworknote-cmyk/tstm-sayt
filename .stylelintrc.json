@@ -1,0 +1,46 @@
+{
+  "//": "Stylelint konfiguratsiyasi — TSTM veb-tizimi.  Ishga tushirish: npx stylelint \"*.css\"",
+
+  "//1": "MUSTAQIL: `extends` ataylab ishlatilmagan. Loyihada package.json/node_modules yo'q va build bosqichi yo'q — konfiguratsiya hech qanday paketga bog'liq bo'lmasligi kerak (eslint.config.mjs ham shu tamoyilda).",
+
+  "//2": "Faqat HAQIQIY XATO ushlaydigan qoidalar yoqilgan: noma'lum xossa, yaroqsiz rang, bo'sh blok, sintaksis xatosi va h.k.",
+
+  "//3": "Format didi ATAYLAB tekshirilmaydi — CSS bu loyihada ixcham yoziladi: bitta selektor = bitta qator (site.css va home.css ~700 qator). Har bir e'lonni alohida qatorga chiqarish faylni 4 barobar uzaytiradi.",
+
+  "//4": "Duplikat selektorlar ham tekshirilmaydi: home.css oxirida ataylab 'POLISH' bo'limi bor, u bazaviy qoidalarni kaskad orqali qayta yozadi (dumaloq burchaklar, hover porlashi).",
+
+  "//5": "Vendor prefikslar (-webkit-backdrop-filter, -webkit-mask-image) Safari/iOS uchun hozir ham ZARUR va har birining yonida prefikssiz varianti bor. Autoprefixer yo'qligi sababli qo'lda yoziladi — OLIB TASHLAMANG.",
+
+  "//6": "Guruhlar: (a) sintaksis xatolari, (b) noma'lum selektor/at-rule, (c) bo'sh yoki ma'nosiz kod, (d) takroriy xossa — fallback bundan mustasno.",
+
+  "rules": {
+    "color-no-invalid-hex": true,
+    "unit-no-unknown": true,
+    "property-no-unknown": true,
+    "declaration-block-no-shorthand-property-overrides": true,
+    "function-calc-no-unspaced-operator": true,
+    "function-linear-gradient-no-nonstandard-direction": true,
+    "string-no-newline": true,
+    "no-invalid-double-slash-comments": true,
+    "no-invalid-position-at-import-rule": true,
+    "no-irregular-whitespace": true,
+    "named-grid-areas-no-invalid": true,
+    "custom-property-no-missing-var-function": true,
+
+    "selector-pseudo-class-no-unknown": true,
+    "selector-pseudo-element-no-unknown": true,
+    "selector-type-no-unknown": [true, { "ignore": ["custom-elements"] }],
+    "media-feature-name-no-unknown": true,
+    "at-rule-no-unknown": true,
+
+    "block-no-empty": true,
+    "comment-no-empty": true,
+    "no-empty-source": true,
+    "no-duplicate-at-import-rules": true,
+    "font-family-no-duplicate-names": true,
+    "keyframe-declaration-no-important": true,
+    "keyframe-block-no-duplicate-selectors": true,
+
+    "declaration-block-no-duplicate-properties": [true, { "ignore": ["consecutive-duplicates-with-different-values"] }]
+  }
+}

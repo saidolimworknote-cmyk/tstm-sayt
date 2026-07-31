@@ -114,10 +114,10 @@
         if (!txt || txt === 'null') return { ok: true, data: null }; // server bor, lekin data yo'q
         return { ok: true, data: JSON.parse(txt) };
       }
-    } catch (e) {}
+    } catch {}
     return { ok: false, data: null };
   }
-  let saveSeq = 0, saveInFlight = false, saveQueueLatest = null;
+  let saveInFlight = false, saveQueueLatest = null;
   function apiSave(db) {
     // Poyga holatini oldini olish: saqlashlarni QAT'IY ketma-ket, navbat bilan yuboramiz.
     // Agar bir nechta saqlash tez-tez chaqirilsa (masalan rasm yuklash + forma saqlash),
@@ -130,7 +130,6 @@
       if (saveQueueLatest === null) return;
       const payload = saveQueueLatest; saveQueueLatest = null;
       saveInFlight = true;
-      const mySeq = ++saveSeq;
       try {
         const x = new XMLHttpRequest();
         x.open('POST', API + '?action=save', true); // async
@@ -139,14 +138,14 @@
         x.onreadystatechange = () => {
           if (x.readyState === 4) {
             if (!(x.status >= 200 && x.status < 300)) {
-              try { window.dispatchEvent(new CustomEvent('tstm-save-failed', { detail: { status: x.status } })); } catch (e) {}
+              try { window.dispatchEvent(new CustomEvent('tstm-save-failed', { detail: { status: x.status } })); } catch {}
             }
             saveInFlight = false;
             sendNext(); // navbatda yana narsa bo'lsa (eng so'nggi holat), endi yuboramiz
           }
         };
         x.send(JSON.stringify(payload));
-      } catch (e) { saveInFlight = false; }
+      } catch { saveInFlight = false; }
     }
   }
 
@@ -159,7 +158,7 @@
       x.open('GET', API + '?action=csrf', false); // sync — faqat admin yozuvidan oldin, kamdan-kam
       x.send(null);
       if (x.status >= 200 && x.status < 300) CSRF = (JSON.parse(x.responseText || '{}').token) || null;
-    } catch (e) {}
+    } catch {}
     return CSRF;
   }
 
@@ -182,13 +181,13 @@
       x.onreadystatechange = () => {
         if (x.readyState === 4) {
           if (!(x.status >= 200 && x.status < 300)) {
-            try { window.dispatchEvent(new CustomEvent('tstm-save-failed', { detail: { status: x.status, action: job.action } })); } catch (e) {}
+            try { window.dispatchEvent(new CustomEvent('tstm-save-failed', { detail: { status: x.status, action: job.action } })); } catch {}
           }
           wBusy = false; pumpWrite();
         }
       };
       x.send(JSON.stringify(job.payload));
-    } catch (e) { wBusy = false; }
+    } catch { wBusy = false; }
   }
 
   // db'da har bir kerakli bo'lim borligini ta'minlaydi (buzuq/eski data.json'ni tuzatadi)
@@ -228,17 +227,12 @@
       const raw = localStorage.getItem(DB_KEY);
       _db = raw ? ensureShape(JSON.parse(raw)) : seed();
       if (_db.__patched) delete _db.__patched;
-    } catch (e) { _db = seed(); }
+    } catch { _db = seed(); }
     return _db;
-  }
-  // to'liq db saqlash (zaxira yo'l — odatda granular yozuv ishlatiladi)
-  function save() {
-    if (API_OK) { apiSave(_db); }
-    backup();
   }
   // localStorage zaxirasi (PHP yo'q rejimida asosiy saqlash)
   function backup() {
-    try { localStorage.setItem(DB_KEY, JSON.stringify(_db)); } catch (e) {}
+    try { localStorage.setItem(DB_KEY, JSON.stringify(_db)); } catch {}
   }
   function reset() {
     if (API_OK) {
@@ -248,7 +242,7 @@
         x.open('POST', API + '?action=reset', false);
         const t = getCsrf(); if (t) x.setRequestHeader('X-CSRF-Token', t);
         x.send(null);
-      } catch (e) {}
+      } catch {}
       _db = null; load();
     } else {
       _db = seed();
@@ -333,11 +327,48 @@
       .then(j => (j && j.ok) ? { ok: true } : { ok: false, error: (j && j.error) || 'failed' })
       .catch(() => ({ ok: false, error: 'network' }));
   }
+  // Audit jurnalini serverdan o'qish (faqat admin). O'qish amali — CSRF shart emas.
+  // Qaytadi: { ok, rows:[{action,coll,item_id,ip,at}], actions:[...], total }.
+  function auditLog(opts) {
+    if (!API_OK) return Promise.resolve({ ok: false, error: 'no_server', rows: [] });
+    opts = opts || {};
+    var qs = '?action=audit_log';
+    if (opts.limit) qs += '&limit=' + encodeURIComponent(opts.limit);
+    if (opts.act) qs += '&act=' + encodeURIComponent(opts.act);
+    return fetch(API + qs, { headers: { 'Accept': 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { return (j && j.ok) ? j : { ok: false, rows: [], actions: [], total: 0 }; })
+      .catch(function () { return { ok: false, error: 'network', rows: [], actions: [], total: 0 }; });
+  }
+  // Diagnostika jurnalini o'qish (faqat admin). O'qish amali — CSRF shart emas.
+  // Qaytadi: { ok, rows:[{id,kind,message,source,line,cause,hits,last_at,...}], kinds:[...], open, total }.
+  function errorLog(opts) {
+    if (!API_OK) return Promise.resolve({ ok: false, error: 'no_server', rows: [], kinds: [], open: 0, total: 0 });
+    opts = opts || {};
+    var qs = '?action=error_log';
+    if (opts.limit) qs += '&limit=' + encodeURIComponent(opts.limit);
+    if (opts.kind) qs += '&kind=' + encodeURIComponent(opts.kind);
+    if (opts.resolved) qs += '&resolved=1';
+    return fetch(API + qs, { headers: { 'Accept': 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { return (j && j.ok) ? j : { ok: false, rows: [], kinds: [], open: 0, total: 0 }; })
+      .catch(function () { return { ok: false, error: 'network', rows: [], kinds: [], open: 0, total: 0 }; });
+  }
+  // Xatoni "hal qilindi" deb belgilash. `id` o'rniga 'all' berilsa — hammasi.
+  function errorResolve(id) {
+    if (!API_OK) return Promise.resolve({ ok: false, error: 'no_server' });
+    var qs = (id === 'all') ? '?action=error_resolve&all=1' : '?action=error_resolve&id=' + encodeURIComponent(id);
+    var t = getCsrf();
+    return fetch(API + qs, { headers: { 'X-CSRF-Token': t || '', 'Accept': 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { return (j && j.ok) ? { ok: true } : { ok: false, error: (j && j.error) || 'failed' }; })
+      .catch(function () { return { ok: false, error: 'network' }; });
+  }
   function login() { sessionStorage.setItem(SESS_KEY, '1'); }
   function logout() {
     sessionStorage.removeItem(SESS_KEY);
     CSRF = null;
-    if (API_OK) { try { const x = new XMLHttpRequest(); x.open('GET', API + '?action=logout', true); x.send(null); } catch(e){} }
+    if (API_OK) { try { const x = new XMLHttpRequest(); x.open('GET', API + '?action=logout', true); x.send(null); } catch{} }
   }
   function isAuthed() { return sessionStorage.getItem(SESS_KEY) === '1'; }
 
@@ -385,11 +416,11 @@
           try {
             const r = JSON.parse(x.responseText || '{}');
             cb(r && r.ok && r.path ? r.path : dataURL);
-          } catch (e) { cb(dataURL); }
+          } catch { cb(dataURL); }
         }
       };
       x.send(JSON.stringify({ data: dataURL }));
-    } catch (e) { cb(dataURL); }
+    } catch { cb(dataURL); }
   }
 
   // ---------- Hujjat yuklash: PDF yoki Word (server fayli) ----------
@@ -410,11 +441,11 @@
           try {
             const r = JSON.parse(x.responseText || '{}');
             if (r && r.ok && r.path) cb(r.path, null); else cb('', (r && r.error) || 'upload_failed');
-          } catch (e) { cb('', 'upload_failed'); }
+          } catch { cb('', 'upload_failed'); }
         }
       };
       x.send(JSON.stringify({ data: dataURL }));
-    } catch (e) { cb('', 'upload_failed'); }
+    } catch { cb('', 'upload_failed'); }
   }
 
   // ---------- Interaktiv infografika HTML faylini yuklash ----------
@@ -431,11 +462,11 @@
       x.onreadystatechange = () => {
         if (x.readyState === 4) {
           try { const r = JSON.parse(x.responseText || '{}'); cb(r && r.ok && r.path ? r.path : ''); }
-          catch (e) { cb(''); }
+          catch { cb(''); }
         }
       };
       x.send(JSON.stringify({ html: html, name: name || '' }));
-    } catch (e) { cb(''); }
+    } catch { cb(''); }
   }
 
   // ---------- Public: foydalanuvchi murojaati (faqat xabar qo'shadi) ----------
@@ -491,34 +522,34 @@
         const x = new XMLHttpRequest();
         x.open('POST', API + '?action=view', true);
         x.setRequestHeader('Content-Type', 'application/json');
-        x.onreadystatechange = function(){ if (x.readyState===4){ try{ var r=JSON.parse(x.responseText||'{}'); cb && cb(r.count||0); }catch(e){ cb && cb(0); } } };
+        x.onreadystatechange = function(){ if (x.readyState===4){ try{ var r=JSON.parse(x.responseText||'{}'); cb && cb(r.count||0); }catch{ cb && cb(0); } } };
         x.send(JSON.stringify({ coll: coll, id: id }));
         return;
-      } catch (e) {}
+      } catch {}
     }
     // fallback: localStorage
     try {
       var k = 'tstm_views'; var v = JSON.parse(localStorage.getItem(k) || '{}');
       var key = coll + ':' + id; v[key] = (v[key] || 0) + 1;
       localStorage.setItem(k, JSON.stringify(v)); cb && cb(v[key]);
-    } catch (e) { cb && cb(0); }
+    } catch { cb && cb(0); }
   }
   function getView(coll, id, cb) {
     if (API_OK) {
       try {
         const x = new XMLHttpRequest();
         x.open('GET', API + '?action=views', true);
-        x.onreadystatechange = function(){ if (x.readyState===4){ try{ var r=JSON.parse(x.responseText||'{}'); cb && cb((r[coll+':'+id])||0); }catch(e){ cb && cb(0); } } };
+        x.onreadystatechange = function(){ if (x.readyState===4){ try{ var r=JSON.parse(x.responseText||'{}'); cb && cb((r[coll+':'+id])||0); }catch{ cb && cb(0); } } };
         x.send(null);
         return;
-      } catch (e) {}
+      } catch {}
     }
     try { var v = JSON.parse(localStorage.getItem('tstm_views') || '{}'); cb && cb(v[coll+':'+id] || 0); }
-    catch (e) { cb && cb(0); }
+    catch { cb && cb(0); }
   }
 
   w.Store = {
     uid, ml, all, find, upsert, remove, settings, setSettings,
-    checkLogin, changePassword, login, logout, isAuthed, verifySession, addMessage, subscribe, uploadImage, uploadPdf, uploadHtml, bumpView, getView, reset, raw: load
+    checkLogin, changePassword, login, logout, isAuthed, verifySession, auditLog, errorLog, errorResolve, addMessage, subscribe, uploadImage, uploadPdf, uploadHtml, bumpView, getView, reset, raw: load
   };
 })(window);

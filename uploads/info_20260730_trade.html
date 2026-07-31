@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>O'zbekiston tashqi savdosi</title>
+<style>
+  :root{--bg:#0a1a2e;--ink:#eaf1f8;--mut:#8fb0cf;--acc:#3d9be0;--line:rgba(255,255,255,.08);--mono:'IBM Plex Mono',ui-monospace,monospace;--serif:Georgia,'Times New Roman',serif;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,Segoe UI,Roboto,Inter,sans-serif;background:radial-gradient(120% 120% at 50% 0,#0d2340,#0a1a2e 60%);color:var(--ink);min-height:100vh;padding:38px 26px 48px;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:960px;margin:0 auto;}
+  .kick{font-family:var(--mono);font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--acc);opacity:.9;}
+  h1{font-family:var(--serif);font-weight:600;font-size:clamp(28px,5vw,44px);line-height:1.1;margin:10px 0 6px;}
+  .sub{color:var(--mut);font-size:15px;max-width:62ch;}
+  .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:30px;align-items:center;margin-top:34px;}
+  @media(max-width:680px){.grid{grid-template-columns:1fr;}}
+  .chart{position:relative;display:flex;align-items:center;justify-content:center;}
+  svg{width:100%;max-width:320px;height:auto;transform:rotate(-90deg);}
+  .seg{fill:none;stroke-width:26;cursor:pointer;transition:stroke-width .2s,opacity .2s;stroke-dasharray:0 1000;transition:stroke-dasharray 1.1s cubic-bezier(.2,.8,.2,1),stroke-width .2s,opacity .2s;}
+  .seg:hover{stroke-width:32;}
+  .center{position:absolute;text-align:center;pointer-events:none;}
+  .center .big{font-family:var(--serif);font-weight:600;font-size:30px;line-height:1;}
+  .center .cap{font-size:11px;color:var(--mut);font-family:var(--mono);letter-spacing:.1em;margin-top:5px;text-transform:uppercase;}
+  .legend{display:flex;flex-direction:column;gap:9px;}
+  .li{display:flex;align-items:center;gap:12px;padding:11px 13px;border:1px solid var(--line);border-radius:12px;cursor:pointer;transition:background .18s,border-color .18s,transform .18s;}
+  .li:hover,.li.on{background:rgba(61,155,224,.1);border-color:rgba(61,155,224,.4);transform:translateX(3px);}
+  .dot{width:13px;height:13px;border-radius:4px;flex:0 0 auto;}
+  .li .nm{font-weight:600;font-size:14px;flex:1;}
+  .li .pc{font-family:var(--mono);font-size:13.5px;color:var(--acc);}
+  .foot{margin-top:38px;padding-top:18px;border-top:1px solid var(--line);color:var(--mut);font-size:12px;font-family:var(--mono);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+  .foot b{color:var(--ink);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kick">Interaktiv infografika · TSTM</div>
+  <h1>O'zbekiston tashqi savdosi</h1>
+  <p class="sub">Asosiy savdo hamkorlari ulushi bo'yicha (namoyish uchun taxminiy taqsimot). Segment yoki qatorga bosing.</p>
+
+  <div class="grid">
+    <div class="chart">
+      <svg viewBox="0 0 120 120" id="donut"></svg>
+      <div class="center"><div class="big" id="cBig">100%</div><div class="cap" id="cCap">Jami savdo</div></div>
+    </div>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <div class="foot"><span>Manba: <b>ochiq savdo statistikasi (namoyish)</b></span><span>© TSTM · 2026</span></div>
+</div>
+<script>
+  var data=[
+    {nm:'Xitoy',       pc:22, c:'#e05b5b'},
+    {nm:'Rossiya',     pc:18, c:'#3d9be0'},
+    {nm:'Qozog‘iston', pc:12, c:'#2e9e83'},
+    {nm:'Turkiya',     pc:9,  c:'#c98a3a'},
+    {nm:'Yevropa Ittifoqi', pc:14, c:'#8a6fd6'},
+    {nm:'Boshqalar',   pc:25, c:'#5a6b7d'}
+  ];
+  var R=45, C=2*Math.PI*R, ns='http://www.w3.org/2000/svg';
+  var svg=document.getElementById('donut'), legend=document.getElementById('legend');
+  var cBig=document.getElementById('cBig'), cCap=document.getElementById('cCap');
+  var offset=0, segs=[];
+  data.forEach(function(d,i){
+    var len=C*d.pc/100;
+    var s=document.createElementNS(ns,'circle');
+    s.setAttribute('class','seg'); s.setAttribute('cx','60'); s.setAttribute('cy','60'); s.setAttribute('r',R);
+    s.setAttribute('stroke',d.c); s.setAttribute('stroke-dashoffset', -offset);
+    svg.appendChild(s); segs.push({el:s,len:len,d:d});
+    offset+=len;
+    // legend
+    var li=document.createElement('div'); li.className='li';
+    li.innerHTML='<span class="dot" style="background:'+d.c+'"></span><span class="nm">'+d.nm+'</span><span class="pc">'+d.pc+'%</span>';
+    legend.appendChild(li);
+    function hi(on){ cBig.textContent=on?d.pc+'%':'100%'; cCap.textContent=on?d.nm:'Jami savdo';
+      segs.forEach(function(g){ g.el.style.opacity = on? (g.d===d?1:.28):1; }); li.classList.toggle('on',on); }
+    li.onmouseenter=function(){hi(true);}; li.onmouseleave=function(){hi(false);};
+    s.addEventListener('mouseenter',function(){hi(true);}); s.addEventListener('mouseleave',function(){hi(false);});
+  });
+  function draw(){ segs.forEach(function(g,i){ setTimeout(function(){ g.el.style.strokeDasharray=g.len+' '+(C-g.len); },120+i*110); }); }
+  if('IntersectionObserver' in window){ var io=new IntersectionObserver(function(e){ if(e[0].isIntersecting){draw();io.disconnect();} },{threshold:.25}); io.observe(svg); } else draw();
+</script>
+</body>
+</html>

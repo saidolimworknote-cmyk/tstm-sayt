@@ -18,7 +18,6 @@
   };
   const mlGet = (v) => (v && typeof v === 'object') ? (v.uz || v.ru || v.en || '') : (v || '');
   const fmtDate = (d) => { if (!d) return '—'; const [y, m, day] = d.split('-'); return day + '.' + m + '.' + y; };
-  const stripTags = (h) => (h || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 
   // Rasmni canvas orqali kichraytirib (JPEG) dataURL qaytaradi — data.json shishib ketmasligi uchun
   function resizeImage(file, maxDim, cb) {
@@ -33,7 +32,7 @@
         const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
         cv.getContext('2d').drawImage(img, 0, 0, w, h);
         let out;
-        try { out = cv.toDataURL('image/jpeg', 0.82); } catch (e) { out = rd.result; }
+        try { out = cv.toDataURL('image/jpeg', 0.82); } catch { out = rd.result; }
         // PNG shaffoflik kerak bo'lsa (logo) — asl saqlanadi
         cb(out || rd.result);
       };
@@ -79,7 +78,9 @@
     undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10H9"/>', redo: '<path d="m15 14 5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h6"/>',
     clearFormat: '<path d="M6 5h11M9 5l-3 14M13 12l6 6M19 12l-6 6"/>',
     views: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
-    draft: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>'
+    draft: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+    audit: '<path d="M12 3 4 6v6c0 5 3.5 7.5 8 9 4.5-1.5 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/>',
+    bug: '<path d="M12 20a6 6 0 0 0 6-6v-3a6 6 0 0 0-12 0v3a6 6 0 0 0 6 6Z"/><path d="M9 7a3 3 0 0 1 6 0"/><path d="M3 13h3M18 13h3M4.5 7.5 7 9M19.5 7.5 17 9M4.5 18.5 7 17M19.5 18.5 17 17"/>'
   };
   const ic = (n, sw) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw || 1.7}" stroke-linecap="round" stroke-linejoin="round">${ICON[n] || ''}</svg>`;
 
@@ -208,7 +209,7 @@
     { group: 'Asosiy', items: [{ key: 'dashboard', label: 'Boshqaruv paneli', icon: 'dashboard', view: 'dashboard' }] },
     { group: 'Kontent', items: ['news', 'events', 'publications', 'pages'] },
     { group: 'Sayt elementlari', items: ['heroSlides', 'experts', 'partners', { key: 'media', label: 'Media kutubxona', icon: 'media', view: 'media' }, { key: 'aboutPage', label: 'Markaz haqida', icon: 'pages', view: 'aboutPage' }] },
-    { group: 'Tizim', items: [{ key: 'messages', label: 'Murojaatlar', icon: 'mail', view: 'messages' }, 'subscribers', 'users', { key: 'settings', label: 'Sozlamalar', icon: 'settings', view: 'settings' }] }
+    { group: 'Tizim', items: [{ key: 'messages', label: 'Murojaatlar', icon: 'mail', view: 'messages' }, 'subscribers', 'users', { key: 'audit', label: 'Audit loglar', icon: 'audit', view: 'audit' }, { key: 'errors', label: 'Xatoliklar', icon: 'bug', view: 'errors' }, { key: 'settings', label: 'Sozlamalar', icon: 'settings', view: 'settings' }] }
   ];
 
   /* -------------------- State / boot -------------------- */
@@ -300,12 +301,12 @@
   function showApp() {
     $('#login').classList.remove('show');
     $('#app').classList.add('show');
-    const a = Store.settings(); const name = Store.raw().auth.username;
+    const name = Store.raw().auth.username;
     $('#userChip .un').textContent = 'Administrator';
     $('#userChip .ur').textContent = name;
     $('#userChip .avatar').textContent = 'A';
     renderSidebar();
-    if (!location.hash) { try { history.replaceState(null, '', '#/dashboard'); } catch (e) {} }
+    if (!location.hash) { try { history.replaceState(null, '', '#/dashboard'); } catch {} }
     route();
     // Kirganda majburiy bildirishnomalar
     const nlist = updateNotifBadge();
@@ -331,7 +332,7 @@
     });
     $('#sbNav').innerHTML = h;
     $$('#sbNav .sb-item').forEach(el => el.addEventListener('click', () => {
-      const v = el.dataset.view, coll = el.dataset.coll;
+      const coll = el.dataset.coll;
       location.hash = coll ? `#/${coll}` : `#/${el.dataset.key}`;
       $('#sidebar').classList.remove('open');
     }));
@@ -455,6 +456,8 @@
     if (state.view === 'dashboard') return viewDashboard(c);
     if (state.view === 'media') return viewMedia(c);
     if (state.view === 'messages') return viewMessages(c);
+    if (state.view === 'audit') return viewAudit(c);
+    if (state.view === 'errors') return viewErrors(c);
     if (state.view === 'aboutPage') return viewAboutPage(c);
     if (state.view === 'settings') return viewSettings(c);
     if (state.coll) {
@@ -464,25 +467,24 @@
     c.innerHTML = '';
   }
 
-  function setTitle(t) { try { document.title = 'TSTM — ' + t; } catch (e) {} const el = $('#pageTitle'); if (el) el.textContent = t; }
+  function setTitle(t) { try { document.title = 'TSTM — ' + t; } catch {} const el = $('#pageTitle'); if (el) el.textContent = t; }
 
   /* ==================== DASHBOARD (statistika paneli) ==================== */
   function fetchViews(cb) {
     try {
       const x = new XMLHttpRequest();
       x.open('GET', 'api.php?action=views', true);
-      x.onreadystatechange = function () { if (x.readyState === 4) { try { cb(JSON.parse(x.responseText || '{}') || {}); } catch (e) { cb({}); } } };
+      x.onreadystatechange = function () { if (x.readyState === 4) { try { cb(JSON.parse(x.responseText || '{}') || {}); } catch { cb({}); } } };
       x.send(null);
-    } catch (e) { cb({}); }
+    } catch { cb({}); }
   }
   function viewDashboard(c) {
     setTitle('Boshqaruv paneli');
     const n = Store.all('news'), ev = Store.all('events'), ex = Store.all('experts'), pb = Store.all('publications'),
-      pg = Store.all('pages'), pt = Store.all('partners'), msgs = Store.all('messages'), md = Store.all('media');
+      pg = Store.all('pages'), pt = Store.all('partners'), msgs = Store.all('messages');
     const today = new Date().toISOString().slice(0, 10);
     const upcoming = ev.filter(e => e.date >= today);
     const unread = msgs.filter(m => !m.read).length;
-    const drafts = [].concat(n, pb, pg, ev).filter(x => x.status === 'draft').length;
     const cards = [
       { ic: 'news', v: n.length, l: 'Yangiliklar', tr: n.filter(x => x.status === 'published').length + ' ta nashr etilgan' },
       { ic: 'events', v: upcoming.length, l: 'Kelgusi tadbirlar', tr: ev.length + ' ta jami' },
@@ -635,7 +637,7 @@
     const side = cfg.fields.filter(f => f.side);
 
     const langBar = hasML ? `<div class="langtabs" id="langTabs">
-      <button type="button" data-l="uz" class="on">UZ</button><button type="button" data-l="ru">RU</button><button type="button" data-l="en">EN</button></div><button type="button" class="btn sm ghost" id="autoTr" title="Faol tildan boshqa 2 tilga avtomatik tarjima qiladi" style="margin-left:10px">⇄ Avto-tarjima</button>` : '';
+      <button type="button" data-l="uz" class="on">UZ</button><button type="button" data-l="ru">RU</button><button type="button" data-l="en">EN</button></div><button type="button" class="btn sm ghost" id="autoTr" title="Bir tilni to'ldiring — bir bosishda qolgan 2 tilga avtomatik tarjima qiladi (manba avtomatik aniqlanadi)" style="margin-left:10px">⇄ Avto-tarjima</button>` : '';
 
     c.innerHTML = `
       <div class="page-head">
@@ -684,7 +686,7 @@
     for (let i = 0; i < parts.length; i++) {
       const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=' + sl + '&tl=' + tl + '&dt=t&q=' + encodeURIComponent(parts[i]);
       try { const r = await fetch(url); const j = await r.json(); out += (j && j[0]) ? j[0].map(x => x[0]).join('') : parts[i]; }
-      catch (e) { out += parts[i]; }
+      catch { out += parts[i]; }
     }
     return out;
   }
@@ -696,36 +698,47 @@
     for (let i = 0; i < nodes.length; i++) { nodes[i].nodeValue = await gtranslate(nodes[i].nodeValue, sl, tl); }
     return tmp.innerHTML;
   }
+  // Butun formani uch tilga tarjima qiladi — MANBA AVTOMATIK aniqlanadi.
+  // Har maydon uchun matn bor birinchi til (ustuvorlik: faol til -> uz -> ru -> en)
+  // manba bo'ladi, qolgan 2 til yoziladi. Ya'ni qaysi tabда turishingizdan qat'i
+  // nazar, bir bosishда to'ldirilgan tildan boshqalarga o'giradi.
   async function autoTranslateForm(btn) {
-    const srcBtn = $('#langTabs button.on');
-    const src = srcBtn ? srcBtn.dataset.l : 'uz';
-    const targets = ['uz', 'ru', 'en'].filter(l => l !== src);
+    const activeBtn = $('#langTabs button.on');
+    const active = activeBtn ? activeBtn.dataset.l : 'uz';
+    const LANGS = ['uz', 'ru', 'en'];
+    const order = [active, ...LANGS.filter(l => l !== active)];
     const fields = $$('#entForm .field[data-ml]');
     if (!fields.length) return;
+    const getVal = el => el ? (el.classList.contains('editor-area') ? el.innerHTML : el.value) : '';
+    const setVal = (el, v) => { if (!el) return; if (el.classList.contains('editor-area')) el.innerHTML = v; else el.value = v; };
     const orig = btn.innerHTML; btn.disabled = true; btn.innerHTML = 'Tarjima qilinmoqda…';
+    let filled = 0;
     try {
       for (const field of fields) {
-        const srcEl = field.querySelector('.lang-pane[data-lang="' + src + '"] [data-in]');
-        if (!srcEl) continue;
-        const isRich = srcEl.classList.contains('editor-area');
-        const srcVal = isRich ? srcEl.innerHTML : srcEl.value;
-        if (!srcVal || !String(srcVal).trim()) continue;
-        for (const tl of targets) {
-          const dEl = field.querySelector('.lang-pane[data-lang="' + tl + '"] [data-in]');
-          if (!dEl) continue;
-          const tr = isRich ? await translateHTML(srcVal, src, tl) : await gtranslate(srcVal, src, tl);
-          if (isRich) dEl.innerHTML = tr; else dEl.value = tr;
+        const panes = {};
+        LANGS.forEach(l => { panes[l] = field.querySelector('.lang-pane[data-lang="' + l + '"] [data-in]'); });
+        let src = null;
+        for (const l of order) { if (panes[l] && String(getVal(panes[l])).trim()) { src = l; break; } }
+        if (!src) continue; // bu maydon hech bir tilda to'ldirilmagan — o'tkazamiz
+        const srcVal = getVal(panes[src]);
+        const rich = panes[src].classList.contains('editor-area');
+        for (const tl of LANGS) {
+          if (tl === src || !panes[tl]) continue;
+          const tr = rich ? await translateHTML(srcVal, src, tl) : await gtranslate(srcVal, src, tl);
+          setVal(panes[tl], tr);
+          filled++;
         }
       }
-      toast('Tarjima tayyor (' + src.toUpperCase() + ' → ' + targets.map(x => x.toUpperCase()).join(', ') + '). Tekshirib, saqlang.');
-    } catch (e) { toast('Tarjimada xatolik yuz berdi', 1); }
+      if (!filled) toast('Avval kamida bitta tilda maydonlarni to\'ldiring — keyin avto-tarjima qolgan tillarni yozadi.', 1);
+      else toast('Avto-tarjima tayyor: ' + filled + ' ta maydon boshqa tillarga o\'girildi. Tekshirib, saqlang.');
+    } catch { toast('Tarjimada xatolik yuz berdi', 1); }
     btn.disabled = false; btn.innerHTML = orig;
   }
 
   // Umumiy avto-tarjima: `.lang-pane[data-lang]` guruhlaridan iborat istalgan konteyner
   // (entForm, Sozlamalar, Markaz haqida, albom) uchun ishlaydi.
   function autoTrButton(id) {
-    return `<button type="button" class="btn sm ghost" id="${id}" title="Faol tildan boshqa 2 tilga avtomatik tarjima qiladi" style="margin-left:10px">⇄ Avto-tarjima</button>`;
+    return `<button type="button" class="btn sm ghost" id="${id}" title="Bir tilni to'ldiring — bir bosishda qolgan 2 tilga avtomatik tarjima qiladi (manba avtomatik aniqlanadi)" style="margin-left:10px">⇄ Avto-tarjima</button>`;
   }
   function paneEditable(pane) {
     const rich = pane.querySelector('.editor-area, [contenteditable="true"]');
@@ -737,23 +750,30 @@
   async function autoTranslatePanes(root, src, btn) {
     const panes = $$('.lang-pane', root);
     if (!panes.length) { toast('Tarjima uchun maydon topilmadi', 1); return; }
+    const LANGS = ['uz', 'ru', 'en'];
+    const order = [src, ...LANGS.filter(l => l !== src)]; // manba ustuvorligi (faol til birinchi)
     const groups = new Map();
     panes.forEach(p => { const k = p.parentElement; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(p); });
-    const targets = ['uz', 'ru', 'en'].filter(l => l !== src);
     const orig = btn.innerHTML; btn.disabled = true; btn.innerHTML = 'Tarjima qilinmoqda…';
+    let filled = 0;
     try {
       for (const grp of groups.values()) {
-        const sp = grp.find(p => p.dataset.lang === src); if (!sp) continue;
-        const sv = paneEditable(sp); if (!sv) continue;
-        const srcVal = sv.get(); if (!srcVal || !String(srcVal).trim()) continue;
-        for (const tl of targets) {
-          const tp = grp.find(p => p.dataset.lang === tl); if (!tp) continue;
-          const tv = paneEditable(tp); if (!tv) continue;
-          tv.set(sv.rich ? await translateHTML(srcVal, src, tl) : await gtranslate(srcVal, src, tl));
+        const ed = {};
+        LANGS.forEach(l => { const p = grp.find(x => x.dataset.lang === l); ed[l] = p ? paneEditable(p) : null; });
+        // Manba: shu guruhда matn bor birinchi til (faol til -> uz -> ru -> en)
+        let s = null;
+        for (const l of order) { if (ed[l] && String(ed[l].get()).trim()) { s = l; break; } }
+        if (!s) continue;
+        const srcVal = ed[s].get();
+        for (const tl of LANGS) {
+          if (tl === s || !ed[tl]) continue;
+          ed[tl].set(ed[s].rich ? await translateHTML(srcVal, s, tl) : await gtranslate(srcVal, s, tl));
+          filled++;
         }
       }
-      toast('Tarjima tayyor (' + src.toUpperCase() + ' → ' + targets.map(x => x.toUpperCase()).join(', ') + '). Tekshirib, saqlang.');
-    } catch (e) { toast('Tarjimada xatolik yuz berdi', 1); }
+      if (!filled) toast('Avval kamida bitta tilda to\'ldiring — keyin avto-tarjima ishlaydi.', 1);
+      else toast('Avto-tarjima tayyor: ' + filled + ' ta maydon o\'girildi. Tekshirib, saqlang.');
+    } catch { toast('Tarjimada xatolik yuz berdi', 1); }
     btn.disabled = false; btn.innerHTML = orig;
   }
 
@@ -764,7 +784,7 @@
     const SKIP = new Set(['name']); // shaxs ismi tarjima qilinmaydi
     const cols = ['news', 'events', 'experts', 'publications', 'pages', 'media', 'heroSlides'];
     const data = {}; let total = 0;
-    cols.forEach(c => { try { data[c] = Store.all(c); } catch (e) { data[c] = []; } total += data[c].length; });
+    cols.forEach(c => { try { data[c] = Store.all(c); } catch { data[c] = []; } total += data[c].length; });
     if (!total) { toast('Tarjima uchun kontent topilmadi', 1); return; }
     const orig = btn.innerHTML; btn.disabled = true;
     let done = 0, filled = 0;
@@ -784,14 +804,14 @@
               if (!v.en || !String(v.en).trim()) { const r = await tr('en'); if (r) { v.en = r; changed = true; filled++; } }
             }
           }
-          if (changed) { try { await Promise.resolve(Store.upsert(c, it)); } catch (e) {} }
+          if (changed) { try { await Promise.resolve(Store.upsert(c, it)); } catch {} }
           done++;
           btn.innerHTML = 'Tarjima: ' + done + '/' + total;
           if (log) log.textContent = done + '/' + total + ' yozuv · ' + filled + ' maydon to\'ldirildi';
         }
       }
       toast('Ommaviy tarjima yakunlandi: ' + filled + ' maydon to\'ldirildi. Saytni tekshiring.');
-    } catch (e) { toast('Tarjimada xatolik yuz berdi', 1); }
+    } catch { toast('Tarjimada xatolik yuz berdi', 1); }
     btn.disabled = false; btn.innerHTML = orig;
   }
 
@@ -875,12 +895,12 @@
   function wireEditor(wrap) {
     const area = $('.editor-area', wrap); if (!area) return;
     // ro'yxatlar/sitata to'g'ri <p> ichida chiqishi uchun
-    try { document.execCommand('defaultParagraphSeparator', false, 'p'); } catch (e) {}
+    try { document.execCommand('defaultParagraphSeparator', false, 'p'); } catch {}
     const sync = () => {
       $$('.editor-tb button[data-cmd]', wrap).forEach(b => {
         const cmd = b.dataset.cmd;
         if (['bold', 'italic', 'underline', 'strikeThrough', 'insertUnorderedList', 'insertOrderedList', 'justifyLeft', 'justifyCenter', 'justifyRight'].indexOf(cmd) < 0) return;
-        try { b.classList.toggle('on', document.queryCommandState(cmd)); } catch (e) {}
+        try { b.classList.toggle('on', document.queryCommandState(cmd)); } catch {}
       });
     };
     $$('.editor-tb button', wrap).forEach(b => b.onclick = () => {
@@ -1034,6 +1054,166 @@
     bg.onclick = (e) => { if (e.target === bg) bg.remove(); };
   }
 
+  /* ==================== AUDIT LOGLAR (o'qish uchun — davlat auditi jurnali) ==================== */
+  // Amal nomlari uchun o'qishli yorliqlar
+  const AUDIT_LBL = {
+    login: 'Kirish', logout: 'Chiqish', upsert: 'Qo\'shish/tahrir', remove: 'O\'chirish',
+    settings: 'Sozlama', save: 'To\'liq saqlash', reset: 'Tiklash', change_password: 'Parol almashtirish',
+    upload: 'Fayl yuklash'
+  };
+  // Yuklangan fayl turlari uchun "Bo'lim" ustunidagi o'qishli nomlar
+  const AUDIT_COLL = { image: 'Rasm', document: 'Hujjat', infographic: 'Infografika' };
+  // Amal turiga rang (badge)
+  const AUDIT_TONE = {
+    login: '#1d6a94', logout: '#6b7280', upsert: '#2e7d6b', remove: '#9a3b52',
+    settings: '#8a5a2b', save: '#5b5ea6', reset: '#9a3b52', change_password: '#9a3b52',
+    upload: '#4a6fa5'
+  };
+  function auditTs(s) {
+    // "2026-07-30 11:14:31" -> "30.06.2026 11:14" (server DATE emas, TIMESTAMP)
+    if (!s) return '—';
+    const m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/);
+    return m ? `${m[3]}.${m[2]}.${m[1]} ${m[4]}:${m[5]}` : esc(String(s));
+  }
+  let auditFilter = '';
+  function viewAudit(c) {
+    setTitle('Audit loglar');
+    c.innerHTML = `
+      <div class="page-head"><div><div class="h">Audit loglar</div>
+        <div class="d">Kim, qachon, nima o'zgartirdi — tizim faoliyati jurnali (faqat o'qish uchun)</div></div><div class="sp"></div></div>
+      <div class="card"><div class="empty">${ic('audit')}<div class="t">Yuklanmoqda…</div></div></div>`;
+    Store.auditLog({ limit: 300, act: auditFilter }).then(function (res) {
+      if (!res || !res.ok) {
+        c.querySelector('.card').innerHTML = `<div class="empty">${ic('audit')}<div class="t">Jurnalni yuklab bo'lmadi</div><div>Server bilan aloqa yo'q yoki sessiya tugagan</div></div>`;
+        return;
+      }
+      const rows = res.rows || [];
+      const acts = res.actions || [];
+      const chips = ['<button class="btn ' + (auditFilter === '' ? 'primary' : 'ghost') + ' sm" data-af="">Hammasi</button>']
+        .concat(acts.map(function (a) {
+          return '<button class="btn ' + (auditFilter === a ? 'primary' : 'ghost') + ' sm" data-af="' + esc(a) + '">' + esc(AUDIT_LBL[a] || a) + '</button>';
+        })).join(' ');
+      c.innerHTML = `
+        <div class="page-head"><div><div class="h">Audit loglar</div>
+          <div class="d">Jami ${res.total} yozuv${auditFilter ? ` · filtr: ${esc(AUDIT_LBL[auditFilter] || auditFilter)}` : ''} · so'nggi ${rows.length} ta ko'rsatilmoqda</div></div><div class="sp"></div></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px">${chips}</div>
+        <div class="card">
+          ${rows.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr>
+              <th style="width:150px">Amal</th><th style="width:130px">Bo'lim</th><th>Yozuv ID</th><th style="width:120px">IP</th><th style="width:150px">Vaqt</th>
+            </tr></thead><tbody>${rows.map(function (r) {
+              const tone = AUDIT_TONE[r.action] || '#6b7280';
+              return `<tr>
+                <td><span class="badge" style="background:${tone}1a;color:${tone};border:1px solid ${tone}44">${esc(AUDIT_LBL[r.action] || r.action)}</span></td>
+                <td class="t-sub">${r.coll ? esc(AUDIT_COLL[r.coll] || r.coll) : '<span style="color:var(--muted)">—</span>'}</td>
+                <td class="mono" style="font-size:12px;color:var(--ink-2)">${r.item_id ? esc(r.item_id) : '<span style="color:var(--muted)">—</span>'}</td>
+                <td class="mono" style="font-size:12px;color:var(--ink-2)">${esc(r.ip || '—')}</td>
+                <td class="mono" style="font-size:12px;color:var(--ink-2)">${auditTs(r.at)}</td>
+              </tr>`;
+            }).join('')}</tbody></table></div>`
+          : `<div class="empty">${ic('audit')}<div class="t">Jurnal bo'sh</div><div>Hali hech qanday amal qayd etilmagan</div></div>`}
+        </div>`;
+      $$('#content [data-af]').forEach(function (b) {
+        b.onclick = function () { auditFilter = b.getAttribute('data-af'); viewAudit(c); };
+      });
+    });
+  }
+
+  /* ==================== XATOLIKLAR (diagnostika jurnali) ====================
+     Saytda va serverda yuz bergan xatolar. Har bir yozuvda SABAB va YECHIM
+     ko'rsatiladi. Bir xil xato takrorlansa yangi qator ochilmaydi — `hits`
+     oshadi (shuning uchun "12 marta" kabi ko'rsatkich bor). */
+  const ERR_LBL = {
+    error: 'JS xatosi', net: 'Tarmoq', server: 'Server', client: 'Brauzer',
+    'php': 'PHP', 'php-warn': 'PHP ogohlantirish', 'php-fatal': 'PHP halokatli', warn: 'Ogohlantirish'
+  };
+  const ERR_TONE = {
+    error: '#9a3b52', 'php-fatal': '#9a3b52', server: '#9a3b52',
+    net: '#2f5f9e', client: '#2f5f9e',
+    'php': '#8a5a2b', 'php-warn': '#8a5a2b', warn: '#8a5a2b'
+  };
+  function errTs(s) {
+    if (!s) return '—';
+    const m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/);
+    return m ? `${m[3]}.${m[2]}.${m[1]} ${m[4]}:${m[5]}` : esc(String(s));
+  }
+  let errFilter = '', errShowResolved = false;
+  function viewErrors(c) {
+    setTitle('Xatoliklar');
+    c.innerHTML = `
+      <div class="page-head"><div><div class="h">Xatoliklar</div>
+        <div class="d">Saytda va serverda yuz bergan xatolar — sababi va yechimi bilan</div></div><div class="sp"></div></div>
+      <div class="card"><div class="empty">${ic('bug')}<div class="t">Yuklanmoqda…</div></div></div>`;
+    Store.errorLog({ limit: 200, kind: errFilter, resolved: errShowResolved }).then(function (res) {
+      if (!res || !res.ok) {
+        c.querySelector('.card').innerHTML = `<div class="empty">${ic('bug')}<div class="t">Jurnalni yuklab bo'lmadi</div><div>Server bilan aloqa yo'q yoki sessiya tugagan</div></div>`;
+        return;
+      }
+      const rows = res.rows || [], kinds = res.kinds || [];
+      const chips = ['<button class="btn ' + (errFilter === '' ? 'primary' : 'ghost') + ' sm" data-ef="">Hammasi</button>']
+        .concat(kinds.map(function (k) {
+          return '<button class="btn ' + (errFilter === k ? 'primary' : 'ghost') + ' sm" data-ef="' + esc(k) + '">' + esc(ERR_LBL[k] || k) + '</button>';
+        })).join(' ');
+      c.innerHTML = `
+        <div class="page-head"><div><div class="h">Xatoliklar</div>
+          <div class="d">${res.open} ta hal qilinmagan · jami ${res.total} ta turdagi xato${errShowResolved ? ' · hal qilinganlar ham ko\'rsatilmoqda' : ''}</div></div>
+          <div class="sp"></div>
+          ${rows.length ? `<button class="btn ghost" id="errResolveAll">${ic('check') || ''} Hammasini hal qilindi deb belgilash</button>` : ''}
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 14px">
+          ${chips}
+          <span style="flex:1"></span>
+          <label style="display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--muted);cursor:pointer">
+            <input type="checkbox" id="errShowRes" ${errShowResolved ? 'checked' : ''}> Hal qilinganlarni ko'rsatish
+          </label>
+        </div>
+        ${rows.length ? rows.map(function (r) {
+          const tone = ERR_TONE[r.kind] || '#6b7280';
+          const loc = r.source ? esc(r.source) + (r.line ? ':' + r.line + (r.col ? ':' + r.col : '') : '') : '';
+          return `<div class="card" style="margin-bottom:10px;padding:14px 16px;${r.resolved == 1 ? 'opacity:.55' : ''}">
+            <div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap">
+              <span class="badge" style="background:${tone}1a;color:${tone};border:1px solid ${tone}44;flex:0 0 auto">${esc(ERR_LBL[r.kind] || r.kind)}</span>
+              <div style="flex:1 1 300px;min-width:0">
+                <div style="font-weight:600;color:var(--ink);word-break:break-word;line-height:1.4">${esc(r.message)}</div>
+                <div class="mono" style="font-size:12px;color:var(--muted);margin-top:4px">
+                  ${loc ? loc + ' · ' : ''}${r.page ? esc(r.page) + ' · ' : ''}${errTs(r.last_at)}
+                  ${r.hits > 1 ? ` · <b style="color:${tone}">${r.hits} marta</b>` : ''}
+                </div>
+                ${r.cause ? `<div style="margin-top:9px;padding:9px 11px;background:var(--panel-2);border-radius:8px;font-size:13px">
+                    <b style="color:var(--accent)">SABAB:</b> ${esc(r.cause)}</div>` : ''}
+                ${r.stack ? `<details style="margin-top:7px"><summary style="cursor:pointer;font-size:12px;color:var(--muted)">Texnik tafsilot (stack)</summary>
+                    <pre style="margin:6px 0 0;padding:9px;background:var(--panel-2);border-radius:7px;overflow-x:auto;font-size:11.5px;color:var(--ink-2);white-space:pre-wrap">${esc(r.stack)}</pre></details>` : ''}
+              </div>
+              ${r.resolved == 1 ? '' : `<button class="btn sm ghost" data-err-res="${r.id}" style="flex:0 0 auto">Hal qilindi</button>`}
+            </div>
+          </div>`;
+        }).join('')
+        : `<div class="card"><div class="empty">${ic('bug')}<div class="t">Xato yo'q</div><div>Tizim toza ishlayapti — hech qanday xato qayd etilmagan</div></div></div>`}`;
+
+      $$('#content [data-ef]').forEach(function (b) {
+        b.onclick = function () { errFilter = b.getAttribute('data-ef'); viewErrors(c); };
+      });
+      const cb = $('#errShowRes');
+      if (cb) cb.onchange = function () { errShowResolved = cb.checked; viewErrors(c); };
+      $$('#content [data-err-res]').forEach(function (b) {
+        b.onclick = function () {
+          b.disabled = true;
+          Store.errorResolve(b.getAttribute('data-err-res')).then(function (r) {
+            if (r.ok) { toast('Hal qilindi deb belgilandi'); viewErrors(c); }
+            else { b.disabled = false; toast('Belgilab bo\'lmadi', 1); }
+          });
+        };
+      });
+      const ra = $('#errResolveAll');
+      if (ra) ra.onclick = function () {
+        ra.disabled = true;
+        Store.errorResolve('all').then(function (r) {
+          if (r.ok) { toast('Barcha xatolar hal qilindi deb belgilandi'); viewErrors(c); }
+          else { ra.disabled = false; toast('Amal bajarilmadi', 1); }
+        });
+      };
+    });
+  }
+
   /* ==================== MARKAZ HAQIDA (bosh sahifa intro + Markaz haqida/Maqsad sahifalari) ==================== */
   function viewAboutPage(c) {
     setTitle('Markaz haqida');
@@ -1132,19 +1312,23 @@
       if ((m.type || 'photo') === 'video') {
         const th = videoThumb(m);
         return `<div class="media-item video" data-id="${m.id}">
-          ${th ? `<img src="${safeUrl(th)}">` : `<div class="vthumb">${ic('media')}</div>`}
-          <div class="vbadge">${ic('play')}</div>
-          <div class="nm">${esc(mlGet(m.title) || m.url)}</div>
-          <div class="ov"><button class="icon-btn" data-act="open" title="Ochish">${ic('eye')}</button><button class="icon-btn" data-act="del" title="O'chirish">${ic('trash')}</button></div>
+          <div class="thumb">${th ? `<img src="${safeUrl(th)}">` : `<div class="vthumb">${ic('media')}</div>`}<div class="vbadge">${ic('play')}</div></div>
+          <div class="info">
+            <div class="nm">${esc(mlGet(m.title) || m.url)}</div>
+            <div class="meta"><span class="tag">${ic('play')} Video</span>${m.date ? `<span>${fmtDate(m.date)}</span>` : ''}${m.url ? `<span class="url" title="${esc(m.url)}">${esc(m.url)}</span>` : ''}</div>
+          </div>
+          <div class="row-act"><button class="icon-btn" data-act="open" title="Ochish">${ic('eye')}</button><button class="icon-btn" data-act="del" title="O'chirish">${ic('trash')}</button></div>
         </div>`;
       }
       return `<div class="media-item info" data-id="${m.id}">
-        <div class="vthumb" style="flex-direction:column;gap:7px;background:linear-gradient(135deg,#0f5689,#0b2f4d);color:#fff">
+        <div class="thumb"><div class="vthumb" style="background:linear-gradient(135deg,#0f5689,#0b2f4d);color:#fff">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 16v-3M12 16V9M16 16v-5" stroke-linecap="round"/></svg>
-          <span style="font-size:9px;letter-spacing:.14em;font-family:var(--mono)">INTERAKTIV</span>
+        </div></div>
+        <div class="info">
+          <div class="nm">${esc(mlGet(m.title) || m.name || 'Infografika')}</div>
+          <div class="meta"><span class="tag">Interaktiv infografika</span>${m.date ? `<span>${fmtDate(m.date)}</span>` : ''}${m.name ? `<span class="url" title="${esc(m.name)}">${esc(m.name)}</span>` : ''}</div>
         </div>
-        <div class="nm">${esc(mlGet(m.title) || m.name || '')}</div>
-        <div class="ov"><button class="icon-btn" data-act="open" title="Ochish">${ic('eye')}</button><button class="icon-btn" data-act="del" title="O'chirish">${ic('trash')}</button></div>
+        <div class="row-act"><button class="icon-btn" data-act="open" title="Ochish">${ic('eye')}</button><button class="icon-btn" data-act="del" title="O'chirish">${ic('trash')}</button></div>
       </div>`;
     }
 
@@ -1189,10 +1373,12 @@
     const photos = Array.isArray(a.photos) ? a.photos : [];
     const cover = a.cover || (photos[0] && photos[0].url) || '';
     return `<div class="media-item album" data-id="${a.id}">
-      ${cover ? `<img src="${safeUrl(cover)}">` : `<div class="vthumb">${ic('media')}</div>`}
-      <div style="position:absolute;top:8px;right:8px;background:rgba(8,12,16,.62);color:#fff;border-radius:999px;padding:3px 10px;font-size:11px;font-family:var(--mono,monospace)">${photos.length}</div>
-      <div class="nm">${esc(mlGet(a.title) || 'Albom')}</div>
-      <div class="ov"><button class="icon-btn" data-act="edit" title="Ochish / tahrirlash">${ic('edit')}</button><button class="icon-btn" data-act="del" title="O'chirish">${ic('trash')}</button></div>
+      <div class="thumb">${cover ? `<img src="${safeUrl(cover)}">` : `<div class="vthumb">${ic('media')}</div>`}<div class="cnt-badge">${photos.length}</div></div>
+      <div class="info">
+        <div class="nm">${esc(mlGet(a.title) || 'Albom')}</div>
+        <div class="meta"><span class="tag">${ic('media')} Fotoalbom</span><span>${photos.length} ta rasm</span>${a.date ? `<span>${fmtDate(a.date)}</span>` : ''}</div>
+      </div>
+      <div class="row-act"><button class="icon-btn" data-act="edit" title="Ochish / tahrirlash">${ic('edit')}</button><button class="icon-btn" data-act="del" title="O'chirish">${ic('trash')}</button></div>
     </div>`;
   }
   function viewAlbums(c) {

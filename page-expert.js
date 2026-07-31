@@ -26,12 +26,13 @@
       if(!a || !n) return false;
       return a.indexOf(n) > -1 || n.indexOf(a) > -1;
     };
-    const articles = Store.all('news')
-      .filter(n => n.status==='published' && byThisExpert(n))
-      .sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
-    const pubs = Store.all('publications')
+    const pubsAll = Store.all('publications')
       .filter(p => p.status==='published' && byThisExpert(p))
       .sort((a,b)=>String(b.year||'').localeCompare(String(a.year||'')));
+    // Ekspert sahifasida faqat eng yangi 4 tasi; qolgani "Barchasini ko'rish" orqali
+    // nashrlar sahifasida (shu ekspert filtri bilan) ko'rinadi.
+    const PUB_LIMIT = 4;
+    const pubs = pubsAll.slice(0, PUB_LIMIT);
 
     // "Tashqi siyosat, Xavfsizlik" -> chiplar; nashrlar sahifasidagi filtrga havola qiladi
     const tags = ml(e.expertise||'').split(/[,;·|]/).map(s=>s.trim()).filter(Boolean);
@@ -78,7 +79,7 @@
       </div></div></section>
 
       <section class="block" style="padding-top:0"><div class="wrap">
-        <div class="sec-head"><div><div class="kicker">${T('expert_pubs')}</div></div></div>
+        <div class="sec-head"><div><div class="kicker">${T('expert_pubs')}</div></div>${pubsAll.length>PUB_LIMIT?`<a class="arrow-link" href="nashrlar.html?author=${encodeURIComponent(name)}">${T('view_all')} →</a>`:''}</div>
         ${pubs.length?`<div class="pub-grid">${pubs.map(p=>{
           const href = `nashr.html?id=${p.id}`;
           return `<div class="pub rv">
@@ -94,17 +95,6 @@
           </div>`;
         }).join('')}</div>`
         :`<div class="empty"><div class="t">${T('expert_none_pub')}</div></div>`}
-      </div></section>
-
-      <section class="block" style="padding-top:0"><div class="wrap">
-        <div class="sec-head"><div><div class="kicker">${T('expert_articles')}</div></div></div>
-        ${articles.length?`<div class="cards">${articles.map(n=>`
-          <a class="ncard rv" href="yangilik.html?id=${n.id}">
-            <div class="img">${n.cover?`<img src="${Site.safeUrl(n.cover)}" alt="">`:`<div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.8"/><path d="m3 17 5-4 4 3 3-3 6 5"/></svg></div>`}
-              <div class="ovl">${n.category?`<span class="tag">${esc(ml(n.category))}</span>`:''}<h3>${esc(ml(n.title))}</h3></div></div>
-            <div class="body"><span class="dt">${Site.fmtDate(n.date)}</span></div>
-          </a>`).join('')}</div>`
-        :`<div class="empty"><div class="t">${T('expert_none_art')}</div></div>`}
       </div></section>`;
     Site.initReveal();
   }});

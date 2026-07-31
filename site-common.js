@@ -4,7 +4,7 @@
    ============================================================ */
 (function (w) {
   // ---------- helpers ----------
-  const lang = (function(){ try { return localStorage.getItem('tstm_site_lang') || 'uz'; } catch(e){ return 'uz'; } })();
+  const lang = (function(){ try { return localStorage.getItem('tstm_site_lang') || 'uz'; } catch{ return 'uz'; } })();
   const T = (k) => (w.I18N ? w.I18N.t(k) : k);
   const mlGet = (v, l) => {
     if (v && typeof v === 'object') return v[l || lang] || v.uz || v.ru || v.en || '';
@@ -45,7 +45,14 @@
   const fmtDate = (d) => { if(!d) return ''; const p = String(d).split('-'); return p[2]+'.'+p[1]+'.'+p[0]; };
   const dayMonth = (d) => { if(!d) return {dd:'',mm:''}; const p = String(d).split('-'); return { dd: p[2], mm: MONTHS[parseInt(p[1],10)-1] || '' }; };
   const qs = (k) => new URLSearchParams(location.search).get(k);
-  const settings = () => { try { return Store.settings(); } catch(e){ return {}; } };
+  const settings = () => { try { return Store.settings(); } catch{ return {}; } };
+  // Joriy tilga mos logo yo'li. Sozlamada maxsus logo bo'lsa — o'sha, aks holda
+  // til bo'yicha standart. Header/footer/chop etish — hammasi shu orqali.
+  function brandLogo(){
+    const s = settings();
+    const def = { uz: 'logo-mark.png', ru: 'logo-mark-ru.png', en: 'logo-mark-en.png' };
+    return (s.logos && s.logos[lang]) || s.logo || def[lang] || def.uz;
+  }
 
   // ---------- Brend nomi (admin -> Sozlamalar -> "Markaz nomi") ----------
   // Brend ikki qatorli lockup, admindagi `siteName` esa bitta matn. Nomni so'z
@@ -106,7 +113,7 @@
     try {
       const on = enabledLangs();
       if (on.indexOf(lang) < 0) { localStorage.setItem('tstm_site_lang', on[0]); location.reload(); }
-    } catch(e){}
+    } catch{}
   })();
   // Til almashtirgich tugmalari — faqat yoqilgan tillar
   const LANG_LABEL = { uz: "O'zbekcha", ru: 'Русский', en: 'English' };
@@ -160,13 +167,13 @@
   }
   // Tashrifchi o'zi tanlagan tema ustun; tanlamagan bo'lsa — admindagi standart tema.
   let theme = 'light';
-  try { theme = localStorage.getItem(THEME_KEY) || settings().theme || 'light'; } catch(e){}
+  try { theme = localStorage.getItem(THEME_KEY) || settings().theme || 'light'; } catch{}
   // apply immediately (before render) to avoid flash
   document.documentElement.setAttribute('data-theme', theme);
   window.TSTM_SITE_THEME = theme; // a11y.js shu qiymatni hurmat qiladi (admin standart temasi yo'qolmasin)
   function toggleTheme(){
     theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    try { localStorage.setItem(THEME_KEY, theme); } catch(e){}
+    try { localStorage.setItem(THEME_KEY, theme); } catch{}
     window.TSTM_SITE_THEME = theme;
     applyTheme(theme);
   }
@@ -251,7 +258,7 @@
     document.querySelectorAll('.theme-tog').forEach(b => b.addEventListener('click', toggleTheme));
     // language (header util paneli + mobil drawer ichidagi tugmalar)
     document.querySelectorAll('.langs span, .mnav-langs span').forEach(sp => {
-      const go = () => { try { localStorage.setItem('tstm_site_lang', sp.dataset.l); } catch(e){} location.reload(); };
+      const go = () => { try { localStorage.setItem('tstm_site_lang', sp.dataset.l); } catch{} location.reload(); };
       sp.addEventListener('click', go);
       sp.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
     });
@@ -349,7 +356,7 @@
       if (url) localStorage.setItem(CK, url);
       else if (loadedOk) localStorage.removeItem(CK); // admin o'chirgan — zaxirani tozalaymiz
       else url = localStorage.getItem(CK) || ''; // store bo'sh (reload lahzasi) — zaxiradan
-    } catch(e){}
+    } catch{}
     const el = document.querySelector('.page-banner');
     if (el && url){
       el.classList.add('has-img');
@@ -371,7 +378,7 @@
       if (localStorage.getItem(SUB_SEEN)) return true;
       var t = parseInt(localStorage.getItem(SUB_SNOOZE) || '0', 10);
       return t && Date.now() < t;
-    } catch(e){ return false; }
+    } catch{ return false; }
   }
 
   function showSubscribe(){
@@ -426,10 +433,10 @@
       try {
         if (dismiss) localStorage.setItem(SUB_SEEN, '1');
         else localStorage.setItem(SUB_SNOOZE, String(Date.now() + 86400000));
-      } catch(e){}
+      } catch{}
       document.removeEventListener('keydown', onKey, true);
       ov.classList.remove('open');
-      setTimeout(function(){ ov.remove(); try { lastFocus && lastFocus.focus(); } catch(e){} }, 300);
+      setTimeout(function(){ ov.remove(); try { lastFocus && lastFocus.focus(); } catch{} }, 300);
     }
 
     function onKey(e){
@@ -451,7 +458,7 @@
       input.classList.add('err');
       // Tugma yuborish paytida disabled bo'lgani uchun fokus <body>ga tushib
       // qoladi — klaviatura bilan ishlatadigan foydalanuvchi yo'qolmasin.
-      try { input.focus(); } catch(e){}
+      try { input.focus(); } catch{}
     }
 
     document.body.appendChild(ov);
@@ -460,7 +467,7 @@
     // Escape va Tab (fokus tuzog'i) darrov ishlaydi.
     requestAnimationFrame(function(){
       ov.classList.add('open');
-      try { modal.focus(); } catch(e){}
+      try { modal.focus(); } catch{}
     });
     document.addEventListener('keydown', onKey, true);
 
@@ -484,7 +491,7 @@
       Promise.resolve(Store.subscribe(em, (w.I18N ? w.I18N.lang : 'uz'))).then(function(res){
         if (res && res.ok) {
           modal.classList.add('done');
-          try { localStorage.setItem(SUB_SEEN, '1'); } catch(err){}
+          try { localStorage.setItem(SUB_SEEN, '1'); } catch{}
           setTimeout(function(){ close(true); }, 2600);
           return;
         }
@@ -505,10 +512,11 @@
   // kontentni yashirin iframe ichida yangidan, toza tartibda quramiz va o'shani chop qilamiz.
   function printDoc(opts){
     opts = opts || {};
-    var abs = function (u) { try { return u ? new URL(u, location.href).href : ''; } catch (e) { return u || ''; } };
+    var abs = function (u) { try { return u ? new URL(u, location.href).href : ''; } catch { return u || ''; } };
     var _b = brandLines(); var org = _b.top, tag = _b.bot;
     var date = fmtDate(new Date().toISOString().slice(0, 10));
-    var logo = abs('logo-mark.png');
+    // Logo joriy tilga qarab tanlanadi (sarlavha/matn tarjima bo'lgani kabi).
+    var logo = abs(brandLogo());
     var img = opts.image ? abs(opts.image) : '';
 
     var css = ''
@@ -557,8 +565,8 @@
     var printed = false;
     var go = function () {
       if (printed) return; printed = true;
-      try { ifr.contentWindow.focus(); ifr.contentWindow.print(); } catch (e) {}
-      setTimeout(function () { try { ifr.remove(); } catch (e) {} }, 1200);
+      try { ifr.contentWindow.focus(); ifr.contentWindow.print(); } catch {}
+      setTimeout(function () { try { ifr.remove(); } catch {} }, 1200);
     };
     // rasm(lar) yuklanishini kutamiz, aks holda 1.5s dan so'ng baribir chop qilamiz
     var imgs = doc.images, left = imgs ? imgs.length : 0;
@@ -593,5 +601,5 @@
     setTimeout(showSubscribe, 2500);
   }
 
-  w.Site = { initPage, renderHeader, renderFooter, mlGet, dispTitle, esc, safeUrl, fmtDate, dayMonth, qs, settings, lang, t: T, ICON, NAV, initReveal, showSubscribe, printDoc };
+  w.Site = { initPage, renderHeader, renderFooter, mlGet, dispTitle, esc, safeUrl, fmtDate, dayMonth, qs, settings, lang, brandLogo, t: T, ICON, NAV, initReveal, showSubscribe, printDoc };
 })(window);

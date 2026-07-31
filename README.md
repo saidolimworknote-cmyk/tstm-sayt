@@ -123,4 +123,67 @@ Qisqacha:
 - Login urinishlari cheklangan (5 xato → 10 daqiqa blok); aloqa formasi spamdan himoyalangan
 - Rasm yuklash faqat PNG/JPG/WEBP/GIF (SVG ataylab o'chirilgan); hujjatlar **fayl imzosi** bo'yicha tekshiriladi
 - `config.php`, `db.php`, `seed.php`, `*.json` — `.htaccess` orqali tashqaridan yopiq
-- Admin amallari `audit_log` jadvalida qayd etiladi
+- Admin amallari (kirish/chiqish, tahrir, o'chirish, **fayl yuklash**, parol almashtirish) `audit_log` jadvalida qayd etiladi
+
+---
+
+## 🩺 Diagnostika ("nima xato ketdi?")
+
+Sayt o'zi xatolarni yig'adi va **sababini o'zbek tilida** tushuntiradi — F12 ochish shart emas.
+
+**Panelni ochish** (pastki o'ng burchakda):
+
+| Kim | Qanday |
+|-----|--------|
+| Administrator | Admin panelga kirgach avtomatik ko'rinadi |
+| Ishlab chiquvchi | Istalgan sahifa manziliga `?debug=1` qo'shing — masalan `media.html?debug=1` |
+| Oddiy tashrifchi | **Ko'rinmaydi** (lekin xatolar baribir jimgina yozib boriladi) |
+
+`?debug=1` sessiya davomida eslab qolinadi; `?debug=0` o'chiradi.
+
+**Nimalarni ushlaydi:** JS xatolari, ushlanmagan promise'lar, tarmoq xatolari
+(fetch/XHR, 404, 401/403/500), yuklanmagan rasm/skript, `console` chiqishi va
+serverdagi PHP xatolari.
+
+**Har bir xatoda:** xabar, fayl va qator, **SABAB** va **YECHIM** tavsiyasi,
+texnik tafsilot (stack). ⧉ tugmasi hammasini matn holida nusxalaydi.
+
+**Tarixni ko'rish:** admin panel → **Xatoliklar**. Bir xil xato takrorlansa
+yangi qator ochilmaydi — "N marta" hisoblagichi oshadi. Tuzatgach «Hal qilindi»
+deb belgilash mumkin.
+
+> Jurnalda **IP saqlanmaydi** va xato matnlari oddiy tashrifchiga hech qachon
+> ko'rsatilmaydi (`error_reporting(0)` kuchda qoladi).
+
+---
+
+## 🧹 Kod sifati
+
+```bash
+npx eslint .              # JS  — 0 xato, 0 ogohlantirish
+npx stylelint "*.css"     # CSS — 0 xato
+```
+
+Konfiguratsiyalar — `eslint.config.mjs` va `.stylelintrc.json`. Ikkalasi ham
+**mustaqil**: hech qanday npm paketiga bog'liq emas (loyihada `package.json` va
+build bosqichi yo'q).
+
+Ikkala konfiguratsiya ham faqat **haqiqiy xato** ushlaydigan qoidalarni yoqadi.
+Format didi ataylab tekshirilmaydi — CSS bu loyihada ixcham yoziladi (bitta
+selektor = bitta qator), bo'sh `catch {}` esa «xatoga chidamli render» tamoyilining
+bir qismi. Har bir o'chirilgan qoidaning sababi konfiguratsiya ichida izohlangan.
+
+> ⚠️ `-webkit-backdrop-filter` va `-webkit-mask-image` prefikslarini **olib
+> tashlamang** — Safari/iOS uchun hozir ham zarur, autoprefixer esa yo'q.
+
+### Uslub fayllari
+
+| Fayl | Kim ishlatadi |
+|------|---------------|
+| `site.css` | Barcha ichki sahifalar (12 ta) |
+| `home.css` | **Faqat** bosh sahifa — mustaqil nusxa, `site.css` ni ulamaydi |
+
+Bosh sahifaning uslublari ilgari HTML ichida inline `<style>` blokida turardi
+(663 qator). Alohida faylga chiqarildi: HTML 71 KB → 24 KB, uslub endi alohida
+keshlanadi. Bosh sahifadagi o'zgarish ichki sahifalarga **o'tmaydi** va aksincha —
+umumiy o'zgarish ikkala faylda ham qilinishi kerak.

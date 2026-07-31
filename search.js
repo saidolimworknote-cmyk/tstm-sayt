@@ -4,7 +4,7 @@
    Window.TSTMSearch.open() / .toggle() bilan ochiladi.
    ============================================================ */
 (function (w) {
-  var lang = (function(){ try { return localStorage.getItem('tstm_site_lang') || 'uz'; } catch(e){ return 'uz'; } })();
+  var lang = (function(){ try { return localStorage.getItem('tstm_site_lang') || 'uz'; } catch{ return 'uz'; } })();
   function T(k){ return (w.I18N ? w.I18N.t(k) : k); }
   function mlGet(v){ if(v && typeof v==='object') return v[lang]||v.uz||v.ru||v.en||''; return v||''; }
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];}); }
@@ -21,14 +21,7 @@
     var tr = catLabel(c);
     return (tr && tr !== raw) ? (raw + ' ' + tr) : raw;
   }
-  var norm = function(s){ return String(s||'').toLocaleLowerCase('uz').replace(/[ʻʼ'`'']/g,"'").replace(/\s+/g,' ').trim(); };
   var fold = function(s){ return String(s||'').toLocaleLowerCase('uz').replace(/[ʻʼ'`'']/g,"'"); };
-  function hl(text, qhl){
-    var raw=String(text||''); if(!qhl) return esc(raw);
-    var low=fold(raw), out='', last=0, idx=0;
-    while((idx=low.indexOf(qhl,last))!==-1){ out+=esc(raw.slice(last,idx))+'<mark>'+esc(raw.slice(idx,idx+qhl.length))+'</mark>'; last=idx+qhl.length; }
-    out+=esc(raw.slice(last)); return out;
-  }
   // ko'p so'zli highlight — barcha token mosliklarini belgilaydi
   function hlTokens(text, tokens){
     var raw=String(text||'');
@@ -58,7 +51,6 @@
     if(start+170<raw.length) snip=snip+'…';
     return snip;
   }
-  var yearOf=function(d){ return d?String(d).slice(0,4):''; };
 
   function buildIndex(){
     var items=[]; if(!w.Store) return items;
@@ -80,7 +72,7 @@
       Store.all('experts').forEach(function(e){
         items.push({kind:'expert',kl:T('search_k_expert'),title:e.name,text:e.role,href:'expert.html?id='+e.id,cover:e.photo||'',date:'',cat:''});
       });
-    }catch(e){}
+    }catch{}
     return items;
   }
 
@@ -100,10 +92,10 @@
   ];
   // so'nggi qidiruvlar (localStorage)
   var RKEY='tstm_recent_search';
-  function getRecent(){ try{ var a=JSON.parse(localStorage.getItem(RKEY)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+  function getRecent(){ try{ var a=JSON.parse(localStorage.getItem(RKEY)||'[]'); return Array.isArray(a)?a:[]; }catch{ return []; } }
   function saveRecent(q){ q=String(q||'').trim(); if(!q) return;
-    try{ var a=getRecent().filter(function(x){ return fold(x)!==fold(q); }); a.unshift(q); localStorage.setItem(RKEY, JSON.stringify(a.slice(0,6))); }catch(e){} }
-  function clearRecent(){ try{ localStorage.removeItem(RKEY); }catch(e){} }
+    try{ var a=getRecent().filter(function(x){ return fold(x)!==fold(q); }); a.unshift(q); localStorage.setItem(RKEY, JSON.stringify(a.slice(0,6))); }catch{} }
+  function clearRecent(){ try{ localStorage.removeItem(RKEY); }catch{} }
   // ommabop kalit so'zlar — kontentdagi kategoriyalardan avtomatik
   function popularKeywords(){
     // Ko'rinadigan (tarjima) shaklni sanaymiz — chip saytdagi yorliq bilan bir xil
@@ -276,7 +268,7 @@
   // #search yoki ?gs=1 bilan kelinsa — qidiruv panelini avtomatik ochamiz
   // (eski qidiruv havolalari / yo'naltirishlar uchun ishonchli, 404 bermaydi)
   function maybeAutoOpen(){
-    try{ if(location.hash==='#search' || /[?&]gs=1(&|$)/.test(location.search)) setTimeout(open, 60); }catch(e){}
+    try{ if(location.hash==='#search' || /[?&]gs=1(&|$)/.test(location.search)) setTimeout(open, 60); }catch{}
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', maybeAutoOpen); else maybeAutoOpen();
 

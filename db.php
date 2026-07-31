@@ -252,6 +252,25 @@ function provision($pdo) {
     INDEX(at)
   )$tail");
 
+  /* Diagnostika jurnali — brauzerdagi JS/tarmoq xatolari va serverdagi PHP
+     xatolari. `fp` (fingerprint) bir xil xatoni takrorlab yozmaslik uchun:
+     yangi hodisa kelganda `hits` oshiriladi, `last_at` yangilanadi. */
+  $pdo->exec("CREATE TABLE IF NOT EXISTS error_log (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    fp CHAR(32) NOT NULL,
+    kind VARCHAR(20) NOT NULL,
+    message VARCHAR(500) NOT NULL,
+    source VARCHAR(300), line INT, col INT,
+    stack TEXT, page VARCHAR(300), ua VARCHAR(300),
+    cause VARCHAR(300),
+    hits INT NOT NULL DEFAULT 1,
+    resolved TINYINT(1) NOT NULL DEFAULT 0,
+    first_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_fp (fp),
+    INDEX(last_at), INDEX(kind), INDEX(resolved)
+  )$tail");
+
   migrate($pdo);
 }
 

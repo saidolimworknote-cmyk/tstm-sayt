@@ -13,7 +13,7 @@
 (function (w) {
   const KEY = 'tstm_site_lang';
   let lang = 'uz';
-  try { lang = localStorage.getItem(KEY) || 'uz'; } catch (e) {}
+  try { lang = localStorage.getItem(KEY) || 'uz'; } catch {}
   if (['uz','ru','en'].indexOf(lang) < 0) lang = 'uz';
 
   const MONTHS = {
@@ -257,8 +257,6 @@
     expert_pubs:    { uz: 'Nashrlari', ru: 'Публикации', en: 'Publications' },
     expert_none_pub:{ uz: 'Hozircha nashr yo‘q', ru: 'Пока нет публикаций', en: 'No publications yet' },
     expert_hours:   { uz: 'Qabul vaqti', ru: 'Приёмные часы', en: 'Office hours' },
-    expert_articles:{ uz: 'Maqola va tahlillari', ru: 'Статьи и аналитика', en: 'Articles & analysis' },
-    expert_none_art:{ uz: 'Hozircha maqola yo\u2018q', ru: 'Пока нет статей', en: 'No articles yet' },
     views_label:   { uz: 'ko\u2018rishlar', ru: 'просмотров', en: 'views' },
     sub_title:     { uz: 'Yangiliklarga obuna bo\u2018ling', ru: 'Подпишитесь на новости', en: 'Subscribe to updates' },
     sub_text:      { uz: 'Markazning so\u2018nggi tahlil va yangiliklarini e\u2018lon qilinishi bilan e-pochtangizga oling.', ru: 'Получайте свежую аналитику и новости центра на вашу почту.', en: 'Get the center\u2019s latest analysis and news delivered to your inbox.' },
@@ -370,7 +368,7 @@
   }
   function setLang(l) {
     if (['uz','ru','en'].indexOf(l) < 0) return;
-    try { localStorage.setItem(KEY, l); } catch (e) {}
+    try { localStorage.setItem(KEY, l); } catch {}
     lang = l;
     location.reload();
   }

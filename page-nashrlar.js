@@ -10,7 +10,9 @@
       sNew:{uz:"Avval yangi", ru:"Сначала новые", en:"Newest first"},
       sOld:{uz:"Avval eski", ru:"Сначала старые", en:"Oldest first"},
       sAz: {uz:"Nomi (A–Z)", ru:"Название (А–Я)", en:"Title (A–Z)"},
-      cnt: {uz:"ta nashr", ru:"публикаций", en:"publications"}
+      cnt: {uz:"ta nashr", ru:"публикаций", en:"publications"},
+      authL:{uz:"Ekspert nashrlari", ru:"Публикации эксперта", en:"Expert’s publications"},
+      clearL:{uz:"Barcha nashrlar", ru:"Все публикации", en:"All publications"}
     };
     const tt = k => (TT[k][L] || TT[k].uz);
 
@@ -27,6 +29,11 @@
 
     let cat = (Site.qs('cat')||'').replace(/\+/g,' '); if(cats.indexOf(cat)<0) cat='';
     let type='', q='', sort='new';
+    // Ekspert sahifasidan "Barchasini ko'rish" -> ?author=<ism> bilan keladi:
+    // faqat shu muallif nashrlarini ko'rsatamiz. Muallif maydonida ism+unvon
+    // bo'lishi mumkin, shuning uchun ikki tomonlama "ichida bormi" tekshiruvi.
+    const norm = s => String(s||'').toLowerCase().replace(/\s+/g,' ').trim();
+    const author = (Site.qs('author')||'').replace(/\+/g,' ').trim();
 
     qEl.placeholder = tt('ph');
     typeSel.innerHTML = `<option value="">${esc(tt('allT'))}</option>` + types.map(t=>`<option value="${esc(t)}">${esc(ml(t))}</option>`).join('');
@@ -43,6 +50,7 @@
     }
     function filtered(){
       let items = allPubs.slice();
+      if(author){ const n = norm(author); items = items.filter(p=>{ const a = norm(p.author); return a && (a.indexOf(n) > -1 || n.indexOf(a) > -1); }); }
       if(cat)  items = items.filter(p=>p.category===cat);
       if(type) items = items.filter(p=>p.type===type);
       if(q){
@@ -79,6 +87,15 @@
         </div>`;
       }).join('');
       Site.initReveal();
+    }
+
+    // Ekspertdan kelgan bo'lsa — kimning nashrlari ekanini ko'rsatuvchi chip + tozalash
+    if(author){
+      const note = document.createElement('div');
+      note.className = 'author-note';
+      note.innerHTML = `<span class="an-lab">${esc(tt('authL'))}: <b>${esc(author)}</b></span>`
+        + `<a class="an-clear" href="nashrlar.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>${esc(tt('clearL'))}</a>`;
+      countEl.parentNode.insertBefore(note, countEl);
     }
 
     qEl.oninput = ()=>{ q=qEl.value.trim(); render2(); };

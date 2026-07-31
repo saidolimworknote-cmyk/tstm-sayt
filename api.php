@@ -43,6 +43,34 @@ $LOGIN_LOCK_SECONDS = 600;
 
 $action = isset($_GET['action']) ? $_GET['action'] : '';
 
+/* -------------------- PHP xatolarini jurnalga olish --------------------
+   `error_reporting(0)` xatolarni foydalanuvchiga KO'RSATMAYDI (axborot oqishi
+   himoyasi, TZ 4.3.1) — lekin ular ko'rinmay yo'qolib ketmasligi kerak. Shu
+   ilgaklar ularni `error_log` jadvaliga yozadi; admin panelda ko'rinadi.
+   Xato matni MIJOZGA hech qachon qaytarilmaydi. */
+set_error_handler(function ($no, $str, $file, $line) {
+  global $pdo;
+  // @ bilan bostirilgan (masalan @mkdir) xatolarni e'tiborsiz qoldiramiz
+  if (!(error_reporting() & $no) && error_reporting() !== 0) return false;
+  $type = ($no & (E_WARNING | E_USER_WARNING)) ? 'php-warn' : 'php';
+  log_error($pdo, $type, $str, basename((string)$file), (int)$line, 0, '', 'api.php?action=' . $GLOBALS['action']);
+  return true; // standart PHP chiqishini to'sib qolamiz
+});
+set_exception_handler(function ($ex) {
+  global $pdo;
+  log_error($pdo, 'php-fatal', $ex->getMessage(), basename($ex->getFile()), $ex->getLine(), 0,
+    $ex->getTraceAsString(), 'api.php?action=' . $GLOBALS['action']);
+  jexit(['ok' => false, 'error' => 'server_error'], 500); // tafsilot mijozga chiqmaydi
+});
+register_shutdown_function(function () {
+  $e = error_get_last();
+  if ($e && ($e['type'] & (E_ERROR | E_PARSE | E_CORE_ERROR | E_COMPILE_ERROR))) {
+    global $pdo;
+    log_error($pdo, 'php-fatal', $e['message'], basename((string)$e['file']), (int)$e['line'], 0, '',
+      'api.php?action=' . $GLOBALS['action']);
+  }
+});
+
 /* -------------------- Helperlar -------------------- */
 function jexit($arr, $code = 200) { http_response_code($code); echo json_encode($arr, JSON_UNESCAPED_UNICODE); exit; }
 function body_json() {
@@ -63,6 +91,33 @@ function require_csrf() {
     jexit(['ok' => false, 'error' => 'bad_csrf'], 403);
   }
 }
+/* -------------------- Diagnostika jurnali --------------------
+   Bir xil xato takror yozilmaydi: `fp` (barmoq izi) bo'yicha `hits` oshiriladi.
+   Jurnalga yozish HECH QACHON javobni buzmasligi kerak — shuning uchun butun
+   tana try/catch ichida va xatolik jimgina yutiladi. */
+function log_error($pdo, $kind, $message, $source = '', $line = 0, $col = 0, $stack = '', $page = '', $cause = '') {
+  try {
+    if (!$pdo) return;
+    $message = mb_substr((string)$message, 0, 500);
+    $fp = md5($kind . '|' . $message . '|' . $source . '|' . $line);
+    $ua = isset($_SERVER['HTTP_USER_AGENT']) ? mb_substr((string)$_SERVER['HTTP_USER_AGENT'], 0, 300) : '';
+    $st = $pdo->prepare(
+      "INSERT INTO error_log (fp, kind, message, source, line, col, stack, page, ua, cause)
+       VALUES (:fp,:k,:m,:s,:l,:c,:st,:p,:ua,:cz)
+       ON DUPLICATE KEY UPDATE hits = hits + 1, last_at = CURRENT_TIMESTAMP, resolved = 0");
+    $st->execute([
+      ':fp' => $fp, ':k' => mb_substr((string)$kind, 0, 20), ':m' => $message,
+      ':s' => mb_substr((string)$source, 0, 300), ':l' => (int)$line, ':c' => (int)$col,
+      ':st' => mb_substr((string)$stack, 0, 2000), ':p' => mb_substr((string)$page, 0, 300),
+      ':ua' => $ua, ':cz' => mb_substr((string)$cause, 0, 300)
+    ]);
+    // Jurnal cheksiz o'smasin — 90 kundan eski hal qilinganlar tozalanadi (~1% hollarda)
+    if (mt_rand(1, 100) === 1) {
+      $pdo->exec("DELETE FROM error_log WHERE last_at < (NOW() - INTERVAL 90 DAY)");
+    }
+  } catch (Exception $e) {}
+}
+
 function audit($pdo, $action, $coll = '', $id = '') {
   try {
     $st = $pdo->prepare("INSERT INTO audit_log (action, coll, item_id, ip) VALUES (:a,:c,:i,:ip)");
@@ -267,6 +322,9 @@ switch ($action) {
   }
 
   case 'logout':
+    // Faqat haqiqiy sessiya bo'lgandagina yozamiz — aks holda autentifikatsiyasiz
+    // so'rovlar bilan jurnalni to'ldirib yuborish mumkin bo'lardi.
+    if (!empty($_SESSION['tstm_admin'])) audit($pdo, 'logout');
     unset($_SESSION['tstm_admin']);
     session_regenerate_id(true);
     echo json_encode(['ok' => true]);
@@ -292,6 +350,8 @@ switch ($action) {
     if (!is_dir($dir)) @mkdir($dir, 0775, true);
     $name = 'img_' . date('Ymd_His') . '_' . substr(md5($bin . mt_rand()), 0, 8) . '.' . $ext;
     if (file_put_contents($dir . '/' . $name, $bin, LOCK_EX) === false) jexit(['ok' => false, 'error' => 'write'], 500);
+    // Audit: fayl serverга yozilgandan keyin, jexit'dan OLDIN (jexit darhol to'xtatadi).
+    audit($pdo, 'upload', 'image', $name);
     jexit(['ok' => true, 'path' => 'uploads/' . $name]);
     break;
   }
@@ -317,6 +377,7 @@ switch ($action) {
     if (!is_dir($dir)) @mkdir($dir, 0775, true);
     $name = 'doc_' . date('Ymd_His') . '_' . substr(md5($bin . mt_rand()), 0, 8) . '.' . $ext;
     if (file_put_contents($dir . '/' . $name, $bin, LOCK_EX) === false) jexit(['ok' => false, 'error' => 'write'], 500);
+    audit($pdo, 'upload', 'document', $name);
     jexit(['ok' => true, 'path' => 'uploads/' . $name]);
     break;
   }
@@ -331,6 +392,7 @@ switch ($action) {
     if (!is_dir($dir)) @mkdir($dir, 0775, true);
     $name = 'info_' . date('Ymd_His') . '_' . substr(md5($html . mt_rand()), 0, 8) . '.html';
     if (file_put_contents($dir . '/' . $name, $html, LOCK_EX) === false) jexit(['ok' => false, 'error' => 'write'], 500);
+    audit($pdo, 'upload', 'infographic', $name);
     jexit(['ok' => true, 'path' => 'uploads/' . $name]);
     break;
   }
@@ -471,6 +533,96 @@ switch ($action) {
     $out = [];
     foreach ($rows as $r) $out[$r['k']] = (int)$r['cnt'];
     echo json_encode($out, JSON_UNESCAPED_UNICODE);
+    break;
+  }
+
+  case 'audit_log': {
+    // FAQAT admin: kim/qachon/nima o'zgartirdi jurnali (davlat auditi talabi).
+    // O'qish amali — CSRF talab qilinmaydi, lekin sessiya majburiy.
+    require_auth();
+    // limit: 1..500 (standart 200). Ixtiyoriy `action` filtri (faqat harf/pastki chiziq).
+    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 200;
+    if ($limit < 1) $limit = 1; if ($limit > 500) $limit = 500;
+    $fAct = isset($_GET['act']) ? preg_replace('/[^a-z_]/i', '', (string)$_GET['act']) : '';
+    if ($fAct !== '') {
+      $st = $pdo->prepare("SELECT action, coll, item_id, ip, at FROM audit_log WHERE action = :a ORDER BY id DESC LIMIT $limit");
+      $st->execute([':a' => $fAct]);
+    } else {
+      $st = $pdo->query("SELECT action, coll, item_id, ip, at FROM audit_log ORDER BY id DESC LIMIT $limit");
+    }
+    $rows = $st->fetchAll();
+    // Amallar ro'yxati (filtr uchun) — jadvaldagi mavjud turlar
+    $acts = $pdo->query("SELECT DISTINCT action FROM audit_log ORDER BY action")->fetchAll(PDO::FETCH_COLUMN);
+    $total = (int)$pdo->query("SELECT COUNT(*) FROM audit_log")->fetch(PDO::FETCH_COLUMN);
+    echo json_encode(['ok' => true, 'rows' => $rows, 'actions' => $acts, 'total' => $total], JSON_UNESCAPED_UNICODE);
+    break;
+  }
+
+  case 'client_error': {
+    // OMMAVIY: brauzerdagi xatoni qabul qiladi (oddiy tashrifchida ham xato
+    // yuz berishi mumkin, shuning uchun auth talab qilinmaydi).
+    // Suiiste'moldan himoya: IP bo'yicha soatiga 60 ta yozuv.
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') jexit(['ok' => false], 405);
+    // Suiiste'mol chegarasi: soatiga 500 dan ortiq YANGI xato turi yozilmasin.
+    // IP saqlanmaydi — jurnalda shaxsiy ma'lumot bo'lmasligi uchun ataylab.
+    try {
+      $cnt = (int)$pdo->query("SELECT COUNT(*) FROM error_log WHERE last_at > (NOW() - INTERVAL 1 HOUR)")->fetch(PDO::FETCH_COLUMN);
+      if ($cnt > 500) jexit(['ok' => true, 'throttled' => true]);
+    } catch (Exception $e) {}
+    $b = body_json();
+    $msg = isset($b['message']) ? (string)$b['message'] : '';
+    if ($msg === '') jexit(['ok' => false, 'error' => 'no message'], 400);
+    $kind = isset($b['kind']) ? preg_replace('/[^a-z-]/i', '', (string)$b['kind']) : 'client';
+    log_error($pdo, $kind !== '' ? $kind : 'client', $msg,
+      isset($b['source']) ? (string)$b['source'] : '',
+      isset($b['line']) ? (int)$b['line'] : 0,
+      isset($b['col']) ? (int)$b['col'] : 0,
+      isset($b['stack']) ? (string)$b['stack'] : '',
+      isset($b['page']) ? (string)$b['page'] : '',
+      isset($b['cause']) ? (string)$b['cause'] : '');
+    jexit(['ok' => true]);
+    break;
+  }
+
+  case 'error_log': {
+    // FAQAT admin: diagnostika jurnalini o'qish. O'qish — CSRF shart emas.
+    require_auth();
+    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 200;
+    if ($limit < 1) $limit = 1; if ($limit > 500) $limit = 500;
+    $kind = isset($_GET['kind']) ? preg_replace('/[^a-z-]/i', '', (string)$_GET['kind']) : '';
+    $showResolved = isset($_GET['resolved']) && $_GET['resolved'] === '1';
+    $where = $showResolved ? '1=1' : 'resolved = 0';
+    if ($kind !== '') {
+      $st = $pdo->prepare("SELECT id, fp, kind, message, source, line, col, stack, page, cause, hits, resolved, first_at, last_at
+                           FROM error_log WHERE $where AND kind = :k ORDER BY last_at DESC LIMIT $limit");
+      $st->execute([':k' => $kind]);
+    } else {
+      $st = $pdo->query("SELECT id, fp, kind, message, source, line, col, stack, page, cause, hits, resolved, first_at, last_at
+                         FROM error_log WHERE $where ORDER BY last_at DESC LIMIT $limit");
+    }
+    $rows = $st->fetchAll();
+    $kinds = $pdo->query("SELECT DISTINCT kind FROM error_log ORDER BY kind")->fetchAll(PDO::FETCH_COLUMN);
+    $open  = (int)$pdo->query("SELECT COUNT(*) FROM error_log WHERE resolved = 0")->fetch(PDO::FETCH_COLUMN);
+    $total = (int)$pdo->query("SELECT COUNT(*) FROM error_log")->fetch(PDO::FETCH_COLUMN);
+    echo json_encode(['ok' => true, 'rows' => $rows, 'kinds' => $kinds, 'open' => $open, 'total' => $total], JSON_UNESCAPED_UNICODE);
+    break;
+  }
+
+  case 'error_resolve': {
+    // FAQAT admin: xatoni "hal qilindi" deb belgilash yoki jurnalni tozalash.
+    require_auth(); require_csrf();
+    $b = $_GET;
+    if (isset($b['all']) && $b['all'] === '1') {
+      $pdo->exec("UPDATE error_log SET resolved = 1");
+      audit($pdo, 'settings', 'error_log', 'resolve_all');
+      jexit(['ok' => true]);
+    }
+    $id = isset($b['id']) ? (int)$b['id'] : 0;
+    if ($id <= 0) jexit(['ok' => false, 'error' => 'bad id'], 400);
+    $st = $pdo->prepare("UPDATE error_log SET resolved = 1 WHERE id = :i");
+    $st->execute([':i' => $id]);
+    audit($pdo, 'settings', 'error_log', (string)$id);
+    jexit(['ok' => true]);
     break;
   }
 

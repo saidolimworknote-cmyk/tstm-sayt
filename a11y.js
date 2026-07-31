@@ -5,7 +5,7 @@
 (function (w) {
   var KEY = 'tstm_a11y';
   var LKEY = 'tstm_site_lang';
-  var lang = (function(){ try { return localStorage.getItem(LKEY) || 'uz'; } catch(e){ return 'uz'; } })();
+  var lang = (function(){ try { return localStorage.getItem(LKEY) || 'uz'; } catch{ return 'uz'; } })();
 
   var STR = {
     title:    { uz: 'Maxsus imkoniyatlar', ru: 'Специальные возможности', en: 'Accessibility' },
@@ -31,8 +31,8 @@
   function t(k){ var o = STR[k]; return o ? (o[lang] || o.uz) : k; }
 
   var defaults = { scheme: 'def', font: 2, scale: 0, reader: false, voice: 'male' };
-  function load(){ try { return Object.assign({}, defaults, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch(e){ return Object.assign({}, defaults); } }
-  function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
+  function load(){ try { return Object.assign({}, defaults, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch{ return Object.assign({}, defaults); } }
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch{} }
   var state = load();
 
   var FONTS = [0.85, 0.92, 1, 1.12, 1.25, 1.4]; // 6 pog'ona (slider)
@@ -61,13 +61,13 @@
     var el = document.documentElement;
     el.setAttribute('data-a11y-scheme', state.scheme);
     // Tashrifchi tanlovi → sayt standart temasi (site-common hisoblab qo'yadi) → light
-    var realTheme = 'light'; try { realTheme = localStorage.getItem('tstm_site_theme') || window.TSTM_SITE_THEME || 'light'; } catch(e){}
+    var realTheme = 'light'; try { realTheme = localStorage.getItem('tstm_site_theme') || window.TSTM_SITE_THEME || 'light'; } catch{}
     if (state.scheme === 'gray') el.setAttribute('data-theme','dark');
     else if (state.scheme === 'contrast' || state.scheme === 'noimg') el.setAttribute('data-theme','light');
     else el.setAttribute('data-theme', realTheme);
-    try { document.body.style.zoom = SCALES[state.scale] || 1; } catch(e){}
+    try { document.body.style.zoom = SCALES[state.scale] || 1; } catch{}
     el.classList.toggle('a11y-active', state.scheme !== 'def' || state.font !== 2 || state.scale !== 0);
-    try { scaleFonts(); } catch(e){}
+    try { scaleFonts(); } catch{}
   }
 
   // ---- styles ----
@@ -197,8 +197,8 @@
 
   // available browser voices
   var voices = [];
-  function loadVoices(){ try { voices = window.speechSynthesis ? speechSynthesis.getVoices() : []; } catch(e){ voices = []; } }
-  if (window.speechSynthesis) { loadVoices(); try { speechSynthesis.onvoiceschanged = loadVoices; } catch(e){} }
+  function loadVoices(){ try { voices = window.speechSynthesis ? speechSynthesis.getVoices() : []; } catch{ voices = []; } }
+  if (window.speechSynthesis) { loadVoices(); try { speechSynthesis.onvoiceschanged = loadVoices; } catch{} }
   function pickVoice(){
     if (!voices.length) loadVoices();
     var pref = lang === 'ru' ? 'ru' : (lang === 'en' ? 'en' : 'uz');
@@ -220,7 +220,7 @@
       u.lang = v ? v.lang : (lang === 'ru' ? 'ru-RU' : lang === 'en' ? 'en-US' : 'uz-UZ');
       u.rate = 0.96;
       speechSynthesis.speak(u);
-    } catch(e){}
+    } catch{}
   }
   // reader click handler
   var readerBound = false;
@@ -234,7 +234,7 @@
     state.reader = on;
     document.documentElement.classList.toggle('a11y-reading-on', on);
     if (on && !readerBound) { document.addEventListener('click', readerClick, true); readerBound = true; }
-    if (!on) { try { speechSynthesis.cancel(); } catch(e){} document.querySelectorAll('.a11y-read-hl').forEach(function(x){x.classList.remove('a11y-read-hl');}); }
+    if (!on) { try { speechSynthesis.cancel(); } catch{} document.querySelectorAll('.a11y-read-hl').forEach(function(x){x.classList.remove('a11y-read-hl');}); }
   }
 
   // ---- Google Translate (tekin widget) ----
@@ -242,7 +242,7 @@
   function ensureGoogleTranslate(cb){
     if (window.__gtLoaded) { cb && cb(); return; }
     window.googleTranslateElementInit = function(){
-      try { new google.translate.TranslateElement({ pageLanguage: lang, includedLanguages: GT_LANGS, autoDisplay: false }, 'a11y-gt-host'); } catch(e){}
+      try { new google.translate.TranslateElement({ pageLanguage: lang, includedLanguages: GT_LANGS, autoDisplay: false }, 'a11y-gt-host'); } catch{}
       window.__gtLoaded = true; cb && cb();
     };
     var sc = document.createElement('script');
@@ -310,8 +310,8 @@
     document.body.appendChild(ov); document.body.appendChild(p);
 
     var lastFocus = null;
-    function open(opener){ lastFocus = opener || document.activeElement; p.classList.add('open'); ov.classList.add('open'); setTimeout(function(){ try { p.querySelector('.x').focus(); } catch(e){} }, 60); }
-    function close(){ p.classList.remove('open'); ov.classList.remove('open'); try { if (lastFocus && lastFocus.focus) lastFocus.focus(); } catch(e){} }
+    function open(opener){ lastFocus = opener || document.activeElement; p.classList.add('open'); ov.classList.add('open'); setTimeout(function(){ try { p.querySelector('.x').focus(); } catch{} }, 60); }
+    function close(){ p.classList.remove('open'); ov.classList.remove('open'); try { if (lastFocus && lastFocus.focus) lastFocus.focus(); } catch{} }
     ov.addEventListener('click', close);
     p.querySelector('.x').addEventListener('click', close);
     // Escape bilan yopish (WCAG)
@@ -361,7 +361,7 @@
     // reset
     p.querySelector('#a11y-reset').addEventListener('click', function(){
       state = Object.assign({}, defaults); save(); apply(); setReader(false);
-      try { document.body.style.zoom = 1; } catch(e){}
+      try { document.body.style.zoom = 1; } catch{}
       // refresh controls
       p.querySelectorAll('.a11y-ic[data-sch]').forEach(function(x){ x.classList.toggle('on', x.dataset.sch===state.scheme); });
       p.querySelectorAll('.a11y-range').forEach(function(r){

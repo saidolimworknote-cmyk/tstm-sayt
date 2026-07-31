@@ -270,18 +270,26 @@
   .two-col>*{min-width:0;}
 
   /* media grid */
-  .media-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;}
-  .media-item{position:relative;border:1px solid var(--line);border-radius:var(--r-s);overflow:hidden;background:var(--panel-2);aspect-ratio:4/3;}
-  .media-item img{width:100%;height:100%;object-fit:cover;}
-  .media-item .ov{position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.6));opacity:0;transition:.15s;display:flex;align-items:flex-end;padding:10px;gap:6px;}
-  .media-item:hover .ov{opacity:1;}
-  .media-item .ov .icon-btn{background:rgba(255,255,255,.92);color:#222;border:0;width:30px;height:30px;}
-  .media-item .nm{position:absolute;left:0;right:0;bottom:0;font-size:10px;color:#fff;padding:8px 10px;font-family:var(--mono);pointer-events:none;opacity:0;}
-  .media-item:hover .nm{opacity:1;}
-  .media-item.video .vbadge{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:46px;height:46px;border-radius:50%;background:rgba(13,68,131,.92);color:#fff;display:flex;align-items:center;justify-content:center;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.4);}
-  .media-item.video .vbadge svg{width:18px;height:18px;margin-left:2px;}
-  .media-item .vthumb{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);background:var(--panel-2);}
-  .media-item .vthumb svg{width:30px;height:30px;}
+  /* Media kutubxona — gorizontal ro'yxat (saytdagi ekspert kartasi uslubi):
+     chapda rasm, o'rtada matn/ma'lumot, o'ngda amallar. */
+  .media-grid{display:flex;flex-direction:column;gap:10px;}
+  .media-item{position:relative;display:flex;align-items:center;gap:16px;border:1px solid var(--line);border-radius:var(--r-s);background:var(--panel-2);padding:10px 14px;transition:border-color .15s, box-shadow .15s;}
+  .media-item:hover{border-color:var(--accent);box-shadow:0 3px 14px rgba(0,0,0,.07);}
+  .media-item .thumb{flex:0 0 auto;width:150px;height:92px;border-radius:8px;overflow:hidden;background:var(--panel);display:flex;align-items:center;justify-content:center;position:relative;}
+  .media-item .thumb img{width:100%;height:100%;object-fit:cover;}
+  .media-item .info{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:6px;}
+  .media-item .nm{font-size:14.5px;font-weight:600;color:var(--ink);line-height:1.35;word-break:break-word;}
+  .media-item .meta{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:12px;color:var(--muted);font-family:var(--mono);align-items:center;}
+  .media-item .meta .tag{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:20px;background:var(--accent-soft,rgba(13,68,131,.1));color:var(--accent);font-size:11px;}
+  .media-item .meta .tag svg{width:12px;height:12px;}
+  .media-item .meta .url{max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;opacity:.85;}
+  .media-item .row-act{flex:0 0 auto;display:flex;gap:8px;}
+  .media-item.video .vbadge{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:50%;background:rgba(13,68,131,.92);color:#fff;display:flex;align-items:center;justify-content:center;pointer-events:none;box-shadow:0 3px 12px rgba(0,0,0,.4);}
+  .media-item.video .vbadge svg{width:15px;height:15px;margin-left:2px;}
+  .media-item .thumb .vthumb{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);}
+  .media-item .thumb .vthumb svg{width:26px;height:26px;}
+  .media-item .cnt-badge{position:absolute;top:6px;right:6px;background:rgba(8,12,16,.62);color:#fff;border-radius:999px;padding:2px 9px;font-size:11px;font-family:var(--mono);}
+  @media(max-width:640px){ .media-item{flex-wrap:wrap;} .media-item .thumb{width:110px;height:70px;} .media-item .info{flex-basis:60%;} }
 
   /* banner settings grid */
   .banner-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
@@ -392,7 +400,8 @@
 
 <div id="toasts"></div>
 
-<script src="admin-store.js?v=48"></script>
-<script src="admin-ui.js?v=55"></script>
+<script src="diag.js?v=1"></script>
+<script src="admin-store.js?v=50"></script>
+<script src="admin-ui.js?v=60"></script>
 </body>
 </html>

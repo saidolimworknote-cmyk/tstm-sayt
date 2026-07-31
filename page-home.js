@@ -48,7 +48,7 @@
       // data-i18n olib tashlanadi — aks holda keyingi I18N.translate() ustidan yozadi
       document.querySelectorAll('[data-i18n="org_name"]').forEach(function(el){ el.removeAttribute('data-i18n'); el.textContent = top; });
       document.querySelectorAll('[data-i18n="org_tagline"]').forEach(function(el){ el.removeAttribute('data-i18n'); el.textContent = bot; });
-    } catch(e){}
+    } catch{}
   })();
   // ---- brend matnini header'dagi joyga moslash ----
   // Nom sozlamadan keladi, uzunligi oldindan noma'lum. Standart o'zbekcha nom
@@ -72,7 +72,7 @@
         size -= 0.5;
         b.style.fontSize = size+'px'; if (sm) sm.style.fontSize = size+'px';
       }
-    } catch(e){}
+    } catch{}
   }
   requestAnimationFrame(fitBrand);
   var _fitT; window.addEventListener('resize', function(){ clearTimeout(_fitT); _fitT = setTimeout(fitBrand, 150); });
@@ -87,7 +87,7 @@
       if (localStorage.getItem(SEEN)) return;
       var _t = parseInt(localStorage.getItem(SNOOZE)||'0',10);
       if (_t && Date.now() < _t) return;   // xatodan keyin yopilgan — 1 kun kutamiz
-    } catch(e){}
+    } catch{}
     var T=function(k){ return window.I18N? I18N.t(k):k; };
     setTimeout(function(){
       var ov=document.createElement('div');
@@ -106,7 +106,7 @@
       var closed=false;
       function close(dismiss){
         if(closed) return; closed=true;
-        try{ if(dismiss!==false) localStorage.setItem(SEEN,'1'); else localStorage.setItem(SNOOZE,String(Date.now()+86400000)); }catch(e){}
+        try{ if(dismiss!==false) localStorage.setItem(SEEN,'1'); else localStorage.setItem(SNOOZE,String(Date.now()+86400000)); }catch{}
         document.removeEventListener('keydown',onKey,true);
         ov.style.opacity='0'; setTimeout(function(){ ov.remove(); },300);
       }
@@ -118,7 +118,7 @@
       function showErr(k){
         errEl.textContent=T(k); errEl.style.display='block';
         input.style.borderColor='#c0392b';
-        try{ input.focus(); }catch(e){}   // tugma disabled bo'lganda fokus yo'qolmasin
+        try{ input.focus(); }catch{}   // tugma disabled bo'lganda fokus yo'qolmasin
       }
       document.body.appendChild(ov); requestAnimationFrame(function(){ ov.style.opacity='1'; });
       document.addEventListener('keydown',onKey,true);
@@ -140,7 +140,7 @@
             okDone=true;
             form.style.display='none'; errEl.style.display='none';
             ov.querySelector('[data-ok]').style.display='block';
-            try{ localStorage.setItem(SEEN,'1'); }catch(err){}
+            try{ localStorage.setItem(SEEN,'1'); }catch{}
             setTimeout(function(){ close(true); },2600);
             return;
           }
@@ -175,7 +175,7 @@
     var _defLogo = {uz:'logo-mark.png',ru:'logo-mark-ru.png',en:'logo-mark-en.png'};
     var _logo = (_st.logos && _st.logos[_lg]) || _st.logo || _defLogo[_lg] || _defLogo.uz;
     if (_logo) document.querySelectorAll('.brand-logo').forEach(function(img){ img.src = _logo; });
-  } catch(e){}
+  } catch{}
   // ---- aloqa ma'lumotlari (sozlamalardan — header util + footer) ----
   try {
     var _cs = (window.Store && Store.settings && Store.settings()) || {};
@@ -197,7 +197,7 @@
       if (p[1] && p[1] !== '#'){ a.href = p[1]; a.style.display=''; }
       else { a.style.display='none'; }
     });
-  } catch(e){}
+  } catch{}
   // ---- theme (light/dark) with persistence ----
   const THEME_KEY = 'tstm_site_theme';
   const sunIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M4.4 4.4l1.4 1.4M18.2 18.2l1.4 1.4M2.5 12h2M19.5 12h2M4.4 19.6l1.4-1.4M18.2 5.8l1.4-1.4"/></svg>';
@@ -209,11 +209,11 @@
   }
   // Tashrifchi o'zi tanlagan tema ustun; tanlamagan bo'lsa — admindagi standart tema.
   let siteTheme = 'light';
-  try { siteTheme = localStorage.getItem(THEME_KEY) || ((window.Store && Store.settings && Store.settings()) || {}).theme || 'light'; } catch(e){}
+  try { siteTheme = localStorage.getItem(THEME_KEY) || ((window.Store && Store.settings && Store.settings()) || {}).theme || 'light'; } catch{}
   applySiteTheme(siteTheme);
   document.querySelectorAll('.theme-tog').forEach(b => b.addEventListener('click', () => {
     siteTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    try { localStorage.setItem(THEME_KEY, siteTheme); } catch(e){}
+    try { localStorage.setItem(THEME_KEY, siteTheme); } catch{}
     applySiteTheme(siteTheme);
   }));
 
@@ -230,7 +230,6 @@
   // ---- build hero from latest 4 published news (CMS-connected) ----
   const mlGet = (v) => { if (v && typeof v === 'object') { const L = (window.I18N ? I18N.lang : 'uz'); return v[L] || v.uz || v.ru || v.en || ''; } return (window.I18N ? I18N.tl(v || '') : (v || '')); };
   const fmtDate = (d) => { if(!d) return ''; const p = d.split('-'); return p[2]+'.'+p[1]+'.'+p[0]; };
-  const ctaText = (window.I18N ? I18N.t('hero_cta') : "Batafsil o'qish");
   const ctaMore = (window.I18N ? I18N.t('read_more') : "Batafsil o'qish");
   // cover'siz slaydlar uchun boy institutsional fon (gradient background-IMAGE'ga beriladi)
   const slotSolid = '#0a2236'; // qattiq zaxira rang (background-color uchun — gradient bu yerda ishlamaydi)
@@ -253,7 +252,7 @@
       if(slides.length) return slides.map(s => ({
         cat: s.category || '', title: s.headline, href: s.link || '', img: s.image || '', date: ''
       }));
-    } catch(e){}
+    } catch{}
     try {
       return Store.all('news')
         .filter(n => n.status === 'published')
@@ -263,7 +262,7 @@
           cat: n.category || 'Yangilik', title: n.title, href: 'yangilik.html?id='+n.id,
           img: n.cover || '', date: n.date || ''
         }));
-    } catch(e){ return []; }
+    } catch{ return []; }
   }
   function buildHero(){
     const items = heroItems();
@@ -280,15 +279,17 @@
       return;
     }
     wrapEl.innerHTML = items.map((it,i) => {
+      // safeUrl javascript:/data: sxemalarini bloklaydi; ' va " CSS url() va style
+      // atributidan chiqib ketishning oldini oladi.
       const bg = it.img
-        ? 'background-image:url(\''+it.img.replace(/'/g,"%27")+'\');--slot-bg:'+slotSolid
+        ? 'background-image:url(\''+safeUrl(it.img).replace(/'/g,"%27").replace(/"/g,"%22")+'\');--slot-bg:'+slotSolid
         : 'background-image:'+heroFallbacks[i%heroFallbacks.length]+';--slot-bg:'+slotSolid;
       // sana faqat yangiliklarda bor \u2014 slaydlarda yorliqning o'zi qoladi
-      const kick = [mlGet(it.cat), fmtDate(it.date)].filter(Boolean).join(' \u00b7 ');
-      const h2 = '<h2>'+mlGet(it.title)+'</h2>';
+      const kick = [esc(mlGet(it.cat)), fmtDate(it.date)].filter(Boolean).join(' \u00b7 ');
+      const h2 = '<h2>'+esc(mlGet(it.title))+'</h2>';
       // havolasi yo'q (yoki '#') slayd bosiladigan bo'lmasin
       const head = (it.href && it.href !== '#')
-        ? '<a class="slide-h2link" href="'+it.href.replace(/"/g,'%22')+'">'+h2+'</a>'
+        ? '<a class="slide-h2link" href="'+safeUrl(it.href)+'">'+h2+'</a>'
         : h2;
       return '<div class="slide'+(i===0?' on':'')+'" data-i="'+i+'">'
         + '<div class="heroimg" style="'+bg+'"></div>'
@@ -307,13 +308,27 @@
   // ---- render homepage sections from Store (CMS-connected) ----
   // Umumiy yordamchilar (ilgari faqat ayrim bloklar ichida mahalliy e'lon qilingan edi)
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+  // Lokal safeUrl — site-common.js'dagi Site.safeUrl bilan bir xil mantiq (bu fayl
+  // alohida nusxa). MUHIM: Site.safeUrl ISHLATMANG — bu skript buildHero()/renderHome()ni
+  // SINXRON chaqiradi, o'sha payt window.Site hali yuklanmagan bo'lishi mumkin
+  // (ReferenceError butun sahifani sindiradi). Lokal nusxa Site'ga bog'liq emas.
+  function safeUrl(u){
+    const s = String(u==null?'':u).trim();
+    if(!s) return '';
+    const probe = s.split('').filter(ch=>ch>' ').join('').toLowerCase();
+    if(/^(javascript|vbscript|file):/.test(probe)) return '';
+    if(/^data:/.test(probe) && !/^data:image\//.test(probe)) return '';
+    return esc(s);
+  }
   function T(k){ return window.I18N ? I18N.t(k) : k; }
   function mlg(v){ if (v && typeof v==='object'){ const L=(window.I18N?I18N.lang:'uz'); return v[L]||v.uz||v.ru||v.en||''; } return (window.I18N?I18N.tl(v||''):(v||'')); }
   // Nashr kartalarida qisqa (displey) sarlavha — bo'sh bo'lsa to'liq sarlavha.
   // site-common.js'dagi Site.dispTitle bilan bir xil mantiq (bu fayl alohida nusxa).
   function dispT(it){ if(!it) return ''; const s=mlg(it.shortTitle); return (s&&String(s).trim())?s:mlg(it.title); }
   function imgTag(src, fallbackData){
-    return src ? '<img src="'+src+'" alt="" style="width:100%;height:100%;object-fit:cover">' : '';
+    // src saqlangan (admin nazoratidagi) qiymat — safeUrl javascript:/data: sxemalarini
+    // bloklaydi. Boshqa sahifalar ham shunday qiladi (site-common.js).
+    return src ? '<img src="'+safeUrl(src)+'" alt="" style="width:100%;height:100%;object-fit:cover">' : '';
   }
   function renderHome(){
     // Tadbirlar bu yerda o'qilmaydi — bosh sahifada tadbirlar bo'limi yo'q
@@ -323,7 +338,7 @@
       news = Store.all('news').filter(n=>n.status==='published').sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
       pubs = Store.all('publications').filter(p=>p.status==='published').slice(0,3);
       exps = Store.all('experts').sort((a,b)=>(a.order||0)-(b.order||0)).slice(0,4);
-    }catch(e){ return; }
+    }catch{ return; }
 
     // ---- Bo'sh holat ----
     // HTML ichida har bir bo'lim uchun namuna kontent yozib qo'yilgan edi
@@ -341,13 +356,13 @@
       const sc = document.querySelector('.stats');
       if(sc){
         if(sd.length){
-          sc.innerHTML = sd.map(function(s){ return '<div class="stat"><div class="n">'+mlg(s.n)+'</div><div class="c">'+mlg(s.c)+'</div></div>'; }).join('');
+          sc.innerHTML = sd.map(function(s){ return '<div class="stat"><div class="n">'+esc(mlg(s.n))+'</div><div class="c">'+esc(mlg(s.c))+'</div></div>'; }).join('');
         } else {
           const sec = sc.closest('section');
           if(sec) sec.hidden = true; else sc.hidden = true;
         }
       }
-    }catch(e){}
+    }catch{}
 
     // NEWS: featured + list
     const ng = document.querySelector('.news-grid');
@@ -358,15 +373,15 @@
         '<a class="feat rv" href="yangilik.html?id='+f.id+'" style="cursor:pointer">'
         + (f.cover?'<div class="ph" style="padding:0">'+imgTag(f.cover)+'</div>':'<div class="ph" data-l="asosiy yangilik"></div>')
         + '<div class="fbody">'
-        + '<div class="meta">'+(f.category?'<span class="tag">'+mlg(f.category)+'</span>':'')+'<span class="d mono muted">'+fmtDate(f.date)+'</span></div>'
-        + '<h3>'+mlg(f.title)+'</h3>'
-        + (mlg(f.excerpt)?'<p>'+mlg(f.excerpt)+'</p>':'')
+        + '<div class="meta">'+(f.category?'<span class="tag">'+esc(mlg(f.category))+'</span>':'')+'<span class="d mono muted">'+fmtDate(f.date)+'</span></div>'
+        + '<h3>'+esc(mlg(f.title))+'</h3>'
+        + (mlg(f.excerpt)?'<p>'+esc(mlg(f.excerpt))+'</p>':'')
         + '</div>'
         + '</a>'
         + '<div class="nlist rv">'
         + rest.map(n=>'<a class="nitem" href="yangilik.html?id='+n.id+'">'
             + (n.cover?'<div class="ph" style="padding:0">'+imgTag(n.cover)+'</div>':'<div class="ph" data-l="foto"></div>')
-            + '<div class="nbody"><div class="d">'+fmtDate(n.date)+(n.category?' · '+mlg(n.category):'')+'</div><h4>'+mlg(n.title)+'</h4></div></a>').join('')
+            + '<div class="nbody"><div class="d">'+fmtDate(n.date)+(n.category?' · '+esc(mlg(n.category)):'')+'</div><h4>'+esc(mlg(n.title))+'</h4></div></a>').join('')
         + '</div>';
     }
 
@@ -375,9 +390,9 @@
     if(pg && !pubs.length){ pg.innerHTML = emptyState('home_no_pubs'); }
     else if(pg){
       pg.innerHTML = pubs.map(p=>'<a class="pub rv" href="nashr.html?id='+p.id+'" style="cursor:pointer">'
-        + '<div class="cover">'+(p.type?'<span class="badge">'+mlg(p.type)+'</span>':'')
+        + '<div class="cover">'+(p.type?'<span class="badge">'+esc(mlg(p.type))+'</span>':'')
         + (p.cover?imgTag(p.cover):'<div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></svg></div>')+'</div>'
-        + '<div class="body"><div class="t">'+mlg(p.category||'')+(p.year?' · '+p.year:'')+'</div><h3>'+dispT(p)+'</h3>'
+        + '<div class="body"><div class="t">'+esc(mlg(p.category||''))+(p.year?' · '+esc(p.year):'')+'</div><h3>'+esc(dispT(p))+'</h3>'
         + '<span class="dl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>'+ctaMore+'</span>'
         + '</div></a>').join('');
     }
@@ -388,13 +403,13 @@
     else if(eg){
       eg.innerHTML = exps.map(e=>'<a class="exp rv" href="expert.html?id='+e.id+'" style="cursor:pointer">'
         + (e.photo?'<div class="ph" style="padding:0">'+imgTag(e.photo)+'</div>':'<div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="9" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg></div>')
-        + '<div class="role">'+mlg(e.role)+'</div><h4>'+mlg(e.name)+'</h4><div class="sub">'+mlg(e.sub)+'</div></a>').join('');
+        + '<div class="role">'+esc(mlg(e.role))+'</div><h4>'+esc(mlg(e.name))+'</h4><div class="sub">'+esc(mlg(e.sub))+'</div></a>').join('');
     }
 
     // PARTNERS — avto-aylanma lenta (marquee)
     const pm = document.getElementById('partnersMarquee');
     if(pm){
-      let partners=[]; try{ partners = Store.all('partners'); }catch(e){}
+      let partners=[]; try{ partners = Store.all('partners'); }catch{}
       if(partners.length){
         // monogramma: nomdan bosh harflar
         const initials = n => { const w=String(n||'?').trim().split(/\s+/); return (w.length>=2 ? (w[0][0]+w[1][0]) : String(n||'?').slice(0,2)).toUpperCase(); };
@@ -403,11 +418,11 @@
         const colorFor = n => { let h=0; const s=String(n||''); for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return MC[h%MC.length]; };
         const tile = p => {
           const inner = p.logo
-            ? '<img src="'+Site.safeUrl(p.logo)+'" alt="'+esc(p.name)+'">'
+            ? '<img src="'+safeUrl(p.logo)+'" alt="'+esc(p.name)+'">'
             : '<span class="pmono" style="background:'+colorFor(p.name)+'">'+esc(initials(p.name))+'</span><span class="pname">'+esc(p.name)+'</span>';
           const cls = 'plogo'+(p.logo?'':' mono');
           return (p.url && p.url!=='#')
-            ? '<a class="'+cls+'" href="'+Site.safeUrl(p.url)+'" target="_blank" rel="noopener" title="'+esc(p.name)+'">'+inner+'</a>'
+            ? '<a class="'+cls+'" href="'+safeUrl(p.url)+'" target="_blank" rel="noopener" title="'+esc(p.name)+'">'+inner+'</a>'
             : '<div class="'+cls+'" title="'+esc(p.name)+'">'+inner+'</div>';
         };
         const oneSet = partners.map(tile).join('');

@@ -27,9 +27,8 @@
     // related
     const related = Store.all('news').filter(x=>x.status==='published' && x.id!==n.id)
       .sort((a,b)=> String(b.date||'').localeCompare(String(a.date||''))).slice(0,3);
-    const I = Site.ICON;
     // chop etish uchun: rasmiy sarlavha (idora nomi) + manba/sana footeri
-    const printHead = `<div class="print-head"><img src="logo-mark.png" alt=""><div class="ph-txt"><b>${Site.esc(T('org_name'))}</b><span>${Site.esc(T('org_tagline'))}</span></div></div>`;
+    const printHead = `<div class="print-head"><img src="${Site.safeUrl(Site.brandLogo())}" alt=""><div class="ph-txt"><b>${Site.esc(T('org_name'))}</b><span>${Site.esc(T('org_tagline'))}</span></div></div>`;
     const printFoot = `<div class="print-foot"><span>${Site.esc(T('print_source'))}: ${Site.esc(location.href)}</span><span>${Site.esc(T('print_date'))}: ${Site.fmtDate(new Date().toISOString().slice(0,10))}</span></div>`;
     main.innerHTML = `${printHead}
       <div class="page-banner"><div class="wrap">
@@ -74,7 +73,7 @@
         var btn=this, lbl=btn.querySelector('[data-lbl]'), old=lbl.textContent;
         function done(){ btn.classList.add('copied'); lbl.textContent=T('link_copied'); setTimeout(function(){ btn.classList.remove('copied'); lbl.textContent=old; },1800); }
         if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(done,done); }
-        else { var t=document.createElement('textarea'); t.value=url; document.body.appendChild(t); t.select(); try{document.execCommand('copy');}catch(e){} t.remove(); done(); }
+        else { var t=document.createElement('textarea'); t.value=url; document.body.appendChild(t); t.select(); try{document.execCommand('copy');}catch{} t.remove(); done(); }
       };
       row.querySelector('[data-act=share]').onclick=function(){
         if(navigator.share){ navigator.share({title:title, url:url}).catch(function(){}); }

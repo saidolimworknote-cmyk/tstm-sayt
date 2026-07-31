@@ -19,9 +19,8 @@
     // (2 qator ≈ 68 belgi — .page-banner.tight cheklovi) — matn hech qachon yo'qolmaydi.
     const showFull = fullTitle !== dispT || fullTitle.length > 68;
     document.title = dispT + ' — TSTM';
-    const I = Site.ICON;
     // chop etish uchun: rasmiy sarlavha (idora nomi) + manba/sana footeri
-    const printHead = `<div class="print-head"><img src="logo-mark.png" alt=""><div class="ph-txt"><b>${Site.esc(T('org_name'))}</b><span>${Site.esc(T('org_tagline'))}</span></div></div>`;
+    const printHead = `<div class="print-head"><img src="${Site.safeUrl(Site.brandLogo())}" alt=""><div class="ph-txt"><b>${Site.esc(T('org_name'))}</b><span>${Site.esc(T('org_tagline'))}</span></div></div>`;
     const printFoot = `<div class="print-foot"><span>${Site.esc(T('print_source'))}: ${Site.esc(location.href)}</span><span>${Site.esc(T('print_date'))}: ${Site.fmtDate(new Date().toISOString().slice(0,10))}</span></div>`;
     const desc = Site.mlGet(p.desc) || '<p class="muted">'+Site.esc(T('soon_text'))+'</p>';
     const phSvg = `<div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></svg></div>`;
@@ -101,7 +100,7 @@
         var btn=this, lbl=btn.querySelector('[data-lbl]'), old=lbl.textContent;
         function done(){ btn.classList.add('copied'); lbl.textContent=T('link_copied'); setTimeout(function(){ btn.classList.remove('copied'); lbl.textContent=old; },1800); }
         if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(done,done); }
-        else { var t=document.createElement('textarea'); t.value=url; document.body.appendChild(t); t.select(); try{document.execCommand('copy');}catch(e){} t.remove(); done(); }
+        else { var t=document.createElement('textarea'); t.value=url; document.body.appendChild(t); t.select(); try{document.execCommand('copy');}catch{} t.remove(); done(); }
       };
       row.querySelector('[data-act=share]').onclick=function(){
         if(navigator.share){ navigator.share({title:title, url:url}).catch(function(){}); }
