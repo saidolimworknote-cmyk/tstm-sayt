@@ -76,82 +76,12 @@
   }
   requestAnimationFrame(fitBrand);
   var _fitT; window.addEventListener('resize', function(){ clearTimeout(_fitT); _fitT = setTimeout(fitBrand, 150); });
-  // ---- obuna (subscribe) modali — tashrif boshida bir marta ----
-  // MUHIM: "obuna bo'ldingiz" xabari FAQAT server tasdiqlagandan keyin chiqadi.
-  // Avval Store.addMessage natijasi umuman tekshirilmasdi — e-pochta hech qayerga
-  // yozilmasa ham foydalanuvchi obuna bo'ldim deb o'ylab ketardi (site-common.js
-  // dagi nusxa tuzatilganda bu inline nusxa e'tibordan chetda qolgan edi).
-  (function(){
-    var SEEN='tstm_sub_seen', SNOOZE='tstm_sub_snooze';
-    try {
-      if (localStorage.getItem(SEEN)) return;
-      var _t = parseInt(localStorage.getItem(SNOOZE)||'0',10);
-      if (_t && Date.now() < _t) return;   // xatodan keyin yopilgan — 1 kun kutamiz
-    } catch{}
-    var T=function(k){ return window.I18N? I18N.t(k):k; };
-    setTimeout(function(){
-      var ov=document.createElement('div');
-      ov.setAttribute('style','position:fixed;inset:0;z-index:99997;background:rgba(8,16,28,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;transition:.3s;font-family:var(--sans)');
-      ov.innerHTML='<div style="position:relative;background:var(--panel,#fff);color:var(--ink,#16181b);max-width:440px;width:100%;border-radius:14px;padding:38px 34px 28px;text-align:center;box-shadow:0 40px 90px -30px rgba(0,0,0,.5)">'
-        +'<button data-x style="position:absolute;top:12px;right:16px;background:none;border:0;font-size:1.625rem;line-height:1;color:var(--muted,#888);cursor:pointer">&times;</button>'
-        +'<div style="width:60px;height:60px;border-radius:50%;background:var(--accent-soft,#e4eef6);color:var(--accent,#0D4483);display:flex;align-items:center;justify-content:center;margin:0 auto 18px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:28px;height:28px"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div>'
-        +'<h3 style="font-family:var(--serif,Georgia);font-weight:600;font-size:1.4375rem;margin:0 0 10px">'+T('sub_title')+'</h3>'
-        +'<p style="color:var(--ink-2,#555);font-size:0.90625rem;line-height:1.6;margin:0 0 22px">'+T('sub_text')+'</p>'
-        +'<form data-f novalidate style="display:flex;gap:8px"><input type="email" name="email" autocomplete="email" inputmode="email" spellcheck="false" autocapitalize="off" placeholder="'+T('sub_ph')+'" aria-label="'+T('sub_ph')+'" style="flex:1;border:1px solid var(--line,#e6e6e2);background:var(--bg-2,#f6f5f2);padding:13px 15px;font-size:0.9375rem;color:var(--ink,#16181b);outline:none;border-radius:8px"><button type="submit" style="background:var(--accent,#0D4483);color:#fff;border:0;padding:13px 22px;border-radius:8px;font-family:var(--mono,monospace);font-size:0.75rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;white-space:nowrap">'+T('sub_btn')+'</button></form>'
-        +'<div data-err role="alert" style="display:none;color:#c0392b;font-size:0.8125rem;text-align:left;margin-top:9px;line-height:1.45"></div>'
-        +'<div data-ok style="display:none;color:var(--accent,#0D4483);font-weight:600;font-size:0.9375rem;padding:14px 0">'+T('sub_ok')+'<div style="font-weight:400;color:var(--ink-2,#555);font-size:0.8125rem;margin-top:6px">'+T('sub_ok_text')+'</div></div>'
-        +'<button data-later style="margin-top:16px;background:none;border:0;color:var(--muted,#888);font-size:0.8125rem;cursor:pointer;text-decoration:underline">'+T('sub_later')+'</button></div>';
-      // dismiss=true — ataylab yopdi yoki obuna bo'ldi: boshqa ko'rsatmaymiz.
-      // dismiss=false — xato bo'lgandan keyin yopildi: 1 kundan so'ng yana taklif qilamiz.
-      var closed=false;
-      function close(dismiss){
-        if(closed) return; closed=true;
-        try{ if(dismiss!==false) localStorage.setItem(SEEN,'1'); else localStorage.setItem(SNOOZE,String(Date.now()+86400000)); }catch{}
-        document.removeEventListener('keydown',onKey,true);
-        ov.style.opacity='0'; setTimeout(function(){ ov.remove(); },300);
-      }
-      var form=ov.querySelector('[data-f]'), input=form.querySelector('input');
-      var btn=form.querySelector('button'), errEl=ov.querySelector('[data-err]');
-      var okDone=false;   // muvaffaqiyatli obunadan keyin yopilish "dismiss" bo'lsin
-      function onKey(e){ if(e.key==='Escape'){ e.preventDefault(); close(okDone||!errShown()); } }
-      function errShown(){ return errEl.style.display==='block'; }
-      function showErr(k){
-        errEl.textContent=T(k); errEl.style.display='block';
-        input.style.borderColor='#c0392b';
-        try{ input.focus(); }catch{}   // tugma disabled bo'lganda fokus yo'qolmasin
-      }
-      document.body.appendChild(ov); requestAnimationFrame(function(){ ov.style.opacity='1'; });
-      document.addEventListener('keydown',onKey,true);
-      // Fon yoki "keyinroq"/× bosilsa — ataylab yopish, lekin xatodan keyin snooze
-      ov.addEventListener('click',function(e){ if(e.target===ov) close(!errShown()); });
-      ov.querySelector('[data-x]').addEventListener('click',function(){ close(!errShown()); });
-      ov.querySelector('[data-later]').addEventListener('click',function(){ close(true); });
-      input.addEventListener('input',function(){ errEl.style.display='none'; input.style.borderColor='var(--line,#e6e6e2)'; });
-      var emailRe=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      form.addEventListener('submit',function(e){
-        e.preventDefault();
-        if(btn.disabled) return;                       // ikki marta yuborishdan himoya
-        var em=input.value.trim();
-        if(!emailRe.test(em)){ showErr('sub_err_email'); return; }
-        btn.disabled=true; btn.style.opacity='.6'; btn.style.cursor='default';
-        errEl.style.display='none'; input.style.borderColor='var(--line,#e6e6e2)';
-        Promise.resolve(Store.subscribe(em,(window.I18N?I18N.lang:'uz'))).then(function(res){
-          if(res && res.ok){
-            okDone=true;
-            form.style.display='none'; errEl.style.display='none';
-            ov.querySelector('[data-ok]').style.display='block';
-            try{ localStorage.setItem(SEEN,'1'); }catch{}
-            setTimeout(function(){ close(true); },2600);
-            return;
-          }
-          var err=(res && res.error)||'failed';
-          showErr(err==='too_many'?'sub_err_many':err==='bad_email'?'sub_err_email':'sub_err_fail');
-        }).catch(function(){ showErr('sub_err_fail'); }).then(function(){
-          if(!okDone){ btn.disabled=false; btn.style.opacity=''; btn.style.cursor='pointer'; }
-        });
-      });
-    }, 3000);
-  })();
+  // ---- obuna (subscribe) modali ----
+  // Mantiq subscribe.js faylida — ichki sahifalar bilan BIR XIL nusxa.
+  // Ilgari bu yerda alohida (e-pochta so'raydigan) nusxa turardi va push
+  // versiyasiga o'tilganda yangilanmay qolgan edi: bosh sahifaga kirgan
+  // odam hamon eski oynani ko'rardi. Nusxa ko'chirmang.
+  try { if (window.Subscribe) window.Subscribe.arm(); } catch(e){ console.error("subscribe:", e); }
   // ---- mobil menyu ----
   (function(){
     var mnav = document.getElementById('mnav');

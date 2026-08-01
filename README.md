@@ -12,6 +12,8 @@ Sayt + boshqaruv paneli (admin). XAMPP'da ishlash uchun PHP backend bilan.
 - `config.sample.php` — maxfiy sozlamalar namunasi (baza logini/paroli).
   Undan `config.php` yasaladi; `config.php` git'ga **tushmaydi**
 - `page-*.js` — har bir sahifaning skripti (CSP talabi bilan HTML'dan ajratilgan)
+- `subscribe.js` + `subscribe.css` — obuna (push-bildirishnoma) oynasi; **barcha**
+  sahifaga ulanadi, jumladan bosh sahifaga ham
 - `seed.php` — standart boshlang'ich kontent (data.json bo'lmasa)
 - `index.php` — bosh sahifaga yo'naltiradi
 - `.htaccess` — Apache sozlamalari
@@ -152,6 +154,13 @@ marta rad etsa, uni qayta so'rab bo'lmaydi — u qo'lda sozlamalardan yoqishi
 kerak bo'ladi. Shuning uchun avval o'z oynamizda tushuntiramiz va faqat rozi
 bo'lgandagina brauzerga o'tkazamiz.
 
+**Oyna kodi qayerda:** `subscribe.js` + `subscribe.css` — ikkalasi ham **barcha**
+sahifaga ulanadi (bosh sahifa ham). Bosh sahifa `site-common.js`/`site.css` ni
+yuklamaydi, shuning uchun oyna mantiqi ham, uslubi ham shu ikki mustaqil faylda
+turadi. **Nusxa ko'chirmang** — ilgari bosh sahifada alohida nusxa bo'lgani
+uchun push versiyasiga o'tilganda u yangilanmay qolgan va tashrifchi hamon eski
+e-pochta so'raydigan oynani ko'rgan edi.
+
 > ⚠️ **HTTPS majburiy.** Push API xavfsiz ulanishsiz ishlamaydi (`localhost` —
 > ishlab chiqish uchun istisno). `http://` da obuna oynasi umuman ko'rinmaydi.
 
@@ -212,6 +221,7 @@ bir qismi. Har bir o'chirilgan qoidaning sababi konfiguratsiya ichida izohlangan
 |------|---------------|
 | `site.css` | Barcha ichki sahifalar (12 ta) |
 | `home.css` | **Faqat** bosh sahifa — mustaqil nusxa, `site.css` ni ulamaydi |
+| `subscribe.css` | **Hamma** sahifa — obuna oynasi (ikkala olamda bir xil ko'rinsin) |
 
 Bosh sahifaning uslublari ilgari HTML ichida inline `<style>` blokida turardi
 (663 qator). Alohida faylga chiqarildi: HTML 71 KB → 24 KB, uslub endi alohida
