@@ -15,12 +15,24 @@
      'unsafe-inline' olib tashlangani uchun). Bosh sahifaga xos header/footer. */
   .pt0{padding-top:0;}
   .ico-18{width:18px;height:18px;}
-  .hp-hdr-wrap{height:72px;}
-  .hp-brand{flex-direction:row;align-items:center;justify-content:flex-start;padding:0;margin:0 0 0 -40px;width:384px;height:55px;}
-  .hp-brand-nm{max-width:none;}
-  .hp-brand-b{font-family:Spectral;font-size:1.0625rem;font-weight:600;line-height:1.3;display:block;white-space:nowrap;}
-  .hp-brand-s{font-family:Spectral;font-size:1.0625rem;font-weight:600;letter-spacing:0.2px;line-height:1.3;display:block;white-space:nowrap;margin-top:0;text-transform:none;opacity:1;}
-  .hp-sechead{margin-bottom:40px;}
+  /* Ustuvorlik: `.bar .wrap{height:104px}` va `header.solid .bar .wrap{height:80px}`
+     ni yengishi shart (ilgari inline style="height:72px" edi). */
+  header .bar .wrap.hp-hdr-wrap{height:72px;}
+  /* width — qat'iy emas, eng kam kenglik: uzbekcha nom 386px joy oladi, RU/EN
+     nomlari yanada uzunroq. Qat'iy 384px'da kontent sig'may, ajratuvchi chiziq
+     siqilib yo'qolardi. */
+  .hp-brand{flex-direction:row;align-items:center;justify-content:flex-start;padding:0;margin:0 0 0 -40px;min-width:384px;height:55px;}
+  /* DIQQAT — ustuvorlik (specificity): bu qoidalar quyidagi umumiy
+     `.brand .nm b|small` (0,2,1) qoidalarini YENGISHI shart. Ilgari bu uslublar
+     inline style="" da turardi (eng kuchli) va inline'dan bitta klassga
+     ko'chirilganda (0,1,0) jimgina yengilib qolgan edi — markaz nomining
+     ikkinchi qatori mono shrift + UPPERCASE bo'lib ketgandi. Shuning uchun
+     selektor `.brand.hp-brand ...` (0,3,1) — fayldagi tartibdan qat'i nazar
+     g'olib. Bu yerga qoida qo'shsangiz, shu naqshni saqlang. */
+  .brand.hp-brand .nm{max-width:none;}
+  .brand.hp-brand .nm b{font-family:var(--serif),serif;font-size:1.0625rem;font-weight:600;line-height:1.3;display:block;white-space:nowrap;}
+  .brand.hp-brand .nm small{font-family:var(--serif),serif;font-size:1.0625rem;font-weight:600;letter-spacing:0.2px;line-height:1.3;display:block;white-space:nowrap;margin-top:0;text-transform:none;opacity:1;}
+  .sec-head.hp-sechead{margin-bottom:40px;}   /* `.sec-head{margin-bottom:38px}` dan kuchli bo'lishi kerak */
   .hp-foot-brand{display:flex;align-items:center;gap:14px;margin-bottom:22px;}
   .flogo{height:46px;width:auto;}
   .hp-foot-div{width:1.5px;height:46px;background:rgba(255,255,255,.3);}
@@ -113,7 +125,10 @@
   .brand .logo{height:66px;width:auto;display:block;transition:height .3s;}
   header.solid .brand .logo{height:56px;}
   .logo-c{display:block;}
-  .brand .divider{width:1.5px;height:50px;background:currentColor;opacity:.30;transition:height .3s;}
+  /* flex:none — chiziq 1.5px, flex uni siqib 0 ga tushirmasin. Brend qutisi
+     qat'iy kenglikda (.hp-brand) bo'lgani uchun nom uzunroq bo'lsa flex eng
+     "siqiluvchan" element sifatida aynan shu chiziqni yo'q qilardi. */
+  .brand .divider{width:1.5px;flex:none;height:50px;background:currentColor;opacity:.30;transition:height .3s;}
   header.solid .brand .divider{height:44px;}
   .brand .nm{line-height:1.22;max-width:236px;}
   .brand .nm b{font-family:var(--serif),serif;font-weight:600;font-size:1rem;letter-spacing:.005em;display:block;}
@@ -439,7 +454,7 @@
     nav.main,header .util{display:none;}
     .nav-burger{display:flex !important;align-items:center;justify-content:center;width:44px;height:44px;margin-left:auto;cursor:pointer;color:inherit;flex:none;}
     .nav-burger svg{width:26px;height:26px;}
-    .brand{margin:0 !important;width:auto !important;}
+    .brand{margin:0 !important;width:auto !important;min-width:0 !important;}
     .plogos{grid-template-columns:repeat(3,1fr);}
     .plogo:nth-child(6n){border-right:1px solid var(--line);}
     .plogo:nth-child(3n){border-right:0;}
@@ -456,7 +471,7 @@
     .nav-burger{display:flex !important;align-items:center;justify-content:center;width:44px;height:44px;margin-left:auto;cursor:pointer;color:inherit;flex:none;}
     .nav-burger svg{width:26px;height:26px;}
     header .bar .wrap{height:64px !important;}
-    .brand{margin:0 !important;width:auto !important;height:auto !important;gap:9px !important;}
+    .brand{margin:0 !important;width:auto !important;min-width:0 !important;height:auto !important;gap:9px !important;}
     .brand .logo{height:40px !important;}
     header.solid .brand .logo{height:38px !important;}
     .brand .divider{height:34px !important;}

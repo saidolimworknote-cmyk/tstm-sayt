@@ -206,7 +206,7 @@
         <a class="brand brand-row" href="Bosh sahifa - Hi-Fi.html" aria-label="${esc(SN)}">
           <img class="logo logo-c" src="logo-mark.png" alt="${esc(SN)}">
           <span class="divider"></span>
-          <span class="nm brand-nm-full"><b class="brand-b17">${esc(B.top)}</b><small class="brand-s17">${esc(B.bot)}</small></span>
+          <span class="nm"><b>${esc(B.top)}</b><small>${esc(B.bot)}</small></span>
         </a>
         <nav class="main" aria-label="${esc(T('a11y_mainnav')||'Asosiy menyu')}">
           ${navHTML}

@@ -28,10 +28,16 @@ html{scroll-behavior:smooth;font-size:clamp(16px, 0.36vw + 10.9px, 20px);}
 .vct-badge{display:inline-flex;align-items:center;gap:6px;}
 .vct-inline{margin-left:auto;display:inline-flex;align-items:center;gap:5px;}
 /* Ichki sahifa header/footer brendi (site-common.js renderHeader/renderFooter) */
-.brand-row{flex-direction:row;align-items:center;justify-content:flex-start;padding:0;margin:0 0 0 -35px;width:384px;height:55px;}
-.brand-nm-full{max-width:none;}
-.brand-b17{font-family:Spectral;font-size:17px;font-weight:600;line-height:1.3;display:block;white-space:nowrap;}
-.brand-s17{font-family:Spectral;font-size:17px;font-weight:600;letter-spacing:0.2px;line-height:1.3;display:block;white-space:nowrap;margin-top:0;text-transform:none;opacity:1;}
+.brand-row{flex-direction:row;align-items:center;justify-content:flex-start;padding:0;margin:0 0 0 -35px;min-width:384px;height:55px;}
+/* DIQQAT — ustuvorlik (specificity): bu qoidalar quyidagi umumiy
+   `.brand .nm b|small` (0,2,1) qoidalarini YENGISHI shart. Ilgari bu uslublar
+   inline style="" da turardi (eng kuchli) va bitta klassga ko'chirilganda
+   (0,1,0) jimgina yengilib qolgan edi — markaz nomining ikkinchi qatori mono
+   shrift + UPPERCASE bo'lib ketgandi. Selektor `.brand.brand-row ...` (0,3,1)
+   — fayldagi tartibdan qat'i nazar g'olib. Naqshni saqlang. */
+.brand.brand-row .nm{max-width:none;}
+.brand.brand-row .nm b{font-family:var(--serif),serif;font-size:17px;font-weight:600;line-height:1.3;display:block;white-space:nowrap;}
+.brand.brand-row .nm small{font-family:var(--serif),serif;font-size:17px;font-weight:600;letter-spacing:0.2px;line-height:1.3;display:block;white-space:nowrap;margin-top:0;text-transform:none;opacity:1;}
 .foot-links{display:flex;gap:24px;}
 :root, html[data-theme="light"]{
   --ink:#16181b; --ink-2:#3f444a; --muted:#767b83;
@@ -103,7 +109,9 @@ header .util a:hover{color:#fff;}
 .brand .logo{height:60px;width:auto;display:block;transition:height .3s;}
 header.solid .brand .logo{height:54px;}
 .logo-c{display:block;}
-.brand .divider{width:1.5px;height:50px;background:currentColor;opacity:.30;transition:height .3s;}
+/* flex:none — chiziq 1.5px, flex uni siqib 0 ga tushirmasin (brand qutisi
+   qat'iy kenglikda bo'lgani uchun nom uzayganda aynan shu yo'qolardi). */
+.brand .divider{width:1.5px;flex:none;height:50px;background:currentColor;opacity:.30;transition:height .3s;}
 header.solid .brand .divider{height:44px;}
 .brand .nm{line-height:1.22;max-width:230px;}
 .brand .nm b{font-family:var(--serif);font-weight:600;font-size:0.96875rem;letter-spacing:.005em;display:block;}
@@ -571,7 +579,7 @@ html,body{overflow-x:hidden;}
   .exp-grid{grid-template-columns:repeat(2,1fr);}
   nav.main{display:none;}
   .nav-burger{display:flex;margin-left:auto;}
-  .brand{margin:0 !important;width:auto !important;}
+  .brand{margin:0 !important;width:auto !important;min-width:0 !important;}
   .dir-grid,.gallery{grid-template-columns:repeat(2,1fr);}
   .contact-grid{grid-template-columns:1fr;gap:40px;}
 }
@@ -581,7 +589,7 @@ html,body{overflow-x:hidden;}
   .cards{grid-template-columns:repeat(2,1fr);gap:16px;}
   .ncard .img{height:150px;}
   .nav-burger{display:flex;margin-left:auto;}
-  .brand{margin:0 !important;width:auto !important;height:auto !important;gap:9px !important;}
+  .brand{margin:0 !important;width:auto !important;min-width:0 !important;height:auto !important;gap:9px !important;}
   .brand .logo{height:40px !important;}
   header.solid .brand .logo{height:38px !important;}
   .brand .divider{height:34px !important;}
