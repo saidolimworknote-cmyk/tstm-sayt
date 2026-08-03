@@ -124,26 +124,33 @@
   }
 
   // ---------- nav model ----------
+  // 2026-08-04: menyu 7 banddan 4 banga qayta guruhlandi (bosh sahifadagi
+  // "Bosh sahifa - Hi-Fi.html" dagi qo'lda yozilgan menyu bilan BIR XIL bo'lishi
+  // shart — u alohida nusxa, o'zgartirsangiz ikkalasini ham yangilang).
+  // `keys` — qaysi sahifalarda bu band "active" bo'lib yonishi. Bir band bir
+  // nechta sahifaga javob beradi (masalan Voqealar = yangiliklar + tadbirlar),
+  // chunki alohida menyu bandlari olib tashlandi, sahifalar esa qoldi.
   const NAV = [
-    { tk: 'nav_about', href: 'markaz-haqida.html', key: 'about', children: [
-      { tk: 'nav_about_goal', href: 'markaz-haqida.html?slug=maqsad' },
-      { tk: 'nav_about_leadership', href: 'rahbariyat.html' }
+    { tk: 'nav_about', href: 'markaz-haqida.html', keys: ['about','contact'], children: [
+      { tk: 'nav_about_leadership', href: 'rahbariyat.html' },
+      { tk: 'nav_about_experts', href: 'rahbariyat.html' },
+      { tk: 'nav_contact', href: 'aloqa.html' }
     ]},
-    { tk: 'nav_research', href: 'tadqiqotlar.html', key: 'research', children: [
-      { tk: 'nav_research_foreign', href: 'nashrlar.html?cat=Tashqi+siyosat' },
-      { tk: 'nav_research_security', href: 'nashrlar.html?cat=Xavfsizlik' },
-      { tk: 'nav_research_economy', href: 'nashrlar.html?cat=Iqtisodiyot' },
-      { tk: 'nav_research_ca', href: 'nashrlar.html?cat=Markaziy+Osiyo' }
+    { tk: 'nav_happenings', href: 'yangiliklar.html', keys: ['news','events'], children: [
+      { tk: 'nav_hap_news', href: 'yangiliklar.html' },
+      { tk: 'nav_hap_experts', href: 'rahbariyat.html' },
+      { tk: 'nav_hap_events', href: 'tadbirlar.html' }
     ]},
-    { tk: 'nav_pubs', href: 'nashrlar.html', key: 'pubs' },
-    { tk: 'nav_news', href: 'yangiliklar.html', key: 'news' },
-    { tk: 'nav_events', href: 'tadbirlar.html', key: 'events' },
-    { tk: 'nav_media', href: 'media.html', key: 'media', children: [
+    { tk: 'nav_analytics', href: 'nashrlar.html', keys: ['pubs','research'], children: [
+      { tk: 'nav_an_reports', href: 'nashrlar.html?type=Hisobot' },
+      { tk: 'nav_an_articles', href: 'nashrlar.html?type=Maqola' },
+      { tk: 'nav_an_books', href: 'nashrlar.html?type=Kitob' }
+    ]},
+    { tk: 'nav_media', href: 'media.html', keys: ['media'], children: [
       { tk: 'nav_media_photo', href: 'media.html?tab=photo' },
       { tk: 'nav_media_video', href: 'media.html?tab=video' },
       { tk: 'nav_media_info', href: 'media.html?tab=info' }
-    ]},
-    { tk: 'nav_contact', href: 'aloqa.html', key: 'contact' }
+    ]}
   ];
 
   const ICON = {
@@ -187,7 +194,7 @@
     const navHTML = NAV.map(n => {
       const car = n.children ? ' <i class="car"></i>' : '';
       const drop = n.children ? '<div class="drop">' + n.children.map(c => `<a href="${c.href}">${esc(T(c.tk))}</a>`).join('') + '</div>' : '';
-      const active = n.key === activeKey ? ' active' : '';
+      const active = (n.keys || [n.key]).indexOf(activeKey) >= 0 ? ' active' : '';
       return `<div class="item${active}"><a href="${n.href}">${esc(T(n.tk))}${car}</a>${drop}</div>`;
     }).join('');
 

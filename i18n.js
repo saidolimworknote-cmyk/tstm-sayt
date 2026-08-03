@@ -54,6 +54,7 @@
        "Voqealar" (yangilik/ekspert/tadbir), "Nashrlar" -> "Tahlillar"
        (hisobot/maqola/kitob). Eski kalitlar ichki sahifalarda hali ishlatiladi,
        shuning uchun o'chirilmadi. */
+    nav_about_experts:    { uz: 'Ekspertlar', ru: 'Эксперты', en: 'Experts' },
     nav_happenings:       { uz: 'Voqealar', ru: 'События', en: 'Happenings' },
     nav_hap_news:         { uz: 'Yangiliklar TSTM', ru: 'Новости ЦВПИ', en: 'CFPS news' },
     nav_hap_experts:      { uz: 'Bizning ekspertlarimiz', ru: 'Наши эксперты', en: 'Our experts' },
