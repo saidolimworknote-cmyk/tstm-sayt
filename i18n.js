@@ -50,6 +50,19 @@
     nav_media_info:       { uz: 'Infografika', ru: 'Инфографика', en: 'Infographics' },
     nav_contact:          { uz: 'Aloqa', ru: 'Контакты', en: 'Contacts' },
 
+    /* Bosh sahifa menyusi 2026-08-04 da qayta guruhlandi: "Tadqiqotlar" ->
+       "Voqealar" (yangilik/ekspert/tadbir), "Nashrlar" -> "Tahlillar"
+       (hisobot/maqola/kitob). Eski kalitlar ichki sahifalarda hali ishlatiladi,
+       shuning uchun o'chirilmadi. */
+    nav_happenings:       { uz: 'Voqealar', ru: 'События', en: 'Happenings' },
+    nav_hap_news:         { uz: 'Yangiliklar TSTM', ru: 'Новости ЦВПИ', en: 'CFPS news' },
+    nav_hap_experts:      { uz: 'Bizning ekspertlarimiz', ru: 'Наши эксперты', en: 'Our experts' },
+    nav_hap_events:       { uz: 'Tadbirlar TSTM', ru: 'Мероприятия ЦВПИ', en: 'CFPS events' },
+    nav_analytics:        { uz: 'Tahlillar', ru: 'Аналитика', en: 'Analysis' },
+    nav_an_reports:       { uz: 'Hisobotlar', ru: 'Отчёты', en: 'Reports' },
+    nav_an_articles:      { uz: 'Maqolalar', ru: 'Статьи', en: 'Articles' },
+    nav_an_books:         { uz: 'Kitoblar', ru: 'Книги', en: 'Books' },
+
     /* ---- common ---- */
     home:         { uz: 'Bosh sahifa', ru: 'Главная', en: 'Home' },
     read_more:    { uz: "Batafsil o'qish", ru: 'Подробнее', en: 'Read more' },

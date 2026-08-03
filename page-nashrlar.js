@@ -28,7 +28,11 @@
     const types = Array.from(new Set(allPubs.map(p=>p.type).filter(Boolean)));
 
     let cat = (Site.qs('cat')||'').replace(/\+/g,' '); if(cats.indexOf(cat)<0) cat='';
-    let type='', q='', sort='new';
+    // ?type=<tur> — bosh sahifadagi "Tahlillar" menyusi shu bilan keladi
+    // (Hisobotlar/Maqolalar/Kitoblar). Bazada yo'q tur berilsa e'tiborsiz
+    // qoldiriladi va hamma nashrlar chiqadi (bo'sh sahifa ko'rsatmaymiz).
+    let type = (Site.qs('type')||'').replace(/\+/g,' '); if(types.indexOf(type)<0) type='';
+    let q='', sort='new';
     // Ekspert sahifasidan "Barchasini ko'rish" -> ?author=<ism> bilan keladi:
     // faqat shu muallif nashrlarini ko'rsatamiz. Muallif maydonida ism+unvon
     // bo'lishi mumkin, shuning uchun ikki tomonlama "ichida bormi" tekshiruvi.
@@ -37,6 +41,7 @@
 
     qEl.placeholder = tt('ph');
     typeSel.innerHTML = `<option value="">${esc(tt('allT'))}</option>` + types.map(t=>`<option value="${esc(t)}">${esc(ml(t))}</option>`).join('');
+    if(type) typeSel.value = type;   // URL'dan kelgan tur tanlagichda ham ko'rinsin
     sortSel.innerHTML = `<option value="new">${esc(tt('sNew'))}</option><option value="old">${esc(tt('sOld'))}</option><option value="az">${esc(tt('sAz'))}</option>`;
 
     const phCover = `<div class="ph abs-cover"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></svg></div>`;
