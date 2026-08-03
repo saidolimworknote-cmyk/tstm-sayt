@@ -325,7 +325,7 @@
         let ct = o.coll ? `<span class="ct">${counts[o.coll]}</span>` : '';
         if (o.key === 'messages') {
           const unread = Store.all('messages').filter(m => !m.read).length;
-          ct = unread ? `<span class="ct" style="background:var(--accent);color:#fff">${unread}</span>` : '';
+          ct = unread ? `<span class="ct a-accent-chip">${unread}</span>` : '';
         }
         h += `<div class="sb-item" data-key="${o.key}" data-view="${o.view}" ${o.coll ? `data-coll="${o.coll}"` : ''}>${ic(o.icon)}<span>${o.label}</span>${ct}</div>`;
       });
@@ -423,7 +423,7 @@
     const p = $('#notifPanel'); if (!p) return;
     const list = buildNotifications();
     const body = list.length
-      ? list.map(i => `<a class="notif-item${i.dot ? ' dot' : ''}" href="${i.href}"><span class="ni">${ic(i.icon)}</span><div style="min-width:0"><div class="nt">${esc(i.title)}</div><div class="ns">${esc(i.sub)}</div></div></a>`).join('')
+      ? list.map(i => `<a class="notif-item${i.dot ? ' dot' : ''}" href="${i.href}"><span class="ni">${ic(i.icon)}</span><div class="a-minw0"><div class="nt">${esc(i.title)}</div><div class="ns">${esc(i.sub)}</div></div></a>`).join('')
       : '<div class="notif-empty">Yangi bildirishnoma yo\'q ✅</div>';
     p.innerHTML = `<div class="nph"><b>Bildirishnomalar</b><span class="t-sub mono">${list.length}</span></div>${body}`;
     $$('.notif-item', p).forEach(a => a.addEventListener('click', () => p.classList.remove('show')));
@@ -497,7 +497,7 @@
     // chart — news by category
     const cats = {}; n.forEach(x => cats[x.category] = (cats[x.category] || 0) + 1);
     const centries = Object.entries(cats).sort((a, b) => b[1] - a[1]); const max = Math.max(1, ...centries.map(e => e[1]));
-    let chart = centries.map(([k, v]) => `<div class="bar"><div class="fill" style="height:${(v / max) * 100}%" title="${v}"></div><div class="lb">${esc(k)}</div></div>`).join('');
+    let chart = centries.map(([k, v]) => `<div class="bar"><div class="fill" data-h="${(v / max) * 100}" title="${v}"></div><div class="lb">${esc(k)}</div></div>`).join('');
     if (!chart) chart = '<div class="empty">Ma\'lumot yo\'q</div>';
     const recent = n.slice(0, 5);
     const recentMsgs = msgs.slice(0, 5);
@@ -512,39 +512,39 @@
         <button class="btn primary" data-go="#/news/new">${ic('plus')} Yangi yangilik</button></div>
       <div class="stat-grid">${cards.map(s => {
         const inner = `<div class="ico">${ic(s.ic)}</div><div class="v">${s.v}</div><div class="l">${s.l}</div><div class="tr">${s.tr}</div>`;
-        return s.href ? `<a class="stat-card${s.accent ? ' accent' : ''}" href="${s.href}" style="text-decoration:none">${inner}</a>`
+        return s.href ? `<a class="stat-card${s.accent ? ' accent' : ''} a-nodec" href="${s.href}">${inner}</a>`
           : `<div class="stat-card">${inner}</div>`;
       }).join('')}</div>
       <div class="two-col">
-        <div class="card" style="padding:22px">
-          <div style="display:flex;align-items:center;margin-bottom:6px"><b style="font-family:var(--serif);font-size:17px">Yangiliklar — kategoriya bo'yicha</b></div>
+        <div class="card a-p22">
+          <div class="a-fac-mb6"><b class="a-serif17">Yangiliklar — kategoriya bo'yicha</b></div>
           <div class="chart">${chart}</div>
         </div>
-        <div class="card" style="padding:6px">
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 16px 10px"><b style="font-family:var(--serif);font-size:17px">So'nggi yangiliklar</b><a class="btn ghost sm" href="#/news">Barchasi</a></div>
-          ${recent.map(r => `<a href="#/news/edit/${r.id}" style="display:flex;gap:12px;align-items:center;padding:11px 16px;border-top:1px solid var(--line-2)">
-            <div style="flex:1;min-width:0"><div class="t-title" style="font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(mlGet(r.title))}</div>
+        <div class="card a-p6">
+          <div class="a-cardhead"><b class="a-serif17">So'nggi yangiliklar</b><a class="btn ghost sm" href="#/news">Barchasi</a></div>
+          ${recent.map(r => `<a href="#/news/edit/${r.id}" class="a-listrow">
+            <div class="a-flex1"><div class="t-title a-t135-ellip">${esc(mlGet(r.title))}</div>
             <div class="t-sub">${esc(r.category)} · ${fmtDate(r.date)}</div></div>
             <span class="badge ${r.status}">${STLABEL[r.status]}</span></a>`).join('') || '<div class="empty">Yangilik yo\'q</div>'}
         </div>
       </div>
-      <div class="two-col" style="margin-top:20px">
-        <div class="card" style="padding:6px">
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 16px 10px"><b style="font-family:var(--serif);font-size:17px">Eng ko'p ko'rilgan</b><span class="t-sub" style="font-family:var(--mono)">${ic('views')}</span></div>
-          <div id="topViewed"><div class="empty" style="padding:20px">Yuklanmoqda…</div></div>
+      <div class="two-col a-mt20">
+        <div class="card a-p6">
+          <div class="a-cardhead"><b class="a-serif17">Eng ko'p ko'rilgan</b><span class="t-sub a-mono">${ic('views')}</span></div>
+          <div id="topViewed"><div class="empty a-p20">Yuklanmoqda…</div></div>
         </div>
-        <div class="card" style="padding:6px">
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 16px 10px"><b style="font-family:var(--serif);font-size:17px">So'nggi murojaatlar</b><a class="btn ghost sm" href="#/messages">Barchasi</a></div>
-          ${recentMsgs.map(m => `<a href="#/messages" style="display:flex;gap:12px;align-items:center;padding:11px 16px;border-top:1px solid var(--line-2)">
-            ${m.read ? '' : '<span style="flex:none;width:8px;height:8px;border-radius:50%;background:var(--accent)"></span>'}
-            <div style="flex:1;min-width:0"><div class="t-title" style="font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(m.name || '—')}${m.subject ? ' · ' + esc(m.subject) : ''}</div>
-            <div class="t-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc((m.text || '').slice(0, 60))}</div></div>
-            <span class="t-sub mono" style="flex:none">${fmtDate(m.date)}</span></a>`).join('') || '<div class="empty" style="padding:20px">Murojaat yo\'q</div>'}
+        <div class="card a-p6">
+          <div class="a-cardhead"><b class="a-serif17">So'nggi murojaatlar</b><a class="btn ghost sm" href="#/messages">Barchasi</a></div>
+          ${recentMsgs.map(m => `<a href="#/messages" class="a-listrow">
+            ${m.read ? '' : '<span class="a-dot"></span>'}
+            <div class="a-flex1"><div class="t-title a-t135-ellip">${esc(m.name || '—')}${m.subject ? ' · ' + esc(m.subject) : ''}</div>
+            <div class="t-sub a-ellip">${esc((m.text || '').slice(0, 60))}</div></div>
+            <span class="t-sub mono a-flexnone">${fmtDate(m.date)}</span></a>`).join('') || '<div class="empty a-p20">Murojaat yo\'q</div>'}
         </div>
       </div>
-      <div class="card" style="margin-top:20px;padding:22px">
-        <b style="font-family:var(--serif);font-size:17px;display:block;margin-bottom:14px">Tezkor amallar</b>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <div class="card a-mt20-p22">
+        <b class="a-serif17-mb14">Tezkor amallar</b>
+        <div class="a-flexwrap10">
           <button class="btn" data-go="#/events/new">${ic('events')} Tadbir qo'shish</button>
           <button class="btn" data-go="#/publications/new">${ic('pub')} Nashr yuklash</button>
           <button class="btn" data-go="#/heroSlides">${ic('hero')} Hero slayder</button>
@@ -552,6 +552,9 @@
           <button class="btn" data-go="#/settings">${ic('settings')} Sozlamalar</button>
         </div>
       </div>`;
+
+    // chart ustunlari balandligi (dinamik) — inline style o'rniga .style (CSP).
+    c.querySelectorAll('.chart .fill').forEach(el => { el.style.height = el.dataset.h + '%'; });
 
     // ko'rishlar (async) — jami son + eng ko'p ko'rilganlar
     fetchViews(v => {
@@ -562,11 +565,11 @@
       const box = document.getElementById('topViewed'); if (!box) return;
       box.innerHTML = rows.length ? rows.map(r => {
         const it = idx[r.id];
-        return `<a href="#/${it.coll}/edit/${r.id}" style="display:flex;gap:12px;align-items:center;padding:11px 16px;border-top:1px solid var(--line-2)">
-          <div style="flex:1;min-width:0"><div class="t-title" style="font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(it.title)}</div>
+        return `<a href="#/${it.coll}/edit/${r.id}" class="a-listrow">
+          <div class="a-flex1"><div class="t-title a-t135-ellip">${esc(it.title)}</div>
           <div class="t-sub">${esc(C[it.coll].singular)}</div></div>
-          <span class="badge published" style="background:var(--panel-2);color:var(--ink-2)">${ic('views')} ${r.cnt}</span></a>`;
-      }).join('') : '<div class="empty" style="padding:20px">Hali ko\'rishlar yo\'q</div>';
+          <span class="badge published a-chip-soft">${ic('views')} ${r.cnt}</span></a>`;
+      }).join('') : '<div class="empty a-p20">Hali ko\'rishlar yo\'q</div>';
     });
   }
 
@@ -586,17 +589,17 @@
         ${sopts.map(s => `<button class="chip ${state.statusFilter === s ? 'on' : ''}" data-f="${s}">${STLABEL[s]}</button>`).join('')}
       </div>` : '';
 
-    const head = cfg.columns.map(col => `<th${col.type === 'status' ? ' style="width:140px"' : ''}>${col.label}</th>`).join('') + '<th style="width:96px;text-align:right">Amal</th>';
+    const head = cfg.columns.map(col => `<th${col.type === 'status' ? ' class="a-w140"' : ''}>${col.label}</th>`).join('') + '<th class="a-w96r">Amal</th>';
     const rows = items.map(x => {
       const tds = cfg.columns.map(col => {
         let val = x[col.k];
         if (col.type === 'status') return `<td><span class="badge ${val}">${STLABEL[val] || val}</span></td>`;
-        if (col.type === 'date') return `<td class="mono" style="font-size:12.5px;color:var(--ink-2)">${fmtDate(val)}</td>`;
+        if (col.type === 'date') return `<td class="mono a-t125-ink2">${fmtDate(val)}</td>`;
         let disp = col.ml ? mlGet(val) : (val || '—');
         if (col.thumb) {
           const img = x[col.thumb];
-          const t = img ? `<img class="thumb" src="${safeUrl(img)}">` : `<div class="thumb" style="display:flex;align-items:center;justify-content:center;color:var(--muted)">${ic(cfg.icon)}</div>`;
-          return `<td><div style="display:flex;align-items:center;gap:12px">${t}<span class="t-title" style="max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(disp)}</span></div></td>`;
+          const t = img ? `<img class="thumb" src="${safeUrl(img)}">` : `<div class="thumb a-center-muted">${ic(cfg.icon)}</div>`;
+          return `<td><div class="a-fac-g12">${t}<span class="t-title a-mw340-ellip">${esc(disp)}</span></div></td>`;
         }
         return `<td><span class="${col.k === cfg.columns[0].k ? 't-title' : ''}">${esc(disp)}</span></td>`;
       }).join('');
@@ -638,7 +641,7 @@
     const side = cfg.fields.filter(f => f.side);
 
     const langBar = hasML ? `<div class="langtabs" id="langTabs">
-      <button type="button" data-l="uz" class="on">UZ</button><button type="button" data-l="ru">RU</button><button type="button" data-l="en">EN</button></div><button type="button" class="btn sm ghost" id="autoTr" title="Bir tilni to'ldiring — bir bosishda qolgan 2 tilga avtomatik tarjima qiladi (manba avtomatik aniqlanadi)" style="margin-left:10px">⇄ Avto-tarjima</button>` : '';
+      <button type="button" data-l="uz" class="on">UZ</button><button type="button" data-l="ru">RU</button><button type="button" data-l="en">EN</button></div><button type="button" class="btn sm ghost a-ml10" id="autoTr" title="Bir tilni to'ldiring — bir bosishda qolgan 2 tilga avtomatik tarjima qiladi (manba avtomatik aniqlanadi)">⇄ Avto-tarjima</button>` : '';
 
     c.innerHTML = `
       <div class="page-head">
@@ -647,8 +650,8 @@
         <div class="d">${cfg.label}</div></div><div class="sp"></div>${langBar}</div>
       <form id="entForm">
         <div class="${side.length ? 'two-col' : ''}">
-          <div class="card" style="padding:24px">${main.map(f => fieldHTML(f, item)).join('')}</div>
-          ${side.length ? `<div class="card" style="padding:22px">${side.map(f => fieldHTML(f, item)).join('')}</div>` : ''}
+          <div class="card a-p24">${main.map(f => fieldHTML(f, item)).join('')}</div>
+          ${side.length ? `<div class="card a-p22">${side.map(f => fieldHTML(f, item)).join('')}</div>` : ''}
         </div>
         <div class="form-actions">
           <button class="btn primary" type="submit">${ic('save')} Saqlash</button>
@@ -739,7 +742,7 @@
   // Umumiy avto-tarjima: `.lang-pane[data-lang]` guruhlaridan iborat istalgan konteyner
   // (entForm, Sozlamalar, Markaz haqida, albom) uchun ishlaydi.
   function autoTrButton(id) {
-    return `<button type="button" class="btn sm ghost" id="${id}" title="Bir tilni to'ldiring — bir bosishda qolgan 2 tilga avtomatik tarjima qiladi (manba avtomatik aniqlanadi)" style="margin-left:10px">⇄ Avto-tarjima</button>`;
+    return `<button type="button" class="btn sm ghost a-ml10" id="${id}" title="Bir tilni to'ldiring — bir bosishda qolgan 2 tilga avtomatik tarjima qiladi (manba avtomatik aniqlanadi)">⇄ Avto-tarjima</button>`;
   }
   function paneEditable(pane) {
     const rich = pane.querySelector('.editor-area, [contenteditable="true"]');
@@ -1011,14 +1014,14 @@
         ${items.length ? `<button class="btn ghost" id="markAll">Hammasini o'qilgan deb belgilash</button>` : ''}</div>
       <div class="card">
         ${items.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr>
-            <th style="width:30px"></th><th>Yuboruvchi</th><th>Mavzu</th><th>Xabar</th><th style="width:110px">Sana</th><th style="width:60px;text-align:right">Amal</th>
+            <th class="a-w30"></th><th>Yuboruvchi</th><th>Mavzu</th><th>Xabar</th><th class="a-w110">Sana</th><th class="a-w60r">Amal</th>
           </tr></thead><tbody>${items.map(m => `
-            <tr data-id="${m.id}" style="${m.read ? '' : 'font-weight:500'}">
-              <td>${m.read ? '' : '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent)"></span>'}</td>
+            <tr data-id="${m.id}" class="${m.read ? '' : 'a-unread'}">
+              <td>${m.read ? '' : '<span class="a-dot-ib"></span>'}</td>
               <td><div class="t-title">${esc(m.name || '—')}</div><div class="t-sub">${esc(m.email || '')}</div></td>
               <td>${esc(m.subject || '—')}</td>
-              <td><div class="t-sub" style="max-width:360px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)">${esc(m.text || '')}</div></td>
-              <td class="mono" style="font-size:12px;color:var(--ink-2)">${fmtDate(m.date)}</td>
+              <td><div class="t-sub a-mw360-ellip">${esc(m.text || '')}</div></td>
+              <td class="mono a-t12-ink2">${fmtDate(m.date)}</td>
               <td><div class="row-act"><button class="icon-btn" data-act="del" title="O'chirish">${ic('trash')}</button></div></td>
             </tr>`).join('')}</tbody></table></div>`
         : `<div class="empty">${ic('mail')}<div class="t">Hozircha murojaat yo'q</div><div>Saytdagi "Aloqa" bo'limidan yuborilgan xabarlar shu yerda ko'rinadi</div></div>`}
@@ -1040,12 +1043,12 @@
   function openMessage(m) {
     if (!m) return;
     const bg = document.createElement('div'); bg.className = 'modal-bg';
-    bg.innerHTML = `<div class="modal" style="max-width:520px">
+    bg.innerHTML = `<div class="modal a-mw520">
       <h3>${esc(m.subject || 'Murojaat')}</h3>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;margin:0 0 16px;font-size:13px;color:var(--ink-2)">
-        <span><b>${esc(m.name || '—')}</b></span><span class="mono" style="color:var(--muted)">${esc(m.email || '')}</span><span class="mono" style="color:var(--muted)">${fmtDate(m.date)}</span>
+      <div class="a-meta-row">
+        <span><b>${esc(m.name || '—')}</b></span><span class="mono a-muted">${esc(m.email || '')}</span><span class="mono a-muted">${fmtDate(m.date)}</span>
       </div>
-      <p style="white-space:pre-wrap;color:var(--ink);font-size:14.5px;line-height:1.6;margin:0 0 22px">${esc(m.text || '')}</p>
+      <p class="a-msgbody">${esc(m.text || '')}</p>
       <div class="acts">
         ${m.email ? `<a class="btn" href="mailto:${esc(m.email)}?subject=Re: ${encodeURIComponent(m.subject || '')}">${ic('mail')} Javob yozish</a>` : ''}
         <button class="btn ghost" data-close>Yopish</button>
@@ -1097,22 +1100,24 @@
       c.innerHTML = `
         <div class="page-head"><div><div class="h">Audit loglar</div>
           <div class="d">Jami ${res.total} yozuv${auditFilter ? ` · filtr: ${esc(AUDIT_LBL[auditFilter] || auditFilter)}` : ''} · so'nggi ${rows.length} ta ko'rsatilmoqda</div></div><div class="sp"></div></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px">${chips}</div>
+        <div class="a-flexwrap8-mb14">${chips}</div>
         <div class="card">
           ${rows.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr>
-              <th style="width:150px">Amal</th><th style="width:130px">Bo'lim</th><th>Yozuv ID</th><th style="width:120px">IP</th><th style="width:150px">Vaqt</th>
+              <th class="a-w150">Amal</th><th class="a-w130">Bo'lim</th><th>Yozuv ID</th><th class="a-w120">IP</th><th class="a-w150">Vaqt</th>
             </tr></thead><tbody>${rows.map(function (r) {
               const tone = AUDIT_TONE[r.action] || '#6b7280';
               return `<tr>
-                <td><span class="badge" style="background:${tone}1a;color:${tone};border:1px solid ${tone}44">${esc(AUDIT_LBL[r.action] || r.action)}</span></td>
-                <td class="t-sub">${r.coll ? esc(AUDIT_COLL[r.coll] || r.coll) : '<span style="color:var(--muted)">—</span>'}</td>
-                <td class="mono" style="font-size:12px;color:var(--ink-2)">${r.item_id ? esc(r.item_id) : '<span style="color:var(--muted)">—</span>'}</td>
-                <td class="mono" style="font-size:12px;color:var(--ink-2)">${esc(r.ip || '—')}</td>
-                <td class="mono" style="font-size:12px;color:var(--ink-2)">${auditTs(r.at)}</td>
+                <td><span class="badge" data-tone="${tone}">${esc(AUDIT_LBL[r.action] || r.action)}</span></td>
+                <td class="t-sub">${r.coll ? esc(AUDIT_COLL[r.coll] || r.coll) : '<span class="a-muted">—</span>'}</td>
+                <td class="mono a-t12-ink2">${r.item_id ? esc(r.item_id) : '<span class="a-muted">—</span>'}</td>
+                <td class="mono a-t12-ink2">${esc(r.ip || '—')}</td>
+                <td class="mono a-t12-ink2">${auditTs(r.at)}</td>
               </tr>`;
             }).join('')}</tbody></table></div>`
           : `<div class="empty">${ic('audit')}<div class="t">Jurnal bo'sh</div><div>Hali hech qanday amal qayd etilmagan</div></div>`}
         </div>`;
+      // Dinamik "tone" rangi (inline style o'rniga .style — CSP).
+      $$('#content .badge[data-tone]').forEach(function (el) { var t = el.dataset.tone; el.style.background = t + '1a'; el.style.color = t; el.style.border = '1px solid ' + t + '44'; });
       $$('#content [data-af]').forEach(function (b) {
         b.onclick = function () { auditFilter = b.getAttribute('data-af'); viewAudit(c); };
       });
@@ -1160,36 +1165,39 @@
           <div class="sp"></div>
           ${rows.length ? `<button class="btn ghost" id="errResolveAll">${ic('check') || ''} Hammasini hal qilindi deb belgilash</button>` : ''}
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 14px">
+        <div class="a-flexwrap8-ac-mb14">
           ${chips}
-          <span style="flex:1"></span>
-          <label style="display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--muted);cursor:pointer">
+          <span class="a-flex1-only"></span>
+          <label class="a-checklabel">
             <input type="checkbox" id="errShowRes" ${errShowResolved ? 'checked' : ''}> Hal qilinganlarni ko'rsatish
           </label>
         </div>
         ${rows.length ? rows.map(function (r) {
           const tone = ERR_TONE[r.kind] || '#6b7280';
           const loc = r.source ? esc(r.source) + (r.line ? ':' + r.line + (r.col ? ':' + r.col : '') : '') : '';
-          return `<div class="card" style="margin-bottom:10px;padding:14px 16px;${r.resolved == 1 ? 'opacity:.55' : ''}">
-            <div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap">
-              <span class="badge" style="background:${tone}1a;color:${tone};border:1px solid ${tone}44;flex:0 0 auto">${esc(ERR_LBL[r.kind] || r.kind)}</span>
-              <div style="flex:1 1 300px;min-width:0">
-                <div style="font-weight:600;color:var(--ink);word-break:break-word;line-height:1.4">${esc(r.message)}</div>
-                <div class="mono" style="font-size:12px;color:var(--muted);margin-top:4px">
+          return `<div class="card a-errcard${r.resolved == 1 ? ' a-resolved' : ''}">
+            <div class="a-fas-g12-wrap">
+              <span class="badge a-flex0" data-tone="${tone}">${esc(ERR_LBL[r.kind] || r.kind)}</span>
+              <div class="a-flex300">
+                <div class="a-errtitle">${esc(r.message)}</div>
+                <div class="mono a-t12-muted-mt4">
                   ${loc ? loc + ' · ' : ''}${r.page ? esc(r.page) + ' · ' : ''}${errTs(r.last_at)}
-                  ${r.hits > 1 ? ` · <b style="color:${tone}">${r.hits} marta</b>` : ''}
+                  ${r.hits > 1 ? ` · <b data-tonec="${tone}">${r.hits} marta</b>` : ''}
                 </div>
-                ${r.cause ? `<div style="margin-top:9px;padding:9px 11px;background:var(--panel-2);border-radius:8px;font-size:13px">
-                    <b style="color:var(--accent)">SABAB:</b> ${esc(r.cause)}</div>` : ''}
-                ${r.stack ? `<details style="margin-top:7px"><summary style="cursor:pointer;font-size:12px;color:var(--muted)">Texnik tafsilot (stack)</summary>
-                    <pre style="margin:6px 0 0;padding:9px;background:var(--panel-2);border-radius:7px;overflow-x:auto;font-size:11.5px;color:var(--ink-2);white-space:pre-wrap">${esc(r.stack)}</pre></details>` : ''}
+                ${r.cause ? `<div class="a-errbox">
+                    <b class="a-accent">SABAB:</b> ${esc(r.cause)}</div>` : ''}
+                ${r.stack ? `<details class="a-mt7"><summary class="a-summary">Texnik tafsilot (stack)</summary>
+                    <pre class="a-stack">${esc(r.stack)}</pre></details>` : ''}
               </div>
-              ${r.resolved == 1 ? '' : `<button class="btn sm ghost" data-err-res="${r.id}" style="flex:0 0 auto">Hal qilindi</button>`}
+              ${r.resolved == 1 ? '' : `<button class="btn sm ghost a-flex0" data-err-res="${r.id}">Hal qilindi</button>`}
             </div>
           </div>`;
         }).join('')
         : `<div class="card"><div class="empty">${ic('bug')}<div class="t">Xato yo'q</div><div>Tizim toza ishlayapti — hech qanday xato qayd etilmagan</div></div></div>`}`;
 
+      // Dinamik "tone" rangi (inline style o'rniga .style — CSP).
+      $$('#content .badge[data-tone]').forEach(function (el) { var t = el.dataset.tone; el.style.background = t + '1a'; el.style.color = t; el.style.border = '1px solid ' + t + '44'; });
+      $$('#content [data-tonec]').forEach(function (el) { el.style.color = el.dataset.tonec; });
       $$('#content [data-ef]').forEach(function (b) {
         b.onclick = function () { errFilter = b.getAttribute('data-ef'); viewErrors(c); };
       });
@@ -1239,40 +1247,40 @@
         <div class="page-head"><div><div class="h">Bildirishnoma</div>
           <div class="d">Obuna bo'lgan tashrifchilarga so'nggi yangilik haqida xabar yuborish</div></div><div class="sp"></div></div>
 
-        <div class="two-col" style="gap:14px;align-items:start">
-          <div class="card" style="padding:20px">
-            <div class="mono" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Obunachilar</div>
-            <div style="font-size:34px;font-weight:700;color:var(--ink);line-height:1.1;margin:6px 0 4px">${n}</div>
-            <div style="font-size:13px;color:var(--muted)">brauzer obuna bo'lgan</div>
-            ${!st || !st.ready ? `<div style="margin-top:12px;padding:9px 11px;background:var(--panel-2);border-radius:8px;font-size:12.5px;color:var(--muted)">
+        <div class="two-col a-g14-start">
+          <div class="card a-p20">
+            <div class="mono a-kicker">Obunachilar</div>
+            <div class="a-bignum">${n}</div>
+            <div class="a-t13-muted">brauzer obuna bo'lgan</div>
+            ${!st || !st.ready ? `<div class="a-note">
               Kalitlar hali yaratilmagan — birinchi obuna bo'lganda avtomatik yaratiladi.</div>` : ''}
           </div>
 
-          <div class="card" style="padding:20px">
-            <div class="mono" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Nima yuboriladi</div>
+          <div class="card a-p20">
+            <div class="mono a-kicker">Nima yuboriladi</div>
             ${latest ? `
-              <div style="font-weight:600;color:var(--ink);margin:8px 0 4px;line-height:1.35">${esc(mlGet(latest.title))}</div>
-              <div class="mono" style="font-size:12px;color:var(--muted)">${latest.date ? fmtDate(latest.date) : ''}${latest.category ? ' · ' + esc(mlGet(latest.category)) : ''}</div>
-            ` : `<div style="margin-top:8px;color:var(--muted);font-size:13px">E'lon qilingan yangilik yo'q — avval yangilik qo'shing.</div>`}
-            <div style="margin-top:12px;font-size:12.5px;color:var(--muted);line-height:1.5">
+              <div class="a-cardtitle">${esc(mlGet(latest.title))}</div>
+              <div class="mono a-t12-muted">${latest.date ? fmtDate(latest.date) : ''}${latest.category ? ' · ' + esc(mlGet(latest.category)) : ''}</div>
+            ` : `<div class="a-mt8-muted13">E'lon qilingan yangilik yo'q — avval yangilik qo'shing.</div>`}
+            <div class="a-mt12-note">
               Matn yuborish paytida aniqlanadi: tashrifchi eng so'nggi e'lon qilingan yangilikni o'z tilida oladi.
             </div>
           </div>
         </div>
 
-        <div class="card" style="margin-top:14px;padding:20px">
-          <div class="form-actions" style="margin:0">
+        <div class="card a-mt14-p20">
+          <div class="form-actions a-m0">
             <button class="btn primary" id="pushSend" ${(!n || !latest) ? 'disabled' : ''}>${ic('bell')} Bildirishnoma yuborish</button>
             <div class="sp"></div>
           </div>
-          <div id="pushRes" style="margin-top:12px"></div>
-          ${!n ? `<div style="margin-top:10px;font-size:13px;color:var(--muted)">Hali obunachi yo'q. Saytga kirib, taklif oynasida «Obuna bo'lish»ni bosib sinab ko'rishingiz mumkin.</div>` : ''}
-          ${n && !latest ? `<div style="margin-top:10px;font-size:13px;color:var(--muted)">Yuborish uchun kamida bitta e'lon qilingan yangilik bo'lishi kerak.</div>` : ''}
+          <div id="pushRes" class="a-mt12"></div>
+          ${!n ? `<div class="a-mt10-muted13">Hali obunachi yo'q. Saytga kirib, taklif oynasida «Obuna bo'lish»ni bosib sinab ko'rishingiz mumkin.</div>` : ''}
+          ${n && !latest ? `<div class="a-mt10-muted13">Yuborish uchun kamida bitta e'lon qilingan yangilik bo'lishi kerak.</div>` : ''}
         </div>
 
-        <div class="card" style="margin-top:14px;padding:18px 20px">
-          <div style="font-size:13px;color:var(--ink-2);line-height:1.65">
-            <b style="color:var(--ink)">Eslatma.</b> Bildirishnoma faqat <b>HTTPS</b> orqali ishlaydi
+        <div class="card a-mt14-p1820">
+          <div class="a-t13-ink2-lh">
+            <b class="a-ink">Eslatma.</b> Bildirishnoma faqat <b>HTTPS</b> orqali ishlaydi
             (<code>localhost</code> — sinov uchun istisno). Sayt hostingga <code>http://</code> bilan
             chiqarilsa, obuna oynasi umuman ko'rinmaydi. <code>.htaccess</code> dagi HTTPS bloki
             yoqilishi shart — qarang: DEPLOY.md.
@@ -1283,17 +1291,17 @@
       if (btn) btn.onclick = function () {
         btn.disabled = true;
         const res = $('#pushRes');
-        res.innerHTML = `<div style="color:var(--muted);font-size:13px">Yuborilmoqda…</div>`;
+        res.innerHTML = `<div class="a-t13-muted">Yuborilmoqda…</div>`;
         Store.pushSend().then(function (r) {
           if (!r || !r.ok) {
-            res.innerHTML = `<div style="color:var(--danger,#9a3b52);font-size:13px">Yuborib bo'lmadi (${esc((r && r.error) || 'xato')})</div>`;
+            res.innerHTML = `<div class="a-danger13">Yuborib bo'lmadi (${esc((r && r.error) || 'xato')})</div>`;
             btn.disabled = false;
             return;
           }
-          res.innerHTML = `<div style="display:flex;gap:16px;flex-wrap:wrap;font-size:13px">
-            <span style="color:#2e7d6b"><b>${r.sent}</b> ta yuborildi</span>
-            ${r.gone ? `<span style="color:var(--muted)"><b>${r.gone}</b> ta eskirgan obuna o'chirildi</span>` : ''}
-            ${r.failed ? `<span style="color:#8a5a2b"><b>${r.failed}</b> ta yetmadi</span>` : ''}
+          res.innerHTML = `<div class="a-flexwrap16-13">
+            <span class="a-green"><b>${r.sent}</b> ta yuborildi</span>
+            ${r.gone ? `<span class="a-muted"><b>${r.gone}</b> ta eskirgan obuna o'chirildi</span>` : ''}
+            ${r.failed ? `<span class="a-brown"><b>${r.failed}</b> ta yetmadi</span>` : ''}
           </div>`;
           toast('Bildirishnoma yuborildi: ' + r.sent + ' ta');
           setTimeout(function () { viewPush(c); }, 1800);
@@ -1329,25 +1337,25 @@
       }).join('');
     }
     function textBlock(idPrefix, val) {
-      return ['uz','ru','en'].map(l => `<div class="lang-pane ${l==='uz'?'on':''}" data-lang="${l}"><textarea class="ctl" id="${idPrefix}_${l}" style="min-height:70px">${esc((val&&val[l])||'')}</textarea></div>`).join('');
+      return ['uz','ru','en'].map(l => `<div class="lang-pane ${l==='uz'?'on':''}" data-lang="${l}"><textarea class="ctl a-mh70" id="${idPrefix}_${l}">${esc((val&&val[l])||'')}</textarea></div>`).join('');
     }
 
     c.innerHTML = `
       <div class="page-head"><div><div class="h">Markaz haqida</div><div class="d">Bosh sahifa kirish jumlasi va "Markaz haqida" sahifasidagi matnlar</div></div><div class="sp"></div>
         <div class="langtabs" id="setLang"><button type="button" data-l="uz" class="on">UZ</button><button type="button" data-l="ru">RU</button><button type="button" data-l="en">EN</button></div>${autoTrButton('aboutAutoTr')}</div>
-      <div class="card" style="padding:24px;margin-bottom:20px">
-        <b style="font-family:var(--serif);font-size:17px;display:block;margin-bottom:6px">1) Kirish jumlasi (bosh sahifa)</b>
-        <div style="color:var(--muted);font-size:13px;margin-bottom:14px">Bosh sahifadagi "Markaz haqida" bo'limining katta sarlavhasi.</div>
+      <div class="card a-p24-mb20">
+        <b class="a-serif17-mb6">1) Kirish jumlasi (bosh sahifa)</b>
+        <div class="a-muted13-mb14">Bosh sahifadagi "Markaz haqida" bo'limining katta sarlavhasi.</div>
         ${textBlock('introTxt', intro)}
       </div>
-      <div class="card" style="padding:24px;margin-bottom:20px">
-        <b style="font-family:var(--serif);font-size:17px;display:block;margin-bottom:6px">2) Markaz haqida — batafsil ma'lumot</b>
-        <div style="color:var(--muted);font-size:13px;margin-bottom:14px">"Markaz haqida" sahifasidagi asosiy matn.</div>
+      <div class="card a-p24-mb20">
+        <b class="a-serif17-mb6">2) Markaz haqida — batafsil ma'lumot</b>
+        <div class="a-muted13-mb14">"Markaz haqida" sahifasidagi asosiy matn.</div>
         ${richBlock('aboutBody', aboutPg.body)}
       </div>
-      <div class="card" style="padding:24px;margin-bottom:20px">
-        <b style="font-family:var(--serif);font-size:17px;display:block;margin-bottom:6px">3) Maqsad va vazifalar</b>
-        <div style="color:var(--muted);font-size:13px;margin-bottom:14px">"Markaz haqida" sahifasidagi "Maqsad va vazifalar" bo'limi matni.</div>
+      <div class="card a-p24-mb20">
+        <b class="a-serif17-mb6">3) Maqsad va vazifalar</b>
+        <div class="a-muted13-mb14">"Markaz haqida" sahifasidagi "Maqsad va vazifalar" bo'limi matni.</div>
         ${richBlock('goalBody', goalPg.body)}
       </div>
       <div class="form-actions"><button class="btn primary" id="aboutSave">${ic('save')} Saqlash</button><div class="sp"></div></div>`;
@@ -1409,7 +1417,7 @@
         </div>`;
       }
       return `<div class="media-item info" data-id="${m.id}">
-        <div class="thumb"><div class="vthumb" style="background:linear-gradient(135deg,#0f5689,#0b2f4d);color:#fff">
+        <div class="thumb"><div class="vthumb a-grad">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 16v-3M12 16V9M16 16v-5" stroke-linecap="round"/></svg>
         </div></div>
         <div class="info">
@@ -1425,9 +1433,9 @@
         <button class="btn primary" id="addBtn">${ic(mediaTab==='video'?'plus':'upload')} ${addLabel}</button>
         <input type="file" accept=".html,.htm,text/html" hidden id="htmlInput"></div>
       <div class="toolbar-row"><div class="filterbar">
-        ${Object.keys(MEDIA_TABS).map(k => `<button class="chip ${k===mediaTab?'on':''}" data-mt="${k}">${MEDIA_TABS[k]} <span style="opacity:.6">${counts[k]||0}</span></button>`).join('')}
+        ${Object.keys(MEDIA_TABS).map(k => `<button class="chip ${k===mediaTab?'on':''}" data-mt="${k}">${MEDIA_TABS[k]} <span class="a-op6">${counts[k]||0}</span></button>`).join('')}
       </div></div>
-      <div class="card" style="padding:20px">
+      <div class="card a-p20">
         ${items.length ? `<div class="media-grid">${items.map(tile).join('')}</div>`
         : `<div class="empty">${ic('media')}<div class="t">Bu bo'limda fayl yo'q</div><div>${mediaTab==='video'?'Video havolasini qo\'shish':'Fayl yuklash'} uchun yuqoridagi tugmani bosing</div></div>`}
       </div>`;
@@ -1483,9 +1491,9 @@
       <div class="page-head"><div><div class="h">Media kutubxona</div><div class="d">${albums.length} ta albom</div></div><div class="sp"></div>
         <button class="btn primary" id="newAlbumBtn">${ic('plus')} Albom yaratish</button></div>
       <div class="toolbar-row"><div class="filterbar">
-        ${Object.keys(MEDIA_TABS).map(k => `<button class="chip ${k===mediaTab?'on':''}" data-mt="${k}">${MEDIA_TABS[k]} <span style="opacity:.6">${counts[k]||0}</span></button>`).join('')}
+        ${Object.keys(MEDIA_TABS).map(k => `<button class="chip ${k===mediaTab?'on':''}" data-mt="${k}">${MEDIA_TABS[k]} <span class="a-op6">${counts[k]||0}</span></button>`).join('')}
       </div></div>
-      <div class="card" style="padding:20px">
+      <div class="card a-p20">
         ${albums.length ? `<div class="media-grid">${albums.map(albumTile).join('')}</div>`
         : `<div class="empty">${ic('media')}<div class="t">Hali albom yo'q</div><div>Birinchi albomni yaratish uchun yuqoridagi tugmani bosing</div></div>`}
       </div>`;
@@ -1505,7 +1513,7 @@
     const bg = document.createElement('div'); bg.className = 'modal-bg';
     bg.innerHTML = `<div class="modal"><h3>Yangi albom</h3>
       <p>Albom sarlavhasi va sanasini kiriting — keyin ichiga rasm yuklaysiz.</p>
-      <div class="field"><label>Albom nomi <span style="color:#e5484d">*</span></label><input class="ctl" id="alTitle" placeholder="Masalan: Termiz dialogi 2026"></div>
+      <div class="field"><label>Albom nomi <span class="a-red">*</span></label><input class="ctl" id="alTitle" placeholder="Masalan: Termiz dialogi 2026"></div>
       <div class="field"><label>Sana</label><input class="ctl" type="date" id="alDate" value="${today}"></div>
       <div class="acts"><button class="btn ghost" data-no>Bekor qilish</button><button class="btn primary" data-yes>${ic('plus')} Yaratish</button></div></div>`;
     document.body.appendChild(bg);
@@ -1527,9 +1535,9 @@
     const cover = al.cover || (photos[0] && photos[0].url) || '';
     function photoTile(p, i) {
       const isCover = cover && p.url === cover;
-      return `<div class="media-item" data-idx="${i}" style="cursor:pointer" title="Muqova qilish uchun bosing">
+      return `<div class="media-item a-pointer" data-idx="${i}" title="Muqova qilish uchun bosing">
         <img src="${safeUrl(p.url)}">
-        ${isCover ? `<div style="position:absolute;top:8px;left:8px;background:var(--accent,#0f5689);color:#fff;border-radius:4px;padding:3px 8px;font-size:10px;letter-spacing:.08em;font-family:var(--mono,monospace)">MUQOVA</div>` : ''}
+        ${isCover ? `<div class="a-badge-abs">MUQOVA</div>` : ''}
         <div class="ov"><button class="icon-btn" data-act="del" title="O'chirish">${ic('trash')}</button></div>
       </div>`;
     }
@@ -1537,11 +1545,11 @@
       <div class="page-head"><button class="btn ghost" id="backAlbums">${ic('back')} Albomlar</button><div class="sp"></div>
         <button class="btn primary" id="addPhotos">${ic('upload')} Rasm qo'shish</button>
         <input type="file" accept="image/*" multiple hidden id="alUp"></div>
-      <div class="card" style="padding:22px;margin-bottom:16px">
-        <div style="display:flex;align-items:center;gap:0;margin-bottom:14px">
+      <div class="card a-p22-mb16">
+        <div class="a-fac-g0-mb14">
           <div class="langtabs" id="albLang"><button type="button" data-l="uz" class="on">UZ</button><button type="button" data-l="ru">RU</button><button type="button" data-l="en">EN</button></div>${autoTrButton('albAutoTr')}
         </div>
-        <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px">
+        <div class="a-grid21">
           <div class="field" data-ml id="metaTitle"><label>Albom nomi</label>
             ${['uz','ru','en'].map(l => `<div class="lang-pane ${l==='uz'?'on':''}" data-lang="${l}"><input class="ctl" data-in value="${esc((mlT && mlT[l]) || '')}" placeholder="${l.toUpperCase()}"></div>`).join('')}
           </div>
@@ -1549,8 +1557,8 @@
         </div>
         <button class="btn" id="saveMeta">${ic('save')} Saqlash</button>
       </div>
-      <div class="card" style="padding:20px">
-        <div class="d" style="margin-bottom:12px">${photos.length} ta rasm${photos.length ? ' · muqovani belgilash uchun rasm ustiga bosing' : ''}</div>
+      <div class="card a-p20">
+        <div class="d a-mb12">${photos.length} ta rasm${photos.length ? ' · muqovani belgilash uchun rasm ustiga bosing' : ''}</div>
         ${photos.length ? `<div class="media-grid">${photos.map(photoTile).join('')}</div>`
         : `<div class="empty">${ic('image')}<div class="t">Albom bo'sh</div><div>Yuqoridagi "Rasm qo'shish" tugmasi orqali rasm yuklang</div></div>`}
       </div>`;
@@ -1619,16 +1627,16 @@
         <div class="langtabs" id="setLang"><button type="button" data-l="uz" class="on">UZ</button><button type="button" data-l="ru">RU</button><button type="button" data-l="en">EN</button></div>${autoTrButton('setAutoTr')}</div>
       <div class="two-col">
         <div>
-          <div class="card" style="padding:24px;margin-bottom:20px"><b style="font-family:var(--serif);font-size:17px;display:block;margin-bottom:18px">Sayt ma'lumotlari</b>
+          <div class="card a-p24-mb20"><b class="a-serif17-mb18">Sayt ma'lumotlari</b>
             ${mlField('siteName', 'Markaz nomi', s.siteName)}
             <div class="field"><label>Qisqa nom</label><input class="ctl" id="setShort" value="${esc(s.shortName)}"></div>
             ${mlField('address', 'Manzil', s.address)}
             <div class="grid2"><div class="field"><label>E-pochta</label><input class="ctl" id="setEmail" value="${esc(s.email)}"></div>
             <div class="field"><label>Telefon</label><input class="ctl" id="setPhone" value="${esc(s.phone)}"></div></div>
             <div class="field"><label>Xarita joyi (aloqa sahifasi)</label><input class="ctl" id="setMap" value="${esc(s.mapQuery || '')}" placeholder="41.310961,69.246750">
-              <div style="color:var(--muted);font-size:12px;margin-top:5px">Google Maps koordinatasi <b>"kenglik,uzunlik"</b> (aniq pin uchun tavsiya etiladi) yoki to'liq manzil matni.</div></div>
+              <div class="a-t12-muted-mt5">Google Maps koordinatasi <b>"kenglik,uzunlik"</b> (aniq pin uchun tavsiya etiladi) yoki to'liq manzil matni.</div></div>
           </div>
-          <div class="card" style="padding:24px"><b style="font-family:var(--serif);font-size:17px;display:block;margin-bottom:18px">Ijtimoiy tarmoqlar</b>
+          <div class="card a-p24"><b class="a-serif17-mb18">Ijtimoiy tarmoqlar</b>
             <div class="grid2">
               <div class="field"><label>Telegram</label><input class="ctl" id="soc_telegram" value="${esc(s.social.telegram)}"></div>
               <div class="field"><label>YouTube</label><input class="ctl" id="soc_youtube" value="${esc(s.social.youtube)}"></div>
@@ -1638,44 +1646,44 @@
           </div>
         </div>
         <div>
-          <div class="card" style="padding:24px;margin-bottom:20px"><b style="font-family:var(--serif);font-size:17px;display:block;margin-bottom:6px">Logotip (3 tilda)</b>
-            <div style="color:var(--muted);font-size:12.5px;margin-bottom:16px">Har bir til uchun alohida logotip. Til almashtirilganda mos logotip ko'rsatiladi.</div>
+          <div class="card a-p24-mb20"><b class="a-serif17-mb6">Logotip (3 tilda)</b>
+            <div class="a-muted125-mb16">Har bir til uchun alohida logotip. Til almashtirilganda mos logotip ko'rsatiladi.</div>
             <div id="logoGrid"></div>
           </div>
-          <div class="card" style="padding:24px;margin-bottom:20px"><b style="font-family:var(--serif);font-size:17px;display:block;margin-bottom:14px">Tillar</b>
-            ${['uz', 'ru', 'en'].map(l => `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0"><span>${({ uz: "O'zbek", ru: 'Rus', en: 'Ingliz' })[l]}</span>
+          <div class="card a-p24-mb20"><b class="a-serif17-mb14">Tillar</b>
+            ${['uz', 'ru', 'en'].map(l => `<div class="a-fac-sb-p8"><span>${({ uz: "O'zbek", ru: 'Rus', en: 'Ingliz' })[l]}</span>
               <label class="switch"><input type="checkbox" data-lang-tog="${l}" ${s.langs[l] ? 'checked' : ''}><span class="sl"></span></label></div>`).join('')}
           </div>
-          <div class="card" style="padding:24px"><b style="font-family:var(--serif);font-size:17px;display:block;margin-bottom:14px">Ko'rinish</b>
+          <div class="card a-p24"><b class="a-serif17-mb14">Ko'rinish</b>
             <div class="field"><label>Standart tema</label><select class="ctl" id="setTheme"><option value="light" ${s.theme === 'light' ? 'selected' : ''}>Yorug'</option><option value="dark" ${s.theme === 'dark' ? 'selected' : ''}>Quyuq</option></select></div>
           </div>
         </div>
       </div>
-      <div class="card" style="padding:24px;margin-top:20px"><b style="font-family:var(--serif);font-size:17px;display:block;margin-bottom:6px">Sahifa banner fonlari</b>
-        <div style="color:var(--muted);font-size:13px;margin-bottom:20px">Har bir bo'lim sarlavhasi ortidagi fon rasmi. Bo'sh qoldirilsa standart to'q ko'k fon ishlatiladi.</div>
+      <div class="card a-p24-mt20"><b class="a-serif17-mb6">Sahifa banner fonlari</b>
+        <div class="a-muted13-mb20">Har bir bo'lim sarlavhasi ortidagi fon rasmi. Bo'sh qoldirilsa standart to'q ko'k fon ishlatiladi.</div>
         <div class="banner-grid" id="bannerGrid"></div>
       </div>
-      <div class="card" style="padding:24px;margin-top:20px"><b style="font-family:var(--serif);font-size:17px;display:block;margin-bottom:6px">Statistika (bosh sahifa)</b>
-        <div style="color:var(--muted);font-size:13px;margin-bottom:18px">Bosh sahifadagi raqamlar. Matn 3 tilda (tepadagi UZ/RU/EN tab orqali almashtiriladi).</div>
+      <div class="card a-p24-mt20"><b class="a-serif17-mb6">Statistika (bosh sahifa)</b>
+        <div class="a-muted13-mb18">Bosh sahifadagi raqamlar. Matn 3 tilda (tepadagi UZ/RU/EN tab orqali almashtiriladi).</div>
         <div id="statsGrid"></div>
       </div>
-      <div class="card" style="padding:24px;margin-top:20px"><b style="font-family:var(--serif);font-size:17px;display:block;margin-bottom:6px">Kontent tarjimasi (EN / RU)</b>
-        <div style="color:var(--muted);font-size:13px;margin-bottom:16px">Barcha yangilik, tadbir, nashr, ekspert va sahifalardagi <b>bo'sh</b> ingliz/rus maydonlarini o'zbek matnidan avtomatik to'ldiradi (Google). Mavjud tarjimalar o'zgarmaydi. Yakunida saytda tekshirib chiqing.</div>
-        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <div class="card a-p24-mt20"><b class="a-serif17-mb6">Kontent tarjimasi (EN / RU)</b>
+        <div class="a-muted13-mb16">Barcha yangilik, tadbir, nashr, ekspert va sahifalardagi <b>bo'sh</b> ingliz/rus maydonlarini o'zbek matnidan avtomatik to'ldiradi (Google). Mavjud tarjimalar o'zgarmaydi. Yakunida saytda tekshirib chiqing.</div>
+        <div class="a-fac-g14-wrap">
           <button type="button" class="btn" id="bulkTr">⇄ Bo'sh tarjimalarni to'ldirish</button>
-          <span id="bulkTrLog" style="color:var(--muted);font-size:13px"></span>
+          <span id="bulkTrLog" class="a-t13-muted"></span>
         </div>
       </div>
-      <div class="card" style="padding:24px;margin-top:20px"><b style="font-family:var(--serif);font-size:17px;display:block;margin-bottom:6px">Xavfsizlik — kirish paroli</b>
-        <div style="color:var(--muted);font-size:13px;margin-bottom:16px">Parol serverda bcrypt bilan xeshlanadi va hech qayerda ochiq saqlanmaydi. Kamida <b>12 ta belgi</b> bo'lishi shart; harf, raqam va belgilar aralashmasi tavsiya etiladi.</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;max-width:760px">
+      <div class="card a-p24-mt20"><b class="a-serif17-mb6">Xavfsizlik — kirish paroli</b>
+        <div class="a-muted13-mb16">Parol serverda bcrypt bilan xeshlanadi va hech qayerda ochiq saqlanmaydi. Kamida <b>12 ta belgi</b> bo'lishi shart; harf, raqam va belgilar aralashmasi tavsiya etiladi.</div>
+        <div class="a-grid-auto">
           <div class="field"><label>Joriy parol</label><input class="ctl" type="password" id="pwCur" autocomplete="current-password"></div>
           <div class="field"><label>Yangi parol</label><input class="ctl" type="password" id="pwNew" autocomplete="new-password"></div>
           <div class="field"><label>Yangi parolni takrorlang</label><input class="ctl" type="password" id="pwNew2" autocomplete="new-password"></div>
         </div>
-        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:16px">
+        <div class="a-fac-g14-wrap-mt16">
           <button type="button" class="btn" id="pwSave">${ic('save')} Parolni almashtirish</button>
-          <span id="pwMsg" style="font-size:13px"></span>
+          <span id="pwMsg" class="a-t13"></span>
         </div>
       </div>
       <div class="form-actions"><button class="btn primary" id="setSave">${ic('save')} Sozlamalarni saqlash</button><div class="sp"></div>
@@ -1686,13 +1694,15 @@
     const banners = Object.assign({}, s.banners || {});
     $('#bannerGrid').innerHTML = Object.keys(BSEC).map(k => `
       <div class="banner-cell" data-bk="${k}">
-        <div class="bprev" style="${banners[k]?`background-image:url(${banners[k]})`:''}">${banners[k]?'':ic('image')}</div>
+        <div class="bprev">${banners[k]?'':ic('image')}</div>
         <div class="binfo"><div class="blabel">${BSEC[k]}</div>
           <div class="bacts"><button type="button" class="btn sm" data-bpick>${ic('upload')} Rasm</button>${banners[k]?`<button type="button" class="btn sm ghost" data-bclear>O'chirish</button>`:''}</div></div>
         <input type="file" accept="image/*" hidden data-binput>
       </div>`).join('');
     $$('#bannerGrid .banner-cell').forEach(cell => {
       const k = cell.dataset.bk, inp = $('[data-binput]', cell), prev = $('.bprev', cell);
+      // dastlabki fon rasmi (inline style o'rniga .style — CSP)
+      if (banners[k]) prev.style.backgroundImage = `url(${banners[k]})`;
       $('[data-bpick]', cell).onclick = () => inp.click();
       inp.onchange = (e) => { const f = e.target.files[0]; if (!f) return; resizeImage(f, 1800, (url) => { Store.uploadImage(url, (saved) => { banners[k] = saved; prev.style.backgroundImage = `url(${saved})`; prev.innerHTML = ''; }); }); };
       const clr = $('[data-bclear]', cell); if (clr) clr.onclick = () => { delete banners[k]; prev.style.backgroundImage = ''; prev.innerHTML = ic('image'); clr.remove(); };
@@ -1704,10 +1714,10 @@
     ]));
     function renderStats(){
       $('#statsGrid').innerHTML = statsData.map((st,i)=>`
-        <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px" data-si="${i}">
-          <input class="ctl" data-sn style="width:110px;flex:none" value="${esc(st.n)}" placeholder="300+">
-          ${['uz','ru','en'].map(l=>`<div class="lang-pane ${l==='uz'?'on':''}" data-lang="${l}" style="flex:1"><input class="ctl" data-sc="${l}" value="${esc((st.c&&st.c[l])||'')}" placeholder="Izoh (${l.toUpperCase()})"></div>`).join('')}
-          <button type="button" class="btn ghost sm" data-sdel style="flex:none">${ic('trash')}</button>
+        <div class="a-fas-g12-mb12" data-si="${i}">
+          <input class="ctl a-w110-none" data-sn value="${esc(st.n)}" placeholder="300+">
+          ${['uz','ru','en'].map(l=>`<div class="lang-pane ${l==='uz'?'on':''} a-flex1-only" data-lang="${l}"><input class="ctl" data-sc="${l}" value="${esc((st.c&&st.c[l])||'')}" placeholder="Izoh (${l.toUpperCase()})"></div>`).join('')}
+          <button type="button" class="btn ghost sm a-flexnone" data-sdel>${ic('trash')}</button>
         </div>`).join('') +
         `<button type="button" class="btn sm" id="statAdd">${ic('plus')} Qator qo'shish</button>`;
       $$('#statsGrid [data-si]').forEach(row=>{
@@ -1731,9 +1741,9 @@
     const logos = Object.assign({ uz: '', ru: '', en: '' }, s.logos || {});
     if (!logos.uz && s.logo) logos.uz = s.logo; // orqaga moslik
     $('#logoGrid').innerHTML = ['uz', 'ru', 'en'].map(l => `
-      <div class="uploader tall" data-lk="${l}" style="margin-bottom:12px">
+      <div class="uploader tall a-mb12" data-lk="${l}">
         <img class="prev" src="${safeUrl(logos[l] || DEF_LOGO[l])}">
-        <div><div style="font-weight:600;font-size:13px;margin-bottom:6px">${LGL[l]}</div>
+        <div><div class="a-fw6-13-mb6">${LGL[l]}</div>
           <button type="button" class="btn sm" data-lpick>${ic('upload')} Tanlash</button>
           ${logos[l] ? `<button type="button" class="btn sm ghost" data-lclear>O'chirish</button>` : ''}
           <input type="file" accept="image/*" hidden data-linput></div>
