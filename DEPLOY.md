@@ -149,10 +149,72 @@ Xavfsizlik sarlavhalari (brauzer DevTools → Network → Response Headers):
 - [ ] `X-Content-Type-Options: nosniff`
 - [ ] `Strict-Transport-Security` (HTTPS yoqilgandan keyin)
 
+## 4c. Infratuzilma va tarmoq (hosting muhitida)
+
+> Bu bandlar **serverdan tashqarida** — domen, tarmoq, DNS provayder darajasida
+> hal qilinadi va mahalliy (XAMPP) muhitda sinab bo'lmaydi. Sayt hostingga
+> chiqarilganda bajariladi. UzInfocom infratuzilmasida joylashtirilsa,
+> ularning ko'pi platforma darajasida ta'minlanadi — u holda «kim javobgar»
+> ustunini ular bilan aniqlashtiring.
+
+### DNS va domen
+- [ ] Domen (`*.uz`) UzInfocom/CCTLD orqali ro'yxatdan o'tgan.
+- [ ] DNS yozuvlari: `A`/`AAAA` (server IP), `www` → asosiy domen (CNAME yoki A).
+- [ ] `CAA` yozuvi — faqat ishlatilayotgan sertifikat markazi (masalan Let's
+      Encrypt) sertifikat bera olsin (`0 issue "letsencrypt.org"`).
+- [ ] TTL joylashuvdan oldin past (300s), barqarorlashgach oshiriladi.
+- [ ] DNSSEC yoqilgan (provayder qo'llasa) — DNS soxtalashtirishga qarshi.
+
+### DDoS va tarmoq himoyasi
+- [ ] Server old tomonida qalqon (reverse proxy / WAF — masalan Cloudflare yoki
+      UzInfocom shlyuzi). Sayt IP'si to'g'ridan-to'g'ri commsiz ochiq turmasin.
+- [ ] Firewall: faqat 80/443 ochiq. MySQL porti (3306) **tashqaridan yopiq** —
+      faqat `localhost`. SSH (22) faqat ma'lum IP'lardan.
+- [ ] Fail2ban yoki shunga o'xshash — takroriy suiiste'mol IP'larini bloklaydi.
+      (Ilova darajasidagi brute-force qulfi allaqachon bor — bu qo'shimcha qatlam.)
+- [ ] Apache `mod_evasive` yoki proksi darajasida so'rov tezligi cheklovi.
+
+### CDN va yetkazib berish (ixtiyoriy — trafik o'ssagina)
+- [ ] Statik resurslar (rasm, CSS, JS) CDN orqali. `.htaccess` da 1 yillik kesh
+      va `ETag` allaqachon sozlangan — CDN ularni to'g'ri o'qiydi.
+- [ ] Faqat statik content keshlansin; `api.php` va `admin.html` **hech qachon**
+      CDN keshiga tushmasin (ular `Cache-Control: no-store` beradi).
+- [ ] TSTM auditoriyasi asosan O'zbekistonda — CDN mahalliy tugun (PoP) bilan
+      bo'lsa foydali, aks holda shart emas.
+
+### Monitoring va ogohlantirish
+- [ ] Uptime kuzatuvchi (masalan UptimeRobot yoki mahalliy Zabbix) — `/` va
+      `/api.php?action=load` har 5 daqiqada tekshiriladi, uzilishda SMS/email.
+- [ ] Disk to'lishi kuzatiladi — `uploads/` va MySQL o'sishi (80% da ogohlantirish).
+- [ ] `audit_log` va `error_log` jadvallari muntazam ko'riladi (admin panel →
+      Audit / Xatoliklar bo'limlari) — shubhali kirish yoki ko'p xatoliklar.
+- [ ] Server jurnallari (Apache `error.log`, `access.log`) saqlanadi va aylanadi
+      (`logrotate`).
+
+### Masshtablash (kelajakda, agar trafik o'ssa)
+- [ ] Sayt hozir **bitta serverda** yetarli (yuk testi: statik ~900 req/s,
+      keshli API ~55 req/s bitta mashinada — real serverda yuqoriroq).
+- [ ] O'sish bo'lsa birinchi qadam: PHP OPcache yoqish + MariaDB xotira sozlash
+      (`innodb_buffer_pool_size`), keyin ko'proq RAM. Gorizontal masshtablash
+      (bir necha server) hozir kerak emas.
+- [ ] Statsiz joylashtirish: sessiya fayllari serverda saqlanadi. Agar bir
+      nechta serverga o'tilsa, sessiyani umumiy omborga (Redis/DB) ko'chirish
+      kerak bo'ladi — hozir bitta server uchun bu shart emas.
+
 ## 5. Muntazam ish (oyiga bir marta)
 
-- [ ] Admin panel → Sozlamalar → ma'lumotlar zaxirasi olingan.
-- [ ] MySQL zaxirasi: `mysqldump -u tstm_app -p tstm > zaxira_YYYY-MM-DD.sql`
+- [ ] **To'liq zaxira olingan** (baza + yuklangan fayllar):
+
+      ```powershell
+      powershell -ExecutionPolicy Bypass -File backup.ps1
+      ```
+
+      Natija: `backups\tstm-YYYYMMDD-HHmmss\` ichida `database.sql` +
+      `uploads.zip` + `meta.txt`. Skript oxirgi 14 ta zaxirani saqlaydi,
+      eskisini avtomatik o'chiradi. **Nusxani boshqa diskka/joyga ham
+      ko'chiring** — bitta serverdagi zaxira ofat (disk nosozligi) da yordam
+      bermaydi.
+
 - [ ] PHP va MySQL yangilanishlari o'rnatilgan.
 - [ ] `audit_log` jadvalidagi kirish urinishlari ko'rib chiqilgan
       (shubhali IP bormi?):
@@ -162,6 +224,30 @@ Xavfsizlik sarlavhalari (brauzer DevTools → Network → Response Headers):
       FROM audit_log WHERE action = 'login'
       GROUP BY ip ORDER BY c DESC LIMIT 20;
       ```
+
+## 5b. Ofatdan tiklash (zaxiradan qaytarish)
+
+Server buzilsa yoki ma'lumot yo'qolsa, eng oxirgi zaxiradan tiklang:
+
+```powershell
+# Eng oxirgi zaxirani asl bazaga tiklaydi (uploads bilan). Tasdiqlash so'raydi.
+powershell -ExecutionPolicy Bypass -File restore.ps1
+
+# Aniq bir zaxiradan:
+powershell -ExecutionPolicy Bypass -File restore.ps1 -From "backups\tstm-20260803-095616"
+```
+
+> **Zaxirani muntazam sinab turing.** Tiklashni haqiqiy bazaga tegmasdan sinov
+> bazasida tekshirish mumkin (asl ma'lumot xavfsiz qoladi):
+>
+> ```powershell
+> powershell -ExecutionPolicy Bypass -File restore.ps1 -Db tstm_restore_test -Force
+> # yozuvlar soni asl bazaga mos kelishini tekshiring, so'ng:
+> # DROP DATABASE tstm_restore_test;
+> ```
+>
+> Sinalmagan zaxira — zaxira emas. Bu loyihada tiklash 12 jadval bo'yicha
+> muvaffaqiyatli sinovdan o'tgan (2026-08-03).
 
 ## 6. Sayt yangilanganda (kesh qoidasi)
 

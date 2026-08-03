@@ -24,6 +24,10 @@ login_attempts.json
 # views.json — ko'rishlar hisoblagichi, server ish jarayonida o'zgaradi
 views.json
 
+# --- Zaxira nusxalar (backup.ps1 yaratadi) ---
+# Baza dump + uploads arxivi. Katta va maxfiy (parol xeshi bor) — repoga tushmaydi.
+backups/
+
 # --- OS artefaktlari ---
 Thumbs.db
 desktop.ini

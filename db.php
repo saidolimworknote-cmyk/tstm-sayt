@@ -568,7 +568,16 @@ function cache_invalidate() { @unlink(cache_file()); }
 function db_load_public_cached($pdo) {
   $f = cache_file();
   $hit = @file_get_contents($f);
-  if ($hit !== false && $hit !== '') return $hit;
+  // Yengil yaxlitlik tekshiruvi: kesh fayli bo'sh emas, lekin buzuq (yarim
+  // yozilgan yoki qo'lda buzilgan) bo'lsa uni tarqatmaymiz. To'liq json_decode
+  // keshning tezlik afzalligini yo'qqa chiqaradi (~43 ms), shuning uchun faqat
+  // JSON obyektining chegara belgilarini tekshiramiz: '{' bilan boshlanib '}'
+  // bilan tugashi shart. Buzuq bo'lsa — pastda qaytadan yasaladi.
+  if ($hit !== false && $hit !== '') {
+    $trim = trim($hit);
+    if ($trim !== '' && $trim[0] === '{' && substr($trim, -1) === '}') return $hit;
+    @unlink($f); // buzuq keshni tozalaymiz — keyingi so'rov toza yasaydi
+  }
   $json = json_encode(db_load_all($pdo, false), JSON_UNESCAPED_UNICODE);
   // Atomik yozish: yarim yozilgan fayl o'qilib qolmasin (bir vaqtda ikki so'rov).
   $tmp = $f . '.' . getmypid() . '.tmp';
