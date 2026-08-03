@@ -15,37 +15,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=75">
+<link rel="stylesheet" href="site.css?v=76">
 <link rel="stylesheet" href="subscribe.css?v=2">
-<style>
-  .exp-detail{display:grid;grid-template-columns:300px 1fr;gap:54px;align-items:start;}
-  .exp-detail .photo{border:1px solid var(--line);background:var(--bg-2);aspect-ratio:3/4;overflow:hidden;border-radius:var(--r-media,12px);transition:box-shadow .28s, border-color .28s;}
-  .exp-detail .photo:hover{box-shadow:var(--glow-soft);border-color:transparent;}
-  .exp-detail .photo img{width:100%;height:100%;object-fit:cover;}
-  .exp-detail .photo .ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);}
-  .exp-detail .photo .ph svg{width:60px;height:60px;opacity:.4;}
-  .exp-detail .role{font-family:var(--mono);font-size:0.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);}
-  .exp-detail h1{font-family:var(--serif);font-weight:600;font-size:clamp(26px,3vw,38px);line-height:1.1;margin:12px 0 8px;}
-  .exp-detail .sub{color:var(--muted);font-size:1.03rem;margin-bottom:24px;}
-
-  /* Aloqa kartasi — portret ostida */
-  .exp-contact{margin-top:22px;border:1px solid var(--line);border-radius:var(--r-card,12px);background:var(--panel);padding:20px;display:flex;flex-direction:column;gap:13px;}
-  .exp-contact .lab{font-family:var(--mono);font-size:0.625rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;}
-  .exp-contact a,.exp-contact span.row{display:flex;align-items:flex-start;gap:11px;color:var(--ink-2);text-decoration:none;font-size:0.9rem;line-height:1.45;word-break:break-word;transition:color .15s;}
-  .exp-contact a:hover{color:var(--accent);}
-  .exp-contact svg{width:16px;height:16px;color:var(--accent);flex:none;margin-top:2px;}
-
-  /* Ekspertiza yo'nalishlari — chiplar */
-  .exp-tags{display:flex;flex-wrap:wrap;gap:9px;margin:0 0 26px;}
-  .exp-tags a{font-family:var(--mono);font-size:0.6875rem;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--ink-2);text-decoration:none;transition:border-color .15s, color .15s, background .15s;}
-  .exp-tags a:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);}
-
-  @media(max-width:760px){
-    .exp-detail{grid-template-columns:1fr;gap:30px;}
-    .exp-detail .photo{max-width:260px;}
-    .exp-contact{max-width:none;}
-  }
-</style>
+<link rel="stylesheet" href="page-expert.css?v=1">
 </head>
 <body>
 <main id="main"></main>
@@ -53,10 +25,10 @@
 <script src="diag.js?v=1"></script>
 <script src="i18n.js?v=54"></script>
 <script src="admin-store.js?v=52"></script>
-<script src="site-common.js?v=67"></script>
+<script src="site-common.js?v=68"></script>
 <script src="subscribe.js?v=2"></script>
 <script src="search.js?v=46"></script>
-<script src="a11y.js?v=52"></script>
-<script src="page-expert.js?v=3"></script>
+<script src="a11y.js?v=53"></script>
+<script src="page-expert.js?v=4"></script>
 </body>
 </html>

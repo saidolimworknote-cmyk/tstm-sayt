@@ -8,7 +8,7 @@
     const main = document.getElementById('main');
     if(!e){
       main.innerHTML = `<div class="page-banner"><div class="wrap"><div class="crumb"><a href="Bosh sahifa - Hi-Fi.html">${T('home')}</a><span class="sep">/</span><a href="rahbariyat.html">${T('nav_about_leadership')}</a></div><h1>${T('not_found_t')||'Topilmadi'}</h1></div></div>
-        <section class="block"><div class="wrap"><div class="empty"><div class="t">${T('not_found_t')}</div><div style="margin-top:20px"><a class="btn outline" href="rahbariyat.html">← ${T('all_team')}</a></div></div></div></section>`;
+        <section class="block"><div class="wrap"><div class="empty"><div class="t">${T('not_found_t')}</div><div class="mt-20"><a class="btn outline" href="rahbariyat.html">← ${T('all_team')}</a></div></div></div></section>`;
       return;
     }
     const name = ml(e.name);
@@ -45,7 +45,7 @@
       clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
     };
     const phSvg = `<div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><circle cx="12" cy="9" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg></div>`;
-    const phCover = `<div class="ph" style="position:absolute;inset:0;border:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></svg></div>`;
+    const phCover = `<div class="ph abs-cover"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></svg></div>`;
     const dlSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 19h14" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     const arrowSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
@@ -69,16 +69,16 @@
           <div class="role">${esc(ml(e.role))}</div>
           <h1>${esc(name)}</h1>
           <div class="sub">${esc(ml(e.sub))}</div>
-          ${tags.length?`<div class="kicker" style="margin:0 0 12px">${T('expert_expertise')}</div>
+          ${tags.length?`<div class="kicker kick-m0-12">${T('expert_expertise')}</div>
             <div class="exp-tags">${tags.map(t=>`<a href="nashrlar.html?cat=${encodeURIComponent(t)}">${esc(t)}</a>`).join('')}</div>`:''}
-          ${bio?`<div class="kicker" style="margin:8px 0 14px">${T('expert_bio')}</div><div class="prose">${bio}</div>`:''}
+          ${bio?`<div class="kicker kick-m8-14">${T('expert_bio')}</div><div class="prose">${bio}</div>`:''}
           <div class="share-row"><span class="lab">${T('share')||'Ulashish'}</span>
             <a href="#" aria-label="Telegram">${I.tg}</a><a href="#" aria-label="Facebook">${I.fb}</a><a href="#" aria-label="X">${I.x}</a>
           </div>
         </div>
       </div></div></section>
 
-      <section class="block" style="padding-top:0"><div class="wrap">
+      <section class="block pt0"><div class="wrap">
         <div class="sec-head"><div><div class="kicker">${T('expert_pubs')}</div></div>${pubsAll.length>PUB_LIMIT?`<a class="arrow-link" href="nashrlar.html?author=${encodeURIComponent(name)}">${T('view_all')} →</a>`:''}</div>
         ${pubs.length?`<div class="pub-grid">${pubs.map(p=>{
           const href = `nashr.html?id=${p.id}`;

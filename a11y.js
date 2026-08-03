@@ -70,123 +70,14 @@
     try { scaleFonts(); } catch{}
   }
 
-  // ---- styles ----
-  var css = document.createElement('style');
-  css.textContent = [
-    'html[data-a11y-scheme="contrast"] body > *:not(.a11y-panel):not(.a11y-overlay):not(#a11y-read-overlay){filter:grayscale(1) contrast(1.35);}',
-    'html[data-a11y-scheme="gray"] body > *:not(.a11y-panel):not(.a11y-overlay):not(#a11y-read-overlay){filter:grayscale(1);}',
-    'html[data-a11y-scheme="noimg"] body > *:not(.a11y-panel):not(.a11y-overlay):not(#a11y-read-overlay){filter:grayscale(1);}',
-    'html[data-a11y-scheme="noimg"] img{opacity:0 !important;}',
-    'html[data-a11y-scheme="noimg"] .heroimg,html[data-a11y-scheme="noimg"] .ph,html[data-a11y-scheme="noimg"] [style*="background-image"]{background-image:none !important;}',
-    'html.a11y-active[data-a11y-scheme="noimg"] .page-banner{background-image:none !important;}',
-    /* reader highlight */
-    '.a11y-reading-on *{cursor:help;}',
-    '.a11y-read-hl{outline:3px solid #0D4483 !important;outline-offset:2px;background:rgba(13,68,131,.08) !important;}',
-    /* ===== O'QISH REJIMI — toza, kitobsimon (gov.uz uslubi) ===== */
-    '#a11y-read-overlay{position:fixed;inset:0;z-index:99999;background:#f6f4ee;overflow-y:auto;}',
-    '.a11y-read-bar{position:sticky;top:0;z-index:2;background:#0D4483;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 26px;font-family:"Inter",system-ui,sans-serif;box-shadow:0 2px 16px rgba(0,0,0,.18);}',
-    '.a11y-read-bar b{font-family:"Spectral",Georgia,serif;font-weight:600;font-size:18px;}',
-    '#a11y-read-x{background:rgba(255,255,255,.16);border:0;color:#fff;padding:10px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-family:inherit;transition:background .15s;}',
-    '#a11y-read-x:hover{background:rgba(255,255,255,.3);}',
-    '.a11y-read-body{max-width:740px;margin:0 auto;padding:52px 28px 100px;font-family:Georgia,"Spectral",serif;font-size:20px;line-height:1.85;color:#1e1e1e;}',
-    '.a11y-read-body>*{max-width:100%;}',
-    '.a11y-read-body h1{font-size:35px;line-height:1.18;margin:0 0 26px;font-weight:700;letter-spacing:-.01em;}',
-    '.a11y-read-body h2{font-size:27px;line-height:1.25;margin:44px 0 16px;font-weight:700;}',
-    '.a11y-read-body h3,.a11y-read-body h4{font-size:22px;line-height:1.3;margin:34px 0 12px;font-weight:600;}',
-    '.a11y-read-body p{margin:0 0 22px;}',
-    '.a11y-read-body ul,.a11y-read-body ol{margin:0 0 24px;padding-left:28px;}',
-    '.a11y-read-body li{margin-bottom:10px;}',
-    '.a11y-read-body a{color:#0a4163;text-decoration:underline;text-underline-offset:2px;}',
-    '.a11y-read-body img{display:block;max-width:100%;height:auto;margin:30px auto;border-radius:10px;}',
-    '.a11y-read-body blockquote{margin:30px 0;padding:8px 0 8px 22px;border-left:4px solid #0D4483;font-style:italic;color:#3a3a3a;}',
-    '.a11y-read-body figure{margin:30px 0;}',
-    '.a11y-read-body figcaption{font-size:15px;color:#6a6a6a;text-align:center;margin-top:10px;font-family:"Inter",sans-serif;}',
-    '.a11y-read-body hr{border:0;border-top:1px solid #dcd6ca;margin:38px 0;}',
-    '@media(max-width:760px){.a11y-read-bar{padding:13px 16px;}.a11y-read-body{padding:34px 18px 72px;font-size:18px;}.a11y-read-body h1{font-size:28px;}.a11y-read-body h2{font-size:23px;}}',
-    /* panel */
-    '.a11y-panel{position:fixed;top:0;right:0;bottom:0;width:430px;max-width:92vw;background:#fff;color:#1a1a1a;z-index:99999;box-shadow:-10px 0 40px rgba(0,0,0,.25);transform:translateX(100%);transition:transform .3s;overflow-y:auto;font-family:"Inter",system-ui,sans-serif;border-left:4px solid #0D4483;}',
-    '.a11y-panel.open{transform:none;}',
-    '.a11y-panel *{letter-spacing:normal !important;}',
-    '.a11y-h{display:flex;align-items:center;gap:10px;padding:20px 24px;border-bottom:1px solid #e6e6e2;}',
-    '.a11y-h .x{background:none;border:0;cursor:pointer;width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:#333;border-radius:6px;flex:none;}',
-    '.a11y-h .x:hover{background:#f0f0f0;}',
-    '.a11y-h .x svg{width:24px;height:24px;}',
-    '.a11y-h h3{font-family:"Spectral",Georgia,serif;font-weight:600;font-size:21px;margin:0 auto;text-align:center;color:#1a1a1a;}',
-    '.a11y-icons{display:flex;gap:12px;padding:20px 24px 6px;}',
-    '.a11y-ic{width:54px;height:46px;border:0;border-radius:8px;background:#8a9099;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;}',
-    '.a11y-ic:hover{background:#6d747d;}',
-    '.a11y-ic.on{background:#0D4483;}',
-    '.a11y-ic svg{width:24px;height:24px;}',
-    '.a11y-s{padding:16px 24px;border-bottom:1px solid #eee;}',
-    '.a11y-s .lbl{font-size:15px;color:#1a1a1a;margin-bottom:14px;font-weight:500;display:flex;align-items:center;justify-content:space-between;}',
-    '.a11y-help{width:24px;height:24px;border-radius:6px;background:#e4eef6;color:#0D4483;border:0;cursor:pointer;font-size:13px;font-weight:700;flex:none;display:flex;align-items:center;justify-content:center;transition:.15s;}',
-    '.a11y-help:hover{background:#0D4483;color:#fff;}',
-    '.a11y-hint[hidden]{display:none;}',
-    /* range slider */
-    '.a11y-range{position:relative;padding:4px 0 26px;}',
-    // Kulrang yo'lak endi ::before da chiziladi. Sabab: input'ning O'ZI 6px bo'lsa,
-    // mobilda barmoq bilan ushlab bo'lmaydi (thumb 20px ko'rinsa ham, bosish
-    // maydoni input qutisi bilan cheklangan). Endi input 24px (WCAG 2.5.8), lekin
-    // manfiy margin uni avvalgi 6px joyiga qaytaradi — ko'rinish o'zgarmaydi.
-    '.a11y-range::before{content:"";position:absolute;top:4px;left:0;right:0;height:6px;border-radius:4px;background:#dfe3e8;}',
-    '.a11y-range input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:24px;background:transparent;outline:none;margin:-9px 0;position:relative;z-index:1;}',
-    '.a11y-range input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0D4483;cursor:pointer;}',
-    '.a11y-range input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #0D4483;cursor:pointer;}',
-    '.a11y-range .fill{position:absolute;top:4px;left:0;height:6px;border-radius:4px;background:#0D4483;pointer-events:none;}',
-    '.a11y-range .dots{position:absolute;top:5px;left:0;right:0;height:8px;pointer-events:none;}',
-    '.a11y-range .dots i{position:absolute;width:4px;height:4px;border-radius:50%;background:#9aa3ad;transform:translateX(-50%);}',
-    '.a11y-range .bub{position:absolute;top:24px;transform:translateX(-50%);background:#5a6066;color:#fff;font-size:11px;font-family:"IBM Plex Mono",monospace;padding:2px 7px;border-radius:4px;white-space:nowrap;}',
-    '.a11y-range .bub::before{content:"";position:absolute;top:-4px;left:50%;transform:translateX(-50%);border:4px solid transparent;border-bottom-color:#5a6066;border-top:0;}',
-    /* checkbox + radio */
-    '.a11y-check{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14.5px;margin-bottom:14px;min-height:24px;}',
-    '.a11y-check input{width:20px;height:20px;accent-color:#0D4483;cursor:pointer;}',
-    '.a11y-radios{display:flex;gap:24px;}',
-    // min-height: label — haqiqiy tap nishoni (radio o'zi 18px). WCAG 2.5.8 -> 24px.
-    '.a11y-radio{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;min-height:24px;}',
-    '.a11y-radio input{width:18px;height:18px;accent-color:#0D4483;cursor:pointer;}',
-    '.a11y-radio.dim{opacity:.45;}',
-    '.a11y-hint{font-size:12px;color:#777c83;margin-top:6px;line-height:1.5;}',
-    '.a11y-sel{width:100%;font-family:inherit;font-size:14.5px;color:#1a1a1a;background:#fff;border:1px solid #d6d6d0;border-radius:6px;padding:13px 14px;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%238a909a\' stroke-width=\'2\'%3E%3Cpath d=\'M6 9l6 6 6-6\'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:34px;}',
-    '.a11y-bigbtn{margin:0 24px 16px;width:calc(100% - 48px);padding:15px;border:1px solid #1a1a1a;background:#fff;color:#1a1a1a;border-radius:8px;cursor:pointer;font-family:"Spectral",Georgia,serif;font-size:16px;font-weight:600;transition:.15s;}',
-    '.a11y-bigbtn:hover{background:#1a1a1a;color:#fff;}',
-    '.a11y-bigbtn.on{background:#0D4483;color:#fff;border-color:#0D4483;}',
-    '.a11y-reset{margin:6px 24px 24px;width:calc(100% - 48px);padding:15px;border:0;background:#eef0f3;color:#5a6066;border-radius:8px;cursor:pointer;font-size:14px;transition:.15s;}',
-    '.a11y-reset:hover{background:#0D4483;color:#fff;}',
-    '.a11y-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:99998;opacity:0;visibility:hidden;transition:.3s;}',
-    '.a11y-overlay.open{opacity:1;visibility:visible;}',
-    /* google translate cosmetic cleanup */
-    '.goog-te-banner-frame{display:none !important;}body{top:0 !important;}',
-    '#goog-gt-tt,.goog-te-balloon-frame{display:none !important;}.goog-text-highlight{background:none !important;box-shadow:none !important;}',
-    /* ===== QORONG‘U (dark) REJIM — panel sayt temasiga moslashadi ===== */
-    'html[data-theme="dark"] .a11y-panel{background:var(--panel);color:var(--ink);border-left-color:var(--accent);box-shadow:-10px 0 40px rgba(0,0,0,.55);}',
-    'html[data-theme="dark"] .a11y-h{border-bottom-color:var(--line);}',
-    'html[data-theme="dark"] .a11y-h h3{color:var(--ink);}',
-    'html[data-theme="dark"] .a11y-h .x{color:var(--ink-2);}',
-    'html[data-theme="dark"] .a11y-h .x:hover{background:var(--bg-3);}',
-    'html[data-theme="dark"] .a11y-ic{background:var(--bg-3);}',
-    'html[data-theme="dark"] .a11y-ic:hover{background:#35456a;}',
-    'html[data-theme="dark"] .a11y-ic.on{background:var(--accent);}',
-    'html[data-theme="dark"] .a11y-s{border-bottom-color:var(--line);}',
-    'html[data-theme="dark"] .a11y-s .lbl{color:var(--ink);}',
-    'html[data-theme="dark"] .a11y-check,html[data-theme="dark"] .a11y-radio{color:var(--ink);}',
-    'html[data-theme="dark"] .a11y-check input,html[data-theme="dark"] .a11y-radio input{accent-color:var(--accent);}',
-    'html[data-theme="dark"] .a11y-hint{color:var(--muted);}',
-    'html[data-theme="dark"] .a11y-range::before{background:var(--line);}',
-    'html[data-theme="dark"] .a11y-range .fill{background:var(--accent);}',
-    'html[data-theme="dark"] .a11y-range .dots i{background:#45557a;}',
-    'html[data-theme="dark"] .a11y-range input[type=range]::-webkit-slider-thumb{border-color:var(--accent);background:var(--panel);}',
-    'html[data-theme="dark"] .a11y-range input[type=range]::-moz-range-thumb{border-color:var(--accent);background:var(--panel);}',
-    'html[data-theme="dark"] .a11y-sel{background:var(--bg);color:var(--ink);border-color:var(--line);}',
-    'html[data-theme="dark"] .a11y-bigbtn{background:transparent;color:var(--ink);border-color:#46557a;}',
-    'html[data-theme="dark"] .a11y-bigbtn:hover{background:var(--ink);color:var(--panel);}',
-    'html[data-theme="dark"] .a11y-bigbtn.on{background:var(--accent);color:#fff;border-color:var(--accent);}',
-    'html[data-theme="dark"] .a11y-reset{background:var(--bg-3);color:var(--ink-2);}',
-    'html[data-theme="dark"] .a11y-reset:hover{background:var(--accent);color:#fff;}',
-    'html[data-theme="dark"] .a11y-help{background:var(--accent-soft);color:var(--accent-d);}',
-    'html[data-theme="dark"] .a11y-help:hover{background:var(--accent);color:#fff;}',
-    '@media(max-width:760px){.a11y-panel{width:360px;}}'
-  ].join('\n');
-  document.head.appendChild(css);
+  // ---- styles (tashqi a11y.css) ----
+  // Qat'iy CSP (style-src 'self') skript orqali joylashtirilgan <style> elementini
+  // ham bloklaydi. Shuning uchun uslublar tashqi a11y.css'da va <link> orqali
+  // yuklanadi (barcha sahifalar ildiz papkada — nisbiy yo'l to'g'ri ishlaydi).
+  var cssLink = document.createElement('link');
+  cssLink.rel = 'stylesheet';
+  cssLink.href = 'a11y.css?v=1';
+  document.head.appendChild(cssLink);
 
   var ICONS = {
     sun:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5.6 5.6 4.2 4.2M19.8 19.8l-1.4-1.4M5.6 18.4l-1.4 1.4M19.8 4.2l-1.4 1.4"/></svg>',
@@ -263,14 +154,16 @@
   }
 
   function rangeHTML(id, count, idx, fmt){
+    // Dinamik joylashuvlar (dots left, fill width, bub left) inline style bilan
+    // emas — CSP style-src 'unsafe-inline'siz. Foizlar data-p'da; buildPanel'dagi
+    // forEach ularni DOM'ga qo'ygach .style orqali beradi (skriptli uslub ruxsat).
     var dots = '';
-    for (var i = 0; i < count; i++){ dots += '<i style="left:'+(i/(count-1)*100)+'%"></i>'; }
-    var pct = idx/(count-1)*100;
+    for (var i = 0; i < count; i++){ dots += '<i data-p="'+(i/(count-1)*100)+'"></i>'; }
     return '<div class="a11y-range" data-rid="'+id+'" data-count="'+count+'">'
       + '<input type="range" min="0" max="'+(count-1)+'" step="1" value="'+idx+'">'
-      + '<div class="fill" style="width:'+pct+'%"></div>'
+      + '<div class="fill"></div>'
       + '<div class="dots">'+dots+'</div>'
-      + '<div class="bub" style="left:'+pct+'%">'+fmt(idx)+'</div></div>';
+      + '<div class="bub">'+fmt(idx)+'</div></div>';
   }
 
   function buildPanel(){
@@ -303,7 +196,7 @@
           + '<option value="tr">Türkçe</option><option value="ar">العربية</option><option value="zh-CN">中文</option>'
           + '<option value="fr">Français</option><option value="de">Deutsch</option><option value="es">Español</option>'
           + '<option value="ko">한국어</option><option value="ja">日本語</option>'
-        + '</select><div class="a11y-hint" hidden>'+t('transHint')+'</div><div id="a11y-gt-host" style="display:none"></div></div>'
+        + '</select><div class="a11y-hint" hidden>'+t('transHint')+'</div><div id="a11y-gt-host" hidden></div></div>'
       + '<button class="a11y-bigbtn" id="a11y-readmode">'+t('readMode')+'</button>'
       + '<button class="a11y-reset" id="a11y-reset">'+t('reset')+'</button>';
 
@@ -330,6 +223,10 @@
       var input = r.querySelector('input'), fill = r.querySelector('.fill'), bub = r.querySelector('.bub');
       var rid = r.dataset.rid, count = +r.dataset.count;
       var fmt = rid === 'font' ? fontPct : scalePct;
+      // Boshlang'ich joylashuvlar (ilgari inline style edi — endi CSP uchun .style orqali).
+      r.querySelectorAll('.dots i').forEach(function(d){ d.style.left = d.dataset.p + '%'; });
+      var pct0 = (+input.value)/(count-1)*100;
+      fill.style.width = pct0 + '%'; bub.style.left = pct0 + '%';
       input.addEventListener('input', function(){
         var v = +input.value, pct = v/(count-1)*100;
         fill.style.width = pct + '%'; bub.style.left = pct + '%'; bub.textContent = fmt(v);

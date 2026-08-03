@@ -203,10 +203,10 @@
         <div class="langs" role="group" aria-label="Til / Язык / Language">${langButtons()}</div>
       </div></div>
       <div class="bar"><div class="wrap">
-        <a class="brand" href="Bosh sahifa - Hi-Fi.html" aria-label="${esc(SN)}" style="flex-direction:row;align-items:center;justify-content:flex-start;padding:0;margin:0 0 0 -35px;width:384px;height:55px">
+        <a class="brand brand-row" href="Bosh sahifa - Hi-Fi.html" aria-label="${esc(SN)}">
           <img class="logo logo-c" src="logo-mark.png" alt="${esc(SN)}">
           <span class="divider"></span>
-          <span class="nm" style="max-width:none"><b style="font-family:Spectral;font-size:17px;font-weight:600;line-height:1.3;display:block;white-space:nowrap">${esc(B.top)}</b><small style="font-family:Spectral;font-size:17px;font-weight:600;letter-spacing:0.2px;line-height:1.3;display:block;white-space:nowrap;margin-top:0;text-transform:none;opacity:1">${esc(B.bot)}</small></span>
+          <span class="nm brand-nm-full"><b class="brand-b17">${esc(B.top)}</b><small class="brand-s17">${esc(B.bot)}</small></span>
         </a>
         <nav class="main" aria-label="${esc(T('a11y_mainnav')||'Asosiy menyu')}">
           ${navHTML}
@@ -317,7 +317,7 @@
       </div>
       <div class="f-bot">
         <span>${esc(T('footer_copyright'))}</span>
-        <div style="display:flex;gap:24px"><a href="#">${esc(T('footer_privacy'))}</a><a href="#">${esc(T('footer_terms'))}</a></div>
+        <div class="foot-links"><a href="#">${esc(T('footer_privacy'))}</a><a href="#">${esc(T('footer_terms'))}</a></div>
       </div>
     </div>`;
     document.body.appendChild(el);
@@ -383,29 +383,10 @@
     var logo = abs(brandLogo());
     var img = opts.image ? abs(opts.image) : '';
 
-    var css = ''
-      + '*{box-sizing:border-box;margin:0;padding:0;}'
-      + '@page{margin:18mm 16mm;}'
-      + "body{font-family:'Inter',Arial,sans-serif;color:#111;font-size:11.5pt;line-height:1.55;-webkit-print-color-adjust:exact;print-color-adjust:exact;}"
-      + '.ph{display:flex;align-items:center;gap:13px;border-bottom:2px solid #0f5689;padding-bottom:12px;margin-bottom:22px;}'
-      + '.ph img{height:46px;width:auto;}'
-      + ".ph b{font-family:'Spectral',Georgia,serif;font-size:13.5pt;font-weight:600;text-transform:uppercase;color:#0f2540;display:block;line-height:1.15;}"
-      + ".ph span{font-family:'Spectral',Georgia,serif;font-size:10.5pt;color:#37506a;display:block;}"
-      + "h1{font-family:'Spectral',Georgia,serif;font-weight:600;font-size:21pt;line-height:1.15;color:#000;margin:0 0 10px;}"
-      + ".meta{display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:9pt;color:#555;border-bottom:1px solid #ccc;padding-bottom:10px;margin-bottom:18px;}"
-      + '.meta .tag{color:#0f5689;border:1px solid #0f5689;padding:1px 8px;text-transform:uppercase;letter-spacing:.08em;}'
-      + ".lead{font-family:'Spectral',Georgia,serif;font-size:13pt;font-weight:500;line-height:1.5;color:#111;border-left:3px solid #0f5689;padding-left:14px;margin:0 0 18px;}"
-      + '.img{margin:0 0 18px;text-align:center;}'
-      + '.img img{max-width:100%;max-height:92mm;width:auto;height:auto;object-fit:contain;border:1px solid #ccc;border-radius:10px;display:inline-block;}'
-      + '.content{font-size:11.5pt;line-height:1.6;color:#111;}'
-      + '.content p{margin:0 0 12px;}'
-      + ".content h2,.content h3{font-family:'Spectral',Georgia,serif;color:#000;margin:16px 0 8px;line-height:1.2;}"
-      + '.content ul,.content ol{margin:0 0 12px;padding-left:22px;}.content li{margin-bottom:6px;}'
-      + '.content img{max-width:100%;height:auto;margin:10px 0;}'
-      + '.content blockquote{border-left:3px solid #0f5689;padding-left:14px;font-style:italic;margin:12px 0;}'
-      + '.content a{color:#000;text-decoration:none;}'
-      + ".foot{display:flex;justify-content:space-between;gap:16px;border-top:1px solid #ccc;margin-top:26px;padding-top:10px;font-family:'IBM Plex Mono',monospace;font-size:8.5pt;color:#555;}"
-      + '.foot span{word-break:break-all;}';
+    // Chop etish uslublari endi tashqi print.css'da (CSP: iframe ota-sahifa
+    // CSP'sini meros oladi, inline <style> bloklanadi — 'self' link ruxsat).
+    // Iframe about:blank bo'lgani uchun nisbiy URL ishlamaydi -> abs() bilan.
+    var cssHref = abs('print.css');
 
     var html = ''
       + '<div class="ph">' + (logo ? '<img src="' + logo + '" alt="">' : '') + '<div><b>' + esc(org) + '</b><span>' + esc(tag) + '</span></div></div>'
@@ -423,7 +404,7 @@
     document.body.appendChild(ifr);
     var doc = ifr.contentWindow.document;
     doc.open();
-    doc.write('<!doctype html><html lang="' + lang + '"><head><meta charset="utf-8"><title>' + esc(opts.title || 'TSTM') + '</title>' + fonts + '<style>' + css + '</style></head><body>' + html + '</body></html>');
+    doc.write('<!doctype html><html lang="' + lang + '"><head><meta charset="utf-8"><title>' + esc(opts.title || 'TSTM') + '</title>' + fonts + '<link rel="stylesheet" href="' + cssHref + '"></head><body>' + html + '</body></html>');
     doc.close();
 
     var printed = false;

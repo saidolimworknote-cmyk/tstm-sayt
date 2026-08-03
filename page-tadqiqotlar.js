@@ -31,10 +31,10 @@
     const recent = Store.all('publications').filter(p=>p.status==='published')
       .sort((a,b)=>String(b.year||'').localeCompare(String(a.year||''))).slice(0,3);
     const el = document.getElementById('recent');
-    if(!recent.length){ el.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="t">${T('no_pubs')}</div></div>`; }
+    if(!recent.length){ el.innerHTML = `<div class="empty col-span-full"><div class="t">${T('no_pubs')}</div></div>`; }
     else el.innerHTML = recent.map(p=>`
-      <a class="pub rv" href="nashr.html?id=${p.id}" style="cursor:pointer">
-        <div class="cover">${p.type?`<span class="badge">${Site.esc(Site.mlGet(p.type))}</span>`:''}${p.cover?`<img src="${p.cover}" alt="">`:`<div class="ph" style="position:absolute;inset:0;border:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></svg></div>`}</div>
+      <a class="pub rv" href="nashr.html?id=${p.id}">
+        <div class="cover">${p.type?`<span class="badge">${Site.esc(Site.mlGet(p.type))}</span>`:''}${p.cover?`<img src="${p.cover}" alt="">`:`<div class="ph abs-cover"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></svg></div>`}</div>
         <div class="body"><div class="t">${Site.esc(Site.mlGet(p.category||''))}${p.year?' · '+Site.esc(p.year):''}</div><h3>${Site.esc(Site.dispTitle(p))}</h3>
           <span class="dl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>${T('read_more')}</span>
         </div>

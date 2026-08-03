@@ -95,16 +95,29 @@ DirectoryIndex index.php
   </FilesMatch>
 
   # Content-Security-Policy — brauzer darajasidagi ikkinchi mudofaa chizig'i.
-  # 'unsafe-inline' hozircha zarur: sahifalar ichida <script> bloklari va
-  # inline style'lar bor. Shunga qaramay CSP quyidagilarni bloklaydi:
+  # script-src'da 'unsafe-inline' YO'Q (inline skript bloklangan). style-src'da
+  # ham 'unsafe-inline' OLIB TASHLANDI (2026-08-03): ommaviy sahifalarning barcha
+  # inline uslublari (style="" atributlari va <style> bloklari) tashqi CSS
+  # fayllarга yoki .style DOM API'ga ko'chirildi. Endi CSS faqat 'self' va Google
+  # Fonts'dan keladi. CSP shuningdek quyidagilarni bloklaydi:
   #   • begona domendan skript yuklash (script-src ro'yxati yopiq)
+  #   • inline skript va inline uslub (unsafe-inline yo'q)
   #   • <base> bilan barcha nisbiy havolalarni o'g'irlash (base-uri)
   #   • forma ma'lumotini boshqa saytga yuborish (form-action)
   #   • saytni begona sahifaga iframe qilib joylash — clickjacking (frame-ancestors)
   #   • Flash/plagin obyektlari (object-src none)
   # Ruxsat etilgan tashqi manbalar: Google Fonts, YouTube (video), Google
   # Translate (a11y paneli va admin avto-tarjimasi).
-  Header set Content-Security-Policy "default-src 'self'; script-src 'self' https://translate.google.com https://translate.googleapis.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://www.gstatic.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://img.youtube.com https://i.ytimg.com https://www.google.com https://www.gstatic.com https://fonts.gstatic.com https://translate.googleapis.com; frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://www.google.com; connect-src 'self' https://translate.googleapis.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
+  Header set Content-Security-Policy "default-src 'self'; script-src 'self' https://translate.google.com https://translate.googleapis.com https://www.gstatic.com; style-src 'self' https://fonts.googleapis.com https://www.gstatic.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://img.youtube.com https://i.ytimg.com https://www.google.com https://www.gstatic.com https://fonts.gstatic.com https://translate.googleapis.com; frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://www.google.com; connect-src 'self' https://translate.googleapis.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
+
+  # admin.html — ISTISNO (bosqichma-bosqich): admin panel (admin-ui.js) hali ko'p
+  # inline uslub ishlatadi. Ular keyingi bosqichda tozalanadi; hozircha admin.html
+  # uchun style-src'da 'unsafe-inline' saqlanadi. Admin panel autentifikatsiyalangan,
+  # noindex va faqat ishonchli foydalanuvchi ko'radi — xavf past. script-src bu
+  # yerda ham qat'iy (inline skript yo'q).
+  <FilesMatch "^admin\.html$">
+    Header set Content-Security-Policy "default-src 'self'; script-src 'self' https://translate.google.com https://translate.googleapis.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://www.gstatic.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://img.youtube.com https://i.ytimg.com https://www.google.com https://www.gstatic.com https://fonts.gstatic.com https://translate.googleapis.com; frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://www.google.com; connect-src 'self' https://translate.googleapis.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
+  </FilesMatch>
 </IfModule>
 
 # Yashirin / xizmat fayllarini tashqaridan ochishni taqiqlash

@@ -204,16 +204,24 @@
       }
       return '<div class="slide-dots">'+s+'</div>';
     }
+    // Hero fon rasmi DINAMIK. HTML ichiga inline style bilan yozmaymiz (CSP
+    // style-src'da 'unsafe-inline' yo'q). O'rniga: --slot-bg ni wrapEl'ga bir
+    // marta beramiz (bolalar meros oladi), fon rasmini esa DOM'ga qo'ygandan
+    // keyin .style.backgroundImage orqali beramiz (skriptli uslub CSP'da ruxsat).
+    wrapEl.style.setProperty('--slot-bg', slotSolid);
+    // safeUrl javascript:/data: sxemalarini bloklaydi; ' va " CSS url() dan
+    // chiqib ketishning oldini oladi.
+    function heroBgVal(it, i){
+      return (it && it.img)
+        ? "url('"+safeUrl(it.img).replace(/'/g,"%27").replace(/"/g,"%22")+"')"
+        : heroFallbacks[i % heroFallbacks.length];
+    }
     if(!items.length){
-      wrapEl.innerHTML = '<div class="slide on"><div class="heroimg" style="background-image:'+heroFallbacks[0]+';--slot-bg:'+slotSolid+'"></div><div class="scrim"></div></div>';
+      wrapEl.innerHTML = '<div class="slide on"><div class="heroimg"></div><div class="scrim"></div></div>';
+      wrapEl.querySelector('.heroimg').style.backgroundImage = heroFallbacks[0];
       return;
     }
     wrapEl.innerHTML = items.map((it,i) => {
-      // safeUrl javascript:/data: sxemalarini bloklaydi; ' va " CSS url() va style
-      // atributidan chiqib ketishning oldini oladi.
-      const bg = it.img
-        ? 'background-image:url(\''+safeUrl(it.img).replace(/'/g,"%27").replace(/"/g,"%22")+'\');--slot-bg:'+slotSolid
-        : 'background-image:'+heroFallbacks[i%heroFallbacks.length]+';--slot-bg:'+slotSolid;
       // sana faqat yangiliklarda bor \u2014 slaydlarda yorliqning o'zi qoladi
       const kick = [esc(mlGet(it.cat)), fmtDate(it.date)].filter(Boolean).join(' \u00b7 ');
       const h2 = '<h2>'+esc(mlGet(it.title))+'</h2>';
@@ -222,7 +230,7 @@
         ? '<a class="slide-h2link" href="'+safeUrl(it.href)+'">'+h2+'</a>'
         : h2;
       return '<div class="slide'+(i===0?' on':'')+'" data-i="'+i+'">'
-        + '<div class="heroimg" style="'+bg+'"></div>'
+        + '<div class="heroimg"></div>'
         + '<div class="scrim"></div>'
         + '<div class="slide-body"><div class="wrap">'
         + '<div class="slide-panel">'
@@ -232,6 +240,11 @@
         + '</div>'
         + '</div></div></div>';
     }).join('');
+    // Fon rasmlarini DOM'ga qo'ygandan keyin beramiz.
+    wrapEl.querySelectorAll('.slide').forEach((slide, i) => {
+      const hi = slide.querySelector('.heroimg');
+      if (hi) hi.style.backgroundImage = heroBgVal(items[i], i);
+    });
   }
   buildHero();
 
@@ -258,7 +271,7 @@
   function imgTag(src, fallbackData){
     // src saqlangan (admin nazoratidagi) qiymat — safeUrl javascript:/data: sxemalarini
     // bloklaydi. Boshqa sahifalar ham shunday qiladi (site-common.js).
-    return src ? '<img src="'+safeUrl(src)+'" alt="" style="width:100%;height:100%;object-fit:cover">' : '';
+    return src ? '<img src="'+safeUrl(src)+'" alt="" class="img-cover">' : '';
   }
   function renderHome(){
     // Tadbirlar bu yerda o'qilmaydi — bosh sahifada tadbirlar bo'limi yo'q
@@ -300,8 +313,8 @@
     else if(ng){
       const f = news[0]; const rest = news.slice(1,6);
       ng.innerHTML =
-        '<a class="feat rv" href="yangilik.html?id='+f.id+'" style="cursor:pointer">'
-        + (f.cover?'<div class="ph" style="padding:0">'+imgTag(f.cover)+'</div>':'<div class="ph" data-l="asosiy yangilik"></div>')
+        '<a class="feat rv" href="yangilik.html?id='+f.id+'">'
+        + (f.cover?'<div class="ph ph-flush">'+imgTag(f.cover)+'</div>':'<div class="ph" data-l="asosiy yangilik"></div>')
         + '<div class="fbody">'
         + '<div class="meta">'+(f.category?'<span class="tag">'+esc(mlg(f.category))+'</span>':'')+'<span class="d mono muted">'+fmtDate(f.date)+'</span></div>'
         + '<h3>'+esc(mlg(f.title))+'</h3>'
@@ -310,7 +323,7 @@
         + '</a>'
         + '<div class="nlist rv">'
         + rest.map(n=>'<a class="nitem" href="yangilik.html?id='+n.id+'">'
-            + (n.cover?'<div class="ph" style="padding:0">'+imgTag(n.cover)+'</div>':'<div class="ph" data-l="foto"></div>')
+            + (n.cover?'<div class="ph ph-flush">'+imgTag(n.cover)+'</div>':'<div class="ph" data-l="foto"></div>')
             + '<div class="nbody"><div class="d">'+fmtDate(n.date)+(n.category?' · '+esc(mlg(n.category)):'')+'</div><h4>'+esc(mlg(n.title))+'</h4></div></a>').join('')
         + '</div>';
     }
@@ -319,7 +332,7 @@
     const pg = document.querySelector('.pub-grid');
     if(pg && !pubs.length){ pg.innerHTML = emptyState('home_no_pubs'); }
     else if(pg){
-      pg.innerHTML = pubs.map(p=>'<a class="pub rv" href="nashr.html?id='+p.id+'" style="cursor:pointer">'
+      pg.innerHTML = pubs.map(p=>'<a class="pub rv" href="nashr.html?id='+p.id+'">'
         + '<div class="cover">'+(p.type?'<span class="badge">'+esc(mlg(p.type))+'</span>':'')
         + (p.cover?imgTag(p.cover):'<div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></svg></div>')+'</div>'
         + '<div class="body"><div class="t">'+esc(mlg(p.category||''))+(p.year?' · '+esc(p.year):'')+'</div><h3>'+esc(dispT(p))+'</h3>'
@@ -331,8 +344,8 @@
     const eg = document.querySelector('.exp-grid');
     if(eg && !exps.length){ eg.innerHTML = emptyState('home_no_experts'); }
     else if(eg){
-      eg.innerHTML = exps.map(e=>'<a class="exp rv" href="expert.html?id='+e.id+'" style="cursor:pointer">'
-        + (e.photo?'<div class="ph" style="padding:0">'+imgTag(e.photo)+'</div>':'<div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="9" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg></div>')
+      eg.innerHTML = exps.map(e=>'<a class="exp rv" href="expert.html?id='+e.id+'">'
+        + (e.photo?'<div class="ph ph-flush">'+imgTag(e.photo)+'</div>':'<div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="9" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg></div>')
         + '<div class="role">'+esc(mlg(e.role))+'</div><h4>'+esc(mlg(e.name))+'</h4><div class="sub">'+esc(mlg(e.sub))+'</div></a>').join('');
     }
 
@@ -345,11 +358,12 @@
         const initials = n => { const w=String(n||'?').trim().split(/\s+/); return (w.length>=2 ? (w[0][0]+w[1][0]) : String(n||'?').slice(0,2)).toUpperCase(); };
         // nomdan barqaror rang (harmonik palitra)
         const MC = ['#0f5689','#1d6a94','#2e7d6b','#8a5a2b','#5b5ea6','#9a3b52','#3a7ca5','#726a95'];
-        const colorFor = n => { let h=0; const s=String(n||''); for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return MC[h%MC.length]; };
+        // Rang indeksi (0..7) — home.css'dagi .pmono-c{idx} klassiga mos (inline style o'rniga).
+        const colorIdx = n => { let h=0; const s=String(n||''); for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return h%MC.length; };
         const tile = p => {
           const inner = p.logo
             ? '<img src="'+safeUrl(p.logo)+'" alt="'+esc(p.name)+'">'
-            : '<span class="pmono" style="background:'+colorFor(p.name)+'">'+esc(initials(p.name))+'</span><span class="pname">'+esc(p.name)+'</span>';
+            : '<span class="pmono pmono-c'+colorIdx(p.name)+'">'+esc(initials(p.name))+'</span><span class="pname">'+esc(p.name)+'</span>';
           const cls = 'plogo'+(p.logo?'':' mono');
           return (p.url && p.url!=='#')
             ? '<a class="'+cls+'" href="'+safeUrl(p.url)+'" target="_blank" rel="noopener" title="'+esc(p.name)+'">'+inner+'</a>'

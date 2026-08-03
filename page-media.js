@@ -116,7 +116,7 @@
 
     function empty(type){
       const meta = TYPES.find(x=>x.t===type) || TYPES[0];
-      gal.innerHTML = `<div class="empty" style="grid-column:1/-1">${EMPTY_ICON[type]||EMPTY_ICON.photo}<div class="t">${esc(T(meta.empty))}</div></div>`;
+      gal.innerHTML = `<div class="empty col-span-full">${EMPTY_ICON[type]||EMPTY_ICON.photo}<div class="t">${esc(T(meta.empty))}</div></div>`;
     }
 
     function draw(){
@@ -187,7 +187,7 @@
           </div>`;
         gal.innerHTML = head + (al.photos.length
           ? al.photos.map(p=>`<div class="gtile rv" data-src="${esc(p.url)}"><img src="${safeUrl(p.url)}" alt="${esc(ml(p.title)||'')}">${ml(p.title)?`<div class="vt">${esc(ml(p.title))}</div>`:''}</div>`).join('')
-          : `<div class="empty" style="grid-column:1/-1">${EMPTY_ICON.photo}<div class="t">${esc(T('m_empty_photo'))}</div></div>`);
+          : `<div class="empty col-span-full">${EMPTY_ICON.photo}<div class="t">${esc(T('m_empty_photo'))}</div></div>`);
         gal.querySelector('#albBack').onclick = ()=>{ albumId=''; pushUrl(); draw(); };
         // Rasm bosilganda markazdagi lightboxда ochiladi; strelkalar albom ichida yuradi.
         const photoItems = al.photos.map(p=>({ type:'image', src:p.url, title:ml(p.title)||'' }));

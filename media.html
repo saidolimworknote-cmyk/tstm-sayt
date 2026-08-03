@@ -15,82 +15,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=75">
+<link rel="stylesheet" href="site.css?v=76">
 <link rel="stylesheet" href="subscribe.css?v=2">
-<style>
-  /* ---- Lightbox: markazda "oyna" (to'liq ekran emas), dumaloq burchak, X + prev/next ---- */
-  .lightbox{position:fixed;inset:0;z-index:300;background:rgba(6,9,13,.9);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:6vh 7vw;opacity:0;transition:opacity .22s ease;}
-  .lightbox.open{display:flex;opacity:1;}
-  .lb-stage{position:relative;display:flex;align-items:center;justify-content:center;max-width:100%;max-height:100%;}
-  @keyframes lbpop{from{opacity:0;transform:scale(.93)}to{opacity:1;transform:none}}
-  .lb-stage img{max-width:min(86vw,1200px);max-height:80vh;object-fit:contain;border-radius:16px;box-shadow:0 30px 90px rgba(0,0,0,.6);background:#0b0f14;animation:lbpop .28s cubic-bezier(.2,.8,.2,1);}
-  .lb-stage .lb-video{position:relative;width:min(86vw,1160px);aspect-ratio:16/9;max-height:80vh;border-radius:16px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.6);background:#000;animation:lbpop .28s cubic-bezier(.2,.8,.2,1);}
-  .lb-stage .lb-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
-  .lb-stage .lb-frame{width:min(90vw,1200px);height:80vh;border:0;border-radius:16px;background:#fff;box-shadow:0 30px 90px rgba(0,0,0,.6);animation:lbpop .28s cubic-bezier(.2,.8,.2,1);}
-  /* Yopish (X) — o'ng tepa burchak */
-  .lb-close{position:fixed;top:22px;right:26px;width:46px;height:46px;border-radius:50%;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.1);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .16s, transform .16s;z-index:2;}
-  .lb-close:hover{background:rgba(255,255,255,.24);transform:rotate(90deg);}
-  .lb-close svg{width:20px;height:20px;}
-  /* Prev / Next — ikki tomonda */
-  .lb-nav{position:fixed;top:50%;transform:translateY(-50%);width:54px;height:54px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .16s, transform .16s;z-index:2;}
-  .lb-nav:hover{background:rgba(255,255,255,.24);}
-  .lb-nav:active{transform:translateY(-50%) scale(.92);}
-  .lb-nav.lb-prev{left:24px;}
-  .lb-nav.lb-prev:hover{transform:translateY(-50%) translateX(-3px);}
-  .lb-nav.lb-next{right:24px;}
-  .lb-nav.lb-next:hover{transform:translateY(-50%) translateX(3px);}
-  .lb-nav svg{width:27px;height:27px;}
-  .lb-nav[hidden]{display:none;}
-  /* Sarlavha + hisoblagich (pastda) */
-  .lb-caption{position:fixed;left:0;right:0;bottom:20px;display:flex;flex-direction:column;align-items:center;gap:7px;color:#fff;pointer-events:none;padding:0 90px;text-align:center;}
-  .lb-caption:empty{display:none;}
-  .lb-caption .lb-count{font-family:var(--mono);font-size:0.7rem;letter-spacing:.12em;opacity:.9;background:rgba(255,255,255,.12);padding:4px 13px;border-radius:999px;}
-  .lb-caption .lb-title{font-size:0.92rem;line-height:1.4;max-width:64ch;text-shadow:0 1px 6px rgba(0,0,0,.5);}
-  @media(max-width:640px){
-    .lightbox{padding:9vh 4vw;}
-    .lb-nav{width:44px;height:44px;} .lb-nav.lb-prev{left:8px;} .lb-nav.lb-next{right:8px;} .lb-nav svg{width:22px;height:22px;}
-    .lb-close{top:12px;right:12px;width:42px;height:42px;}
-    .lb-caption{padding:0 66px;bottom:14px;}
-    .lb-stage img,.lb-stage .lb-video{max-height:70vh;}
-  }
-  /* Video kartasi 16:9 — video ramkasiga mos, thumbnailда qora chiziq bo'lmaydi */
-  .gtile.vid{aspect-ratio:16/9;}
-  .gtile.vid img{width:100%;height:100%;object-fit:cover;}
-  .gtile .play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(8,12,16,.32);transition:.2s;}
-  .gtile:hover .play{background:rgba(8,12,16,.18);}
-  .gtile .play span{width:58px;height:58px;border-radius:50%;background:rgba(13,68,131,.94);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 22px rgba(0,0,0,.45);transition:transform .2s;}
-  .gtile:hover .play span{transform:scale(1.08);}
-  .gtile .play span svg{width:22px;height:22px;color:#fff;margin-left:3px;}
-  .gtile .vt{position:absolute;left:0;right:0;bottom:0;padding:28px 14px 12px;background:linear-gradient(180deg,transparent,rgba(6,14,26,.85));color:#fff;font-size:0.84375rem;font-weight:500;line-height:1.3;pointer-events:none;}
-  /* video — o'sha joyning o'zida (inline) ijro */
-  .gtile.playing{cursor:default;background:#000;transform:none;}
-  .gtile iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
-  /* interaktiv infografika kartasi */
-  .gtile.info-card{background:linear-gradient(140deg,var(--accent),#0b2f4d);border:0;}
-  .info-card .ic-inner{position:absolute;inset:0;display:flex;flex-direction:column;padding:22px;color:#fff;}
-  .info-card .ic-ico{width:34px;height:34px;opacity:.95;}
-  .info-card .ic-k{font-family:var(--mono);font-size:0.65rem;letter-spacing:.16em;text-transform:uppercase;opacity:.82;margin-top:14px;}
-  .info-card .ic-t{font-family:var(--serif);font-weight:600;font-size:1.1rem;line-height:1.25;margin-top:6px;}
-  .info-card .ic-open{margin-top:auto;font-family:var(--mono);font-size:0.66rem;letter-spacing:.12em;text-transform:uppercase;opacity:.9;display:inline-flex;align-items:center;gap:7px;transition:gap .2s;}
-  .info-card:hover .ic-open{gap:12px;}
-  /* foto albom kartasi (isrs.uz uslubi — muqova + sarlavha + son) */
-  .gtile.album{cursor:pointer;}
-  .gtile.album .album-badge{position:absolute;top:12px;right:12px;z-index:2;display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:999px;background:rgba(8,12,16,.62);backdrop-filter:blur(4px);color:#fff;font-family:var(--mono);font-size:0.66rem;letter-spacing:.05em;}
-  .gtile.album .album-badge svg{width:13px;height:13px;}
-  .gtile.album .vt{display:flex;flex-direction:column;gap:3px;padding:34px 14px 13px;}
-  .gtile.album .al-t{font-family:var(--serif);font-weight:600;font-size:0.98rem;line-height:1.25;}
-  .gtile.album .al-d{font-family:var(--mono);font-size:0.64rem;letter-spacing:.06em;opacity:.85;}
-  .gtile.album .vthumb{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(140deg,var(--accent),#0b2f4d);color:rgba(255,255,255,.5);}
-  .gtile.album .vthumb svg{width:44px;height:44px;}
-  /* albom ichki sarlavhasi + orqaga tugma */
-  .album-head{grid-column:1/-1;display:flex;flex-direction:column;gap:12px;margin-bottom:4px;}
-  .album-back{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;padding:8px 16px 8px 13px;border:1px solid var(--line);border-radius:999px;background:none;color:var(--ink);cursor:pointer;font-family:var(--mono);font-size:0.72rem;letter-spacing:.06em;text-transform:uppercase;transition:.18s;}
-  .album-back:hover{border-color:var(--accent);color:var(--accent);gap:12px;}
-  .album-back svg{width:16px;height:16px;}
-  .album-h{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;}
-  .album-h h2{font-family:var(--serif);font-weight:600;font-size:1.5rem;line-height:1.2;margin:0;}
-  .album-h .album-date{font-family:var(--mono);font-size:0.75rem;letter-spacing:.06em;color:var(--muted);}
-</style>
+<link rel="stylesheet" href="page-media.css?v=1">
 </head>
 <body>
 <main>
@@ -117,10 +44,10 @@
 <script src="diag.js?v=1"></script>
 <script src="i18n.js?v=54"></script>
 <script src="admin-store.js?v=52"></script>
-<script src="site-common.js?v=67"></script>
+<script src="site-common.js?v=68"></script>
 <script src="subscribe.js?v=2"></script>
 <script src="search.js?v=46"></script>
-<script src="a11y.js?v=52"></script>
-<script src="page-media.js?v=4"></script>
+<script src="a11y.js?v=53"></script>
+<script src="page-media.js?v=5"></script>
 </body>
 </html>

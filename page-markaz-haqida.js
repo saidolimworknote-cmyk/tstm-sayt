@@ -58,7 +58,7 @@
     const aboutHtml = bodyOf('markaz-haqida');
     if(aboutHtml){
       document.getElementById('aboutBody').innerHTML = aboutHtml;
-      document.getElementById('aboutBodySec').style.display = '';
+      document.getElementById('aboutBodySec').classList.remove('is-hidden');
     }
 
     const goalHtml = bodyOf('maqsad');

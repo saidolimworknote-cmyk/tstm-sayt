@@ -10,6 +10,31 @@
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
+
+  /* Utility/semantik klasslar — inline style="" o'rniga (CSP style-src'dan
+     'unsafe-inline' olib tashlangani uchun). Bosh sahifaga xos header/footer. */
+  .pt0{padding-top:0;}
+  .ico-18{width:18px;height:18px;}
+  .hp-hdr-wrap{height:72px;}
+  .hp-brand{flex-direction:row;align-items:center;justify-content:flex-start;padding:0;margin:0 0 0 -40px;width:384px;height:55px;}
+  .hp-brand-nm{max-width:none;}
+  .hp-brand-b{font-family:Spectral;font-size:1.0625rem;font-weight:600;line-height:1.3;display:block;white-space:nowrap;}
+  .hp-brand-s{font-family:Spectral;font-size:1.0625rem;font-weight:600;letter-spacing:0.2px;line-height:1.3;display:block;white-space:nowrap;margin-top:0;text-transform:none;opacity:1;}
+  .hp-sechead{margin-bottom:40px;}
+  .hp-foot-brand{display:flex;align-items:center;gap:14px;margin-bottom:22px;}
+  .flogo{height:46px;width:auto;}
+  .hp-foot-div{width:1.5px;height:46px;background:rgba(255,255,255,.3);}
+  .hp-foot-txt{line-height:1.22;}
+  .hp-foot-txt b{font-family:var(--serif);font-weight:600;font-size:1rem;display:block;color:#fff;}
+  .hp-foot-txt small{font-family:var(--mono);font-size:0.59375rem;letter-spacing:.12em;text-transform:uppercase;display:block;margin-top:3px;}
+  .hp-foot-links{display:flex;gap:24px;}
+  .img-cover{width:100%;height:100%;object-fit:cover;}
+  .ph-flush{padding:0;}
+  /* Hamkor monogrammasi ranglari (nomdan barqaror indeks tanlanadi) */
+  .pmono-c0{background:#0f5689;} .pmono-c1{background:#1d6a94;}
+  .pmono-c2{background:#2e7d6b;} .pmono-c3{background:#8a5a2b;}
+  .pmono-c4{background:#5b5ea6;} .pmono-c5{background:#9a3b52;}
+  .pmono-c6{background:#3a7ca5;} .pmono-c7{background:#726a95;}
   :root, html[data-theme="light"]{
     --ink:#16181b;
     --ink-2:#3f444a;

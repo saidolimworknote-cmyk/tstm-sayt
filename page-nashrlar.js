@@ -39,7 +39,7 @@
     typeSel.innerHTML = `<option value="">${esc(tt('allT'))}</option>` + types.map(t=>`<option value="${esc(t)}">${esc(ml(t))}</option>`).join('');
     sortSel.innerHTML = `<option value="new">${esc(tt('sNew'))}</option><option value="old">${esc(tt('sOld'))}</option><option value="az">${esc(tt('sAz'))}</option>`;
 
-    const phCover = `<div class="ph" style="position:absolute;inset:0;border:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></svg></div>`;
+    const phCover = `<div class="ph abs-cover"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></svg></div>`;
     const coverHTML = p => p.cover ? `<img src="${Site.safeUrl(p.cover)}" alt="">` : phCover;
     const dlSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 19h14" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     const arrowSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
@@ -71,7 +71,7 @@
       chips();
       const items = filtered();
       countEl.textContent = items.length + ' ' + tt('cnt');
-      if(!items.length){ wrap.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="t">${esc(T('no_pubs'))}</div></div>`; return; }
+      if(!items.length){ wrap.innerHTML = `<div class="empty col-span-full"><div class="t">${esc(T('no_pubs'))}</div></div>`; return; }
       wrap.innerHTML = items.map(p=>{
         const href = `nashr.html?id=${p.id}`;
         return `<div class="pub rv">

@@ -15,49 +15,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=75">
+<link rel="stylesheet" href="site.css?v=76">
 <link rel="stylesheet" href="subscribe.css?v=2">
-<style>
-  .lp-head{display:flex;align-items:center;gap:16px;margin-bottom:28px;}
-  .lp-title{font-family:var(--serif);font-weight:600;font-size:clamp(24px,2.6vw,32px);letter-spacing:.01em;color:var(--accent2-d);text-transform:uppercase;margin:0;}
-  .off-list{display:flex;flex-direction:column;gap:16px;}
-  .off-card{display:grid;grid-template-columns:1fr auto;align-items:stretch;border:1px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden;transition:transform .2s, box-shadow .2s, border-color .2s;}
-  .off-card:hover{transform:translateY(-3px);box-shadow:0 0 0 1.5px color-mix(in srgb,var(--accent2) 45%,transparent), 0 24px 48px -26px color-mix(in srgb,var(--accent2) 45%,transparent);}
-  .off-main{display:grid;grid-template-columns:200px 1fr;gap:0 30px;align-items:stretch;text-decoration:none;color:inherit;}
-  .off-photo{width:200px;min-height:190px;overflow:hidden;background:var(--bg-2);flex:none;}
-  .off-photo img{width:100%;height:100%;object-fit:cover;}
-  .off-photo .ph{width:100%;height:100%;min-height:190px;display:flex;align-items:center;justify-content:center;color:var(--muted);}
-  .off-photo .ph svg{width:36px;height:36px;opacity:.4;}
-  .off-info{align-self:center;padding:24px 0;}
-  .off-info .role{font-family:var(--mono);font-size:0.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent2-d);margin-bottom:8px;}
-  .off-info h3{font-family:var(--serif);font-weight:600;font-size:1.25rem;margin:0 0 8px;color:var(--ink);}
-  .off-info .sub{color:var(--ink-2);font-size:0.875rem;line-height:1.5;max-width:56ch;}
-  .off-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;}
-  .off-tags span{font-family:var(--mono);font-size:0.625rem;letter-spacing:.06em;text-transform:uppercase;padding:5px 11px;border:1px solid var(--line);border-radius:999px;color:var(--muted);}
-  .off-contact{align-self:stretch;display:flex;flex-direction:column;justify-content:center;gap:9px;font-family:var(--sans);font-size:0.84375rem;color:var(--ink-2);white-space:nowrap;padding:24px 30px;border-left:1px solid var(--line);}
-  .off-contact a,.off-contact span{display:flex;align-items:center;gap:9px;color:var(--ink-2);text-decoration:none;}
-  .off-contact a:hover{color:var(--accent2-d);}
-  .off-contact svg{width:16px;height:16px;color:var(--accent2-d);flex:none;}
-  @media(max-width:760px){
-    /* mobil: ixcham gorizontal karta — kichik rasm chapda, matn o'ngda */
-    .off-card{grid-template-columns:1fr;}
-    .off-main{grid-template-columns:108px 1fr;gap:0 14px;}
-    .off-photo{width:108px;min-height:132px;height:100%;}
-    .off-photo .ph{min-height:132px;}
-    .off-info{padding:14px 14px 12px 0;}
-    .off-info .role{font-size:0.625rem;margin-bottom:5px;}
-    .off-info h3{font-size:1.0625rem;margin:0 0 5px;}
-    .off-info .sub{max-width:none;font-size:0.8125rem;}
-    .off-tags{gap:6px;margin-top:9px;}
-    .off-tags span{padding:4px 9px;}
-    .off-contact{flex-direction:row;flex-wrap:wrap;justify-content:flex-start;gap:8px 18px;padding:12px 14px;border-left:0;border-top:1px solid var(--line);}
-  }
-  @media print{
-    header,footer,.page-banner{display:none !important;}
-    body.inner{padding-top:0 !important;}
-    .off-card{break-inside:avoid;box-shadow:none !important;}
-  }
-</style>
+<link rel="stylesheet" href="page-rahbariyat.css?v=1">
 </head>
 <body>
 <main>
@@ -77,10 +37,10 @@
 <script src="diag.js?v=1"></script>
 <script src="i18n.js?v=54"></script>
 <script src="admin-store.js?v=52"></script>
-<script src="site-common.js?v=67"></script>
+<script src="site-common.js?v=68"></script>
 <script src="subscribe.js?v=2"></script>
 <script src="search.js?v=46"></script>
-<script src="a11y.js?v=52"></script>
+<script src="a11y.js?v=53"></script>
 <script src="page-rahbariyat.js?v=1"></script>
 </body>
 </html>

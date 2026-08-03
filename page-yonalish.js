@@ -39,11 +39,11 @@
     pubs.sort((x,y)=>String(y.year||'').localeCompare(String(x.year||'')));
     const el = document.getElementById('pubs');
     if(!pubs.length){
-      el.innerHTML = `<div class="empty" style="grid-column:1/-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></svg><div class="t">${T('yo_none')}</div></div>`;
+      el.innerHTML = `<div class="empty col-span-full"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></svg><div class="t">${T('yo_none')}</div></div>`;
     } else {
       el.innerHTML = pubs.map(p=>`
         <article class="pub rv">
-          <div class="cover">${p.type?`<span class="badge">${Site.esc(Site.mlGet(p.type))}</span>`:''}${p.cover?`<img src="${Site.safeUrl(p.cover)}" alt="">`:`<div class="ph" style="position:absolute;inset:0;border:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></svg></div>`}</div>
+          <div class="cover">${p.type?`<span class="badge">${Site.esc(Site.mlGet(p.type))}</span>`:''}${p.cover?`<img src="${Site.safeUrl(p.cover)}" alt="">`:`<div class="ph abs-cover"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></svg></div>`}</div>
           <div class="body"><div class="t">${Site.esc(Site.mlGet(p.category||''))}${p.year?' · '+Site.esc(p.year):''}</div><h3>${Site.esc(Site.dispTitle(p))}</h3>
             <a class="dl" href="${Site.safeUrl(p.pdf) || '#'}" ${p.pdf?'download':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 19h14" stroke-linecap="round" stroke-linejoin="round"/></svg>${p.pdf?T('download_pdf'):T('soon')}</a>
           </div>

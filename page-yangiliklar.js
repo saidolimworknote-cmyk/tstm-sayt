@@ -19,14 +19,14 @@
       fb.innerHTML = cats.map(c=>`<button class="fchip ${c===active?'on':''}" data-c="${Site.esc(c)}">${c===''?Site.esc(Site.t('all')):Site.esc(Site.mlGet(c))}</button>`).join('');
       fb.querySelectorAll('.fchip').forEach(b=> b.onclick=()=>{ active=b.dataset.c; draw(); });
       const items = active==='' ? all : all.filter(n=>n.category===active);
-      if(!items.length){ wrap.innerHTML = `<div class="empty" style="grid-column:1/-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 14h8"/></svg><div class="t">${Site.esc(Site.t('no_news_cat'))}</div></div>`; return; }
+      if(!items.length){ wrap.innerHTML = `<div class="empty col-span-full"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 14h8"/></svg><div class="t">${Site.esc(Site.t('no_news_cat'))}</div></div>`; return; }
       wrap.innerHTML = items.map(n=>`
         <a class="ncard rv" href="yangilik.html?id=${n.id}">
           <div class="img ph">${imgHTML(n)}
             ${n.category?`<span class="tag">${Site.esc(Site.mlGet(n.category))}</span>`:''}
             <div class="ovl"><h3>${Site.esc(Site.mlGet(n.title))}</h3></div>
           </div>
-          <div class="body"><span class="dt">${Site.fmtDate(n.date)}</span><span class="dt vct" data-vid="${n.id}" style="margin-left:auto;display:inline-flex;align-items:center;gap:5px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="width:14px;height:14px"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg><b>·</b></span></div>
+          <div class="body"><span class="dt">${Site.fmtDate(n.date)}</span><span class="dt vct vct-inline" data-vid="${n.id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" class="ico-14"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg><b>·</b></span></div>
         </a>`).join('');
       Site.initReveal();
       // ko'rishlar sonini (faqat o'qish, sanamasdan) ko'rsatamiz

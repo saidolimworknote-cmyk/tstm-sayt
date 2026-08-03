@@ -8,7 +8,7 @@
     const T = Site.t;
     if(!n){
       main.innerHTML = `<div class="page-banner"><div class="wrap"><div class="crumb"><a href="Bosh sahifa - Hi-Fi.html">${T('home')}</a><span class="sep">/</span><a href="yangiliklar.html">${T('nav_news')}</a></div><h1>${T('not_found_t')}</h1></div></div>
-        <section class="block"><div class="wrap"><div class="empty"><div class="t">${T('not_found_t')}</div><div style="margin-top:20px"><a class="btn outline" href="yangiliklar.html">← ${T('all_news')}</a></div></div></div></section>`;
+        <section class="block"><div class="wrap"><div class="empty"><div class="t">${T('not_found_t')}</div><div class="mt-20"><a class="btn outline" href="yangiliklar.html">← ${T('all_news')}</a></div></div></div></section>`;
       return;
     }
     document.title = Site.mlGet(n.title) + ' — TSTM';
@@ -36,7 +36,7 @@
         <h1>${Site.esc(Site.mlGet(n.title))}</h1>
       </div></div>
       <section class="block"><div class="wrap"><div class="article">
-        <div class="meta">${n.category?`<span class="tag">${Site.esc(Site.mlGet(n.category))}</span>`:''}<span class="dt mono muted">${Site.fmtDate(n.date)}</span><span class="dt mono muted" id="viewct" style="display:inline-flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="width:15px;height:15px"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg><b id="viewn">·</b> ${T('views_label')}</span></div>
+        <div class="meta">${n.category?`<span class="tag">${Site.esc(Site.mlGet(n.category))}</span>`:''}<span class="dt mono muted">${Site.fmtDate(n.date)}</span><span class="dt mono muted vct-badge" id="viewct"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" class="ico-15"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg><b id="viewn">·</b> ${T('views_label')}</span></div>
         ${standfirst}
         ${n.cover?`<div class="hero-img"><img src="${Site.safeUrl(n.cover)}" alt=""></div>`:''}
         <div class="content">${body}</div>
@@ -47,7 +47,7 @@
         </div>
         ${printFoot}
       </div></div></section>
-      ${related.length?`<section class="block related-sec" style="padding-top:0"><div class="wrap">
+      ${related.length?`<section class="block related-sec pt0"><div class="wrap">
         <div class="sec-head"><div><div class="kicker">${T('read_again')}</div><h2>${T('related_news')}</h2></div><a class="arrow-link" href="yangiliklar.html">${T('view_all')} →</a></div>
         <div class="cards">${related.map(r=>`
           <a class="ncard rv" href="yangilik.html?id=${r.id}">
