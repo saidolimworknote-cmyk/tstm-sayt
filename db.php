@@ -67,6 +67,9 @@ $SCHEMA = [
     ['key' => 'sub', 'type' => 'json'], ['key' => 'photo'],
     ['key' => 'bio', 'type' => 'json'], ['key' => 'expertise', 'type' => 'json'],
     ['key' => 'phone'], ['key' => 'email'], ['key' => 'url'], ['key' => 'hours'],
+    // Qaysi sahifada ko'rinadi: 'Rahbariyat' -> rahbariyat.html,
+    // boshqa har qanday qiymat (jumladan bo'sh) -> ekspertlar.html.
+    ['key' => 'kind'],
     ['key' => 'order', 'col' => 'sort_order', 'type' => 'int'],
   ]],
   'publications' => ['table' => 'publications', 'cols' => [
@@ -190,8 +193,8 @@ function provision($pdo) {
     name LONGTEXT, role LONGTEXT, sub LONGTEXT, photo VARCHAR(500),
     bio LONGTEXT, expertise LONGTEXT,
     phone VARCHAR(80), email VARCHAR(191), url VARCHAR(500), hours VARCHAR(191),
-    sort_order INT DEFAULT 0,
-    $seq, INDEX(sort_order)
+    kind VARCHAR(40), sort_order INT DEFAULT 0,
+    $seq, INDEX(sort_order), INDEX(kind)
   )$tail");
 
   $pdo->exec("CREATE TABLE IF NOT EXISTS publications (
@@ -368,6 +371,8 @@ function migrate($pdo) {
     'email'     => 'VARCHAR(191)',
     'url'       => 'VARCHAR(500)',
     'hours'     => 'VARCHAR(191)',
+    // Rahbariyat/Ekspertlar sahifalarga ajratish uchun (2026-08-06)
+    'kind'      => 'VARCHAR(40)',
   ]);
   ensure_cols($pdo, 'publications', [
     'short_title' => 'LONGTEXT',

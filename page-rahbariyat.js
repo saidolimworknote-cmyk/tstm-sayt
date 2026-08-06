@@ -1,10 +1,15 @@
-/* rahbariyat.html sahifasining skripti.
-   Ilgari HTML ichida inline turardi. CSP 'unsafe-inline' siz ishlashi uchun
-   alohida faylga ko'chirildi — sahifada faqat <script src> qoladi. */
+/* Rahbariyat VA Ekspertlar sahifalarining umumiy skripti.
+   Ikkala sahifa bir xil ro'yxatni chizadi, farqi faqat KIMNI ko'rsatishida:
+   `<div id="grid" data-kind="Rahbariyat">` bo'lsa faqat rahbariyat, aks holda
+   qolganlari (kind bo'sh yoki "Ekspert"). Filtr HTML'dan data-atribut orqali
+   keladi — CSP inline skriptga ruxsat bermaydi. */
   Site.initPage({ active:'about', render(){
     const T = Site.t;
-    let exp = Store.all('experts').sort((a,b)=>(a.order||0)-(b.order||0));
     const el = document.getElementById('grid');
+    const only = (el && el.dataset.kind) || '';   // '' => ekspertlar
+    let exp = Store.all('experts')
+      .filter(e => only === 'Rahbariyat' ? e.kind === 'Rahbariyat' : e.kind !== 'Rahbariyat')
+      .sort((a,b)=>(a.order||0)-(b.order||0));
     if(!exp.length){ el.innerHTML=`<div class="empty"><div class="t">${T('none_data')}</div></div>`; return; }
     const I = {
       phone:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/></svg>',

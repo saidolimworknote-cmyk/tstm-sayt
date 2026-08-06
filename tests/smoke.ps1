@@ -32,7 +32,8 @@ Write-Host ("=" * 60)
 Write-Host "`n[1] Sahifalar 200 qaytaradi"
 $pages = 'Bosh sahifa - Hi-Fi.html','nashrlar.html','yangiliklar.html','aloqa.html',
          'media.html','rahbariyat.html','markaz-haqida.html','tadqiqotlar.html',
-         'tadbirlar.html','yonalish.html','oav.html','sharh.html','admin.html'
+         'tadbirlar.html','yonalish.html','oav.html','sharh.html',
+         'ekspertlar.html','hisobotlar.html','maqolalar.html','kitoblar.html','admin.html'
 foreach ($p in $pages) {
   $r = Get2 "$Base/$([uri]::EscapeDataString($p))"
   Check "sahifa: $p" ((Code $r) -eq 200) "status=$(Code $r)"

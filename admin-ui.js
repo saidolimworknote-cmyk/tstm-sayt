@@ -176,13 +176,17 @@
     },
     experts: {
       label: 'Ekspertlar', singular: 'ekspert', icon: 'experts', sort: 'order',
-      columns: [{ k: 'name', label: 'Ism', ml: 1, thumb: 'photo' }, { k: 'role', label: 'Lavozim', ml: 1 }, { k: 'expertise', label: 'Ekspertiza', ml: 1 }],
+      columns: [{ k: 'name', label: 'Ism', ml: 1, thumb: 'photo' }, { k: 'role', label: 'Lavozim', ml: 1 }, { k: 'kind', label: 'Bo\'lim' }, { k: 'expertise', label: 'Ekspertiza', ml: 1 }],
       fields: [
         { k: 'name', label: 'Ism familiya', type: 'text', ml: 1, req: 1 },
         { k: 'role', label: 'Lavozim', type: 'text', ml: 1 },
         { k: 'sub', label: 'Ilmiy daraja / mutaxassislik', type: 'text', ml: 1 },
         { k: 'expertise', label: 'Ekspertiza yo\'nalishlari', type: 'text', ml: 1, ph: 'Tashqi siyosat, Xavfsizlik, Markaziy Osiyo' },
         { k: 'bio', label: 'Qisqacha biografiya', type: 'rich', ml: 1 },
+        // Saytda qaysi sahifada ko'rinishini belgilaydi. Bo'sh qolsa —
+        // "Ekspert" (ekspertlar.html). Faqat "Rahbariyat" tanlansa
+        // rahbariyat.html sahifasiga tushadi.
+        { k: 'kind', label: 'Bo\'lim (qaysi sahifada)', type: 'select', side: 1, opts: ['Ekspert', 'Rahbariyat'] },
         { k: 'photo', label: 'Portret', type: 'image', side: 1 },
         { k: 'phone', label: 'Telefon', type: 'text', side: 1, ph: '+998 71 000 00 00' },
         { k: 'email', label: 'E-pochta', type: 'text', side: 1, ph: 'ism@markaz.uz' },
@@ -1710,7 +1714,7 @@
         <button class="btn danger" id="setReset">${ic('trash')} Barcha ma'lumotlarni tiklash</button></div>`;
 
     // banners
-    const BSEC = { news:'Yangiliklar', oav:'Ekspertlar OAVda', events:'Tadbirlar', pubs:'Nashrlar', research:'Tadqiqotlar', about:'Markaz haqida', leadership:'Rahbariyat', media:'Media', contact:'Aloqa', search:'Qidiruv' };
+    const BSEC = { news:'Yangiliklar', oav:'Ekspertlar OAVda', events:'Tadbirlar', pubs:'Nashrlar', research:'Tadqiqotlar', about:'Markaz haqida', leadership:'Rahbariyat', experts:'Ekspertlar', media:'Media', contact:'Aloqa', search:'Qidiruv' };
     const banners = Object.assign({}, s.banners || {});
     $('#bannerGrid').innerHTML = Object.keys(BSEC).map(k => `
       <div class="banner-cell" data-bk="${k}">

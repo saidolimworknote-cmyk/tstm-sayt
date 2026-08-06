@@ -7,8 +7,10 @@
     const e = id ? Store.find('experts', id) : null;
     const main = document.getElementById('main');
     if(!e){
-      main.innerHTML = `<div class="page-banner"><div class="wrap"><div class="crumb"><a href="Bosh sahifa - Hi-Fi.html">${T('home')}</a><span class="sep">/</span><a href="rahbariyat.html">${T('nav_about_leadership')}</a></div><h1>${T('not_found_t')||'Topilmadi'}</h1></div></div>
-        <section class="block"><div class="wrap"><div class="empty"><div class="t">${T('not_found_t')}</div><div class="mt-20"><a class="btn outline" href="rahbariyat.html">← ${T('all_team')}</a></div></div></div></section>`;
+      // Xodim topilmadi — qaysi bo'limga tegishli ekanini bilib bo'lmaydi,
+      // shuning uchun kengroq ro'yxatga (ekspertlar) qaytaramiz.
+      main.innerHTML = `<div class="page-banner"><div class="wrap"><div class="crumb"><a href="Bosh sahifa - Hi-Fi.html">${T('home')}</a><span class="sep">/</span><a href="ekspertlar.html">${T('nav_about_experts')}</a></div><h1>${T('not_found_t')||'Topilmadi'}</h1></div></div>
+        <section class="block"><div class="wrap"><div class="empty"><div class="t">${T('not_found_t')}</div><div class="mt-20"><a class="btn outline" href="ekspertlar.html">← ${T('all_team')}</a></div></div></div></section>`;
       return;
     }
     const name = ml(e.name);
@@ -56,9 +58,14 @@
       e.hours ? `<span class="row">${IC.clock}${esc(e.hours)}</span>` : ''
     ].filter(Boolean).join('');
 
+    // Non zanjiri xodim QAYSI sahifaga tegishli ekaniga qarab quriladi:
+    // rahbariyat -> rahbariyat.html, qolganlar -> ekspertlar.html.
+    const backHref = e.kind === 'Rahbariyat' ? 'rahbariyat.html' : 'ekspertlar.html';
+    const backLbl  = e.kind === 'Rahbariyat' ? T('nav_about_leadership') : T('nav_about_experts');
+
     main.innerHTML = `
       <div class="page-banner"><div class="wrap">
-        <div class="crumb"><a href="Bosh sahifa - Hi-Fi.html">${T('home')}</a><span class="sep">/</span><a href="rahbariyat.html">${T('nav_about_leadership')}</a><span class="sep">/</span><span>${esc(name)}</span></div>
+        <div class="crumb"><a href="Bosh sahifa - Hi-Fi.html">${T('home')}</a><span class="sep">/</span><a href="${backHref}">${backLbl}</a><span class="sep">/</span><span>${esc(name)}</span></div>
       </div></div>
       <section class="block"><div class="wrap"><div class="exp-detail">
         <div>

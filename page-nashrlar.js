@@ -23,7 +23,16 @@
     const sortSel = document.getElementById('sortSel');
     const countEl = document.getElementById('count');
 
-    const allPubs = Store.all('publications').filter(p=>p.status==='published');
+    // "Tahlillar" bo'limining alohida sahifalari (hisobotlar/maqolalar/kitoblar)
+    // shu skriptning o'zini ishlatadi. Ular <main data-ptypes="Tur1,Tur2">
+    // atributi bilan qaysi nashr turlarini ko'rsatishni aytadi — CSP inline
+    // skriptga ruxsat bermagani uchun sozlama DOM orqali uzatiladi.
+    // Atribut bo'lmasa (nashrlar.html) — barcha nashrlar, hech narsa cheklanmaydi.
+    const scopeEl = document.querySelector('[data-ptypes]');
+    const scope = scopeEl ? scopeEl.dataset.ptypes.split(',').map(s=>s.trim()).filter(Boolean) : [];
+
+    let allPubs = Store.all('publications').filter(p=>p.status==='published');
+    if(scope.length) allPubs = allPubs.filter(p => scope.indexOf(p.type) > -1);
     const cats  = ['', ...Array.from(new Set(allPubs.map(p=>p.category).filter(Boolean)))];
     const types = Array.from(new Set(allPubs.map(p=>p.type).filter(Boolean)));
 
@@ -42,6 +51,12 @@
     qEl.placeholder = tt('ph');
     typeSel.innerHTML = `<option value="">${esc(tt('allT'))}</option>` + types.map(t=>`<option value="${esc(t)}">${esc(ml(t))}</option>`).join('');
     if(type) typeSel.value = type;   // URL'dan kelgan tur tanlagichda ham ko'rinsin
+    // Tur cheklangan sahifada bittagina tur qolsa tanlagich ma'nosiz — yashiramiz
+    // (masalan "Hisobotlar" sahifasida bazada faqat "Hisobot" bo'lsa).
+    if(scope.length && types.length < 2){
+      const box = typeSel.closest('.pubsel');
+      if(box) box.style.display = 'none';
+    }
     sortSel.innerHTML = `<option value="new">${esc(tt('sNew'))}</option><option value="old">${esc(tt('sOld'))}</option><option value="az">${esc(tt('sAz'))}</option>`;
 
     const phCover = `<div class="ph abs-cover"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></svg></div>`;

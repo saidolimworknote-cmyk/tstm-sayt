@@ -133,7 +133,7 @@
   const NAV = [
     { tk: 'nav_about', href: 'markaz-haqida.html', keys: ['about'], children: [
       { tk: 'nav_about_leadership', href: 'rahbariyat.html' },
-      { tk: 'nav_about_experts', href: 'rahbariyat.html' }
+      { tk: 'nav_about_experts', href: 'ekspertlar.html' }
     ]},
     { tk: 'nav_happenings', href: 'yangiliklar.html', keys: ['news','events','oav'], children: [
       { tk: 'nav_hap_news', href: 'yangiliklar.html' },
@@ -141,9 +141,9 @@
       { tk: 'nav_hap_events', href: 'tadbirlar.html' }
     ]},
     { tk: 'nav_analytics', href: 'nashrlar.html', keys: ['pubs','research'], children: [
-      { tk: 'nav_an_reports', href: 'nashrlar.html?type=Hisobot' },
-      { tk: 'nav_an_articles', href: 'nashrlar.html?type=Maqola' },
-      { tk: 'nav_an_books', href: 'nashrlar.html?type=Kitob' }
+      { tk: 'nav_an_reports', href: 'hisobotlar.html' },
+      { tk: 'nav_an_articles', href: 'maqolalar.html' },
+      { tk: 'nav_an_books', href: 'kitoblar.html' }
     ]},
     { tk: 'nav_media', href: 'media.html', keys: ['media'], children: [
       { tk: 'nav_media_photo', href: 'media.html?tab=photo' },
@@ -353,7 +353,9 @@
   const BANNER_MAP = {
     'yangiliklar.html':'news','yangilik.html':'news','tadbirlar.html':'events',
     'nashrlar.html':'pubs','nashr.html':'pubs','tadqiqotlar.html':'research','yonalish.html':'research',
-    'markaz-haqida.html':'about','rahbariyat.html':'leadership','media.html':'media',
+    // "Tahlillar" bo'limining uch sahifasi nashrlar bilan bir xil bannerni oladi
+    'hisobotlar.html':'pubs','maqolalar.html':'pubs','kitoblar.html':'pubs',
+    'markaz-haqida.html':'about','rahbariyat.html':'leadership','ekspertlar.html':'experts','media.html':'media',
     'aloqa.html':'contact','qidiruv.html':'search',
     'oav.html':'oav','sharh.html':'oav'
   };

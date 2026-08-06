@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tadbirlar — TSTM</title>
-<meta name="description" content="TSTM markazi tashkil etayotgan konferensiya, davra suhbati va tadbirlar taqvimi.">
+<title>Ekspertlar — TSTM</title>
+<meta name="description" content="TSTM markazi ekspertlari — tahlilchilar va ilmiy xodimlar.">
 <link rel="icon" href="logo-mark.png">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="TSTM">
-<meta property="og:title" content="Tadbirlar — TSTM">
-<meta property="og:description" content="TSTM markazi tashkil etayotgan konferensiya, davra suhbati va tadbirlar taqvimi.">
+<meta property="og:title" content="Ekspertlar — TSTM">
+<meta property="og:description" content="TSTM markazi ekspertlari — tahlilchilar va ilmiy xodimlar.">
 <meta property="og:image" content="logo-mark.png">
 <meta name="twitter:card" content="summary">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,17 +17,19 @@
 <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="site.css?v=87">
 <link rel="stylesheet" href="subscribe.css?v=2">
+<link rel="stylesheet" href="page-rahbariyat.css?v=2">
 </head>
 <body>
 <main>
   <div class="page-banner"><div class="wrap">
-    <div class="crumb"><a href="Bosh sahifa - Hi-Fi.html" data-i18n="home">Bosh sahifa</a><span class="sep">/</span><span data-i18n="nav_events">Tadbirlar</span></div>
-    <h1 data-i18n="p_events_title">Tadbirlar taqvimi</h1>
-    <p class="lead" data-i18n="p_events_lead">Konferensiyalar, davra suhbatlari, brifinglar va ta'lim dasturlari — markaz tashkil etadigan tadbirlar.</p>
+    <div class="crumb"><a href="Bosh sahifa - Hi-Fi.html" data-i18n="home">Bosh sahifa</a><span class="sep">/</span><a href="markaz-haqida.html" data-i18n="nav_about">Markaz haqida</a><span class="sep">/</span><span data-i18n="nav_about_experts">Ekspertlar</span></div>
+    <h1 data-i18n="p_experts_title">Ekspertlar</h1>
+    <p class="lead" data-i18n="p_experts_lead">Markaz ekspertlari — tahlilchilar va ilmiy xodimlar.</p>
   </div></div>
   <section class="block"><div class="wrap">
-    <div id="upcoming"></div>
-    <div id="past"></div>
+    <!-- data-kind YO'Q -> page-rahbariyat.js "Rahbariyat" bo'lmaganlarning
+         hammasini chizadi (kind bo'sh bo'lganlar ham shu yerga tushadi). -->
+    <div class="off-list" id="grid"></div>
   </div></section>
 </main>
 
@@ -38,6 +40,6 @@
 <script src="subscribe.js?v=2"></script>
 <script src="search.js?v=48"></script>
 <script src="a11y.js?v=54"></script>
-<script src="page-tadbirlar.js?v=1"></script>
+<script src="page-rahbariyat.js?v=2"></script>
 </body>
 </html>
