@@ -57,7 +57,7 @@
     nav_about_experts:    { uz: 'Ekspertlar', ru: 'Эксперты', en: 'Experts' },
     nav_happenings:       { uz: 'Voqealar', ru: 'События', en: 'Happenings' },
     nav_hap_news:         { uz: 'Yangiliklar TSTM', ru: 'Новости ЦВПИ', en: 'CFPS news' },
-    nav_hap_experts:      { uz: 'Bizning ekspertlarimiz', ru: 'Наши эксперты', en: 'Our experts' },
+    nav_hap_experts:      { uz: 'Bizning ekspertlar OAVlarda', ru: 'Наши эксперты в СМИ', en: 'Our experts in the media' },
     nav_hap_events:       { uz: 'Tadbirlar TSTM', ru: 'Мероприятия ЦВПИ', en: 'CFPS events' },
     nav_analytics:        { uz: 'Tahlillar', ru: 'Аналитика', en: 'Analysis' },
     nav_an_reports:       { uz: 'Hisobotlar', ru: 'Отчёты', en: 'Reports' },
