@@ -1710,7 +1710,7 @@
         <button class="btn danger" id="setReset">${ic('trash')} Barcha ma'lumotlarni tiklash</button></div>`;
 
     // banners
-    const BSEC = { news:'Yangiliklar', events:'Tadbirlar', pubs:'Nashrlar', research:'Tadqiqotlar', about:'Markaz haqida', leadership:'Rahbariyat', media:'Media', contact:'Aloqa', search:'Qidiruv' };
+    const BSEC = { news:'Yangiliklar', oav:'Ekspertlar OAVda', events:'Tadbirlar', pubs:'Nashrlar', research:'Tadqiqotlar', about:'Markaz haqida', leadership:'Rahbariyat', media:'Media', contact:'Aloqa', search:'Qidiruv' };
     const banners = Object.assign({}, s.banners || {});
     $('#bannerGrid').innerHTML = Object.keys(BSEC).map(k => `
       <div class="banner-cell" data-bk="${k}">

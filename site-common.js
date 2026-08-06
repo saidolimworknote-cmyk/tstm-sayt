@@ -354,7 +354,8 @@
     'yangiliklar.html':'news','yangilik.html':'news','tadbirlar.html':'events',
     'nashrlar.html':'pubs','nashr.html':'pubs','tadqiqotlar.html':'research','yonalish.html':'research',
     'markaz-haqida.html':'about','rahbariyat.html':'leadership','media.html':'media',
-    'aloqa.html':'contact','qidiruv.html':'search'
+    'aloqa.html':'contact','qidiruv.html':'search',
+    'oav.html':'oav','sharh.html':'oav'
   };
   function applyBanner(activeKey){
     const banners = (settings() || {}).banners || {};
@@ -398,16 +399,23 @@
     // Chop etish uslublari endi tashqi print.css'da (CSP: iframe ota-sahifa
     // CSP'sini meros oladi, inline <style> bloklanadi — 'self' link ruxsat).
     // Iframe about:blank bo'lgani uchun nisbiy URL ishlamaydi -> abs() bilan.
-    var cssHref = abs('print.css');
+    // Versiya SHART: bu fayl HTML'da <link> bilan ulanmagani uchun boshqa
+    // joyda kesh buzilmaydi — o'zgartirsangiz raqamni oshiring.
+    var cssHref = abs('print.css?v=2');
+
+    // Asl manba (tashqi nashr havolasi) — ekspert sharhlarida hujjatning
+    // ishonchliligi uchun muhim, shuning uchun footerga chiqadi.
+    var origin = opts.sourceUrl ? '<span>' + esc(T('print_orig')) + ': ' + esc(opts.sourceUrl) + '</span>' : '';
 
     var html = ''
       + '<div class="ph">' + (logo ? '<img src="' + logo + '" alt="">' : '') + '<div><b>' + esc(org) + '</b><span>' + esc(tag) + '</span></div></div>'
       + '<h1>' + esc(opts.title || '') + '</h1>'
       + (opts.meta ? '<div class="meta">' + opts.meta + '</div>' : '')
+      + (opts.byline ? '<div class="byline">' + opts.byline + '</div>' : '')
       + (opts.lead ? '<div class="lead">' + opts.lead + '</div>' : '')
       + (img ? '<div class="img"><img src="' + img + '" alt=""></div>' : '')
       + '<div class="content">' + (opts.content || '') + '</div>'
-      + '<div class="foot"><span>' + esc(T('print_source')) + ': ' + esc(location.href) + '</span><span>' + esc(T('print_date')) + ': ' + date + '</span></div>';
+      + '<div class="foot"><span>' + esc(T('print_source')) + ': ' + esc(location.href) + '</span>' + origin + '<span>' + esc(T('print_date')) + ': ' + date + '</span></div>';
 
     var fonts = '<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">';
     var ifr = document.createElement('iframe');
@@ -425,18 +433,23 @@
       try { ifr.contentWindow.focus(); ifr.contentWindow.print(); } catch {}
       setTimeout(function () { try { ifr.remove(); } catch {} }, 1200);
     };
-    // rasm(lar) yuklanishini kutamiz, aks holda 1.5s dan so'ng baribir chop qilamiz
-    var imgs = doc.images, left = imgs ? imgs.length : 0;
-    if (left) {
-      var tick = function () { if (--left <= 0) go(); };
-      for (var i = 0; i < imgs.length; i++) {
-        if (imgs[i].complete) tick();
-        else { imgs[i].onload = tick; imgs[i].onerror = tick; }
-      }
-      setTimeout(go, 1500);
-    } else {
-      setTimeout(go, 350);
+    // Chop qilishdan oldin IKKALASINI kutamiz: (1) print.css yuklanishi va
+    // (2) rasm(lar). Ilgari faqat rasm kutilardi — uslub yetib ulgurmagan
+    // holatda hujjat butunlay bezaksiz chiqib ketishi mumkin edi. Rasmsiz
+    // sahifada esa qat'iy 350ms kutilardi, bu ham o'sha poygaga ochiq edi.
+    var imgs = doc.images;
+    var pending = 1 + (imgs ? imgs.length : 0); // 1 = uslub
+    var tick = function () { if (--pending <= 0) go(); };
+    var link = doc.querySelector('link[rel="stylesheet"][href*="print.css"]');
+    if (!link) tick();
+    else if (link.sheet) tick();               // kesh: allaqachon tayyor
+    else { link.onload = tick; link.onerror = tick; }
+    if (imgs) for (var i = 0; i < imgs.length; i++) {
+      if (imgs[i].complete) tick();
+      else { imgs[i].onload = tick; imgs[i].onerror = tick; }
     }
+    // Qat'iy chegara: nimadir osilib qolsa ham foydalanuvchi kutib qolmaydi.
+    setTimeout(go, 2500);
   }
 
   // ---------- page bootstrap ----------

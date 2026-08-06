@@ -40,7 +40,11 @@
       .sort((a,b)=> String(b.date||'').localeCompare(String(a.date||''))).slice(0,3);
 
     const printHead = `<div class="print-head"><img src="${Site.safeUrl(Site.brandLogo())}" alt=""><div class="ph-txt"><b>${Site.esc(T('org_name'))}</b><span>${Site.esc(T('org_tagline'))}</span></div></div>`;
-    const printFoot = `<div class="print-foot"><span>${Site.esc(T('print_source'))}: ${Site.esc(location.href)}</span><span>${Site.esc(T('print_date'))}: ${Site.fmtDate(new Date().toISOString().slice(0,10))}</span></div>`;
+    // Brauzerning o'z chop etishi (Ctrl+P) uchun footer. Asl nashr havolasi
+    // shu yerda ham bo'lsin — qog'ozda tugmani bosib bo'lmaydi.
+    const printFoot = `<div class="print-foot"><span>${Site.esc(T('print_source'))}: ${Site.esc(location.href)}</span>${
+      srcUrl ? `<span>${Site.esc(T('print_orig'))}: ${Site.esc(p.source)}</span>` : ''
+    }<span>${Site.esc(T('print_date'))}: ${Site.fmtDate(new Date().toISOString().slice(0,10))}</span></div>`;
 
     main.innerHTML = `${printHead}
       <div class="page-banner"><div class="wrap">
@@ -80,10 +84,15 @@
       var row=document.getElementById('actRow'); if(!row) return;
       var title=Site.mlGet(p.title), url=location.href;
       row.querySelector('[data-act=print]').onclick=function(){
-        var metaHtml = (p.outlet?'<span class="tag">'+Site.esc(p.outlet)+'</span>':'')
-                     + (p.expert?'<span>'+Site.esc(p.expert)+'</span>':'')
+        // Meta qatorida faqat mavzu va sana; kim/qayerda esa alohida imzo
+        // blokida (chop etilgan hujjatda bu ikkalasi eng muhim ma'lumot).
+        var metaHtml = (p.category?'<span class="tag">'+Site.esc(Site.mlGet(p.category))+'</span>':'')
                      + '<span>'+Site.fmtDate(p.date)+'</span>';
-        Site.printDoc({ title:title, meta:metaHtml, lead: excerpt?Site.esc(excerpt):'', image:p.cover||'', content: body });
+        var bylineHtml = (p.expert?'<div><span class="lab">'+Site.esc(T('oav_expert'))+'</span><span class="val">'+Site.esc(p.expert)+'</span></div>':'')
+                       + (p.outlet?'<div><span class="lab">'+Site.esc(T('oav_outlet'))+'</span><span class="val">'+Site.esc(p.outlet)+'</span></div>':'');
+        Site.printDoc({ title:title, meta:metaHtml, byline:bylineHtml,
+          lead: excerpt?Site.esc(excerpt):'', image:p.cover||'', content: body,
+          sourceUrl: p.source||'' });
       };
       row.querySelector('[data-act=link]').onclick=function(){
         var btn=this, lbl=btn.querySelector('[data-lbl]'), old=lbl.textContent;

@@ -957,6 +957,19 @@ html[data-theme="dark"]{
   .article .content blockquote { border-left:3px solid #0f5689; color:#000 !important; font-style:italic; }
   .article .content a { color:#000 !important; text-decoration:none; }
 
+  /* --- ekspert sharhi (sharh.html) imzo qatori ---
+     Bu blok `.article .content` dan TASHQARIDA, shuning uchun yuqoridagi
+     umumiy `color:#000` qoidalari unga tegmasdi: quyuq temada matn oq
+     qog'ozda deyarli ko'rinmay chiqardi. Ikonkalar chop etishda ortiqcha. */
+  .oav-byline { border-color:#ccc !important; margin:0 0 16px; padding:10px 0;
+    page-break-inside:avoid; gap:6px 26px; }
+  .oav-byline svg { display:none !important; }
+  .oav-byline .lab { color:#555 !important; font-size:8.5pt; }
+  .oav-byline .val { color:#000 !important; font-size:11pt; font-weight:600; }
+  /* Tashqi manbaga o'tish tugmasi qog'ozda bosilmaydi — havolaning o'zi
+     print-foot da matn ko'rinishida chiqadi (page-sharh.js -> sourceUrl). */
+  .oav-src { display:none !important; }
+
   /* --- nashr (pub-detail): muqova+ma'lumot ustuni o'ngga suzadi, matn atrofidan oqadi --- */
   .pub-detail { display:block !important; }
   .pub-detail > div:first-child { float:right; width:48mm; margin:2px 0 10px 12mm; page-break-inside:avoid; }

@@ -101,6 +101,7 @@
     link_copied:  { uz: 'Havola nusxalandi', ru: 'Ссылка скопирована', en: 'Link copied' },
     print_source: { uz: 'Manba', ru: 'Источник', en: 'Source' },
     print_date:   { uz: 'Chop etilgan sana', ru: 'Дата печати', en: 'Printed on' },
+    print_orig:   { uz: 'Asl nashr', ru: 'Первоисточник', en: 'Original publication' },
     not_found_t:  { uz: 'Topilmadi', ru: 'Не найдено', en: 'Not found' },
 
     /* ---- hero ---- */
