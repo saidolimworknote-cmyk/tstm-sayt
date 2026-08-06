@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="home.css?v=6">
+<link rel="stylesheet" href="home.css?v=7">
 <link rel="stylesheet" href="subscribe.css?v=2">
 </head>
 <body>
@@ -240,8 +240,13 @@
           <a href="#" id="fsX" target="_blank" rel="noopener" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 3h3l-6.6 7.5L21.7 21h-6l-4.7-6.1L5.6 21H2.5l7-8L2 3h6.2l4.2 5.6L17.5 3Zm-1 16h1.6L7.6 4.7H5.9L16.5 19Z"/></svg></a>
         </div>
       </div>
-      <div class="f-col"><h5 data-i18n="footer_sections">Bo'limlar</h5><a href="markaz-haqida.html" data-i18n="nav_about">Markaz haqida</a><a href="rahbariyat.html" data-i18n="nav_about_leadership">Rahbariyat</a><a href="tadqiqotlar.html" data-i18n="nav_research">Tadqiqotlar</a><a href="nashrlar.html" data-i18n="nav_pubs">Nashrlar</a><a href="yangiliklar.html" data-i18n="nav_news">Yangiliklar</a><a href="tadbirlar.html" data-i18n="nav_events">Tadbirlar</a></div>
-      <div class="f-col"><h5 data-i18n="footer_media">Media</h5><a href="media.html?tab=photo" data-i18n="nav_media_photo">Fotogalereya</a><a href="media.html?tab=video" data-i18n="nav_media_video">Videomateriallar</a><a href="media.html?tab=info" data-i18n="nav_media_info">Infografika</a><a href="aloqa.html" data-i18n="footer_press">Matbuot xizmati</a></div>
+      <!-- Havola ustunlari yuqoridagi menyu bilan bir xil (4 guruh x 3 band).
+           Ichki sahifalarda xuddi shu ro'yxat site-common.js dagi NAV massividan
+           chiziladi — menyu o'zgarsa BU YERNI ham qo'lda yangilash kerak. -->
+      <div class="f-col"><h5 data-i18n="nav_about">Markaz haqida</h5><a href="rahbariyat.html" data-i18n="nav_about_leadership">Rahbariyat</a><a href="rahbariyat.html" data-i18n="nav_about_experts">Ekspertlar</a><a href="aloqa.html" data-i18n="nav_contact">Aloqa</a></div>
+      <div class="f-col"><h5 data-i18n="nav_happenings">Voqealar</h5><a href="yangiliklar.html" data-i18n="nav_hap_news">Yangiliklar TSTM</a><a href="rahbariyat.html" data-i18n="nav_hap_experts">Bizning ekspertlarimiz</a><a href="tadbirlar.html" data-i18n="nav_hap_events">Tadbirlar TSTM</a></div>
+      <div class="f-col"><h5 data-i18n="nav_analytics">Tahlillar</h5><a href="nashrlar.html?type=Hisobot" data-i18n="nav_an_reports">Hisobotlar</a><a href="nashrlar.html?type=Maqola" data-i18n="nav_an_articles">Maqolalar</a><a href="nashrlar.html?type=Kitob" data-i18n="nav_an_books">Kitoblar</a></div>
+      <div class="f-col"><h5 data-i18n="nav_media">Media</h5><a href="media.html?tab=photo" data-i18n="nav_media_photo">Fotogalereya</a><a href="media.html?tab=video" data-i18n="nav_media_video">Videomateriallar</a><a href="media.html?tab=info" data-i18n="nav_media_info">Infografika</a></div>
       <div class="f-contact">
         <h5 data-i18n="footer_contact">Aloqa</h5>
         <div><span class="lab" data-i18n="footer_address">Manzil</span><span id="fAddr">Toshkent sh., O'zbekiston</span></div>

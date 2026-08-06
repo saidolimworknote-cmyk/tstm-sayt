@@ -285,6 +285,9 @@
   }
 
   // ---------- FOOTER ----------
+  // Havola ustunlari yuqoridagi NAV massividan chiziladi — menyu o'zgarsa footer
+  // o'zi ergashadi. Ilgari ular qo'lda yozilgani uchun menyu qayta guruhlangach
+  // footer eski bo'limlarni (Tadqiqotlar/Nashrlar) ko'rsatib qolgan edi.
   function renderFooter(){
     const s = settings();
     const soc = s.social || {};
@@ -308,13 +311,9 @@
           ].filter(l => l.u && l.u !== '#')
            .map(l => `<a href="${safeUrl(l.u)}" target="_blank" rel="noopener" aria-label="${l.n}">${l.i}</a>`).join('')}</div>
         </div>
-        <div class="f-col"><h5>${esc(T('footer_sections'))}</h5>
-          <a href="markaz-haqida.html">${esc(T('nav_about'))}</a><a href="rahbariyat.html">${esc(T('nav_about_leadership'))}</a>
-          <a href="tadqiqotlar.html">${esc(T('nav_research'))}</a><a href="nashrlar.html">${esc(T('nav_pubs'))}</a>
-          <a href="yangiliklar.html">${esc(T('nav_news'))}</a><a href="tadbirlar.html">${esc(T('nav_events'))}</a></div>
-        <div class="f-col"><h5>${esc(T('footer_media'))}</h5>
-          <a href="media.html?tab=photo">${esc(T('nav_media_photo'))}</a><a href="media.html?tab=video">${esc(T('nav_media_video'))}</a>
-          <a href="media.html?tab=info">${esc(T('nav_media_info'))}</a><a href="aloqa.html">${esc(T('footer_press'))}</a></div>
+        ${NAV.map(n => `<div class="f-col"><h5>${esc(T(n.tk))}</h5>${
+          (n.children || []).map(c => `<a href="${c.href}">${esc(T(c.tk))}</a>`).join('')
+        }</div>`).join('')}
         <div class="f-contact">
           <h5>${esc(T('footer_contact'))}</h5>
           <div><span class="lab">${esc(T('footer_address'))}</span>${esc(mlGet(s.address)||"Toshkent sh., O'zbekiston")}</div>

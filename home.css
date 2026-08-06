@@ -401,7 +401,9 @@
   /* footer */
   footer{background:var(--footer);color:rgba(255,255,255,.72);padding:64px 0 30px;font-size:0.9375rem;}
   html[data-theme="dark"] footer{background:#22314e;border-top:1px solid #334566;}
-  .f-top{display:grid;grid-template-columns:1.7fr 1fr 1fr 1.3fr;gap:40px;padding-bottom:38px;border-bottom:1px solid rgba(255,255,255,.12);}
+  /* 6 ustun: brend + menyuning 4 guruhi + aloqa. Ustun oralig'i 28px (40px emas) —
+     5 ta oraliq bilan 1181px atrofida havola ustunlari juda torayib ketardi. */
+  .f-top{display:grid;grid-template-columns:1.5fr .85fr .85fr .85fr .85fr 1.2fr;gap:40px 28px;padding-bottom:38px;border-bottom:1px solid rgba(255,255,255,.12);}
   footer .brand{color:#fff;margin-bottom:16px;}
   footer .brand .nm small{opacity:.55;}
   .f-about{font-size:0.90625rem;line-height:1.7;max-width:38ch;color:rgba(255,255,255,.66);}
@@ -447,6 +449,13 @@
     .brand .nm b{font-size:0.875rem;}
     .brand .logo{height:58px;}
     .wrap{padding:0 30px;}
+    /* Footer: 6 ustun bu kenglikda sig'maydi ("Videomateriallar" kabi uzun havolalar
+       ikkiga bo'linib ketardi). Brend va aloqa to'liq enga chiqadi, o'rtada esa
+       menyuning 4 guruhi bitta qatorda qoladi. */
+    .f-top{grid-template-columns:repeat(4,1fr);gap:30px 24px;}
+    .f-top>:first-child{grid-column:1 / -1;}
+    .f-contact{grid-column:1 / -1;display:grid;grid-template-columns:repeat(3,1fr);gap:0 24px;}
+    .f-contact h5{grid-column:1 / -1;margin-bottom:14px;}
   }
   html,body{overflow-x:hidden;}
   @media(max-width:1080px){
@@ -524,9 +533,10 @@
     footer{padding:38px 0 22px;font-size:0.875rem;}
     .f-top{grid-template-columns:1fr 1fr;gap:24px 20px;padding-bottom:24px;}
     .f-top>:first-child{grid-column:1 / -1;}
-    .f-contact{grid-column:1 / -1;}
+    /* display:block — 1180px qoidasidagi 3 ustunli aloqa to'ri mobilda tiklanadi */
+    .f-contact{grid-column:1 / -1;display:block;}
     .f-about{max-width:none;font-size:0.84375rem;line-height:1.6;}
-    /* "Bo'limlar" va "Media" havola ustunlari mobilda YASHIRILADI — bu havolalar
+    /* Menyu guruhlarining havola ustunlari mobilda YASHIRILADI — bu havolalar
        burger menyuda allaqachon bor, footerda esa faqat uni cho'zib turardi.
        Desktopda o'z holicha qoladi. (site.css'da ham xuddi shu qoida bor —
        bu fayl alohida nusxa, ikkalasi birga yangilanishi kerak.) */
