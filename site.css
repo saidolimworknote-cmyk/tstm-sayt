@@ -507,9 +507,13 @@ html[data-theme="dark"] .prose a{color:var(--accent) !important;}
 footer{background:var(--footer);color:rgba(255,255,255,.72);padding:64px 0 30px;font-size:0.9375rem;}
 /* Qorong'i rejimda footer fondan ajralib tursin (biroz ochroq navy + yengil yuqori chegara) */
 html[data-theme="dark"] footer{background:#22314e;border-top:1px solid #334566;}
-/* 6 ustun: brend + menyuning 4 guruhi + aloqa. Ustun oralig'i 28px (40px emas) —
-   5 ta oraliq bilan 1181px atrofida havola ustunlari juda torayib ketardi. */
-.f-top{display:grid;grid-template-columns:1.5fr .85fr .85fr .85fr .85fr 1.2fr;gap:40px 28px;padding-bottom:38px;border-bottom:1px solid rgba(255,255,255,.12);}
+/* Chapda brend bloki (keng), o'ngda menyuning 4 guruhi. Ikkisi orasida BO'SH
+   ustun (2-track) — havola ustunlarini o'ng chekkaga suradi. Brend ustuni
+   ilgari 293px edi va markaz nomi ikki qatorga bo'linib siqilib turardi.
+   Birinchi .f-col ataylab 3-ustunga qadaladi, qolgani o'zi ergashadi. */
+.f-top{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,.45fr) repeat(4,minmax(0,.68fr));gap:40px 28px;padding-bottom:38px;border-bottom:1px solid rgba(255,255,255,.12);}
+.f-top>:first-child{grid-column:1;}
+.f-top>.f-col:nth-child(2){grid-column:3;}
 .f-brand{display:flex;align-items:center;gap:11px;margin-bottom:16px;}
 .f-brand img{height:44px;width:auto;display:block;}
 .f-brand .flogo-w{display:none;}
@@ -520,9 +524,8 @@ html[data-theme="dark"] footer{background:#22314e;border-top:1px solid #334566;}
 .f-col h5{font-family:var(--mono);font-size:0.75rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.5);margin:0 0 16px;font-weight:500;}
 .f-col a{display:block;font-size:0.9375rem;padding:6px 0;transition:color .2s, padding .2s;}
 .f-col a:hover{color:#fff;padding-left:5px;}
-.f-contact div{font-size:0.9375rem;margin-bottom:13px;line-height:1.55;}
-.f-contact h5{font-family:var(--mono);font-size:0.6875rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.45);margin:0 0 20px;}
-.f-contact .lab{font-family:var(--mono);font-size:0.6875rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.48);display:block;margin-bottom:4px;}
+/* .f-contact (manzil/e-pochta/telefon ustuni) footerdan olib tashlandi —
+   menyuda "Aloqa" bandi va tepadagi util qatorida e-pochta/telefon bor. */
 .socials{display:flex;gap:8px;margin-top:16px;}
 .socials a{width:34px;height:34px;border:1px solid rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;transition:.2s;}
 .socials a:hover{background:#fff;color:var(--footer);border-color:#fff;}
@@ -538,8 +541,6 @@ html[data-theme="light"] .f-brand .flogo-w{display:block;}
 html[data-theme="light"] .f-brand small{color:rgba(255,255,255,.72);}
 html[data-theme="light"] .f-about{color:rgba(255,255,255,.74);}
 html[data-theme="light"] .f-col h5{color:rgba(255,255,255,.7);}
-html[data-theme="light"] .f-contact h5{color:rgba(255,255,255,.7);}
-html[data-theme="light"] .f-contact .lab{color:rgba(255,255,255,.7);}
 html[data-theme="light"] .f-bot{color:rgba(255,255,255,.7);}
 
 /* reveal */
@@ -573,13 +574,16 @@ html[data-theme="light"] .f-bot{color:rgba(255,255,255,.7);}
   .wrap{padding:0 30px;}
   /* Media galereya: keng ekranda 4 ta, o'rta ekranda 3 ta karta */
   .gallery{grid-template-columns:repeat(3,1fr);}
-  /* Footer: 6 ustun bu kenglikda sig'maydi ("Videomateriallar" kabi uzun havolalar
-     ikkiga bo'linib ketardi). Brend va aloqa to'liq enga chiqadi, o'rtada esa
-     menyuning 4 guruhi bitta qatorda qoladi. */
+}
+/* Footerning o'z chegarasi (sahifa maketinikidan boshqa, ataylab kengroq):
+   brend + bo'sh ustun + 4 havola ustuni bir qatorda turishi uchun kamida
+   ~1500px kerak. Undan tor ekranda brend to'liq enga chiqadi va 4 guruh
+   pastda bitta qatorda joylashadi — "Bizning ekspertlarimiz" kabi uzun
+   havolalar ikkiga bo'linib ketmasin. */
+@media(max-width:1500px){
   .f-top{grid-template-columns:repeat(4,1fr);gap:30px 24px;}
   .f-top>:first-child{grid-column:1 / -1;}
-  .f-contact{grid-column:1 / -1;display:grid;grid-template-columns:repeat(3,1fr);gap:0 24px;}
-  .f-contact h5{grid-column:1 / -1;margin-bottom:14px;}
+  .f-top>.f-col:nth-child(2){grid-column:auto;}
 }
 html,body{overflow-x:hidden;}
 @media(max-width:1080px){
@@ -631,18 +635,15 @@ html,body{overflow-x:hidden;}
   .dir p{font-size:0.84375rem;}
   .ncard .body{padding:11px 14px 13px;}
   .article .hero-img{height:220px;}
-  /* footer — ixcham: brend to'liq eng, aloqa pastda */
+  /* footer — ixcham: faqat brend, tavsif va ijtimoiy tarmoqlar */
   footer{padding:38px 0 22px;font-size:0.875rem;}
   .f-top{grid-template-columns:1fr 1fr;gap:24px 20px;padding-bottom:24px;}
   .f-top>:first-child{grid-column:1 / -1;}
-  /* display:block — 1180px qoidasidagi 3 ustunli aloqa to'ri mobilda tiklanadi */
-  .f-contact{grid-column:1 / -1;display:block;}
   .f-about{max-width:none;font-size:0.84375rem;line-height:1.6;}
   /* Menyu guruhlarining havola ustunlari mobilda YASHIRILADI — bu havolalar
      burger menyuda allaqachon bor, footerda esa faqat uni cho'zib turardi.
      Desktopda o'z holicha qoladi. */
   .f-top .f-col{display:none;}
-  .f-contact div{font-size:0.84375rem;margin-bottom:10px;}
   .socials{margin-top:14px;}
   .f-bot{padding-top:18px;gap:10px;}
   .ev-card{grid-template-columns:1fr;gap:16px;padding:20px 20px;}
@@ -986,7 +987,7 @@ html[data-theme="dark"]{
 
 
 /* ===== WCAG 2.5.8: tap-nishonlar kamida 24px — padding + manfiy margin, maket siljimaydi ===== */
-.crumb a,.arrow-link,.f-bot a,.f-contact a,.pub-actions .dl:not(.pdf),.off-contact a,.map-bar a,.exp-contact a{padding-top:4px;padding-bottom:4px;margin-top:-4px;margin-bottom:-4px;}
+.crumb a,.arrow-link,.f-bot a,.pub-actions .dl:not(.pdf),.off-contact a,.map-bar a,.exp-contact a{padding-top:4px;padding-bottom:4px;margin-top:-4px;margin-bottom:-4px;}
 .cinfo a.val{padding-top:2px;padding-bottom:2px;}
 /* Nashr kartasi: "Batafsil o'qish" qutisi PDF tugmasi bilan bir xil balandlikda
    bo'lsin — aks holda faylsiz kartada amal qatori pastroq tushib, ajratuvchi

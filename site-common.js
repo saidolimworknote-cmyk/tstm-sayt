@@ -290,6 +290,8 @@
   // Havola ustunlari yuqoridagi NAV massividan chiziladi — menyu o'zgarsa footer
   // o'zi ergashadi. Ilgari ular qo'lda yozilgani uchun menyu qayta guruhlangach
   // footer eski bo'limlarni (Tadqiqotlar/Nashrlar) ko'rsatib qolgan edi.
+  // "Aloqa" ustuni (manzil/e-pochta/telefon) ataylab YO'Q: menyuda "Aloqa"
+  // bandi bor va tepadagi util qatorida e-pochta bilan telefon turibdi.
   function renderFooter(){
     const s = settings();
     const soc = s.social || {};
@@ -316,12 +318,6 @@
         ${NAV.filter(n => n.children && n.children.length).map(n => `<div class="f-col"><h5>${esc(T(n.tk))}</h5>${
           n.children.map(c => `<a href="${c.href}">${esc(T(c.tk))}</a>`).join('')
         }</div>`).join('')}
-        <div class="f-contact">
-          <h5>${esc(T('footer_contact'))}</h5>
-          <div><span class="lab">${esc(T('footer_address'))}</span>${esc(mlGet(s.address)||"Toshkent sh., O'zbekiston")}</div>
-          <div><span class="lab">${esc(T('footer_email'))}</span>${esc(s.email||'info@markaz.uz')}</div>
-          <div><span class="lab">${esc(T('footer_phone'))}</span>${esc(s.phone||'+998 71 000 00 00')}</div>
-        </div>
       </div>
       <div class="f-bot">
         <span>${esc(T('footer_copyright'))}</span>
