@@ -135,9 +135,9 @@
       { tk: 'nav_about_leadership', href: 'rahbariyat.html' },
       { tk: 'nav_about_experts', href: 'rahbariyat.html' }
     ]},
-    { tk: 'nav_happenings', href: 'yangiliklar.html', keys: ['news','events'], children: [
+    { tk: 'nav_happenings', href: 'yangiliklar.html', keys: ['news','events','oav'], children: [
       { tk: 'nav_hap_news', href: 'yangiliklar.html' },
-      { tk: 'nav_hap_experts', href: 'rahbariyat.html' },
+      { tk: 'nav_hap_experts', href: 'oav.html' },
       { tk: 'nav_hap_events', href: 'tadbirlar.html' }
     ]},
     { tk: 'nav_analytics', href: 'nashrlar.html', keys: ['pubs','research'], children: [

@@ -5,7 +5,9 @@ Sayt + boshqaruv paneli (admin). XAMPP'da ishlash uchun PHP backend bilan.
 ## 📦 Tarkibi
 - **Bosh sahifa - Hi-Fi.html** — saytning bosh sahifasi
 - Ichki sahifalar: `yangiliklar.html`, `yangilik.html`, `tadbirlar.html`, `nashrlar.html`,
-  `tadqiqotlar.html`, `markaz-haqida.html`, `rahbariyat.html`, `media.html`, `aloqa.html`
+  `tadqiqotlar.html`, `markaz-haqida.html`, `rahbariyat.html`, `media.html`, `aloqa.html`,
+  `oav.html` + `sharh.html` — «Bizning ekspertlar OAVlarda» (ro'yxat va bitta sharh;
+  admin'da **Ekspertlar OAVda** bo'limi, `media_posts` jadvali)
 - **admin.html** — boshqaruv paneli (login bilan)
 - `api.php` — PHP backend (ma'lumotlarni **MySQL/MariaDB**'da saqlaydi)
 - `db.php` — MySQL qatlami (PDO, jadval sxemasi, avtomatik yaratish)
@@ -96,9 +98,15 @@ Sayt 3 tilli: **UZ / RU / EN**. Har bir kontent admin panelda 3 tilda tahrirlana
 ---
 
 ## 🗄️ Ma'lumotlar bazasi (MySQL)
-- Baza nomi: **`tstm`** (avtomatik yaratiladi). Jadvallar: `news`, `events`, `experts`,
-  `publications`, `hero_slides`, `partners`, `pages`, `media`, `users`, `messages`,
+- Baza nomi: **`tstm`** (avtomatik yaratiladi). Jadvallar: `news`, `media_posts`, `events`,
+  `experts`, `publications`, `hero_slides`, `partners`, `pages`, `media`, `users`, `messages`,
   `settings`, `auth`, `views`, `login_attempts`, `audit_log`.
+- **Yangi bo'lim qo'shish** (naqsh — `media_posts` shu tarzda qo'shilgan): `db.php` da
+  `$SCHEMA` ga yozuv + `CREATE TABLE` + `$COLL_ORDER`; `admin-ui.js` da `C` konfiguratsiyasi
+  + `NAV` guruhi; sayt tomonida sahifa va `page-*.js`. `api.php` ga tegish SHART EMAS —
+  u hamma narsani `$SCHEMA` dan oladi. Kolleksiya kaliti faqat HARFLARDAN iborat bo'lsin
+  (`mediaPosts`, `media_posts` emas) — ko'rishlar hisoblagichi kalitni `[^a-z]/i` bilan
+  filtrlaydi.
 - Ko'p tilli maydonlar (`title`, `body`, …) `LONGTEXT`da JSON sifatida, filtrlanadigan
   maydonlar (`status`, `date`, `category`, …) alohida ustunlarda **indeks** bilan saqlanadi.
 - Baza login/parolini o'zgartirish: **`config.php`** (`db_host`, `db_name`, `db_user`,

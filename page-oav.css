@@ -1,0 +1,31 @@
+/* "Bizning ekspertlar OAVlarda" — oav.html va sharh.html uchun.
+   Karta va maqola tuzilishi yangiliklardan olinadi (site.css), bu yerda faqat
+   shu bo'limga xos qo'shimchalar. */
+
+/* Ro'yxat kartasi: ekspert ismi sanadan oldin, undan ajralib tursin.
+   .dt (sana) o'ngga suriladi — .ncard .body flex bo'lgani uchun margin yetarli. */
+.ncard .body .oav-exp{font-size:0.84375rem;font-weight:500;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ncard .body .oav-exp + .dt{margin-left:auto;flex:none;}
+
+/* Maqola sahifasidagi ekspert / nashr qatori */
+.oav-byline{display:flex;flex-wrap:wrap;align-items:center;gap:8px 22px;margin:0 0 26px;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+.oav-byline > div{display:flex;align-items:center;gap:9px;min-width:0;}
+.oav-byline svg{width:16px;height:16px;flex:none;color:var(--accent);}
+.oav-byline .lab{font-family:var(--mono);font-size:0.6875rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.oav-byline .val{font-size:0.9375rem;color:var(--ink);font-weight:500;}
+
+/* "Asl manbaga o'tish" — tashqi havola, matndan keyin */
+.oav-src{display:inline-flex;align-items:center;gap:10px;margin-top:26px;padding:11px 20px;border:1px solid var(--line);border-radius:999px;
+  font-family:var(--mono);font-size:0.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);
+  transition:background .15s, border-color .15s, gap .2s;}
+.oav-src:hover{background:var(--accent-soft);border-color:var(--accent);gap:14px;}
+.oav-src svg{width:15px;height:15px;flex:none;}
+
+@media(max-width:600px){
+  .oav-byline{gap:10px 16px;padding:12px 0;margin-bottom:20px;}
+  .oav-byline .val{font-size:0.875rem;}
+  .oav-src{width:100%;justify-content:center;}
+}
+
+/* Chop etishda tashqi havola tugmasi keraksiz (bosib bo'lmaydi) */
+@media print{ .oav-src{display:none;} }

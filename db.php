@@ -47,6 +47,16 @@ $SCHEMA = [
     ['key' => 'excerpt', 'type' => 'json'], ['key' => 'body', 'type' => 'json'],
     ['key' => 'region'], ['key' => 'author'],
   ]],
+  // "Bizning ekspertlar OAVlarda" — ekspertlarimizning ommaviy axborot
+  // vositalaridagi sharhlari. Tuzilishi yangilikka o'xshash, ustiga uchta
+  // maydon: kim (expert), qayerda (outlet) va asl manba havolasi (source).
+  'mediaPosts' => ['table' => 'media_posts', 'cols' => [
+    ['key' => 'title', 'type' => 'json'], ['key' => 'excerpt', 'type' => 'json'],
+    ['key' => 'body', 'type' => 'json'],
+    ['key' => 'expert'], ['key' => 'outlet'], ['key' => 'source'],
+    ['key' => 'category'], ['key' => 'date', 'type' => 'date'],
+    ['key' => 'cover'], ['key' => 'status'],
+  ]],
   'events' => ['table' => 'events', 'cols' => [
     ['key' => 'title', 'type' => 'json'], ['key' => 'date', 'type' => 'date'],
     ['key' => 'time'], ['key' => 'location', 'type' => 'json'],
@@ -97,7 +107,7 @@ $SCHEMA = [
 ];
 
 // load() javobidagi collection tartibi (eski data.json bilan bir xil ko'rinish uchun)
-$COLL_ORDER = ['users', 'news', 'events', 'experts', 'publications', 'heroSlides', 'partners', 'pages', 'media', 'messages', 'subscribers'];
+$COLL_ORDER = ['users', 'news', 'mediaPosts', 'events', 'experts', 'publications', 'heroSlides', 'partners', 'pages', 'media', 'messages', 'subscribers'];
 
 // Ommaviy 'load' javobida BO'SH qaytadigan bo'limlar — shaxsiy ma'lumot.
 // Yangi shaxsiy bo'lim qo'shsangiz, uni shu yerga ham yozing.
@@ -158,6 +168,14 @@ function provision($pdo) {
     cover VARCHAR(500), excerpt LONGTEXT, body LONGTEXT,
     region VARCHAR(120), author VARCHAR(191),
     $seq, INDEX(status), INDEX(date), INDEX(category)
+  )$tail");
+
+  $pdo->exec("CREATE TABLE IF NOT EXISTS media_posts (
+    id VARCHAR(40) PRIMARY KEY,
+    title LONGTEXT, excerpt LONGTEXT, body LONGTEXT,
+    expert VARCHAR(191), outlet VARCHAR(191), source VARCHAR(500),
+    category VARCHAR(120), date DATE NULL, cover VARCHAR(500), status VARCHAR(40),
+    $seq, INDEX(status), INDEX(date), INDEX(outlet)
   )$tail");
 
   $pdo->exec("CREATE TABLE IF NOT EXISTS events (

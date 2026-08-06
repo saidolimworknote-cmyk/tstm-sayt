@@ -32,7 +32,7 @@ Write-Host ("=" * 60)
 Write-Host "`n[1] Sahifalar 200 qaytaradi"
 $pages = 'Bosh sahifa - Hi-Fi.html','nashrlar.html','yangiliklar.html','aloqa.html',
          'media.html','rahbariyat.html','markaz-haqida.html','tadqiqotlar.html',
-         'tadbirlar.html','yonalish.html','admin.html'
+         'tadbirlar.html','yonalish.html','oav.html','sharh.html','admin.html'
 foreach ($p in $pages) {
   $r = Get2 "$Base/$([uri]::EscapeDataString($p))"
   Check "sahifa: $p" ((Code $r) -eq 200) "status=$(Code $r)"
@@ -45,7 +45,7 @@ Check "load 200" ((Code $r) -eq 200)
 $json = $null; try { $json = $r.Content | ConvertFrom-Json } catch {}
 Check "load haqiqiy JSON" ($json -ne $null)
 if ($json) {
-  foreach ($k in 'news','publications','experts','events','pages','settings') {
+  foreach ($k in 'news','mediaPosts','publications','experts','events','pages','settings') {
     Check "load kaliti: $k" ($null -ne $json.PSObject.Properties[$k])
   }
   # Maxfiy bo'limlar anonim so'rovda BO'SH bo'lishi kerak

@@ -45,6 +45,7 @@
   const ICON = {
     dashboard: '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
     news: '<path d="M5 3h11l3 3v15H5z"/><path d="M9 8h7M9 12h7M9 16h4"/>',
+    mic: '<rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/>',
     events: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/>',
     pub: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/>',
     pages: '<path d="M3 4h13l5 5v11H3z"/><path d="M16 4v5h5"/>',
@@ -98,6 +99,24 @@
         { k: 'category', label: 'Mavzu (kategoriya)', type: 'select', side: 1, opts: ['Diplomatiya', 'Tahlil', 'Tadbir', 'Hamkorlik', 'Nashr', 'Iqtisodiyot', 'Xavfsizlik', 'Energetika'] },
         { k: 'region', label: 'Hudud', type: 'select', side: 1, opts: ['', 'Markaziy Osiyo', 'Janubiy Osiyo', 'Yevropa', 'Yaqin Sharq', 'Global'] },
         { k: 'author', label: 'Muallif (ekspert)', type: 'text', side: 1 },
+        { k: 'date', label: 'Sana', type: 'date', side: 1 },
+        { k: 'cover', label: 'Muqova rasmi', type: 'image', side: 1 },
+        { k: 'status', label: 'Holat', type: 'status', side: 1 }
+      ]
+    },
+    // "Bizning ekspertlar OAVlarda" — sayt tomonida oav.html / sharh.html.
+    // Yangilikka o'xshaydi, farqi: ekspert / OAV nomi / asl manba havolasi.
+    mediaPosts: {
+      label: 'Ekspertlar OAVda', singular: 'sharh', icon: 'mic', status: true, search: 'title',
+      columns: [{ k: 'title', label: 'Sarlavha', ml: 1, thumb: 'cover' }, { k: 'expert', label: 'Ekspert' }, { k: 'outlet', label: 'OAV' }, { k: 'date', label: 'Sana', type: 'date' }, { k: 'status', label: 'Holat', type: 'status' }],
+      fields: [
+        { k: 'title', label: 'Sarlavha', type: 'text', ml: 1, req: 1 },
+        { k: 'excerpt', label: 'Qisqa anons', type: 'textarea', ml: 1 },
+        { k: 'body', label: 'Sharh matni', type: 'rich', ml: 1 },
+        { k: 'expert', label: 'Ekspert', type: 'text', side: 1, ph: 'F.I.Sh.' },
+        { k: 'outlet', label: 'OAV nomi', type: 'text', side: 1, ph: 'Gazeta.uz' },
+        { k: 'source', label: 'Asl havola (URL)', type: 'text', side: 1, ph: 'https://...' },
+        { k: 'category', label: 'Mavzu', type: 'select', side: 1, opts: ['', 'Tashqi siyosat', 'Iqtisodiyot', 'Xavfsizlik', 'Markaziy Osiyo', 'Diplomatiya', 'Energetika'] },
         { k: 'date', label: 'Sana', type: 'date', side: 1 },
         { k: 'cover', label: 'Muqova rasmi', type: 'image', side: 1 },
         { k: 'status', label: 'Holat', type: 'status', side: 1 }
@@ -207,7 +226,7 @@
 
   const NAV = [
     { group: 'Asosiy', items: [{ key: 'dashboard', label: 'Boshqaruv paneli', icon: 'dashboard', view: 'dashboard' }] },
-    { group: 'Kontent', items: ['news', 'events', 'publications', 'pages'] },
+    { group: 'Kontent', items: ['news', 'mediaPosts', 'events', 'publications', 'pages'] },
     { group: 'Sayt elementlari', items: ['heroSlides', 'experts', 'partners', { key: 'media', label: 'Media kutubxona', icon: 'media', view: 'media' }, { key: 'aboutPage', label: 'Markaz haqida', icon: 'pages', view: 'aboutPage' }] },
     { group: 'Tizim', items: [{ key: 'messages', label: 'Murojaatlar', icon: 'mail', view: 'messages' }, 'subscribers', 'users', { key: 'audit', label: 'Audit loglar', icon: 'audit', view: 'audit' }, { key: 'errors', label: 'Xatoliklar', icon: 'bug', view: 'errors' }, { key: 'push', label: 'Bildirishnoma', icon: 'bell', view: 'push' }, { key: 'settings', label: 'Sozlamalar', icon: 'settings', view: 'settings' }] }
   ];
@@ -405,7 +424,7 @@
       list.push({ icon: 'events', dot: true, title: 'Yaqin tadbir', sub: (mlGet(e.title) || '(nomsiz)') + ' · ' + fmtDate(e.date), href: '#/events/edit/' + e.id });
     });
     // e'lon qilinmagan qoralamalar (eslatma)
-    [['news', Store.all('news')], ['publications', Store.all('publications')], ['pages', Store.all('pages')], ['events', Store.all('events')]].forEach(([coll, arr]) => {
+    [['news', Store.all('news')], ['mediaPosts', Store.all('mediaPosts')], ['publications', Store.all('publications')], ['pages', Store.all('pages')], ['events', Store.all('events')]].forEach(([coll, arr]) => {
       arr.filter(x => x.status === 'draft').slice(0, 4).forEach(x => {
         list.push({ icon: 'draft', title: 'Qoralama', sub: (mlGet(x[C[coll].columns[0].k]) || '(nomsiz)') + ' — ' + C[coll].singular, href: '#/' + coll + '/edit/' + x.id });
       });
@@ -482,12 +501,13 @@
   function viewDashboard(c) {
     setTitle('Boshqaruv paneli');
     const n = Store.all('news'), ev = Store.all('events'), ex = Store.all('experts'), pb = Store.all('publications'),
-      pg = Store.all('pages'), pt = Store.all('partners'), msgs = Store.all('messages');
+      pg = Store.all('pages'), pt = Store.all('partners'), msgs = Store.all('messages'), mp = Store.all('mediaPosts');
     const today = new Date().toISOString().slice(0, 10);
     const upcoming = ev.filter(e => e.date >= today);
     const unread = msgs.filter(m => !m.read).length;
     const cards = [
       { ic: 'news', v: n.length, l: 'Yangiliklar', tr: n.filter(x => x.status === 'published').length + ' ta nashr etilgan' },
+      { ic: 'mic', v: mp.length, l: 'Ekspertlar OAVda', tr: mp.filter(x => x.status === 'published').length + ' ta nashr etilgan', href: '#/mediaPosts' },
       { ic: 'events', v: upcoming.length, l: 'Kelgusi tadbirlar', tr: ev.length + ' ta jami' },
       { ic: 'pub', v: pb.length, l: 'Nashrlar', tr: pb.filter(x => x.status === 'published').length + ' ta ochiq' },
       { ic: 'experts', v: ex.length, l: 'Ekspertlar', tr: pt.length + ' ta hamkor' },
@@ -504,7 +524,7 @@
 
     // id -> {coll,title} indeks (eng ko'p ko'rilganlarni aniqlash uchun)
     const idx = {};
-    [['news', n], ['publications', pb], ['events', ev], ['experts', ex], ['pages', pg]].forEach(([coll, arr]) =>
+    [['news', n], ['mediaPosts', mp], ['publications', pb], ['events', ev], ['experts', ex], ['pages', pg]].forEach(([coll, arr]) =>
       arr.forEach(it => { idx[it.id] = { coll, title: mlGet(it[C[coll].columns[0].k]) || '(nomsiz)' }; }));
 
     c.innerHTML = `
@@ -786,7 +806,7 @@
   // Mavjud tarjimalarga tegmaydi (idempotent — qayta ishga tushirsa xavfsiz).
   async function bulkFillTranslations(btn, log) {
     const SKIP = new Set(['name']); // shaxs ismi tarjima qilinmaydi
-    const cols = ['news', 'events', 'experts', 'publications', 'pages', 'media', 'heroSlides'];
+    const cols = ['news', 'mediaPosts', 'events', 'experts', 'publications', 'pages', 'media', 'heroSlides'];
     const data = {}; let total = 0;
     cols.forEach(c => { try { data[c] = Store.all(c); } catch { data[c] = []; } total += data[c].length; });
     if (!total) { toast('Tarjima uchun kontent topilmadi', 1); return; }

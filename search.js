@@ -58,6 +58,13 @@
       Store.all('news').filter(function(n){return n.status==='published';}).forEach(function(n){
         items.push({kind:'news',kl:T('search_k_news'),title:n.title,text:n.excerpt||n.body,href:'yangilik.html?id='+n.id,cover:n.cover||'',date:n.date||'',cat:n.category||''});
       });
+      // "Bizning ekspertlar OAVlarda". Nashr nomi `cat` ga tushadi (natija
+      // kartasida ham ko'rinadi), ekspert ismi esa `extra` ga — u faqat
+      // qidiruv maydoniga qo'shiladi, snippetni ifloslantirmaydi.
+      Store.all('mediaPosts').filter(function(p){return p.status==='published';}).forEach(function(p){
+        items.push({kind:'oav',kl:T('search_k_oav'),title:p.title,text:p.excerpt||p.body,
+          extra:p.expert||'',href:'sharh.html?id='+p.id,cover:p.cover||'',date:p.date||'',cat:p.outlet||''});
+      });
       Store.all('publications').filter(function(p){return p.status==='published';}).forEach(function(p){
         // `disp` — qisqa (displey) sarlavha: natija kartasida shu ko'rsatiladi,
         // qidiruv esa ikkala sarlavhani ham qamraydi (pastdagi titleLow qarang).
@@ -85,6 +92,7 @@
   // kategoriyalar (yuqoridagi qatorda chip sifatida chiqadi)
   var KINDS=[
     {k:'news',   t:'search_k_news'},
+    {k:'oav',    t:'search_k_oav'},
     {k:'pub',    t:'search_k_pub'},
     {k:'event',  t:'search_k_event'},
     {k:'expert', t:'search_k_expert'},
@@ -181,7 +189,9 @@
         if(activeKind && it.kind!==activeKind) return null;
         // kategoriya ham qidiriladi — "ommabop kalit so'zlar" aynan kategoriyalardan
         // yasaladi, indeksda bo'lmasa ular bosilganda hech narsa topilmasdi
-        var titleLow=fold(mlGet(it.title))+' '+fold(mlGet(it.disp||'')), hay=titleLow+' '+fold(mlGet(it.text))+' '+fold(catText(it.cat));
+        // `extra` — snippetda ko'rinmaydigan, faqat qidiriladigan qo'shimcha
+        // matn (masalan ekspert ismi). Bo'lmasa e'tiborsiz qoladi.
+        var titleLow=fold(mlGet(it.title))+' '+fold(mlGet(it.disp||'')), hay=titleLow+' '+fold(mlGet(it.text))+' '+fold(catText(it.cat))+' '+fold(it.extra||'');
         if(!tokens.every(function(tk){ return hay.indexOf(tk)>-1; })) return null;
         var score=0; tokens.forEach(function(tk){ if(titleLow.indexOf(tk)>-1) score+=2; });
         return {it:it, score:score};
