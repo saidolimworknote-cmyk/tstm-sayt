@@ -109,14 +109,18 @@
   // ---- aloqa ma'lumotlari (sozlamalardan — header util + footer) ----
   try {
     var _cs = (window.Store && Store.settings && Store.settings()) || {};
+    var _cml = function(v){ if(v && typeof v==='object'){ var L=(window.I18N?I18N.lang:'uz'); return v[L]||v.uz||v.ru||v.en||''; } return v||''; };
     var _email = _cs.email || 'info@markaz.uz';
     var _phone = _cs.phone || '+998 71 000 00 00';
     var _tel   = 'tel:' + _phone.replace(/[^\d+]/g,'');
     var _setLink = function(id, txt, href){ var el=document.getElementById(id); if(!el) return; if(txt!=null) el.textContent=txt; if(href!=null) el.href=href; };
-    // Footerdagi aloqa ustuni olib tashlandi — endi faqat tepadagi util qatori
-    // to'ldiriladi (manzil footerda ko'rsatilmaydi, u aloqa.html da bor).
     _setLink('utilEmail', _email, 'mailto:'+_email);
     _setLink('utilPhone', _phone, _tel);
+    // Footerdagi ixcham aloqa bloki (.f-meta): manzil + e-pochta.
+    // Telefon ataylab yo'q — u tepadagi util qatorida turibdi.
+    _setLink('fEmail', _email, 'mailto:'+_email);
+    var _fa = document.getElementById('fAddr');
+    if(_fa) _fa.textContent = _cml(_cs.address) || "Toshkent sh., O'zbekiston";
     // ijtimoiy tarmoqlar — faqat to'ldirilganlari ko'rinadi ("#"/bo'sh bo'lsa yashiriladi)
     var _soc = _cs.social || {};
     [['fsTelegram',_soc.telegram],['fsYoutube',_soc.youtube],['fsFacebook',_soc.facebook],['fsX',_soc.x]].forEach(function(p){

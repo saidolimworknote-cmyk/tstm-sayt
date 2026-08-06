@@ -165,7 +165,9 @@
     tg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.5 4.3 2.9 11.4c-.9.4-.9 1.6.1 1.9l4.6 1.4 1.8 5.6c.2.7 1.1.9 1.6.3l2.5-2.5 4.7 3.5c.6.4 1.4 0 1.5-.7L23 5.4c.2-.9-.7-1.5-1.5-1.1Z"/></svg>',
     yt: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 12s0-3.2-.4-4.7c-.2-.8-.9-1.5-1.7-1.7C19.4 5.2 12 5.2 12 5.2s-7.4 0-8.9.4c-.8.2-1.5.9-1.7 1.7C1 8.8 1 12 1 12s0 3.2.4 4.7c.2.8.9 1.5 1.7 1.7 1.5.4 8.9.4 8.9.4s7.4 0 8.9-.4c.8-.2 1.5-.9 1.7-1.7C23 15.2 23 12 23 12ZM9.8 15.3V8.7l6 3.3-6 3.3Z"/></svg>',
     fb: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.7l-.4 2.9h-2.3v7A10 10 0 0 0 22 12Z"/></svg>',
-    x: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 3h3l-6.6 7.5L21.7 21h-6l-4.7-6.1L5.6 21H2.5l7-8L2 3h6.2l4.2 5.6L17.5 3Zm-1 16h1.6L7.6 4.7H5.9L16.5 19Z"/></svg>'
+    x: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 3h3l-6.6 7.5L21.7 21h-6l-4.7-6.1L5.6 21H2.5l7-8L2 3h6.2l4.2 5.6L17.5 3Zm-1 16h1.6L7.6 4.7H5.9L16.5 19Z"/></svg>',
+    pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg>',
+    mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7.2 8.5 6 8.5-6"/></svg>'
   };
 
   // ---------- THEME ----------
@@ -290,8 +292,10 @@
   // Havola ustunlari yuqoridagi NAV massividan chiziladi — menyu o'zgarsa footer
   // o'zi ergashadi. Ilgari ular qo'lda yozilgani uchun menyu qayta guruhlangach
   // footer eski bo'limlarni (Tadqiqotlar/Nashrlar) ko'rsatib qolgan edi.
-  // "Aloqa" ustuni (manzil/e-pochta/telefon) ataylab YO'Q: menyuda "Aloqa"
-  // bandi bor va tepadagi util qatorida e-pochta bilan telefon turibdi.
+  // Alohida "Aloqa" USTUNI ataylab yo'q (menyuda "Aloqa" bandi bor, telefon esa
+  // tepadagi util qatorida). Lekin manzil boshqa hech qayerda ko'rinmasdi va
+  // mobilda footer bo'shab qolardi — shuning uchun manzil bilan e-pochta brend
+  // ustuni ichida, tavsif ostida ixcham `.f-meta` bloki bo'lib turadi.
   function renderFooter(){
     const s = settings();
     const soc = s.social || {};
@@ -307,6 +311,10 @@
             <span><b>${esc(B.top)}</b><small>${esc(B.bot)}</small></span>
           </div>
           <p class="f-about">${esc(T('footer_about'))}</p>
+          <div class="f-meta">
+            <div>${ICON.pin}<span>${esc(mlGet(s.address)||"Toshkent sh., O'zbekiston")}</span></div>
+            <div>${ICON.mail}<a href="mailto:${esc(s.email||'info@markaz.uz')}">${esc(s.email||'info@markaz.uz')}</a></div>
+          </div>
           <div class="socials">${[
             {u:soc.telegram, i:ICON.tg, n:'Telegram'},
             {u:soc.youtube,  i:ICON.yt, n:'YouTube'},

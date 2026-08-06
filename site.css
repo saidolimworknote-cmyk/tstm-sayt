@@ -524,8 +524,14 @@ html[data-theme="dark"] footer{background:#22314e;border-top:1px solid #334566;}
 .f-col h5{font-family:var(--mono);font-size:0.75rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.5);margin:0 0 16px;font-weight:500;}
 .f-col a{display:block;font-size:0.9375rem;padding:6px 0;transition:color .2s, padding .2s;}
 .f-col a:hover{color:#fff;padding-left:5px;}
-/* .f-contact (manzil/e-pochta/telefon ustuni) footerdan olib tashlandi —
-   menyuda "Aloqa" bandi va tepadagi util qatorida e-pochta/telefon bor. */
+/* Ixcham aloqa bloki — brend ustuni ichida, tavsif ostida. Alohida "Aloqa"
+   USTUNI yo'q (u 4 havola ustunining maketini buzardi), lekin manzil boshqa
+   hech qayerda ko'rinmaydi va mobilda footerni mazmunli qilib turadi. */
+.f-meta{margin-top:18px;display:flex;flex-direction:column;gap:9px;font-size:0.875rem;line-height:1.5;color:rgba(255,255,255,.66);}
+.f-meta>div{display:flex;align-items:flex-start;gap:9px;}
+.f-meta svg{width:15px;height:15px;flex:none;margin-top:2px;opacity:.62;}
+.f-meta a{color:inherit;transition:color .2s;}
+.f-meta a:hover{color:#fff;}
 .socials{display:flex;gap:8px;margin-top:16px;}
 .socials a{width:34px;height:34px;border:1px solid rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;transition:.2s;}
 .socials a:hover{background:#fff;color:var(--footer);border-color:#fff;}
@@ -541,6 +547,7 @@ html[data-theme="light"] .f-brand .flogo-w{display:block;}
 html[data-theme="light"] .f-brand small{color:rgba(255,255,255,.72);}
 html[data-theme="light"] .f-about{color:rgba(255,255,255,.74);}
 html[data-theme="light"] .f-col h5{color:rgba(255,255,255,.7);}
+html[data-theme="light"] .f-meta{color:rgba(255,255,255,.78);}
 html[data-theme="light"] .f-bot{color:rgba(255,255,255,.7);}
 
 /* reveal */
@@ -987,7 +994,7 @@ html[data-theme="dark"]{
 
 
 /* ===== WCAG 2.5.8: tap-nishonlar kamida 24px — padding + manfiy margin, maket siljimaydi ===== */
-.crumb a,.arrow-link,.f-bot a,.pub-actions .dl:not(.pdf),.off-contact a,.map-bar a,.exp-contact a{padding-top:4px;padding-bottom:4px;margin-top:-4px;margin-bottom:-4px;}
+.crumb a,.arrow-link,.f-bot a,.f-meta a,.pub-actions .dl:not(.pdf),.off-contact a,.map-bar a,.exp-contact a{padding-top:4px;padding-bottom:4px;margin-top:-4px;margin-bottom:-4px;}
 .cinfo a.val{padding-top:2px;padding-bottom:2px;}
 /* Nashr kartasi: "Batafsil o'qish" qutisi PDF tugmasi bilan bir xil balandlikda
    bo'lsin — aks holda faylsiz kartada amal qatori pastroq tushib, ajratuvchi
