@@ -256,11 +256,12 @@
   .dir-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
   .dir{padding:38px 34px 60px;position:relative;transition:transform .25s, box-shadow .25s, border-color .25s;cursor:pointer;background:var(--panel);border:1px solid var(--line);border-radius:14px;display:block;}
   .dir h3{color:var(--ink);}
-  .dir:hover{transform:translateY(-6px);box-shadow:0 28px 56px -28px color-mix(in srgb,var(--accent) 45%,transparent);border-color:color-mix(in srgb,var(--accent) 50%,var(--line));}
+  .dir:hover{transform:translateY(-6px);box-shadow:var(--lift);}
   .dir-top{display:flex;align-items:center;justify-content:space-between;}
   .dico{width:54px;height:54px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;transition:.25s;}
   .dico svg{width:26px;height:26px;}
-  .dir:hover .dico{background:var(--accent);color:#fff;}
+  /* Hover'da ikonka qutisi to'liq moviyga bo'yalardi — olib tashlandi.
+     Karta bosiladigan ekani ko'tarilish va sarlavha rangi orqali bilinadi. */
   .dir .num{font-family:var(--serif);font-size:1.875rem;font-weight:500;color:color-mix(in srgb,var(--ink) 18%,transparent);letter-spacing:-.02em;}
   .dir h3{font-family:var(--serif);font-weight:500;font-size:1.3125rem;margin:24px 0 12px;line-height:1.28;}
   .dir p{color:var(--ink-2);font-size:0.90625rem;line-height:1.65;margin:0;}
@@ -281,7 +282,7 @@
   /* Matn ramkaga tegib qolmasligi uchun ichkariga olinadi (.nitem .nbody kabi).
      Rasm esa padding'dan tashqarida — u ramkani to'liq egallaydi. */
   .feat .fbody{padding:0 18px;}
-  .feat:hover{transform:translateY(-4px);box-shadow:0 0 0 1.5px color-mix(in srgb,var(--accent) 55%,transparent), 0 28px 56px -28px color-mix(in srgb,var(--accent) 60%,transparent);background:color-mix(in srgb,var(--accent) 5%,var(--panel));}
+  .feat:hover{transform:translateY(-4px);box-shadow:var(--lift);}
   .feat .meta{display:flex;gap:14px;align-items:center;margin:26px 0 14px;}
   .tag{font-family:var(--mono);font-size:0.6875rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:4px 11px;}
   .feat h3{font-family:var(--serif);font-weight:500;font-size:1.875rem;line-height:1.18;margin:0 0 14px;}
@@ -293,7 +294,7 @@
      rasm atigi 96x74 bo'lib, ramkadan uzilib turardi.
      Ekspert kartalaridagi (.exp .ph) bilan bir xil mantiq. */
   .nitem{display:grid;grid-template-columns:170px 1fr;gap:0;padding:0;border-top:1px solid var(--line);align-items:stretch;border-radius:10px;overflow:hidden;transition:background .2s, box-shadow .25s, transform .25s;}
-  .nitem:hover{background:color-mix(in srgb,var(--accent) 6%,var(--panel));box-shadow:0 0 0 1.5px color-mix(in srgb,var(--accent) 50%,transparent), 0 20px 44px -24px color-mix(in srgb,var(--accent) 55%,transparent);transform:translateY(-2px);border-top-color:transparent;}
+  .nitem:hover{box-shadow:var(--lift-soft);transform:translateY(-2px);}
   .nitem:first-child{border-top:0;}
   /* Rasm ustuni kartaning to'liq balandligini egallaydi (align-items:stretch) */
   .nitem .ph{height:100%;min-height:118px;border-radius:0;overflow:hidden;}
@@ -308,7 +309,7 @@
   .pub-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:34px;}
 
   .pub{background:var(--panel);border:1px solid var(--line);display:flex;flex-direction:column;transition:transform .25s, box-shadow .25s, border-color .25s;}
-  .pub:hover{transform:translateY(-6px);box-shadow:0 28px 56px -28px color-mix(in srgb,var(--accent) 45%,transparent);border-color:color-mix(in srgb,var(--accent) 50%,var(--line));}
+  .pub:hover{transform:translateY(-6px);box-shadow:var(--lift);}
   .pub .cover{height:264px;border-bottom:1px solid var(--line);position:relative;overflow:hidden;}
   .pub .cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
   .pub .cover .ph{position:absolute;inset:0;border:0;}
@@ -332,7 +333,7 @@
   .exp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:30px;}
   .exp{display:block;transition:transform .25s, box-shadow .25s;border-radius:12px;padding:10px;margin:-10px;}
   .exp.rv{transition:opacity .7s ease, transform .25s, box-shadow .25s;}
-  .exp:hover{transform:translateY(-5px);box-shadow:0 26px 52px -30px color-mix(in srgb,var(--accent) 45%,transparent);}
+  .exp:hover{transform:translateY(-5px);box-shadow:var(--lift-soft);}
   .exp .ph{height:300px;margin-bottom:20px;overflow:hidden;border-radius:6px;}
   .exp .ph img{width:100%;height:100%;object-fit:cover;}
   .exp .role{font-family:var(--mono);font-size:0.6875rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);}
@@ -376,7 +377,7 @@
     box-shadow:0 2px 10px rgba(20,40,70,.055);
     transition:transform .28s cubic-bezier(.2,.7,.2,1),box-shadow .28s,border-color .28s;}
   html[data-theme="dark"] .plogo{background:#212c48;border-color:rgba(255,255,255,.08);box-shadow:0 2px 12px rgba(0,0,0,.24);}
-  .plogo:hover{transform:translateY(-6px);border-color:var(--accent);box-shadow:0 16px 36px rgba(15,40,70,.16);}
+  .plogo:hover{transform:translateY(-6px);box-shadow:var(--lift-soft);}
   html[data-theme="dark"] .plogo:hover{box-shadow:0 16px 38px rgba(0,0,0,.46);}
   /* logo — doim rangli, kartani to'liq egallaydi */
   .plogo img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;}
@@ -610,8 +611,8 @@
     .dir:hover .go{opacity:0;}
   }
 
-  /* scroll progress bar */
-  #scrollProgress{position:fixed;top:0;left:0;height:3px;width:0;background:#5CC6FF;z-index:100000;pointer-events:none;transition:width .08s linear;box-shadow:0 0 8px rgba(92,198,255,.6);}
+  /* Sahifa tepasidagi o'qish jarayoni chizig'i (#scrollProgress) OLIB TASHLANDI —
+     qarang: site.css dagi izoh va search.js. */
 
   /* ============ Global inline search (bosh sahifa uchun) ============ */
   .gs-ov{position:fixed;inset:0;z-index:99996;background:rgba(8,16,28,.5);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);opacity:0;visibility:hidden;transition:opacity .25s, visibility .25s;}
@@ -689,28 +690,33 @@
   .mnav a{display:block;font-family:var(--serif);font-size:1.375rem;padding:15px 0;border-bottom:1px solid var(--line);color:var(--ink);}
 
   /* ============================================================
-     POLISH — silliq (dumaloq) burchaklar + elektrik hover porlashi
+     POLISH — silliq (dumaloq) burchaklar + hover chuqurligi
      ============================================================ */
   :root{
     --r-card:16px;
-    --glow:0 0 0 1.5px color-mix(in srgb,var(--accent2) 72%,transparent),
-           0 0 22px -2px color-mix(in srgb,var(--accent2) 50%,transparent),
-           0 28px 60px -24px color-mix(in srgb,var(--accent2) 60%,transparent);
-    --glow-soft:0 0 0 1px color-mix(in srgb,var(--accent2) 55%,transparent),
-                0 0 16px -3px color-mix(in srgb,var(--accent2) 42%,transparent),
-                0 20px 44px -24px color-mix(in srgb,var(--accent2) 50%,transparent);
+    /* Karta hover'i: neytral chuqurlik soyasi. Ilgari bu yerda moviy "elektrik"
+       porlash (--glow) turardi — u rasmiy sayt uslubiga to'g'ri kelmagani uchun
+       olib tashlandi. (site.css'da ham xuddi shu ta'rif bor — bu fayl alohida
+       nusxa, ikkalasi birga yangilanishi kerak.) */
+    --lift:0 18px 40px -20px rgba(10,25,47,.30), 0 3px 10px -5px rgba(10,25,47,.16);
+    --lift-soft:0 12px 28px -18px rgba(10,25,47,.24), 0 2px 8px -5px rgba(10,25,47,.12);
+  }
+  html[data-theme="dark"]{
+    --lift:0 18px 40px -18px rgba(0,0,0,.62), 0 3px 10px -5px rgba(0,0,0,.40);
+    --lift-soft:0 12px 28px -16px rgba(0,0,0,.50), 0 2px 8px -5px rgba(0,0,0,.32);
   }
   /* dumaloq burchaklar */
   .pub{border-radius:var(--r-card);overflow:hidden;}
   .stats{border-radius:var(--r-card);}
   .tag{border-radius:6px;}
   .pub .cover .badge{border-radius:6px;}
-  /* elektrik hover porlashi — barcha kartalar bir xil */
+  /* hover — barcha kartalar bir xil: ko'tarilish + neytral soya.
+     border-color va fon rangi hover'da O'ZGARMAYDI (ilgari moviy tusga kirardi). */
   .dir,.pub,.feat,.nitem,.exp{transition:transform .28s cubic-bezier(.2,.7,.2,1), box-shadow .28s, border-color .28s, background .28s;}
-  .dir:hover,.pub:hover{transform:translateY(-6px);box-shadow:var(--glow);border-color:color-mix(in srgb,var(--accent2) 45%,transparent);}
-  .feat:hover{transform:translateY(-5px);box-shadow:var(--glow);background:color-mix(in srgb,var(--accent2) 5%,var(--panel));}
-  .nitem:hover{transform:translateY(-2px);box-shadow:var(--glow-soft);background:color-mix(in srgb,var(--accent2) 6%,var(--panel));border-top-color:transparent;}
-  .exp:hover{transform:translateY(-5px);box-shadow:var(--glow-soft);}
+  .dir:hover,.pub:hover{transform:translateY(-6px);box-shadow:var(--lift);}
+  .feat:hover{transform:translateY(-5px);box-shadow:var(--lift);}
+  .nitem:hover{transform:translateY(-2px);box-shadow:var(--lift-soft);}
+  .exp:hover{transform:translateY(-5px);box-shadow:var(--lift-soft);}
   @media(prefers-reduced-motion:reduce){
     .dir,.pub,.feat,.nitem,.exp{transition:box-shadow .2s, border-color .2s;}
     .dir:hover,.pub:hover,.feat:hover,.nitem:hover,.exp:hover{transform:none;}

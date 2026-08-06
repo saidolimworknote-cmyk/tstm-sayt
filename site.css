@@ -198,7 +198,7 @@ section.block{padding:74px 0;}
 .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:26px;}
 .cards.two{grid-template-columns:repeat(2,1fr);}
 .ncard{display:flex;flex-direction:column;cursor:pointer;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;transition:transform .25s, box-shadow .25s, border-color .25s;}
-.ncard:hover{transform:translateY(-6px);box-shadow:0 0 0 1.5px color-mix(in srgb,var(--accent2) 60%,transparent), 0 28px 54px -26px color-mix(in srgb,var(--accent2) 55%,transparent);border-color:transparent;}
+.ncard:hover{transform:translateY(-6px);box-shadow:var(--lift);}
 .ncard .img{height:200px;position:relative;overflow:hidden;display:block;background:#0b1622;}
 .ncard .img img{width:100%;height:100%;object-fit:cover;transition:transform .5s;}
 .ncard:hover .img img{transform:scale(1.05);}
@@ -255,7 +255,7 @@ section.block{padding:74px 0;}
 /* upcoming — cards */
 .ev-list{display:flex;flex-direction:column;gap:16px;}
 .ev-card{display:grid;grid-template-columns:100px 1fr;gap:26px;padding:24px 28px;border:1px solid var(--line);background:var(--panel);transition:border-color .18s, transform .18s, box-shadow .18s;}
-.ev-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 12px 30px rgba(0,0,0,.06);}
+.ev-card:hover{transform:translateY(-2px);box-shadow:var(--lift-soft);}
 .ev-cal{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border-right:1px solid var(--line);padding-right:24px;}
 .ev-cal .dd{font-family:var(--serif);font-weight:600;font-size:2.875rem;line-height:.95;color:var(--accent);}
 .ev-cal .mm{font-family:var(--mono);font-size:0.6875rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);margin-top:9px;}
@@ -281,7 +281,7 @@ section.block{padding:74px 0;}
 /* publications grid */
 .pub-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:34px;}
 .pub{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;transition:transform .25s, box-shadow .25s, border-color .25s;}
-.pub:hover{transform:translateY(-6px);box-shadow:0 0 0 1.5px color-mix(in srgb,var(--accent2) 55%,transparent), 0 28px 56px -26px color-mix(in srgb,var(--accent2) 55%,transparent);border-color:transparent;}
+.pub:hover{transform:translateY(-6px);box-shadow:var(--lift);}
 .pub .cover{height:280px;border-bottom:1px solid var(--line);position:relative;overflow:hidden;}
 .pub .cover img{width:100%;height:100%;object-fit:cover;}
 .pub .cover .ph{position:absolute;inset:0;border:0;}
@@ -361,7 +361,7 @@ section.block{padding:74px 0;}
 /* info cards */
 .cinfo{display:flex;flex-direction:column;gap:14px;}
 .cinfo .crow{display:flex;gap:16px;align-items:flex-start;padding:18px;border:1px solid var(--line);background:var(--bg-2);transition:border-color .18s, transform .18s, box-shadow .18s;}
-.cinfo .crow:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 10px 26px rgba(0,0,0,.06);}
+.cinfo .crow:hover{transform:translateY(-2px);box-shadow:var(--lift-soft);}
 .cinfo .ci{width:44px;height:44px;border:1px solid var(--line);background:var(--panel);display:flex;align-items:center;justify-content:center;color:var(--accent);flex:none;}
 .cinfo .ci svg{width:20px;height:20px;}
 .cinfo .lab{font-family:var(--mono);font-size:0.65625rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
@@ -400,9 +400,9 @@ section.block{padding:74px 0;}
 a:focus-visible,button:focus-visible,[role=button]:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.ic:focus-visible,.langs span:focus-visible,.fchip:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:2px;}
 .skip-link{outline:none;}
 
-/* Scroll progress bar */
-#scrollProgress{position:fixed;top:0;left:0;height:3px;width:0;background:#5CC6FF;z-index:100000;pointer-events:none;transition:width .08s linear;box-shadow:0 0 8px rgba(92,198,255,.6);}
-@media(max-width:760px){#scrollProgress{height:4px;}}
+/* Sahifa tepasidagi o'qish jarayoni chizig'i (#scrollProgress) OLIB TASHLANDI —
+   yorqin moviy rangi rasmiy sayt uslubiga to'g'ri kelmasdi. Uni yaratuvchi kod
+   search.js dan ham o'chirildi; qaytarilsa, ikkalasi birga tiklanishi kerak. */
 
 /* ============ Global inline search ============ */
 .gs-ov{position:fixed;inset:0;z-index:99996;background:rgba(8,16,28,.5);backdrop-filter:blur(3px);opacity:0;visibility:hidden;transition:opacity .25s, visibility .25s;}
@@ -768,7 +768,7 @@ html,body{overflow-x:hidden;}
 .rcard:hover{transform:translateY(-6px);box-shadow:0 30px 56px -30px rgba(0,0,0,.34);}
 .rcard:hover::before{transform:scaleX(1);}
 .rcard .ico{width:52px;height:52px;border:1px solid var(--line);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--accent);margin-bottom:24px;transition:.25s;}
-.rcard:hover .ico{background:var(--accent);color:#fff;border-color:var(--accent);}
+/* .rcard:hover .ico — ikonka qutisining moviyga bo'yalishi olib tashlandi */
 .rcard .ico svg{width:24px;height:24px;}
 .rcard .num{position:absolute;top:30px;right:30px;font-family:var(--serif);font-size:2.125rem;font-weight:600;color:var(--line-2);line-height:1;}
 .rcard h3{font-family:var(--serif);font-weight:500;font-size:1.3125rem;line-height:1.22;margin:0 0 12px;}
@@ -786,13 +786,16 @@ html,body{overflow-x:hidden;}
   --r-card:16px;    /* kartalar */
   --r-media:12px;   /* rasm / media bloklari */
   --r-ctl:10px;     /* tugma, input, ikonka qutilari */
-  /* elektrik ko'k mayin porlash (halo): ichki chiziq + yumshoq nur + chuqurlik */
-  --glow:0 0 0 1.5px color-mix(in srgb,var(--accent2) 72%,transparent),
-         0 0 22px -2px color-mix(in srgb,var(--accent2) 50%,transparent),
-         0 28px 60px -24px color-mix(in srgb,var(--accent2) 60%,transparent);
-  --glow-soft:0 0 0 1px color-mix(in srgb,var(--accent2) 55%,transparent),
-              0 0 16px -3px color-mix(in srgb,var(--accent2) 42%,transparent),
-              0 20px 44px -24px color-mix(in srgb,var(--accent2) 50%,transparent);
+  /* Karta hover'i: neytral chuqurlik soyasi. Ilgari bu yerda moviy "elektrik"
+     porlash (--glow) turardi — u rasmiy sayt uslubiga to'g'ri kelmagani uchun
+     olib tashlandi. Rang bermaydi: faqat karta yuzadan ko'tarilgandek ko'rinadi. */
+  --lift:0 18px 40px -20px rgba(10,25,47,.30), 0 3px 10px -5px rgba(10,25,47,.16);
+  --lift-soft:0 12px 28px -18px rgba(10,25,47,.24), 0 2px 8px -5px rgba(10,25,47,.12);
+}
+/* Quyuq rejimda qora soya oq fondagichalik ko'rinmaydi — kuchaytiriladi */
+html[data-theme="dark"]{
+  --lift:0 18px 40px -18px rgba(0,0,0,.62), 0 3px 10px -5px rgba(0,0,0,.40);
+  --lift-soft:0 12px 28px -16px rgba(0,0,0,.50), 0 2px 8px -5px rgba(0,0,0,.32);
 }
 
 /* --- burchaklarni dumaloqlashtirish (silliq) --- */
@@ -825,15 +828,15 @@ html,body{overflow-x:hidden;}
 .tabs button{border-radius:var(--r-ctl) var(--r-ctl) 0 0;}
 .gs-inner input{border-radius:var(--r-ctl);}
 
-/* --- elektrik hover porlashi: barcha kartalarga --- */
+/* --- hover: ko'tarilish + neytral soya, barcha kartalarga bir xil --- */
+/* border-color hover'da O'ZGARMAYDI — asl nozik chegara joyida qoladi. */
 .ncard,.pub,.rcard,.gtile{transition:transform .28s cubic-bezier(.2,.7,.2,1), box-shadow .28s, border-color .28s;}
 .ncard:hover,.pub:hover,.rcard:hover{
   transform:translateY(-6px);
-  box-shadow:var(--glow);
-  border-color:color-mix(in srgb,var(--accent2) 45%,transparent);
+  box-shadow:var(--lift);
 }
 .gtile{transition:transform .28s, box-shadow .28s, border-color .28s;}
-.gtile:hover{transform:translateY(-4px);box-shadow:var(--glow);border-color:transparent;}
+.gtile:hover{transform:translateY(-4px);box-shadow:var(--lift);}
 /* --- nashr kartasi: chuqurlik va harakat --- */
 /* Muqova rasmi hover'da sekin yaqinlashadi — karta "tirik" bo'ladi. */
 .pub .cover img{transition:transform .6s cubic-bezier(.2,.7,.2,1);}
@@ -847,9 +850,9 @@ html,body{overflow-x:hidden;}
 .pub .body .t{color:var(--accent2-d);opacity:.9;}
 /* rcard yuqori aksent chizig'i endi dumaloq burchakka mos */
 .rcard::before{border-radius:var(--r-card) var(--r-card) 0 0;}
-/* ekspert kartalari (ichki sahifa) — rasm ustida porlash */
+/* ekspert kartalari (ichki sahifa) — rasm ustida yumshoq soya */
 .exp .ph,.exp .img{transition:box-shadow .28s, transform .28s;}
-.exp:hover .ph,.exp:hover .img{box-shadow:var(--glow-soft);}
+.exp:hover .ph,.exp:hover .img{box-shadow:var(--lift-soft);}
 
 @media(prefers-reduced-motion:reduce){
   .ncard,.pub,.rcard,.gtile{transition:box-shadow .2s, border-color .2s;}
@@ -862,9 +865,9 @@ html,body{overflow-x:hidden;}
    ============================================================ */
 .about-values{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;}
 .aval{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-card);padding:34px 30px 32px;position:relative;transition:transform .25s, box-shadow .25s, border-color .25s;}
-.aval:hover{transform:translateY(-6px);box-shadow:var(--glow-soft);border-color:color-mix(in srgb,var(--accent2) 40%,transparent);}
+.aval:hover{transform:translateY(-6px);box-shadow:var(--lift-soft);}
 .aval .ci{width:52px;height:52px;border:1px solid var(--line);border-radius:var(--r-ctl);display:flex;align-items:center;justify-content:center;color:var(--accent);margin-bottom:22px;transition:.25s;}
-.aval:hover .ci{background:var(--accent);color:#fff;border-color:var(--accent);}
+/* .aval:hover .ci — ikonka qutisining moviyga bo'yalishi olib tashlandi */
 .aval .ci svg{width:24px;height:24px;}
 .aval h3{font-family:var(--serif);font-weight:500;font-size:1.25rem;line-height:1.24;margin:0 0 11px;color:var(--ink);}
 .aval p{color:var(--ink-2);font-size:0.90625rem;line-height:1.65;margin:0;}

@@ -131,10 +131,9 @@
   // nechta sahifaga javob beradi (masalan Voqealar = yangiliklar + tadbirlar),
   // chunki alohida menyu bandlari olib tashlandi, sahifalar esa qoldi.
   const NAV = [
-    { tk: 'nav_about', href: 'markaz-haqida.html', keys: ['about','contact'], children: [
+    { tk: 'nav_about', href: 'markaz-haqida.html', keys: ['about'], children: [
       { tk: 'nav_about_leadership', href: 'rahbariyat.html' },
-      { tk: 'nav_about_experts', href: 'rahbariyat.html' },
-      { tk: 'nav_contact', href: 'aloqa.html' }
+      { tk: 'nav_about_experts', href: 'rahbariyat.html' }
     ]},
     { tk: 'nav_happenings', href: 'yangiliklar.html', keys: ['news','events'], children: [
       { tk: 'nav_hap_news', href: 'yangiliklar.html' },
@@ -150,7 +149,10 @@
       { tk: 'nav_media_photo', href: 'media.html?tab=photo' },
       { tk: 'nav_media_video', href: 'media.html?tab=video' },
       { tk: 'nav_media_info', href: 'media.html?tab=info' }
-    ]}
+    ]},
+    // Ochiluvchi ro'yxatsiz yakka band — to'g'ridan-to'g'ri aloqa sahifasiga.
+    // Footer bunday bandlarni ustun qilib chizmaydi (renderFooter'dagi filter).
+    { tk: 'nav_contact', href: 'aloqa.html', keys: ['contact'] }
   ];
 
   const ICON = {
@@ -311,8 +313,8 @@
           ].filter(l => l.u && l.u !== '#')
            .map(l => `<a href="${safeUrl(l.u)}" target="_blank" rel="noopener" aria-label="${l.n}">${l.i}</a>`).join('')}</div>
         </div>
-        ${NAV.map(n => `<div class="f-col"><h5>${esc(T(n.tk))}</h5>${
-          (n.children || []).map(c => `<a href="${c.href}">${esc(T(c.tk))}</a>`).join('')
+        ${NAV.filter(n => n.children && n.children.length).map(n => `<div class="f-col"><h5>${esc(T(n.tk))}</h5>${
+          n.children.map(c => `<a href="${c.href}">${esc(T(c.tk))}</a>`).join('')
         }</div>`).join('')}
         <div class="f-contact">
           <h5>${esc(T('footer_contact'))}</h5>

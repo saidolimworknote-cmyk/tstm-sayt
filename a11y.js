@@ -279,7 +279,7 @@
     var main = document.querySelector('main') || document.querySelector('.article') || document.body;
     var clone = main.cloneNode(true);
     // UI / bezak bloklarni butunlay olib tashlaymiz (faqat o'qiladigan kontent qoladi)
-    clone.querySelectorAll('header,footer,nav,.a11y-panel,.a11y-overlay,.hero,.hero-ctrl,.hero-arrows,.slide-dots,.dot,.dots,.gs-ov,.sub-ov,#scrollProgress,.mnav,.page-banner .crumb,.filterbar,.tabs,.share-row,.act-row,.socials,.arrow-link,.go,.badge,.tag,button,svg,form,input,select,textarea,iframe,style,script,noscript,.ph').forEach(function(x){ x.remove(); });
+    clone.querySelectorAll('header,footer,nav,.a11y-panel,.a11y-overlay,.hero,.hero-ctrl,.hero-arrows,.slide-dots,.dot,.dots,.gs-ov,.sub-ov,.mnav,.page-banner .crumb,.filterbar,.tabs,.share-row,.act-row,.socials,.arrow-link,.go,.badge,.tag,button,svg,form,input,select,textarea,iframe,style,script,noscript,.ph').forEach(function(x){ x.remove(); });
     // barcha klass va inline-uslublarni olib tashlaymiz -> grid/card yo'qoladi, toza matn oqimi qoladi
     clone.querySelectorAll('*').forEach(function(el){ el.removeAttribute('class'); el.removeAttribute('style'); el.removeAttribute('data-a11y-fs'); el.removeAttribute('data-l'); });
     // rasmning yo'qolib qolgan (lazy) manbasini tiklaymiz

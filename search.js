@@ -274,27 +274,8 @@
 
   w.TSTMSearch={ open:open, close:close, toggle:toggle, wire:wire };
 
-  /* ---- Scroll Progress Bar (rAF bilan optimallashtirilgan) ---- */
-  (function(){
-    function initBar(){
-      if(document.getElementById('scrollProgress')) return;
-      var bar=document.createElement('div');
-      bar.id='scrollProgress';
-      bar.setAttribute('aria-hidden','true');
-      document.body.appendChild(bar);
-      var ticking=false;
-      function update(){
-        var st=window.pageYOffset||document.documentElement.scrollTop||0;
-        var h=(document.documentElement.scrollHeight - document.documentElement.clientHeight);
-        var p=h>0?(st/h)*100:0;
-        bar.style.width=p+'%';
-        ticking=false;
-      }
-      function onScroll(){ if(!ticking){ ticking=true; requestAnimationFrame(update); } }
-      window.addEventListener('scroll', onScroll, {passive:true});
-      window.addEventListener('resize', onScroll, {passive:true});
-      update();
-    }
-    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initBar); else initBar();
-  })();
+  /* Sahifa tepasidagi o'qish jarayoni chizig'i (#scrollProgress) OLIB TASHLANDI —
+     yorqin moviy rangi rasmiy sayt uslubiga to'g'ri kelmasdi. U shu yerda
+     yaratilib, har scroll'da kengligi yangilanardi; CSS'i site.css va home.css
+     da edi. Qaytarilsa, uchala joy birga tiklanishi kerak. */
 })(window);

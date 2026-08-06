@@ -31,7 +31,7 @@
     color:var(--ink);line-height:1.5;display:inline-block;max-width:52ch;}
   @media(max-width:860px){.pub-detail .pub-byline{margin-top:20px;padding-top:13px;}
     .pub-detail .pub-byline .nm{font-size:0.98rem;}}
-  /* POLISH — dumaloq burchak + elektrik porlash */
+  /* POLISH — dumaloq burchak + yumshoq hover soyasi */
   .pub-detail .cov{border-radius:var(--r-media,12px);transition:box-shadow .28s, border-color .28s;}
-  .pub-detail .cov:hover{box-shadow:var(--glow-soft);border-color:transparent;}
+  .pub-detail .cov:hover{box-shadow:var(--lift-soft);}
   .pub-detail .cov .badge{border-radius:6px;}
