@@ -1,8 +1,8 @@
 <?php
 /* ============================================================
-   TSTM — standart boshlang'ich kontent (fallback seed)
-   Faqat data.json topilmagan holatda ishlatiladi. Odatda import
-   mavjud data.json'dan bo'ladi. Auth paroli bo'sh qoladi — birinchi
+   TSTM — standart boshlang'ich kontent (seed)
+   Bo'sh bazani to'ldirishning YAGONA yo'li (2026-08-07 dan; ilgari
+   data.json dan import ham bor edi). Auth paroli bo'sh qoladi — birinchi
    kirish config.php dagi `admin_bootstrap_password` orqali bo'ladi va
    o'sha zahoti bcrypt bilan xeshlanib saqlanadi. U bo'sh bo'lsa
    parolsiz kirish MUMKIN EMAS (qarang: config.sample.php).

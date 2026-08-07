@@ -14,10 +14,10 @@ _*.html
 # config.php — baza logini/paroli va birinchi kirish paroli. Har bir muhitda
 #   (mahalliy, hosting) o'ziniki bo'ladi. Namunasi: config.sample.php (u repoda).
 config.php
-# data.json — MySQL'ga ko'chishdan oldingi eski ombor. Ichida admin parolining
-#   XESHI (auth.passwordHash) bor, shuning uchun versiya nazoratiga qo'yilmaydi.
-#   db.php uni faqat birinchi ishga tushirishda (baza bo'sh bo'lsa) o'qiydi;
-#   usiz seed.php standart qiymatlar bilan ishga tushadi.
+# data.json — MySQL'ga ko'chishdan oldingi eski ombor. 2026-08-07 da loyihadan
+#   BUTUNLAY olib tashlandi (db.php endi uni o'qimaydi, arxivi: backups\legacy\).
+#   Qoida saqlanib qolyapti: ichida admin parolining XESHI bo'lgani uchun, agar
+#   bunday fayl yana paydo bo'lsa, u versiya nazoratiga TUSHMASLIGI kerak.
 data.json
 # login_attempts.json — brute-force himoyasi holati, IP manzillarni saqlaydi
 login_attempts.json

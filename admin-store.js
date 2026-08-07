@@ -1,6 +1,6 @@
 /* ============================================================
    TSTM Admin — ma'lumotlar ombori
-   XAMPP/PHP rejimi: api.php orqali serverdagi data.json bilan ishlaydi.
+   XAMPP/PHP rejimi: api.php orqali serverdagi MySQL bazasi bilan ishlaydi.
    PHP bo'lmasa (oddiy/file:// ochilganda): localStorage'ga qaytadi.
    ============================================================ */
 (function (w) {
@@ -40,7 +40,7 @@
           { n: '32', c: { uz: 'Yillik tajriba', ru: 'Года опыта', en: 'Years of experience' } }
         ]
       },
-      // Xavfsizlik: haqiqiy parol faqat serverda (api.php + data.json, xesh holida) saqlanadi.
+      // Xavfsizlik: haqiqiy parol faqat serverda (api.php + MySQL `auth` jadvali, xesh holida) saqlanadi.
       // Bu ochiq fayl (admin-store.js) hech qanday parolni oshkor qilmasin.
       auth: { username: 'markaz_admini', password: '' },
       users: [

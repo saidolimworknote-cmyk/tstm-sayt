@@ -24,7 +24,7 @@ Sayt + boshqaruv paneli (admin). XAMPP'da ishlash uchun PHP backend bilan.
 - `page-*.js` — har bir sahifaning skripti (CSP talabi bilan HTML'dan ajratilgan)
 - `subscribe.js` + `subscribe.css` — obuna (push-bildirishnoma) oynasi; **barcha**
   sahifaga ulanadi, jumladan bosh sahifaga ham
-- `seed.php` — standart boshlang'ich kontent (data.json bo'lmasa)
+- `seed.php` — bo'sh bazani to'ldiruvchi standart boshlang'ich kontent
 - `index.php` — bosh sahifaga yo'naltiradi
 - `.htaccess` — Apache sozlamalari
 - `robots.txt`, `sitemap.xml` — qidiruv tizimlari (SEO) uchun
@@ -72,9 +72,14 @@ paroli». Kamida 12 belgi.
 
 - PHP + MySQL (XAMPP) ishlaganda — barcha kontent **`tstm` MySQL bazasi**ga yoziladi.
   Admin'da qilingan har qanday o'zgarish **barcha tashrifchilarga** ko'rinadi.
-- Baza va jadvallar **birinchi ochilishda avtomatik yaratiladi** (`db.php`).
-  Agar loyihada eski `data.json` bo'lsa — u avtomatik MySQL'ga **import qilinadi**
-  (kontent + parol xeshi saqlanadi). Bo'lmasa — `seed.php`dagi standart kontent.
+- Baza va jadvallar **birinchi ochilishda avtomatik yaratiladi** (`db.php`) va
+  `seed.php`dagi standart kontent bilan to'ldiriladi. Parol xeshi **bo'sh** qoladi —
+  birinchi kirish `config.php` dagi `admin_bootstrap_password` orqali bo'ladi.
+  > Ilgari bu yerda `data.json` dan import bo'lardi (MySQL'ga ko'chish yo'li).
+  > 2026-08-07 da olib tashlandi: migratsiya 2026-07-29 da tugagan, fayl esa
+  > 8-iyulda muzlab qolib, eskirgan kontentni va **almashtirilgan parolni**
+  > tiklab yuborishi mumkin edi. Ma'lumotni tiklashning yagona to'g'ri yo'li —
+  > `restore.ps1` (SQL zaxirasidan). Eski fayl `backups\legacy\` da arxivda.
 - Ma'lumot bazasidan tashqari **hech qanday sozlash shart emas** — XAMPP'da MySQL
   ishlab tursa kifoya. Baza login/parolini `config.php` dan o'zgartiring
   (namunasi: `config.sample.php`).

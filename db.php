@@ -682,18 +682,17 @@ function db_import($pdo, $db) {
   }
 }
 
-/* -------------------- Birinchi ishga tushirish: data.json'dan yoki standart seed'dan to'ldirish -------------------- */
+/* -------------------- Birinchi ishga tushirish: standart seed bilan to'ldirish --------------------
+   Ilgari bu yerda `data.json` dan import bo'lardi (MySQL'ga ko'chishdagi migratsiya
+   yo'li). 2026-08-07 da olib tashlandi — migratsiya 2026-07-29 da tugagan, fayl esa
+   8-iyuldagi holatda muzlab qolgan edi va IKKI xavf tug'dirardi:
+     1) eskirgan kontentni tiklardi (masalan 1 ta media yozuvi, hozir 9 ta);
+     2) `auth.passwordHash` orqali 30-iyulda ALMASHTIRILGAN parolni qaytarardi.
+   Endi ma'lumotni tiklash yagona to'g'ri yo'l bilan bo'ladi: `restore.ps1`
+   (backup.ps1 olgan SQL zaxirasidan). Eski fayl `backups\legacy\` da arxivda.
+   Bo'sh bazaga birinchi kirish: config.php dagi `admin_bootstrap_password`. */
 function db_bootstrap_if_empty($pdo) {
   if (!db_is_empty($pdo)) return;
-  $jsonFile = __DIR__ . '/data.json';
-  $db = null;
-  if (file_exists($jsonFile)) {
-    $raw = file_get_contents($jsonFile);
-    $db = json_decode($raw, true);
-  }
-  if (!is_array($db)) {
-    require_once __DIR__ . '/seed.php';
-    $db = default_seed();
-  }
-  db_import($pdo, $db);
+  require_once __DIR__ . '/seed.php';
+  db_import($pdo, default_seed());
 }
