@@ -8,6 +8,8 @@
   .pubsel select{appearance:none;-webkit-appearance:none;padding:14px 42px 14px 16px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:var(--r-ctl);font-family:var(--mono);font-size:0.72rem;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;outline:none;transition:border-color .15s;}
   .pubsel select:focus{border-color:var(--accent);}
   .pubsel::after{content:"";position:absolute;right:17px;top:50%;width:7px;height:7px;border-right:1.5px solid var(--muted);border-bottom:1.5px solid var(--muted);transform:translateY(-70%) rotate(45deg);pointer-events:none;}
+  /* Maxsus tanlagich yoqilganda o'z kareti bor (.csel-car) — bunisi ortiqcha. */
+  .pubsel.csel-host::after{display:none;}
   .rescount{font-family:var(--mono);font-size:0.6875rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:26px;}
   /* Ekspertdan kelgan filtr ko'rsatkichi */
   .author-note{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;background:var(--panel-2,rgba(13,68,131,.06));border:1px solid var(--line);border-radius:var(--r-card);padding:12px 18px;margin-bottom:18px;}

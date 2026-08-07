@@ -469,6 +469,7 @@
     try { applyBanner(opts.active); } catch(e){ console.error('applyBanner:', e); }
     try { renderFooter(); } catch(e){ console.error('renderFooter:', e); }
     try { if (w.I18N) w.I18N.translate(document); } catch(e){ console.error(e); }
+    try { enhanceSelects(document); } catch(e){ console.error('enhanceSelects:', e); }
     initReveal();
     try { if (w.Subscribe) w.Subscribe.arm(); } catch(e){ console.error('subscribe:', e); }
   }
@@ -476,5 +477,135 @@
   // Obuna oynasi subscribe.js dan keladi; u yuklanmagan sahifada shunchaki jim turadi.
   function showSubscribe(){ if (w.Subscribe) w.Subscribe.show(); }
 
-  w.Site = { initPage, renderHeader, renderFooter, mlGet, dispTitle, esc, safeUrl, fmtDate, dayMonth, qs, settings, lang, brandLogo, t: T, ICON, NAV, initReveal, showSubscribe, printDoc };
+  /* ---------- Maxsus tanlagich (custom select) ----------
+     MUAMMO: native <select> ning YOPIQ holatini uslublash mumkin, lekin
+     bosilganda ochiladigan ro'yxatni operatsion tizim chizadi — unga
+     border-radius BERIB BO'LMAYDI (Chrome/Firefox `option` radiusini
+     e'tiborsiz qoldiradi). Shu sababli "Tahlillar" sahifalaridagi filtrlar
+     bosilganda qirrali, sayt uslubiga yot ro'yxat chiqardi.
+
+     YECHIM: native <select> DOMda QOLADI (mavjud kod uning `.value` va
+     `change` hodisasiga tayanadi — page-nashrlar.js:122), faqat ko'rinishi
+     yashiriladi. Ustiga o'z tugmamiz va ro'yxatimiz quriladi; tanlanganda
+     native select'ning qiymati o'rnatilib, `change` yuboriladi.
+
+     Variantlar keyinroq to'ldirilsa ham ishlasin deb MutationObserver bilan
+     kuzatiladi — page-nashrlar.js ro'yxatni render paytida to'ldiradi. */
+  function enhanceSelect(sel){
+    if (!sel || sel._csel) return;
+    var box = sel.parentElement;
+    if (!box) return;
+    sel._csel = true;
+    box.classList.add('csel-host');
+
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'csel-btn';
+    btn.setAttribute('aria-haspopup', 'listbox');
+    btn.setAttribute('aria-expanded', 'false');
+    var lab = sel.getAttribute('aria-label');
+    if (lab) btn.setAttribute('aria-label', lab);
+    btn.innerHTML = '<span class="csel-val"></span><span class="csel-car" aria-hidden="true"></span>';
+
+    var pop = document.createElement('div');
+    pop.className = 'csel-pop';
+    pop.setAttribute('role', 'listbox');
+    if (lab) pop.setAttribute('aria-label', lab);
+
+    box.appendChild(btn);
+    box.appendChild(pop);
+
+    function opts(){ return Array.prototype.slice.call(pop.children); }
+    function open(){ return box.classList.contains('csel-open'); }
+
+    function sync(){
+      var list = Array.prototype.slice.call(sel.options);
+      pop.innerHTML = '';
+      list.forEach(function(o){
+        var it = document.createElement('div');
+        it.className = 'csel-opt';
+        it.setAttribute('role', 'option');
+        it.dataset.v = o.value;
+        it.textContent = o.textContent;
+        it.setAttribute('aria-selected', o.value === sel.value ? 'true' : 'false');
+        if (o.value === sel.value) it.classList.add('on');
+        pop.appendChild(it);
+      });
+      var cur = list.filter(function(o){ return o.value === sel.value; })[0];
+      btn.querySelector('.csel-val').textContent = cur ? cur.textContent : '';
+    }
+
+    function setOpen(v){
+      box.classList.toggle('csel-open', v);
+      btn.setAttribute('aria-expanded', v ? 'true' : 'false');
+      if (v) {
+        var on = pop.querySelector('.csel-opt.on') || pop.firstChild;
+        if (on) { on.classList.add('cur'); on.scrollIntoView({ block: 'nearest' }); }
+      } else {
+        opts().forEach(function(o){ o.classList.remove('cur'); });
+      }
+    }
+
+    function pick(el){
+      if (!el) return;
+      sel.value = el.dataset.v;
+      sync();
+      setOpen(false);
+      btn.focus();
+      sel.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    function move(step){
+      var list = opts();
+      if (!list.length) return;
+      var i = list.findIndex(function(o){ return o.classList.contains('cur'); });
+      if (i < 0) i = list.findIndex(function(o){ return o.classList.contains('on'); });
+      var n = Math.max(0, Math.min(list.length - 1, (i < 0 ? 0 : i) + step));
+      list.forEach(function(o){ o.classList.remove('cur'); });
+      list[n].classList.add('cur');
+      list[n].scrollIntoView({ block: 'nearest' });
+    }
+
+    btn.addEventListener('click', function(e){ e.stopPropagation(); setOpen(!open()); });
+    pop.addEventListener('click', function(e){
+      e.stopPropagation();
+      var o = e.target.closest('.csel-opt');
+      if (o) pick(o);
+    });
+    /* BITTA keydown ishlovchisi. Ilgari ikkitasi bor edi (tugmada va
+       konteynerda) — hodisa tugmadan konteynerga KO'TARILGANI uchun har bosish
+       ikki marta ishlanardi: ArrowDown ikki qadam tashlardi, Enter esa ro'yxatni
+       ochib darhol yopib yuborardi. Shuning uchun hammasi shu yerda. */
+    box.addEventListener('keydown', function(e){
+      if (!open()) {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault(); setOpen(true);
+          if (e.key === 'ArrowDown') move(1);
+          else if (e.key === 'ArrowUp') move(-1);
+        }
+        return;
+      }
+      if (e.key === 'Escape') { e.preventDefault(); setOpen(false); btn.focus(); }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); move(1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
+      else if (e.key === 'Home') { e.preventDefault(); move(-999); }
+      else if (e.key === 'End') { e.preventDefault(); move(999); }
+      else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(pop.querySelector('.csel-opt.cur')); }
+      else if (e.key === 'Tab') setOpen(false);
+    });
+    document.addEventListener('click', function(){ if (open()) setOpen(false); });
+
+    // Variantlar keyinroq to'ldirilishi/o'zgarishi mumkin
+    try { new MutationObserver(sync).observe(sel, { childList: true }); } catch {}
+    sync();
+  }
+
+  // Sahifadagi barcha tanlagichlarni bezaymiz. Maxsus imkoniyatlar panelidagi
+  // (.a11y-sel) tanlagichga TEGILMAYDI — u yerda native element ekran
+  // o'quvchilari uchun ishonchliroq.
+  function enhanceSelects(root){
+    (root || document).querySelectorAll('select:not(.a11y-sel)').forEach(enhanceSelect);
+  }
+
+  w.Site = { initPage, renderHeader, renderFooter, mlGet, dispTitle, esc, safeUrl, fmtDate, dayMonth, qs, settings, lang, brandLogo, t: T, ICON, NAV, initReveal, showSubscribe, printDoc, enhanceSelect, enhanceSelects };
 })(window);
