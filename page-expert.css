@@ -9,7 +9,7 @@
   .exp-detail .sub{color:var(--muted);font-size:1.03rem;margin-bottom:24px;}
 
   /* Aloqa kartasi — portret ostida */
-  .exp-contact{margin-top:22px;border:1px solid var(--line);border-radius:var(--r-card,12px);background:var(--surface);padding:20px;display:flex;flex-direction:column;gap:13px;}
+  .exp-contact{margin-top:22px;border:1px solid var(--line);border-radius:var(--r-card,16px);background:var(--surface);padding:20px;display:flex;flex-direction:column;gap:13px;}
   .exp-contact .lab{font-family:var(--mono);font-size:0.625rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;}
   .exp-contact a,.exp-contact span.row{display:flex;align-items:flex-start;gap:11px;color:var(--ink-2);text-decoration:none;font-size:0.9rem;line-height:1.45;word-break:break-word;transition:color .15s;}
   .exp-contact a:hover{color:var(--accent);}
@@ -17,7 +17,7 @@
 
   /* Ekspertiza yo'nalishlari — chiplar */
   .exp-tags{display:flex;flex-wrap:wrap;gap:9px;margin:0 0 26px;}
-  .exp-tags a{font-family:var(--mono);font-size:0.6875rem;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--ink-2);text-decoration:none;transition:border-color .15s, color .15s, background .15s;}
+  .exp-tags a{font-family:var(--mono);font-size:0.6875rem;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border:1px solid var(--line);border-radius:var(--r-pill);background:var(--panel);color:var(--ink-2);text-decoration:none;transition:border-color .15s, color .15s, background .15s;}
   .exp-tags a:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);}
 
   @media(max-width:760px){

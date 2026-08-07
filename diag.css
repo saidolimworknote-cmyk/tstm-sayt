@@ -1,0 +1,39 @@
+/* TSTM — diagnostika paneli uslublari.
+   Ilgari bu CSS diag.js ichida matn sifatida turib, skript orqali <style>
+   elementiga joylanardi. Qat'iy CSP (style-src 'self') bunday <style> ni
+   BLOKLAYDI — natijada panel va tugma butunlay uslubsiz ko'rinardi
+   (#diagFab position:static, brauzer standart tugmasi). a11y.css bilan
+   bir xil yechim: tashqi fayl + <link>. */
+#diagPanel{position:fixed;right:16px;bottom:16px;width:min(460px,calc(100vw - 32px));max-height:min(70vh,620px);
+display:flex;flex-direction:column;background:#0f1520;color:#dfe6f0;border:1px solid #2a3548;border-radius:14px;
+box-shadow:0 20px 60px rgba(0,0,0,.5);font:13px/1.5 ui-monospace,Consolas,monospace;z-index:99999;overflow:hidden;}
+#diagPanel.min{max-height:44px;}
+#diagHead{display:flex;align-items:center;gap:10px;padding:11px 13px;background:#151d2b;border-bottom:1px solid #263143;cursor:pointer;flex:0 0 auto;}
+#diagHead .ttl{font-weight:600;letter-spacing:.04em;font-size:12px;color:#9fb2cc;text-transform:uppercase;}
+#diagHead .sp{flex:1;}
+#diagHead button{background:none;border:0;color:#8fa3bf;cursor:pointer;font-size:15px;padding:2px 6px;border-radius:6px;}
+#diagHead button:hover{background:#222d3f;color:#fff;}
+.diag-b{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;}
+.diag-b.e{background:rgba(220,70,90,.16);color:#ff8095;}
+.diag-b.w{background:rgba(230,170,60,.16);color:#f0b95e;}
+.diag-b.n{background:rgba(90,140,230,.16);color:#82aaf0;}
+#diagTabs{display:flex;gap:6px;padding:9px 13px;border-bottom:1px solid #263143;flex:0 0 auto;flex-wrap:wrap;}
+#diagTabs button{background:#1a2434;border:1px solid #2a3548;color:#93a5c0;padding:4px 11px;border-radius:999px;cursor:pointer;font:inherit;font-size:11px;}
+#diagTabs button.on{background:#2563a8;border-color:#2563a8;color:#fff;}
+#diagList{overflow-y:auto;flex:1 1 auto;padding:8px;}
+.diag-i{border-left:3px solid #3a4560;background:#141c29;border-radius:8px;padding:9px 11px;margin-bottom:7px;}
+.diag-i.error{border-left-color:#e05570;} .diag-i.server{border-left-color:#c0446a;}
+.diag-i.warn{border-left-color:#e0a844;} .diag-i.net{border-left-color:#5b8fe0;} .diag-i.log{border-left-color:#40506a;}
+.diag-i .m{color:#eef3fa;word-break:break-word;white-space:pre-wrap;}
+.diag-i .loc{color:#7d8ea8;font-size:11px;margin-top:3px;}
+.diag-i .why{margin-top:6px;padding:6px 8px;background:#101825;border-radius:6px;font-size:11.5px;color:#b9c8dd;}
+.diag-i .why b{color:#7fd4a8;font-weight:600;}
+.diag-i .why .fix{display:block;margin-top:3px;color:#9ab0cc;}
+.diag-i .why .fix b{color:#f0b95e;}
+.diag-i details{margin-top:5px;} .diag-i summary{cursor:pointer;color:#7d8ea8;font-size:11px;}
+.diag-i pre{margin:5px 0 0;padding:7px;background:#0b111b;border-radius:6px;overflow-x:auto;font-size:11px;color:#94a6c0;}
+#diagEmpty{padding:26px 14px;text-align:center;color:#5f708a;}
+#diagFab{position:fixed;right:16px;bottom:16px;z-index:99998;display:flex;align-items:center;gap:7px;padding:9px 15px;border-radius:999px;
+background:#0f1520;color:#dfe6f0;border:1px solid #2a3548;box-shadow:0 8px 26px rgba(0,0,0,.4);cursor:pointer;font:12px/1 ui-monospace,Consolas,monospace;}
+#diagFab:hover{border-color:#2563a8;}
+@media(max-width:560px){#diagPanel{right:8px;left:8px;bottom:8px;width:auto;}}

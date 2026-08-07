@@ -34,4 +34,4 @@
   /* POLISH — dumaloq burchak + yumshoq hover soyasi */
   .pub-detail .cov{border-radius:var(--r-media,12px);transition:box-shadow .28s, border-color .28s;}
   .pub-detail .cov:hover{box-shadow:var(--lift-soft);}
-  .pub-detail .cov .badge{border-radius:6px;}
+  .pub-detail .cov .badge{border-radius:var(--r-pill);}
