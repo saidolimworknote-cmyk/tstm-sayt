@@ -67,12 +67,20 @@ Remove-Item $tmp -Force -ErrorAction SilentlyContinue
 Write-Host "  [1/2] Baza tiklandi -> $dbName"
 
 # --- 2. uploads tiklash ---
+# IKKALA joyga ham tiklaymiz: loyiha papkasi VA XAMPP deploy (jonli sayt shundan
+# o'qiydi). Faqat bittasiga tiklansa sayt hamon singan rasmlarni ko'rsatadi.
 $zipFile = Join-Path $From 'uploads.zip'
 if ((Test-Path $zipFile) -and $Db -eq '') {
-  $uploads = Join-Path $root 'uploads'
-  New-Item -ItemType Directory -Force $uploads | Out-Null
-  Expand-Archive -Path $zipFile -DestinationPath $uploads -Force
-  Write-Host "  [2/2] uploads/ tiklandi"
+  $targets = @( (Join-Path $root 'uploads'), 'C:\xampp\htdocs\tstm-sayt\uploads' ) | Select-Object -Unique
+  foreach ($t in $targets) {
+    try {
+      New-Item -ItemType Directory -Force $t -ErrorAction Stop | Out-Null
+      Expand-Archive -Path $zipFile -DestinationPath $t -Force -ErrorAction Stop
+      Write-Host "  [2/2] uploads/ tiklandi -> $t"
+    } catch {
+      Write-Host "  [2/2] OGOHLANTIRISH: tiklanmadi -> $t  ($($_.Exception.Message))" -ForegroundColor Yellow
+    }
+  }
 } elseif ($Db -ne '') {
   Write-Host "  [2/2] uploads o'tkazib yuborildi (sinov bazasiga tiklash)"
 } else {

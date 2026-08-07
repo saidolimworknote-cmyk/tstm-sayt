@@ -201,20 +201,39 @@ Xavfsizlik sarlavhalari (brauzer DevTools → Network → Response Headers):
       nechta serverga o'tilsa, sessiyani umumiy omborga (Redis/DB) ko'chirish
       kerak bo'ladi — hozir bitta server uchun bu shart emas.
 
-## 5. Muntazam ish (oyiga bir marta)
+## 5. Zaxira — AVTOMATIK
 
-- [ ] **To'liq zaxira olingan** (baza + yuklangan fayllar):
+Zaxira qo'lda olinmaydi: Windows Task Scheduler'dagi **`TSTM-Backup`** vazifasi
+**har 4 soatda** va tizimga kirganda `backup.ps1` ni jimgina ishga tushiradi.
 
-      ```powershell
-      powershell -ExecutionPolicy Bypass -File backup.ps1
-      ```
+```powershell
+# Holatini ko'rish
+Get-ScheduledTask TSTM-Backup | Get-ScheduledTaskInfo   # LastTaskResult = 0 bo'lsin
+Get-Content backups\backup.log -Tail 10                 # har ishlashning natijasi
 
-      Natija: `backups\tstm-YYYYMMDD-HHmmss\` ichida `database.sql` +
-      `uploads.zip` + `meta.txt`. Skript oxirgi 14 ta zaxirani saqlaydi,
-      eskisini avtomatik o'chiradi. **Nusxani boshqa diskka/joyga ham
-      ko'chiring** — bitta serverdagi zaxira ofat (disk nosozligi) da yordam
-      bermaydi.
+# Qo'lda, darhol olish
+powershell -ExecutionPolicy Bypass -File backup.ps1
+```
 
+**Har bir zaxirada nima bor** — `backups\tstm-YYYYMMDD-HHmmss\`:
+`database.sql` + `uploads.zip` + `meta.txt`.
+
+**Yuklamalar IKKI joydan yig'iladi** — loyiha `uploads\` va **`C:\xampp\htdocs\
+tstm-sayt\uploads\`**. Bu muhim: admin panel orqali yuklangan fayllar faqat
+htdocs'da paydo bo'ladi va loyihaga qaytmaydi. Skript ilgari faqat loyihani
+arxivlagani uchun **2026-08-07 da htdocs'dan o'chgan 80 ta fayl zaxirasiz
+qolgan edi**. `meta.txt` va `backup.log` da `faqat-htdocs=N` — o'sha bo'shliqni
+ko'rsatadigan hisoblagich.
+
+**Ikkinchi nusxa boshqa diskda:** har zaxira `D:\linuxserver2026\tstm-backups\`
+ga ham ko'chiriladi (`-MirrorTo` bilan o'zgartiriladi). C: bilan bir narsa
+bo'lsa — shu nusxa qoladi.
+
+**Saqlash muddati (pog'onali):** oxirgi 3 kunniki — hammasi; 3–90 kun — har
+kunning oxirgisi; 90 kundan eskisi o'chadi. Ikkala joyda ham bir xil.
+
+- [ ] Oyiga bir marta: `backup.log` da xato yo'qligiga va ikkinchi nusxa
+      olinayotganiga ishonch hosil qiling (`nusxa=ha`).
 - [ ] PHP va MySQL yangilanishlari o'rnatilgan.
 - [ ] `audit_log` jadvalidagi kirish urinishlari ko'rib chiqilgan
       (shubhali IP bormi?):
@@ -231,6 +250,7 @@ Server buzilsa yoki ma'lumot yo'qolsa, eng oxirgi zaxiradan tiklang:
 
 ```powershell
 # Eng oxirgi zaxirani asl bazaga tiklaydi (uploads bilan). Tasdiqlash so'raydi.
+# uploads IKKALA joyga tiklanadi: loyiha va C:\xampp\htdocs\tstm-sayt\uploads.
 powershell -ExecutionPolicy Bypass -File restore.ps1
 
 # Aniq bir zaxiradan:
@@ -246,8 +266,9 @@ powershell -ExecutionPolicy Bypass -File restore.ps1 -From "backups\tstm-2026080
 > # DROP DATABASE tstm_restore_test;
 > ```
 >
-> Sinalmagan zaxira — zaxira emas. Bu loyihada tiklash 12 jadval bo'yicha
-> muvaffaqiyatli sinovdan o'tgan (2026-08-03).
+> Sinalmagan zaxira — zaxira emas. Bu loyihada tiklash muvaffaqiyatli sinovdan
+> o'tgan: 12 jadval (2026-08-03) va qayta — yozuvlar soni, parol xeshi hamda
+> o'zbekcha matn (apostroflar) butunligi bilan (2026-08-07).
 
 ## 6. Sayt yangilanganda (kesh qoidasi)
 

@@ -2,11 +2,25 @@
 # ------------------------------------------------------------------
 # Bazani (mysqldump) + yuklangan fayllarni (uploads/) bitta papkaga arxivlaydi.
 # Ishlatish:   powershell -ExecutionPolicy Bypass -File backup.ps1
+#              powershell -ExecutionPolicy Bypass -File backup.ps1 -Quiet   # jadval uchun
 # Natija:      backups\tstm-YYYYMMDD-HHmmss\  (sql + uploads.zip + meta.txt)
+#              + ikkinchi nusxa boshqa diskda ($MirrorTo)
 #
 # Tiklash uchun: restore.ps1 ni ishga tushiring.
+#
+# MUHIM — uploads IKKI joydan yig'iladi:
+#   1) loyiha papkasi        C:\Users\...\Desktop\tstm-sayt\uploads
+#   2) XAMPP deploy (JONLI)  C:\xampp\htdocs\tstm-sayt\uploads
+# Admin panel orqali yuklangan fayllar FAQAT (2) da paydo bo'ladi va loyihaga
+# qaytmaydi. Ilgari bu skript faqat (1) ni arxivlagani uchun 2026-08-07 da
+# htdocs'dan o'chgan 80 ta fayl zaxirasiz qolgan edi. Ikkalasini ham oling.
 # ------------------------------------------------------------------
+param(
+  [switch]$Quiet,
+  [string]$MirrorTo = 'D:\linuxserver2026\tstm-backups'
+)
 $ErrorActionPreference = 'Stop'
+function Say($m, $c = 'Gray') { if (-not $Quiet) { Write-Host $m -ForegroundColor $c } }
 
 # --- Sozlamalar (config.php dan o'qiladi, bo'lmasa XAMPP standarti) ---
 $root   = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -26,7 +40,7 @@ if (Test-Path $cfg) {
 $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 $dir = Join-Path $root "backups\tstm-$stamp"
 New-Item -ItemType Directory -Force $dir | Out-Null
-Write-Host "Zaxira papkasi: $dir"
+Say "Zaxira papkasi: $dir"
 
 # --- 1. Baza dump ---
 $sqlFile = Join-Path $dir 'database.sql'
@@ -36,17 +50,43 @@ $dumpArgs += @('--databases', $dbName, '--routines', '--events', '--single-trans
 & $mysqldump @dumpArgs
 if (-not (Test-Path $sqlFile) -or (Get-Item $sqlFile).Length -lt 100) { throw "Baza dump muvaffaqiyatsiz!" }
 $sqlKB = [math]::Round((Get-Item $sqlFile).Length/1KB, 1)
-Write-Host "  [1/3] Baza dump: $sqlKB KB"
+Say "  [1/4] Baza dump: $sqlKB KB" 'Green'
 
-# --- 2. uploads/ arxivi ---
-$uploads = Join-Path $root 'uploads'
+# --- 2. uploads/ arxivi (loyiha + htdocs birlashtirilgan) ---
+$sources = @(
+  (Join-Path $root 'uploads'),
+  'C:\xampp\htdocs\tstm-sayt\uploads'
+) | Where-Object { Test-Path $_ } | Select-Object -Unique
+
 $zipFile = Join-Path $dir 'uploads.zip'
-if (Test-Path $uploads) {
-  Compress-Archive -Path "$uploads\*" -DestinationPath $zipFile -Force -ErrorAction SilentlyContinue
+$fileCount = 0; $onlyLive = 0
+if ($sources.Count) {
+  $staging = Join-Path $env:TEMP "tstm-bk-$PID"
+  Remove-Item $staging -Recurse -Force -ErrorAction SilentlyContinue
+  New-Item -ItemType Directory -Force $staging | Out-Null
+
+  $seen = @{}
+  foreach ($s in $sources) {
+    foreach ($f in Get-ChildItem $s -File -Force -ErrorAction SilentlyContinue) {
+      # Bir xil nomli fayl ikkala joyda ham bo'lsa — jonli (htdocs) nusxa ustun,
+      # chunki manbalar ro'yxatida u oxirgi turadi.
+      if (-not $seen.ContainsKey($f.Name)) { $seen[$f.Name] = $s } else { $seen[$f.Name] = $s }
+      Copy-Item $f.FullName (Join-Path $staging $f.Name) -Force
+    }
+  }
+  $fileCount = (Get-ChildItem $staging -File -Force).Count
+  # Faqat jonli (htdocs) da bor — ya'ni loyihada zaxirasiz turgan fayllar
+  if ($sources.Count -gt 1) {
+    $projNames = @(Get-ChildItem $sources[0] -File -Force -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name)
+    $onlyLive = @(Get-ChildItem $staging -File -Force | Where-Object { $projNames -notcontains $_.Name }).Count
+  }
+
+  Compress-Archive -Path "$staging\*" -DestinationPath $zipFile -Force
+  Remove-Item $staging -Recurse -Force -ErrorAction SilentlyContinue
   $zipKB = if (Test-Path $zipFile) { [math]::Round((Get-Item $zipFile).Length/1KB, 1) } else { 0 }
-  Write-Host "  [2/3] uploads.zip: $zipKB KB"
+  Say "  [2/4] uploads.zip: $fileCount fayl, $zipKB KB (shundan $onlyLive tasi faqat htdocs'da)" 'Green'
 } else {
-  Write-Host "  [2/3] uploads/ yo'q - o'tkazib yuborildi"
+  Say "  [2/4] uploads/ topilmadi - o'tkazib yuborildi" 'Yellow'
 }
 
 # --- 3. Meta ma'lumot ---
@@ -55,17 +95,68 @@ TSTM zaxira nusxasi
 Sana:     $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')
 Baza:     $dbName @ $dbHost`:$dbPort
 SQL:      database.sql ($sqlKB KB)
-Uploads:  uploads.zip
+Uploads:  uploads.zip ($fileCount fayl; $onlyLive tasi faqat htdocs'da edi)
+Manbalar: $($sources -join ' + ')
 Tiklash:  powershell -ExecutionPolicy Bypass -File restore.ps1 -From "$dir"
 "@
 Set-Content -Path (Join-Path $dir 'meta.txt') -Value $meta -Encoding utf8
-Write-Host "  [3/3] meta.txt yozildi"
+Say "  [3/4] meta.txt yozildi" 'Green'
 
-# --- Eski zaxiralarni tozalash (oxirgi 14 tasi qoladi) ---
-$all = Get-ChildItem (Join-Path $root 'backups') -Directory -ErrorAction SilentlyContinue | Sort-Object Name -Descending
-if ($all.Count -gt 14) {
-  $all | Select-Object -Skip 14 | ForEach-Object { Remove-Item $_.FullName -Recurse -Force; Write-Host "  Eski zaxira o'chirildi: $($_.Name)" }
+# --- 4. Boshqa diskka ikkinchi nusxa ---
+# C: ni yo'qotsak yoki xato buyruq C: dagi hamma narsani o'chirsa — bu nusxa qoladi.
+$mirrorOk = $false
+if ($MirrorTo -ne '') {
+  try {
+    New-Item -ItemType Directory -Force $MirrorTo -ErrorAction Stop | Out-Null
+    $dst = Join-Path $MirrorTo "tstm-$stamp"
+    Copy-Item $dir $dst -Recurse -Force -ErrorAction Stop
+    $mirrorOk = $true
+    Say "  [4/4] Ikkinchi nusxa: $dst" 'Green'
+    # Tozalash pastda, Invoke-Prune orqali — ikkala joyda bir xil siyosat bilan
+  } catch {
+    Say "  [4/4] OGOHLANTIRISH: ikkinchi nusxa olinmadi ($MirrorTo) - $($_.Exception.Message)" 'Yellow'
+  }
+} else {
+  Say "  [4/4] Ikkinchi nusxa o'chirilgan (-MirrorTo '')" 'Yellow'
 }
 
-Write-Host ""
-Write-Host "TAYYOR. Zaxira: $dir"
+# --- Eski zaxiralarni tozalash ---
+# Skript kuniga bir necha marta ishlagani uchun "oxirgi 14 ta" degan qoida
+# atigi 2 kunlik tarix qoldirardi. Buning o'rniga bosqichli (pog'onali) saqlash:
+#   * oxirgi 3 kunniki  — HAMMASI (soatlik aniqlik: "bugun buzilgan"ni qaytarish)
+#   * 3-90 kun oralig'i — har kunning ENG OXIRGISI (kunlik aniqlik)
+#   * 90 kundan eski    — o'chiriladi
+# 6 MB x ~100 nusxa = ~600 MB. Diskda joy bor, ma'lumot esa qaytmaydi.
+function Invoke-Prune($base) {
+  $items = Get-ChildItem $base -Directory -ErrorAction SilentlyContinue |
+           Where-Object { $_.Name -match '^tstm-(\d{8})-(\d{6})$' }
+  if (-not $items) { return }
+  $now = Get-Date
+  $keep = @{}
+  $byDay = @{}
+  foreach ($i in $items) {
+    if ($i.Name -notmatch '^tstm-(\d{8})-(\d{6})$') { continue }
+    $day = $Matches[1]
+    $when = [datetime]::ParseExact("$($Matches[1])$($Matches[2])", 'yyyyMMddHHmmss', $null)
+    $age = ($now - $when).TotalDays
+    if ($age -le 3) { $keep[$i.Name] = $true; continue }      # yaqin tarix — hammasi
+    if ($age -gt 90) { continue }                              # juda eski — o'chadi
+    if (-not $byDay.ContainsKey($day) -or $i.Name -gt $byDay[$day]) { $byDay[$day] = $i.Name }
+  }
+  foreach ($n in $byDay.Values) { $keep[$n] = $true }          # har kunning oxirgisi
+  foreach ($i in $items) {
+    if (-not $keep.ContainsKey($i.Name)) {
+      Remove-Item $i.FullName -Recurse -Force -ErrorAction SilentlyContinue
+      Say "  Eski zaxira o'chirildi: $($i.Name)"
+    }
+  }
+}
+Invoke-Prune (Join-Path $root 'backups')
+if ($mirrorOk) { Invoke-Prune $MirrorTo }
+
+# --- Jurnal (jadval bo'yicha ishlaganda natijani ko'rish uchun) ---
+$logLine = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')  OK  sql=${sqlKB}KB  fayl=$fileCount  faqat-htdocs=$onlyLive  nusxa=$(if($mirrorOk){'ha'}else{'yoq'})"
+Add-Content -Path (Join-Path $root 'backups\backup.log') -Value $logLine -Encoding utf8
+
+Say ""
+Say "TAYYOR. Zaxira: $dir" 'Cyan'
