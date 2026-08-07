@@ -357,7 +357,6 @@ function vapid_keys($pdo) {
 
 /* base64url — push standarti oddiy base64 emas, shu shaklni talab qiladi. */
 function b64url_encode($b) { return rtrim(strtr(base64_encode($b), '+/', '-_'), '='); }
-function b64url_decode($s) { return base64_decode(strtr($s, '-_', '+/') . str_repeat('=', (4 - strlen($s) % 4) % 4)); }
 
 /* -------------------- Migratsiya --------------------
    CREATE TABLE IF NOT EXISTS mavjud jadvalga yangi ustun QO'SHMAYDI.

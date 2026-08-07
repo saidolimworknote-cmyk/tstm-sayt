@@ -5,9 +5,6 @@
 
    MUHIM: bosh sahifa site.css ni ULAMAYDI — bu fayl to'liq mustaqil nusxa.
    Ichki sahifalarga tegishli o'zgarish site.css da alohida qilinadi. */
-  :root{
-    --serif-x:0;
-  }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
 
