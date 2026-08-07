@@ -1,5 +1,5 @@
   .pub-detail{display:grid;grid-template-columns:340px 1fr;gap:54px;align-items:start;}
-  .pub-detail .cov{position:relative;border:1px solid var(--line);background:var(--bg-2);aspect-ratio:3/4;overflow:hidden;}
+  .pub-detail .cov{position:relative;border:1px solid var(--line);background:var(--surface);aspect-ratio:3/4;overflow:hidden;}
   .pub-detail .cov img{width:100%;height:100%;object-fit:cover;}
   .pub-detail .cov .ph{position:absolute;inset:0;border:0;}
   .pub-detail .cov .badge{position:absolute;top:16px;left:16px;background:rgba(13,68,131,.92);color:#fff;font-family:var(--mono);font-size:0.625rem;letter-spacing:.12em;text-transform:uppercase;padding:6px 11px;}

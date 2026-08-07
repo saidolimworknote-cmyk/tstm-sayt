@@ -41,13 +41,27 @@ html{scroll-behavior:smooth;font-size:clamp(16px, 0.36vw + 10.9px, 20px);}
 .foot-links{display:flex;gap:24px;}
 :root, html[data-theme="light"]{
   --ink:#16181b; --ink-2:#3f444a; --muted:#767b83;
-  /* Hairline ramka/ajratuvchilar. Fon (--bg #eef0f4) juda och bo'lgani uchun
-     avvalgi #e3e6ea deyarli ko'rinmasdi — endi kontrast sezilarli, lekin yumshoq. */
-  --line:#cdd3dc; --line-2:#b7c0cc;
+  /* Hairline ramka/ajratuvchilar. Fon oq bo'lgani uchun chiziq avvalgidan
+     yumshoqroq — oq ustida #cdd3dc qattiq ko'rinardi. */
+  --line:#d8dfe9; --line-2:#c3ccd9;
   /* Kartalar uchun nozik chuqurlik soyasi (light/dark alohida) — chiziqqa yolg'iz
      tayanmasdan ham yuza ajralib tursin. */
   --card-shadow:0 1px 2px rgba(18,40,72,.05), 0 12px 26px -18px rgba(18,40,72,.20);
-  --bg:#eef0f4; --bg-2:#f7f8fa; --bg-3:#e7eaee; --panel:#ffffff;
+
+  /* --- YUZA POG'ONALARI (2026-08-07) ---------------------------------------
+     Ilgari teskari edi: fon kulrang (#eef0f4), kartalar oq. Endi aksincha —
+     fon OQ, kartalar esa undan ajralib turadigan kulrang yuzada. Shunda
+     e'tibor fonga emas, kontentga tushadi.
+       0-daraja  --bg       oq       sahifa kanvasi (matn sahifalari ham shu ustida)
+       1-daraja  --surface  kulrang  kartalar/plitkalar — kanvasdan ajralib turadi
+       2-daraja  --panel    oq       SUZUVCHI qatlam: ochiluvchi menyu, qidiruv
+                                     paneli, modal. Kontent USTIDA turgani uchun
+                                     eng yorug' bo'lishi shart — kulrang qilinmasin.
+       --bg-2 esa oq yuzalardagi nozik hover to'ldirishi bo'lib qoladi.
+     Quyuq temada --surface = --panel, ya'ni dark ko'rinish o'zgarmaydi.
+     ------------------------------------------------------------------------ */
+  --bg:#ffffff; --bg-2:#f7f9fb; --bg-3:#eaeef4; --panel:#ffffff;
+  --surface:#f1f4f8;
   --accent:#0f5689; --accent-d:#0a4163; --accent-soft:#e4eef6;
   --accent2:#1492e6; --accent2-d:#0b6fb8;
   --footer:#0D4483; --header-solid:rgba(255,255,255,.9);
@@ -62,6 +76,8 @@ html[data-theme="dark"]{
   --line:#2c3852; --line-2:#232d44;
   --card-shadow:0 2px 10px rgba(0,0,0,.22);
   --bg:#151c2e; --bg-2:#1a2236; --bg-3:#212b42; --panel:#1e2740;
+  /* Quyuq temada karta va suzuvchi qatlam bir xil — dark ko'rinish o'zgarmaydi. */
+  --surface:#1e2740;
   --accent:#3f97cf; --accent-d:#62acdb; --accent-soft:#1d3a58;
   --accent2:#34b6ff; --accent2-d:#5cc6ff;
   --footer:#0e1d36; --header-solid:rgba(21,28,46,.9);
@@ -197,7 +213,7 @@ section.block{padding:74px 0;}
 /* news/article cards grid */
 .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:26px;}
 .cards.two{grid-template-columns:repeat(2,1fr);}
-.ncard{display:flex;flex-direction:column;cursor:pointer;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;transition:transform .25s, box-shadow .25s, border-color .25s;}
+.ncard{display:flex;flex-direction:column;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;transition:transform .25s, box-shadow .25s, border-color .25s;}
 .ncard:hover{transform:translateY(-6px);box-shadow:var(--lift);}
 .ncard .img{height:200px;position:relative;overflow:hidden;display:block;background:#0b1622;}
 .ncard .img img{width:100%;height:100%;object-fit:cover;transition:transform .5s;}
@@ -254,7 +270,7 @@ section.block{padding:74px 0;}
 
 /* upcoming — cards */
 .ev-list{display:flex;flex-direction:column;gap:16px;}
-.ev-card{display:grid;grid-template-columns:100px 1fr;gap:26px;padding:24px 28px;border:1px solid var(--line);background:var(--panel);transition:border-color .18s, transform .18s, box-shadow .18s;}
+.ev-card{display:grid;grid-template-columns:100px 1fr;gap:26px;padding:24px 28px;border:1px solid var(--line);background:var(--surface);transition:border-color .18s, transform .18s, box-shadow .18s;}
 .ev-card:hover{transform:translateY(-2px);box-shadow:var(--lift-soft);}
 .ev-cal{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border-right:1px solid var(--line);padding-right:24px;}
 .ev-cal .dd{font-family:var(--serif);font-weight:600;font-size:2.875rem;line-height:.95;color:var(--accent);}
@@ -280,7 +296,7 @@ section.block{padding:74px 0;}
 
 /* publications grid */
 .pub-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:34px;}
-.pub{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;transition:transform .25s, box-shadow .25s, border-color .25s;}
+.pub{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;transition:transform .25s, box-shadow .25s, border-color .25s;}
 .pub:hover{transform:translateY(-6px);box-shadow:var(--lift);}
 .pub .cover{height:280px;border-bottom:1px solid var(--line);position:relative;overflow:hidden;}
 .pub .cover img{width:100%;height:100%;object-fit:cover;}
@@ -333,7 +349,7 @@ section.block{padding:74px 0;}
 .tabs button:hover{color:var(--ink);}
 .tabs button.on{color:var(--accent);border-bottom-color:var(--accent);}
 .gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
-.gtile{position:relative;aspect-ratio:4/3;overflow:hidden;border:1px solid var(--line);background:var(--bg-2);cursor:pointer;}
+.gtile{position:relative;aspect-ratio:4/3;overflow:hidden;border:1px solid var(--line);background:var(--surface);cursor:pointer;}
 .gtile img{width:100%;height:100%;object-fit:cover;transition:transform .4s;}
 .gtile:hover img{transform:scale(1.06);}
 .gtile .play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(8,12,16,.3);}
@@ -344,7 +360,7 @@ section.block{padding:74px 0;}
 .mfilter .fchip .fc-n{font-size:.9em;line-height:1;padding:2px 7px;border-radius:999px;background:var(--accent-soft);color:var(--accent);transition:.15s;}
 .mfilter .fchip.on .fc-n{background:rgba(255,255,255,.22);color:#fff;}
 /* media — matbuot xizmati paneli */
-.press{margin-top:64px;display:flex;align-items:center;gap:26px;flex-wrap:wrap;justify-content:space-between;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:32px 34px;}
+.press{margin-top:64px;display:flex;align-items:center;gap:26px;flex-wrap:wrap;justify-content:space-between;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:32px 34px;}
 .press .pl{display:flex;align-items:flex-start;gap:20px;flex:1;min-width:280px;}
 .press .pico{flex:none;width:52px;height:52px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;}
 .press .pico svg{width:24px;height:24px;}
@@ -360,9 +376,9 @@ section.block{padding:74px 0;}
 
 /* info cards */
 .cinfo{display:flex;flex-direction:column;gap:14px;}
-.cinfo .crow{display:flex;gap:16px;align-items:flex-start;padding:18px;border:1px solid var(--line);background:var(--bg-2);transition:border-color .18s, transform .18s, box-shadow .18s;}
+.cinfo .crow{display:flex;gap:16px;align-items:flex-start;padding:18px;border:1px solid var(--line);background:var(--surface);transition:border-color .18s, transform .18s, box-shadow .18s;}
 .cinfo .crow:hover{transform:translateY(-2px);box-shadow:var(--lift-soft);}
-.cinfo .ci{width:44px;height:44px;border:1px solid var(--line);background:var(--panel);display:flex;align-items:center;justify-content:center;color:var(--accent);flex:none;}
+.cinfo .ci{width:44px;height:44px;border:1px solid var(--line);background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--accent);flex:none;}
 .cinfo .ci svg{width:20px;height:20px;}
 .cinfo .lab{font-family:var(--mono);font-size:0.65625rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
 .cinfo .val{font-size:1.02rem;color:var(--ink);line-height:1.4;word-break:break-word;}
@@ -376,7 +392,7 @@ section.block{padding:74px 0;}
 .csocial svg{width:18px;height:18px;}
 
 /* form panel */
-.cform-panel{border:1px solid var(--line);background:var(--panel);padding:34px;}
+.cform-panel{border:1px solid var(--line);background:var(--surface);padding:34px;}
 .cform .fld{margin-bottom:18px;}
 .cform .fld-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
 .cform label{display:block;font-size:0.8125rem;font-weight:600;color:var(--ink-2);margin-bottom:7px;}
@@ -475,7 +491,7 @@ a:focus-visible,button:focus-visible,[role=button]:focus-visible,input:focus-vis
 .map-addr svg{width:15px;height:15px;color:var(--accent);flex:none;}
 .map-open{font-size:0.8125rem;font-weight:600;color:var(--accent);white-space:nowrap;display:inline-flex;align-items:center;gap:5px;}
 .map-open:hover{text-decoration:underline;}
-.map-embed{height:340px;background:var(--bg-2);}
+.map-embed{height:340px;background:var(--surface);}
 .map-embed iframe{width:100%;height:100%;border:0;display:block;}
 
 /* button */
@@ -771,7 +787,7 @@ html,body{overflow-x:hidden;}
 
 /* ============ RESEARCH AREAS (Tadqiqot yo'nalishlari) — boyitilgan ============ */
 .research-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;}
-.rcard{position:relative;background:var(--panel);border:1px solid var(--line);padding:34px 30px 38px;transition:transform .25s, box-shadow .25s, border-color .25s;overflow:hidden;}
+.rcard{position:relative;background:var(--surface);border:1px solid var(--line);padding:34px 30px 38px;transition:transform .25s, box-shadow .25s, border-color .25s;overflow:hidden;}
 .rcard::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .3s;}
 .rcard:hover{transform:translateY(-6px);box-shadow:0 30px 56px -30px rgba(0,0,0,.34);}
 .rcard:hover::before{transform:scaleX(1);}
@@ -839,10 +855,16 @@ html[data-theme="dark"]{
 /* --- hover: ko'tarilish + neytral soya, barcha kartalarga bir xil --- */
 /* border-color hover'da O'ZGARMAYDI — asl nozik chegara joyida qoladi. */
 .ncard,.pub,.rcard,.gtile{transition:transform .28s cubic-bezier(.2,.7,.2,1), box-shadow .28s, border-color .28s;}
+/* Hover: karta kulrang yuzadan OQ ga "ko'tariladi" — go'yo yorug'likka yaqinlashadi.
+   Bu porlash/ramka yonishi EMAS (u ataylab taqiqlangan), faqat yuza va soya
+   o'zgaradi. Kanvas ham oq bo'lgani uchun karta hover'da fonga singib ketmasin
+   deb ramka va soya joyida qoladi. */
 .ncard:hover,.pub:hover,.rcard:hover{
   transform:translateY(-6px);
   box-shadow:var(--lift);
+  background:var(--panel);
 }
+.ev-card:hover,.aval:hover{background:var(--panel);}
 .gtile{transition:transform .28s, box-shadow .28s, border-color .28s;}
 .gtile:hover{transform:translateY(-4px);box-shadow:var(--lift);}
 /* --- nashr kartasi: chuqurlik va harakat --- */
@@ -872,7 +894,7 @@ html[data-theme="dark"]{
    (effektli: dumaloq kartalar, hover ko'tarilishi va porlash)
    ============================================================ */
 .about-values{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;}
-.aval{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-card);padding:34px 30px 32px;position:relative;transition:transform .25s, box-shadow .25s, border-color .25s;}
+.aval{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:34px 30px 32px;position:relative;transition:transform .25s, box-shadow .25s, border-color .25s;}
 .aval:hover{transform:translateY(-6px);box-shadow:var(--lift-soft);}
 .aval .ci{width:52px;height:52px;border:1px solid var(--line);border-radius:var(--r-ctl);display:flex;align-items:center;justify-content:center;color:var(--accent);margin-bottom:22px;transition:.25s;}
 /* .aval:hover .ci — ikonka qutisining moviyga bo'yalishi olib tashlandi */
@@ -882,7 +904,7 @@ html[data-theme="dark"]{
 
 /* jamoa/hamkorlik bloki — vazmin panel */
 .about-cta{display:flex;align-items:center;justify-content:space-between;gap:36px;flex-wrap:wrap;
-  background:var(--bg-2);border:1px solid var(--line);border-radius:var(--r-card);padding:42px 46px;}
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:42px 46px;}
 .about-cta .txt h2{font-family:var(--serif);font-weight:500;font-size:clamp(23px,2.4vw,30px);line-height:1.18;margin:0 0 10px;color:var(--ink);}
 .about-cta .txt p{color:var(--ink-2);font-size:0.96875rem;line-height:1.6;margin:0;max-width:52ch;}
 .about-cta .acts{display:flex;gap:14px;flex-wrap:wrap;flex:none;}
