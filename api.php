@@ -9,7 +9,23 @@
    • Granular CRUD (upsert/remove) — concurrency xavfsiz
    ============================================================ */
 
-error_reporting(0);
+/* Xato matni foydalanuvchiga HECH QACHON ko'rsatilmaydi (axborot oqishi
+   himoyasi, TZ 4.3.1) — buni `display_errors = 0` ta'minlaydi.
+
+   `error_reporting` esa ATAYLAB E_ALL: ilgari bu yerda `error_reporting(0)`
+   turardi va u ikki narsani jimgina buzardi:
+     1) Global qiymat 0 bo'lganda `@` operatori ham 0 beradi (o'lchandi,
+        PHP 8.2.12). Natijada quyidagi ilgak `@unlink(...)` kabi ATAYLAB
+        bostirilgan, kutilgan holatni haqiqiy xatodan ajrata olmasdi va
+        hammasini `error_log` jadvaliga yozardi. Admin paneldagi
+        "Xatoliklar" bo'limi birinchi kundanoq soxta signalga to'lardi
+        (masalan "cache_public.json topilmadi" — u birinchi so'rovda
+        bo'lmasligi mutlaqo normal), haqiqiy xato esa ular orasida ko'rinmay
+        qolardi.
+     2) E_DEPRECATED umuman ko'rinmasdi — PHP yangi versiyaga o'tganda
+        (masalan 8.2 -> 8.3) ogohlantirishlar jim yo'qolardi.
+   display_errors = 0 bo'lgani uchun E_ALL tashqariga hech nima chiqarmaydi. */
+error_reporting(E_ALL);
 @ini_set('display_errors', '0');
 
 require_once __DIR__ . '/db.php';
@@ -61,14 +77,24 @@ $LOGIN_LOCK_SECONDS = 600;
 $action = isset($_GET['action']) ? $_GET['action'] : '';
 
 /* -------------------- PHP xatolarini jurnalga olish --------------------
-   `error_reporting(0)` xatolarni foydalanuvchiga KO'RSATMAYDI (axborot oqishi
+   `display_errors = 0` xatolarni foydalanuvchiga KO'RSATMAYDI (axborot oqishi
    himoyasi, TZ 4.3.1) — lekin ular ko'rinmay yo'qolib ketmasligi kerak. Shu
    ilgaklar ularni `error_log` jadvaliga yozadi; admin panelda ko'rinadi.
    Xato matni MIJOZGA hech qachon qaytarilmaydi. */
 set_error_handler(function ($no, $str, $file, $line) {
   global $pdo;
-  // @ bilan bostirilgan (masalan @mkdir) xatolarni e'tiborsiz qoldiramiz
-  if (!(error_reporting() & $no) && error_reporting() !== 0) return false;
+  /* `@` bilan ATAYLAB bostirilgan amallar (@unlink, @file_get_contents,
+     @mkdir) — bu kutilgan holatlar, xato emas: kesh fayli hali yo'q,
+     papka allaqachon bor va h.k. Ularni yozmaymiz.
+
+     `true` qaytaramiz (`false` emas): `false` bo'lsa PHP o'z ishlovchisiga
+     o'tkazadi va kutilgan holat serverning umumiy xato jurnaliga tushib,
+     u yerni ham keraksiz to'ldiradi.
+
+     Bu tekshiruv FAQAT global error_reporting E_ALL bo'lgani uchun ishlaydi
+     (yuqoridagi izohga qarang): global qiymat 0 bo'lsa `@` ham 0 beradi va
+     bostirilganni oddiy xatodan ajratib bo'lmaydi. */
+  if (!(error_reporting() & $no)) return true;
   $type = ($no & (E_WARNING | E_USER_WARNING)) ? 'php-warn' : 'php';
   log_error($pdo, $type, $str, basename((string)$file), (int)$line, 0, '', 'api.php?action=' . $GLOBALS['action']);
   return true; // standart PHP chiqishini to'sib qolamiz
