@@ -122,25 +122,93 @@ function db() {
   if ($pdo !== null) return $pdo;
   global $DB_HOST, $DB_PORT, $DB_NAME, $DB_USER, $DB_PASS, $DB_CHARSET;
 
-  // 1) Serverga ulanamiz (baza hali bo'lmasligi mumkin) va bazani yaratamiz
-  $dsn0 = "mysql:host=$DB_HOST;port=$DB_PORT;charset=$DB_CHARSET";
   $opt = [
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
     PDO::ATTR_EMULATE_PREPARES => false,
   ];
-  $root = new PDO($dsn0, $DB_USER, $DB_PASS, $opt);
-  $root->exec("CREATE DATABASE IF NOT EXISTS `$DB_NAME` CHARACTER SET $DB_CHARSET COLLATE {$DB_CHARSET}_unicode_ci");
-
-  // 2) Bazaga ulanamiz
   $dsn = "mysql:host=$DB_HOST;port=$DB_PORT;dbname=$DB_NAME;charset=$DB_CHARSET";
-  $pdo = new PDO($dsn, $DB_USER, $DB_PASS, $opt);
+
+  /* 1) TO'G'RIDAN-TO'G'RI bazaga ulanamiz — odatdagi (va hostingdagi yagona)
+        holat. Ilgari bu yerda avval serverga ulanib `CREATE DATABASE IF NOT
+        EXISTS` bajarilardi. Bu MAHALLIY XAMPP'da (root huquqi bilan) ishlardi,
+        lekin hostingda saytni butunlay o'ldirardi: shared hostingda baza
+        cPanel orqali oldindan yaratiladi va ilova foydalanuvchisida baza
+        YARATISH huquqi bo'lmaydi. MySQL bunday holatda `IF NOT EXISTS` bo'lsa
+        ham "Access denied ... (1044)" beradi — ya'ni HAR BIR so'rov 500 xato
+        bilan tugardi. Yon foyda: endi odatdagi holatda ikkita emas, BITTA
+        ulanish ochiladi. */
+  try {
+    $pdo = new PDO($dsn, $DB_USER, $DB_PASS, $opt);
+  } catch (PDOException $e) {
+    /* 2) Ulanmadi — sabablardan biri "baza hali yo'q" bo'lishi mumkin (butunlay
+          yangi mahalliy o'rnatish). Server darajasiga ulanib yaratib ko'ramiz.
+          Xato kodiga qaramaymiz: PDO ulanish xatolarida kodni turli drayver va
+          PHP versiyalarida turlicha qaytaradi, shuning uchun shunchaki urinib
+          ko'ramiz. Bu ham bo'lmasa — ASL xatoni qaytaramiz (u tushunarliroq:
+          noto'g'ri parol, server o'chiq va h.k.). */
+    try {
+      $dsn0 = "mysql:host=$DB_HOST;port=$DB_PORT;charset=$DB_CHARSET";
+      $root = new PDO($dsn0, $DB_USER, $DB_PASS, $opt);
+      $root->exec("CREATE DATABASE IF NOT EXISTS `$DB_NAME` CHARACTER SET $DB_CHARSET COLLATE {$DB_CHARSET}_unicode_ci");
+      $pdo = new PDO($dsn, $DB_USER, $DB_PASS, $opt);
+    } catch (PDOException $e2) {
+      throw $e;
+    }
+  }
+
   provision($pdo);
   return $pdo;
 }
 
-/* -------------------- Jadvallarni yaratish (indekslar bilan) -------------------- */
+/* -------------------- Sxema qorovuli --------------------
+   `provision_schema()` 21 ta `CREATE TABLE IF NOT EXISTS` + migratsiyalarni
+   bajaradi. Ular xavfsiz (idempotent), lekin ARZON EMAS: o'lchangan sarf
+   har so'rovda 22–47 ms. Ilgari bu HAR BIR so'rovda ishlardi — hatto ommaviy
+   sahifa keshdan berilganda ham, ya'ni tekinga sarflanardi.
+
+   Qorovul: sxema oxirgi marta qaysi db.php bilan qurilganini `schema_meta`
+   jadvalida saqlaymiz. Mos kelsa — bitta SELECT bilan chiqib ketamiz.
+
+   BELGI SIFATIDA db.php ning O'ZI ishlatiladi (o'zgartirilgan vaqti + hajmi).
+   Bu ataylab qo'lda emas: qo'lda "sxema versiyasi" raqami bo'lsa, kimdir
+   jadvalga ustun qo'shib raqamni oshirishni unutadi va migratsiya jimgina
+   bajarilmay qoladi. db.php o'zgarsa — belgi o'z-o'zidan mos kelmay qoladi
+   va sxema keyingi so'rovda bir marta qayta quriladi. Ya'ni faylni serverga
+   yuklashning o'zi migratsiyani ishga tushiradi.
+
+   Huquqlar: birinchi ishga tushirish uchun CREATE/ALTER kerak. Sxema qurilgach
+   oddiy so'rovlar faqat SELECT/INSERT/UPDATE/DELETE bilan ishlaydi — lekin
+   db.php yangilanganda CREATE/ALTER yana kerak bo'ladi, shuning uchun ularni
+   olib tashlamang (qarang: DEPLOY.md). */
 function provision($pdo) {
+  $stamp = (string)@filemtime(__FILE__) . '-' . (string)@filesize(__FILE__);
+
+  try {
+    $row = $pdo->query("SELECT v FROM schema_meta WHERE k = 'provision'")->fetch();
+    if ($row && (string)$row['v'] === $stamp) return;   // sxema dolzarb — ish yo'q
+  } catch (PDOException $e) {
+    // schema_meta hali yo'q (birinchi ishga tushirish) — pastda yaratiladi.
+  }
+
+  provision_schema($pdo);
+
+  try {
+    $pdo->exec("CREATE TABLE IF NOT EXISTS schema_meta (
+      k VARCHAR(32) PRIMARY KEY,
+      v VARCHAR(64) NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci");
+    $st = $pdo->prepare("INSERT INTO schema_meta (k, v) VALUES ('provision', :v)
+                         ON DUPLICATE KEY UPDATE v = VALUES(v)");
+    $st->execute([':v' => $stamp]);
+  } catch (PDOException $e) {
+    /* Belgini yozolmadik — zarari yo'q, faqat keyingi so'rov ham sxemani
+       qayta quradi (ya'ni eski, sekin xatti-harakat). Sayt ishlayveradi. */
+  }
+}
+
+/* -------------------- Jadvallarni yaratish (indekslar bilan) -------------------- */
+function provision_schema($pdo) {
   $c = "utf8mb4";
   $tail = " ENGINE=InnoDB DEFAULT CHARSET=$c COLLATE {$c}_unicode_ci";
 

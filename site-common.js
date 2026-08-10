@@ -125,7 +125,7 @@
 
   // ---------- nav model ----------
   // 2026-08-04: menyu 7 banddan 4 banga qayta guruhlandi (bosh sahifadagi
-  // "Bosh sahifa - Hi-Fi.html" dagi qo'lda yozilgan menyu bilan BIR XIL bo'lishi
+  // "index.html" dagi qo'lda yozilgan menyu bilan BIR XIL bo'lishi
   // shart — u alohida nusxa, o'zgartirsangiz ikkalasini ham yangilang).
   // `keys` — qaysi sahifalarda bu band "active" bo'lib yonishi. Bir band bir
   // nechta sahifaga javob beradi (masalan Voqealar = yangiliklar + tadbirlar),
@@ -214,7 +214,7 @@
         <div class="langs" role="group" aria-label="Til / Язык / Language">${langButtons()}</div>
       </div></div>
       <div class="bar"><div class="wrap">
-        <a class="brand brand-row" href="Bosh sahifa - Hi-Fi.html" aria-label="${esc(SN)}">
+        <a class="brand brand-row" href="index.html" aria-label="${esc(SN)}">
           <img class="logo logo-c" src="logo-mark.png" alt="${esc(SN)}">
           <span class="divider"></span>
           <span class="nm"><b>${esc(B.top)}</b><small>${esc(B.bot)}</small></span>

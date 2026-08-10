@@ -54,7 +54,12 @@
 # Papka tarkibini ro'yxat qilib ko'rsatishni o'chiramiz (masalan /uploads/ ochilganda)
 Options -Indexes
 
-DirectoryIndex index.php
+# Bosh sahifa. Ilgari `Bosh sahifa - Hi-Fi.html` deb atalardi va `index.php`
+# unga yo'naltirardi — natijada manzil `/Bosh%20sahifa%20-%20Hi-Fi.html`
+# ko'rinardi va Linux serverda harf registri xatoga olib kelishi mumkin edi
+# (Windows registrni farqlamaydi, Linux farqlaydi). 2026-08-10 da fayl
+# `index.html` ga o'zgartirildi, yo'naltiruvchi `index.php` esa o'chirildi.
+DirectoryIndex index.html index.php
 
 # HTML va PHP keshlanmaydi — sahifadagi o'zgarish va yangi `?v=` raqami
 # tashrifchiga DARHOL yetib borishi uchun.
@@ -71,10 +76,18 @@ DirectoryIndex index.php
     Header set Expires "0"
   </FilesMatch>
   # ---- Xavfsizlik sarlavhalari ----
-  Header set X-Content-Type-Options "nosniff"
-  Header set X-Frame-Options "SAMEORIGIN"
-  Header set Referrer-Policy "strict-origin-when-cross-origin"
-  Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+  #
+  # `always` MUHIM: usiz Apache bu sarlavhalarni FAQAT muvaffaqiyatli (2xx/3xx)
+  # javoblarga qo'shadi. Xato sahifalari — 404, 403, 500 — ularsiz qolardi
+  # (o'lchangan: 200 javobda 3 ta sarlavha, 404 javobda 0 ta). Ya'ni saytdagi
+  # istalgan mavjud bo'lmagan manzil himoyasiz sahifa bo'lib qolardi: uni
+  # begona saytga iframe qilib joylash mumkin edi (clickjacking) va CSP ham
+  # ishlamasdi. Hostingda bu ayniqsa muhim — u yerda 404 sahifalar ko'p
+  # so'raladi (skanerlovchi botlar).
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
 
   # Boshqaruv paneli qidiruv natijalarida CHIQMASIN.
   #
@@ -83,7 +96,7 @@ DirectoryIndex index.php
   # manzilni natijalarga qo'shib qo'yishi mumkin. `noindex` sarlavhasi esa
   # indeksdan butunlay chiqaradi — bu robots.txt dan kuchliroq chora.
   <FilesMatch "^(admin\.html)$">
-    Header set X-Robots-Tag "noindex, nofollow, noarchive"
+    Header always set X-Robots-Tag "noindex, nofollow, noarchive"
   </FilesMatch>
 
   # Service worker KESHLANMASIN. U `?v=` versiyasisiz yuklanadi (brauzer uni
@@ -108,7 +121,7 @@ DirectoryIndex index.php
   #   • Flash/plagin obyektlari (object-src none)
   # Ruxsat etilgan tashqi manbalar: Google Fonts, YouTube (video), Google
   # Translate (a11y paneli va admin avto-tarjimasi).
-  Header set Content-Security-Policy "default-src 'self'; script-src 'self' https://translate.google.com https://translate.googleapis.com https://www.gstatic.com; style-src 'self' https://fonts.googleapis.com https://www.gstatic.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://img.youtube.com https://i.ytimg.com https://www.google.com https://www.gstatic.com https://fonts.gstatic.com https://translate.googleapis.com; frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://www.google.com; connect-src 'self' https://translate.googleapis.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' https://translate.google.com https://translate.googleapis.com https://www.gstatic.com; style-src 'self' https://fonts.googleapis.com https://www.gstatic.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://img.youtube.com https://i.ytimg.com https://www.google.com https://www.gstatic.com https://fonts.gstatic.com https://translate.googleapis.com; frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://www.google.com; connect-src 'self' https://translate.googleapis.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
 
   # Butun sayt (admin panel ham) endi bir xil QAT'IY CSP ostida — style-src'da
   # 'unsafe-inline' YO'Q. admin.html va admin-ui.js ning barcha inline uslublari

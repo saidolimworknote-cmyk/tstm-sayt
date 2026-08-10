@@ -7,6 +7,37 @@ Loyihaning texnik xavfsizlik holati: [SECURITY.md](SECURITY.md)
 
 ---
 
+## 0. Yuklash paketini yig'ish (mahalliy)
+
+Serverga loyihaning HAMMASI ketmaydi: `backups\` 114 MB va ichida parol xeshi
+bor, `config.php` da mahalliy baza paroli, `.git\`/`tests\`/`*.ps1` esa veb
+papkada umuman keraksiz. Buni qo'lda ajratish xatoga olib keladi, shuning uchun
+skript bor:
+
+```powershell
+# Domen hali ma'lum bo'lmasa - shunchaki:
+powershell -ExecutionPolicy Bypass -File deploy.ps1
+
+# Domen ma'lum bo'lgach (sitemap.xml va robots.txt ga yoziladi):
+powershell -ExecutionPolicy Bypass -File deploy.ps1 -Domain tstm.uz
+```
+
+Natija: `%USERPROFILE%\Desktop\tstm-deploy\tstm-<sana>.zip` (~5.8 MB, 98 fayl).
+
+Skript oxirida O'ZI tekshiradi:
+
+- `.htaccess` va `uploads\.htaccess` paketda BORmi (ular nuqta bilan boshlanadi
+  va FTP mijozlari ko'pincha yashiradi - ular ko'chmasa saytning BUTUN himoya
+  qatlami yo'qoladi);
+- `config.php`, `data.json`, `backups\`, `.git\` paketga TUSHMAGANmi;
+- zip ichidagi yo'llar to'g'ri slash (`/`) bilan yozilganmi.
+
+> Oxirgi band bejiz emas: PowerShell 5.1 dagi `Compress-Archive` yo'llarni
+> `uploads\.htaccess` ko'rinishida yozadi. Linux serverdagi `unzip` buni papka
+> deb emas, nomida teskari slash bo'lgan yagona fayl deb ochadi - natijada
+> `uploads/` papkasi umuman paydo bo'lmaydi va barcha rasm/PDF 404 beradi.
+> `deploy.ps1` zipni shu sababli qo'lda yig'adi.
+
 ## 1. Serverga qo'yishdan oldin
 
 - [ ] **`config.php` yaratilgan.** `config.sample.php` dan nusxalang:
@@ -33,8 +64,17 @@ Loyihaning texnik xavfsizlik holati: [SECURITY.md](SECURITY.md)
       Keyin `config.php` da: `'db_user' => 'tstm_app'`, `'db_pass' => '...'`.
 
       > `CREATE`/`ALTER` kerak, chunki `db.php` jadvallarni birinchi ishga
-      > tushishda o'zi yaratadi va migratsiya qiladi. Jadvallar bir marta
-      > yaratilgach bu ikki huquqni olib tashlashingiz mumkin.
+      > tushishda o'zi yaratadi va migratsiya qiladi.
+      >
+      > ⚠️ **Bu ikki huquqni OLIB TASHLAMANG.** Ilgari shu yerda "jadvallar
+      > yaratilgach olib tashlash mumkin" deb yozilgan edi — bu XATO. `db.php`
+      > yangilanganda (masalan jadvalga yangi ustun qo'shilganda) sxema qayta
+      > quriladi va `CREATE`/`ALTER` yana kerak bo'ladi. Huquq bo'lmasa sayt
+      > yangilanishdan keyin 500 xato beradi.
+      >
+      > Kundalik ishda bu huquqlar baribir ISHLATILMAYDI: `provision()` ning
+      > qorovuli sxema dolzarb ekanini bitta `SELECT` bilan aniqlaydi va DDL
+      > umuman bajarilmaydi (`schema_meta` jadvali).
 
 - [ ] **Admin paroli almashtirilgan.** Kamida 12 belgi.
       Admin panel → Sozlamalar → «Xavfsizlik — kirish paroli».
@@ -42,6 +82,40 @@ Loyihaning texnik xavfsizlik holati: [SECURITY.md](SECURITY.md)
 - [ ] **`config.php` dagi `admin_bootstrap_password` bo'sh.**
       U faqat butunlay yangi (bo'sh) bazani birinchi marta ochish uchun kerak.
       Kirgandan keyin darhol bo'shatiladi.
+
+## 1b. Kontentni serverga ko'chirish (baza dumpi)
+
+⚠️ **Bu qadam tashlab ketilsa, hostingda BO'SH NAMUNA sayt chiqadi.** Fayllarni
+ko'chirishning o'zi kontentni ko'chirmaydi: barcha yangilik, nashr, ekspert va
+sahifa matnlari BAZADA. Bo'sh bazani ko'rgan `db.php` uni standart namuna
+kontenti bilan to'ldiradi (`db_bootstrap_if_empty`) - bu sizning ma'lumotingiz
+emas.
+
+- [ ] **Hostingga mos dump yasalgan.** `backups\` dagi tayyor zaxira BU YERGA
+      YARAMAYDI: `backup.ps1` uni `--databases` bilan oladi, ya'ni ichida
+      `CREATE DATABASE tstm` va `USE tstm` bor. Hostingda baza nomi boshqacha
+      (`u12345_tstm`) va import xato beradi. Alohida dump kerak:
+
+      ```powershell
+      & 'C:\xampp\mysql\bin\mysqldump.exe' -u root --single-transaction `
+        --default-character-set=utf8mb4 tstm --result-file=hosting-import.sql
+      ```
+
+      `--databases` YO'Q - shuning uchun dump istalgan nomdagi bazaga tushadi.
+
+- [ ] **Import qilingan.** phpMyAdmin -> bazani tanlang -> Import. Yoki SSH bilan:
+      `mysql -u u12345_tstm_app -p u12345_tstm < hosting-import.sql`
+
+- [ ] **Tekshirilgan:** 22 ta jadval bor; `news`/`publications` da yozuvlar bor;
+      o'zbekcha apostroflar (`bo'yicha`) va kirillcha matn buzilmagan.
+
+- [ ] **Dump serverdan O'CHIRILGAN.** Ichida `auth` jadvali, ya'ni admin
+      parolining bcrypt xeshi bor. Import tugagach faylni serverda qoldirmang.
+
+> Mahalliy ishlab chiqish qoldiqlarini (audit/xatolik jurnallari, push obunasi,
+> ko'rishlar hisoblagichi) dumpga qo'shmaslik tavsiya etiladi - ular hostingda
+> faqat chalkashlik keltiradi. Buning uchun `--no-create-info` bilan ikkinchi
+> dump va `--ignore-table=tstm.audit_log` kabi bayroqlar ishlatiladi.
 
 ## 2. Fayl huquqlari
 
@@ -137,7 +211,9 @@ Quyidagi manzillar **403 yoki 404** qaytarishi shart (ochilib qolmasin):
 
 Quyidagilar **200** qaytarishi shart:
 
-- [ ] `/` (bosh sahifaga yo'naltiradi)
+- [ ] `/` (bosh sahifaning O'ZI ochiladi - yo'naltirishsiz. 2026-08-10 dan
+      bosh sahifa `index.html`, eski `Bosh sahifa - Hi-Fi.html` va uni
+      yo'naltiruvchi `index.php` olib tashlandi.)
 - [ ] `/api.php?action=load` — ichida `messages`, `subscribers`, `users`
       **bo'sh massiv** bo'lishi va `passwordHash` **umuman bo'lmasligi** kerak.
 - [ ] `/robots.txt`, `/sitemap.xml`

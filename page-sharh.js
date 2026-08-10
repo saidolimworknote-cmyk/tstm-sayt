@@ -7,7 +7,7 @@
     const main = document.getElementById('main');
     const T = Site.t;
     if(!p || p.status!=='published'){
-      main.innerHTML = `<div class="page-banner"><div class="wrap"><div class="crumb"><a href="Bosh sahifa - Hi-Fi.html">${T('home')}</a><span class="sep">/</span><a href="oav.html">${T('nav_hap_experts')}</a></div><h1>${T('not_found_t')}</h1></div></div>
+      main.innerHTML = `<div class="page-banner"><div class="wrap"><div class="crumb"><a href="index.html">${T('home')}</a><span class="sep">/</span><a href="oav.html">${T('nav_hap_experts')}</a></div><h1>${T('not_found_t')}</h1></div></div>
         <section class="block"><div class="wrap"><div class="empty"><div class="t">${T('not_found_t')}</div><div class="mt-20"><a class="btn outline" href="oav.html">← ${T('all_oav')}</a></div></div></div></section>`;
       return;
     }
@@ -48,7 +48,7 @@
 
     main.innerHTML = `${printHead}
       <div class="page-banner"><div class="wrap">
-        <div class="crumb"><a href="Bosh sahifa - Hi-Fi.html">${T('home')}</a><span class="sep">/</span><a href="oav.html">${T('nav_hap_experts')}</a>${p.outlet?`<span class="sep">/</span><span>${Site.esc(p.outlet)}</span>`:''}</div>
+        <div class="crumb"><a href="index.html">${T('home')}</a><span class="sep">/</span><a href="oav.html">${T('nav_hap_experts')}</a>${p.outlet?`<span class="sep">/</span><span>${Site.esc(p.outlet)}</span>`:''}</div>
         <h1>${Site.esc(Site.mlGet(p.title))}</h1>
       </div></div>
       <section class="block"><div class="wrap"><div class="article">

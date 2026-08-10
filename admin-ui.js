@@ -1843,7 +1843,7 @@
     m.innerHTML = `<button id="mProfile">${ic('users')} Profil</button><button id="mSite">${ic('eye')} Saytni ko'rish</button><div class="sep"></div><button class="danger" id="mOut">${ic('logout')} Chiqish</button>`;
     document.body.appendChild(m);
     $('#mProfile', m).onclick = () => { m.remove(); location.hash = '#/users'; };
-    $('#mSite', m).onclick = () => { m.remove(); window.open('Bosh sahifa - Hi-Fi.html', '_blank'); };
+    $('#mSite', m).onclick = () => { m.remove(); window.open('index.html', '_blank'); };
     $('#mOut', m).onclick = () => { Store.logout(); m.remove(); $('#app').classList.remove('show'); $('#login').classList.add('show'); $('#lp').value = ''; location.hash = ''; };
     setTimeout(() => document.addEventListener('click', function h(e) { if (!m.contains(e.target) && !$('#userChip').contains(e.target)) { m.remove(); document.removeEventListener('click', h); } }), 0);
   }

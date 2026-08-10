@@ -30,7 +30,7 @@ Write-Host ("=" * 60)
 
 # ---- 1. Sahifalar yuklanadi (200) ----
 Write-Host "`n[1] Sahifalar 200 qaytaradi"
-$pages = 'Bosh sahifa - Hi-Fi.html','nashrlar.html','yangiliklar.html','aloqa.html',
+$pages = 'index.html','nashrlar.html','yangiliklar.html','aloqa.html',
          'media.html','rahbariyat.html','markaz-haqida.html','tadqiqotlar.html',
          'tadbirlar.html','yonalish.html','oav.html','sharh.html',
          'ekspertlar.html','hisobotlar.html','maqolalar.html','kitoblar.html','admin.html'
@@ -58,7 +58,7 @@ if ($json) {
 
 # ---- 3. Xavfsizlik sarlavhalari ----
 Write-Host "`n[3] Xavfsizlik sarlavhalari"
-$h = Head "$Base/Bosh%20sahifa%20-%20Hi-Fi.html"
+$h = Head "$Base/index.html"
 Check "Content-Security-Policy" ($h -match 'Content-Security-Policy:')
 Check "X-Content-Type-Options: nosniff" ($h -match 'X-Content-Type-Options:\s*nosniff')
 Check "X-Frame-Options" ($h -match 'X-Frame-Options:')

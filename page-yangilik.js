@@ -7,7 +7,7 @@
     const main = document.getElementById('main');
     const T = Site.t;
     if(!n){
-      main.innerHTML = `<div class="page-banner"><div class="wrap"><div class="crumb"><a href="Bosh sahifa - Hi-Fi.html">${T('home')}</a><span class="sep">/</span><a href="yangiliklar.html">${T('nav_news')}</a></div><h1>${T('not_found_t')}</h1></div></div>
+      main.innerHTML = `<div class="page-banner"><div class="wrap"><div class="crumb"><a href="index.html">${T('home')}</a><span class="sep">/</span><a href="yangiliklar.html">${T('nav_news')}</a></div><h1>${T('not_found_t')}</h1></div></div>
         <section class="block"><div class="wrap"><div class="empty"><div class="t">${T('not_found_t')}</div><div class="mt-20"><a class="btn outline" href="yangiliklar.html">← ${T('all_news')}</a></div></div></div></section>`;
       return;
     }
@@ -32,7 +32,7 @@
     const printFoot = `<div class="print-foot"><span>${Site.esc(T('print_source'))}: ${Site.esc(location.href)}</span><span>${Site.esc(T('print_date'))}: ${Site.fmtDate(new Date().toISOString().slice(0,10))}</span></div>`;
     main.innerHTML = `${printHead}
       <div class="page-banner"><div class="wrap">
-        <div class="crumb"><a href="Bosh sahifa - Hi-Fi.html">${T('home')}</a><span class="sep">/</span><a href="yangiliklar.html">${T('nav_news')}</a><span class="sep">/</span><span>${n.category?Site.esc(Site.mlGet(n.category)):T('search_k_news')}</span></div>
+        <div class="crumb"><a href="index.html">${T('home')}</a><span class="sep">/</span><a href="yangiliklar.html">${T('nav_news')}</a><span class="sep">/</span><span>${n.category?Site.esc(Site.mlGet(n.category)):T('search_k_news')}</span></div>
         <h1>${Site.esc(Site.mlGet(n.title))}</h1>
       </div></div>
       <section class="block"><div class="wrap"><div class="article">
