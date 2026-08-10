@@ -189,6 +189,17 @@ if (-not $NoZip) {
   Write-Host ("Arxiv: {0} ({1:N1} MB)" -f $zip, ($zsize / 1MB)) -ForegroundColor Green
 }
 
+# ---- Topshiriq hujjati -------------------------------------------
+# TOPSHIRISH.md paket ICHIGA tushmaydi (.md kengaytmasi chiqarib tashlangan va
+# .htaccess uni baribir to'sadi), lekin u o'rnatuvchi mutaxassislar uchun
+# zarur. Shuning uchun zip YONIGA qo'yiladi - topshiriladigan to'plam shu:
+#   tstm-<sana>.zip + hosting-import.sql + TOPSHIRISH.md
+$doc = Join-Path $src 'TOPSHIRISH.md'
+if (Test-Path $doc) {
+  Copy-Item $doc (Join-Path $Out 'TOPSHIRISH.md') -Force
+  Write-Host "  [OK]   TOPSHIRISH.md paket yoniga qo'yildi"
+}
+
 Write-Host ""
 if ($missing.Count -gt 0 -or $leaked.Count -gt 0) {
   # DIQQAT: bu satr ichida uzun tire (em dash) ISHLATILMAYDI. PowerShell 5.1
