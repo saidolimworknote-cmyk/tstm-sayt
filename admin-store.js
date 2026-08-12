@@ -17,15 +17,19 @@
   function seed() {
     return {
       settings: {
+        // RU/EN qo'lda tasdiqlangan (2026-08-12) — avtomatik tarjimaga ISHONILMAYDI:
+        // header/footerdagi brend nomi shu matndan ikki muvozanatli qatorga
+        // bo'linadi (page-home.js/site-common.js brandLines()), shuning uchun
+        // so'zma-so'z aniq bo'lishi shart. (seed.php'da ham xuddi shu qiymat bor.)
         siteName: ml(
           'Tashqi siyosiy tadqiqotlar va xalqaro tashabbuslar markazi',
-          'Центр внешнеполитических исследований и международных инициатив',
-          'Center for Foreign Policy Research and International Initiatives'
+          'Центр Внешнеполитических Исследований',
+          'Center for Foreign Policy Studies'
         ),
         shortName: 'TSTM',
         address: ml("Mahmudjon G'ofurov ko'chasi, Toshkent", 'ул. Махмуджона Гофурова, Ташкент', 'Mahmudjon Gofurov St., Tashkent'),
-        email: 'info@markaz.uz',
-        phone: '+998 71 000 00 00',
+        email: 'info@cfps.uz',
+        phone: '+998 71 239 36 55',
         mapQuery: '41.310961,69.246750', // xarita joyi: koordinata "lat,lng" yoki manzil (Google Maps)
         social: { telegram: 'https://t.me/', youtube: '#', facebook: '#', x: '#' },
         langs: { uz: true, ru: true, en: true },
@@ -68,7 +72,7 @@
         { id: uid(), name: ml('Kamola Ergasheva', '', ''), role: ml('Bosh ilmiy xodim', '', ''), sub: ml('Iqtisodiy diplomatiya', '', ''), photo: '', bio: ml('', '', ''), order: 4 }
       ],
       publications: [
-        { id: uid(), title: ml('Markaziy Osiyoda yangi diplomatik arxitektura', '', ''), type: 'Hisobot', category: 'Tashqi siyosat', region: 'Markaziy Osiyo', author: 'Bobur Rahimov', year: '2026', status: 'published', cover: '', pdf: 'markaziy-osiyo-arxitektura.pdf', desc: ml('', '', '') },
+        { id: uid(), title: ml('Markaziy Osiyoda yangi diplomatik arxitektura', '', ''), type: 'Tahlil', category: 'Tashqi siyosat', region: 'Markaziy Osiyo', author: 'Bobur Rahimov', year: '2026', status: 'published', cover: '', pdf: 'markaziy-osiyo-arxitektura.pdf', desc: ml('', '', '') },
         { id: uid(), title: ml('Mintaqaviy transport yo\'laklari va savdo istiqbollari', '', ''), type: 'Tahliliy sharh', category: 'Iqtisodiyot', region: 'Markaziy Osiyo', author: 'Kamola Ergasheva', year: '2026', status: 'published', cover: '', pdf: 'transport-yolaklari.pdf', desc: ml('', '', '') },
         { id: uid(), title: ml('Mintaqaviy xavfsizlik: tahdidlar va imkoniyatlar', '', ''), type: 'Monografiya', category: 'Xavfsizlik', region: 'Markaziy Osiyo', author: 'Sardor Aliyev', year: '2025', status: 'published', cover: '', pdf: 'mintaqaviy-xavfsizlik.pdf', desc: ml('', '', '') }
       ],

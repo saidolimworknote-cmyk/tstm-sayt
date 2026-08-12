@@ -12,21 +12,23 @@
 <meta property="og:description" content="Tashqi siyosiy tadqiqotlar va xalqaro tashabbuslar markazi — tashqi siyosat, mintaqaviy xavfsizlik va xalqaro hamkorlik bo'yicha tahlil, yangilik va nashrlar.">
 <meta property="og:image" content="logo-mark.png">
 <meta name="twitter:card" content="summary">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="home.css?v=14">
-<link rel="stylesheet" href="subscribe.css?v=3">
+<link rel="stylesheet" href="fonts.css?v=1">
+<link rel="stylesheet" href="home.css?v=16">
+<link rel="stylesheet" href="subscribe.css?v=4">
 </head>
 <body>
 
 <!-- ===================== HEADER ===================== -->
-<header id="hdr">
+<!-- Ilgari bosh sahifada header gero ustida shaffof/blur holatda boshlanib,
+     skroll qilinganda oqqa o'tardi (page-home.js, "header solid on scroll").
+     2026-08-12: ichki sahifalar bilan bir xillik uchun endi boshidanoq OQ
+     ("solid") — skroll bog'liqligi olib tashlandi. -->
+<header id="hdr" class="solid">
   <div class="util">
     <div class="wrap">
       <span data-i18n="util_country">O'zbekiston Respublikasi</span>
-      <a href="#" id="utilEmail">info@markaz.uz</a>
-      <a href="#" id="utilPhone">+998 71 000 00 00</a>
+      <a href="#" id="utilEmail">info@cfps.uz</a>
+      <a href="#" id="utilPhone">+998 71 239 36 55</a>
       <span class="sp"></span>
       <div class="langs" role="group" aria-label="Til / Язык / Language"><span data-l="uz" role="button" tabindex="0" aria-label="O'zbekcha">UZ</span><span data-l="ru" role="button" tabindex="0" aria-label="Русский">RU</span><span data-l="en" role="button" tabindex="0" aria-label="English">EN</span></div>
     </div>
@@ -43,13 +45,13 @@
           <div class="drop"><a href="rahbariyat.html" data-i18n="nav_about_leadership">Rahbariyat</a><a href="ekspertlar.html" data-i18n="nav_about_experts">Ekspertlar</a></div>
         </div>
         <div class="item"><a href="yangiliklar.html"><span data-i18n="nav_happenings">Voqealar</span> <i class="car"></i></a>
-          <div class="drop"><a href="yangiliklar.html" data-i18n="nav_hap_news">Yangiliklar TSTM</a><a href="oav.html" data-i18n="nav_hap_experts">Bizning ekspertlar OAVlarda</a><a href="tadbirlar.html" data-i18n="nav_hap_events">Tadbirlar TSTM</a></div>
+          <div class="drop"><a href="yangiliklar.html" data-i18n="nav_hap_news">Yangiliklar TSTM</a><a href="tadbirlar.html" data-i18n="nav_hap_events">Tadbirlar TSTM</a></div>
         </div>
-        <div class="item"><a href="nashrlar.html"><span data-i18n="nav_analytics">Tahlillar</span> <i class="car"></i></a>
-          <div class="drop"><a href="hisobotlar.html" data-i18n="nav_an_reports">Hisobotlar</a><a href="maqolalar.html" data-i18n="nav_an_articles">Maqolalar</a><a href="kitoblar.html" data-i18n="nav_an_books">Kitoblar</a></div>
+        <div class="item"><a href="nashrlar.html"><span data-i18n="nav_analytics">Tadqiqotlar</span> <i class="car"></i></a>
+          <div class="drop"><a href="maqolalar.html" data-i18n="nav_an_articles">Maqolalar</a><a href="maruzalar.html" data-i18n="nav_an_lectures">Ma'ruzalar</a><a href="tahlillar.html" data-i18n="nav_an_reports">Tahlillar</a><a href="kitoblar.html" data-i18n="nav_an_books">Kitoblar</a></div>
         </div>
         <div class="item"><a href="media.html"><span data-i18n="nav_media">Media</span> <i class="car"></i></a>
-          <div class="drop"><a href="media.html?tab=photo" data-i18n="nav_media_photo">Fotogalereya</a><a href="media.html?tab=video" data-i18n="nav_media_video">Videomateriallar</a><a href="media.html?tab=info" data-i18n="nav_media_info">Infografika</a></div>
+          <div class="drop"><a href="oav.html" data-i18n="nav_hap_experts">Bizning ekspertlar OAVlarda</a><a href="media.html?tab=photo" data-i18n="nav_media_photo">Fotogalereya</a><a href="media.html?tab=video" data-i18n="nav_media_video">Videomateriallar</a><a href="media.html?tab=info" data-i18n="nav_media_info">Infografika</a></div>
         </div>
         <!-- Ochiluvchi ro'yxatsiz yakka band (shuning uchun .car ham, .drop ham yo'q) -->
         <div class="item"><a href="aloqa.html"><span data-i18n="nav_contact">Aloqa</span></a></div>
@@ -79,7 +81,7 @@
   </div>
   <a href="markaz-haqida.html" data-i18n="nav_about">Markaz haqida</a>
   <a href="yangiliklar.html" data-i18n="nav_happenings">Voqealar</a>
-  <a href="nashrlar.html" data-i18n="nav_analytics">Tahlillar</a>
+  <a href="nashrlar.html" data-i18n="nav_analytics">Tadqiqotlar</a>
   <a href="media.html" data-i18n="nav_media">Media</a>
   <a href="aloqa.html" data-i18n="nav_contact">Aloqa</a>
 </div>
@@ -177,7 +179,7 @@
     </div>
     <div class="pub-grid">
       <article class="pub rv">
-        <div class="cover"><span class="badge">Hisobot</span><div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></svg></div></div>
+        <div class="cover"><span class="badge">Tahlil</span><div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></svg></div></div>
         <div class="body"><div class="t">Tashqi siyosat · 2026</div><h3>Markaziy Osiyoda yangi diplomatik arxitektura</h3>
           <a class="dl" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 19h14" stroke-linecap="round" stroke-linejoin="round"/></svg>PDF yuklab olish</a>
         </div>
@@ -236,13 +238,6 @@
           <span class="hp-foot-txt"><b data-i18n="org_name">TASHQI SIYOSIY TADQIQOTLAR</b><small data-i18n="org_tagline">va xalqaro tashabbuslar markazi</small></span>
         </div>
         <p class="f-about" data-i18n="footer_about">Mustaqil tahliliy markaz. Tashqi siyosat, mintaqaviy xavfsizlik va xalqaro hamkorlik bo'yicha ekspert-tahliliy tadqiqotlar.</p>
-        <!-- Alohida "Aloqa" ustuni yo'q — manzil bilan e-pochta shu yerda ixcham
-             turadi (telefon tepadagi util qatorida). Qiymatlar page-home.js da
-             sozlamalardan to'ldiriladi. -->
-        <div class="f-meta">
-          <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg><span id="fAddr">Toshkent sh., O'zbekiston</span></div>
-          <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7.2 8.5 6 8.5-6"/></svg><a id="fEmail" href="#">info@markaz.uz</a></div>
-        </div>
         <div class="socials">
           <a href="#" id="fsTelegram" target="_blank" rel="noopener" aria-label="Telegram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.5 4.3 2.9 11.4c-.9.4-.9 1.6.1 1.9l4.6 1.4 1.8 5.6c.2.7 1.1.9 1.6.3l2.5-2.5 4.7 3.5c.6.4 1.4 0 1.5-.7L23 5.4c.2-.9-.7-1.5-1.5-1.1Z"/></svg></a>
           <a href="#" id="fsYoutube" target="_blank" rel="noopener" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 12s0-3.2-.4-4.7c-.2-.8-.9-1.5-1.7-1.7C19.4 5.2 12 5.2 12 5.2s-7.4 0-8.9.4c-.8.2-1.5.9-1.7 1.7C1 8.8 1 12 1 12s0 3.2.4 4.7c.2.8.9 1.5 1.7 1.7 1.5.4 8.9.4 8.9.4s7.4 0 8.9-.4c.8-.2 1.5-.9 1.7-1.7C23 15.2 23 12 23 12ZM9.8 15.3V8.7l6 3.3-6 3.3Z"/></svg></a>
@@ -254,12 +249,17 @@
            Ichki sahifalarda xuddi shu ro'yxat site-common.js dagi NAV massividan
            chiziladi — menyu o'zgarsa BU YERNI ham qo'lda yangilash kerak. -->
       <div class="f-col"><h5 data-i18n="nav_about">Markaz haqida</h5><a href="rahbariyat.html" data-i18n="nav_about_leadership">Rahbariyat</a><a href="ekspertlar.html" data-i18n="nav_about_experts">Ekspertlar</a></div>
-      <div class="f-col"><h5 data-i18n="nav_happenings">Voqealar</h5><a href="yangiliklar.html" data-i18n="nav_hap_news">Yangiliklar TSTM</a><a href="oav.html" data-i18n="nav_hap_experts">Bizning ekspertlar OAVlarda</a><a href="tadbirlar.html" data-i18n="nav_hap_events">Tadbirlar TSTM</a></div>
-      <div class="f-col"><h5 data-i18n="nav_analytics">Tahlillar</h5><a href="hisobotlar.html" data-i18n="nav_an_reports">Hisobotlar</a><a href="maqolalar.html" data-i18n="nav_an_articles">Maqolalar</a><a href="kitoblar.html" data-i18n="nav_an_books">Kitoblar</a></div>
-      <div class="f-col"><h5 data-i18n="nav_media">Media</h5><a href="media.html?tab=photo" data-i18n="nav_media_photo">Fotogalereya</a><a href="media.html?tab=video" data-i18n="nav_media_video">Videomateriallar</a><a href="media.html?tab=info" data-i18n="nav_media_info">Infografika</a></div>
-      <!-- "Aloqa" ustuni (manzil/e-pochta/telefon) OLIB TASHLANDI: menyuda
-           "Aloqa" bandi bor va tepadagi util qatorida e-pochta bilan telefon
-           har sahifada ko'rinib turadi. -->
+      <div class="f-col"><h5 data-i18n="nav_happenings">Voqealar</h5><a href="yangiliklar.html" data-i18n="nav_hap_news">Yangiliklar TSTM</a><a href="tadbirlar.html" data-i18n="nav_hap_events">Tadbirlar TSTM</a></div>
+      <div class="f-col"><h5 data-i18n="nav_analytics">Tadqiqotlar</h5><a href="maqolalar.html" data-i18n="nav_an_articles">Maqolalar</a><a href="maruzalar.html" data-i18n="nav_an_lectures">Ma'ruzalar</a><a href="tahlillar.html" data-i18n="nav_an_reports">Tahlillar</a><a href="kitoblar.html" data-i18n="nav_an_books">Kitoblar</a></div>
+      <div class="f-col"><h5 data-i18n="nav_media">Media</h5><a href="oav.html" data-i18n="nav_hap_experts">Bizning ekspertlar OAVlarda</a><a href="media.html?tab=photo" data-i18n="nav_media_photo">Fotogalereya</a><a href="media.html?tab=video" data-i18n="nav_media_video">Videomateriallar</a><a href="media.html?tab=info" data-i18n="nav_media_info">Infografika</a></div>
+      <!-- Manzil/e-pochta. 2026-08-12: brend ustunidan bu yerga ko'chirildi —
+           endi sayt arxitekturasi (havola ustunlari) OSTIDA turadi (CSS grid:
+           `.f-top>.f-meta`, home.css). Alohida "Aloqa" USTUNI hamon yo'q:
+           menyuda "Aloqa" bandi bor, telefon esa tepadagi util qatorida. -->
+      <div class="f-meta">
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg><span id="fAddr">Toshkent sh., O'zbekiston</span></div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7.2 8.5 6 8.5-6"/></svg><a id="fEmail" href="#">info@cfps.uz</a></div>
+      </div>
     </div>
     <div class="f-bot">
       <span data-i18n="footer_copyright">© 2026 Tashqi siyosiy tadqiqotlar va xalqaro tashabbuslar markazi</span>
@@ -271,7 +271,7 @@
 <script src="diag.js?v=2"></script>
 <script src="i18n.js?v=62"></script>
 <script src="admin-store.js?v=52"></script>
-<script src="a11y.js?v=55"></script>
+<script src="a11y.js?v=56"></script>
 <script src="search.js?v=48"></script>
 <script src="subscribe.js?v=2"></script>
 <script src="page-home.js?v=11"></script>

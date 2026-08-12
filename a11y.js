@@ -76,7 +76,7 @@
   // yuklanadi (barcha sahifalar ildiz papkada — nisbiy yo'l to'g'ri ishlaydi).
   var cssLink = document.createElement('link');
   cssLink.rel = 'stylesheet';
-  cssLink.href = 'a11y.css?v=2';
+  cssLink.href = 'a11y.css?v=3';
   document.head.appendChild(cssLink);
 
   var ICONS = {

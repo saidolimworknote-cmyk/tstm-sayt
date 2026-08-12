@@ -11,7 +11,7 @@
    o'zgaruvchilarga zaxira qiymat berilgan.
    ============================================================ */
 
-.sub-ov{position:fixed;inset:0;z-index:99997;background:rgba(8,16,28,.62);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:opacity .3s, visibility .3s;font-family:var(--sans,'Inter',system-ui,sans-serif);}
+.sub-ov{position:fixed;inset:0;z-index:99997;background:rgba(8,16,28,.62);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:opacity .3s, visibility .3s;font-family:var(--sans,'Montserrat',system-ui,sans-serif);}
 .sub-ov.open{opacity:1;visibility:visible;}
 /* Rasmiy (davlat idorasi) uslubidagi obuna kartasi: yuqori aksent chizig'i, chapga tekislangan */
 .sub-modal{position:relative;background:var(--panel,#fff);color:var(--ink,#16181b);max-width:468px;width:100%;border:1px solid var(--line,#e6e6e2);border-radius:var(--r-card,16px);box-shadow:0 40px 90px -30px rgba(0,0,0,.5);transform:translateY(16px) scale(.98);transition:transform .3s cubic-bezier(.2,.8,.25,1);overflow:hidden;}

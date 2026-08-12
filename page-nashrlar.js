@@ -23,8 +23,8 @@
     const sortSel = document.getElementById('sortSel');
     const countEl = document.getElementById('count');
 
-    // "Tahlillar" bo'limining alohida sahifalari (hisobotlar/maqolalar/kitoblar)
-    // shu skriptning o'zini ishlatadi. Ular <main data-ptypes="Tur1,Tur2">
+    // "Tadqiqotlar" bo'limining alohida sahifalari (maqolalar/maruzalar/
+    // tahlillar/kitoblar) shu skriptning o'zini ishlatadi. Ular <main data-ptypes="Tur1,Tur2">
     // atributi bilan qaysi nashr turlarini ko'rsatishni aytadi — CSP inline
     // skriptga ruxsat bermagani uchun sozlama DOM orqali uzatiladi.
     // Atribut bo'lmasa (nashrlar.html) — barcha nashrlar, hech narsa cheklanmaydi.
@@ -37,9 +37,9 @@
     const types = Array.from(new Set(allPubs.map(p=>p.type).filter(Boolean)));
 
     let cat = (Site.qs('cat')||'').replace(/\+/g,' '); if(cats.indexOf(cat)<0) cat='';
-    // ?type=<tur> — bosh sahifadagi "Tahlillar" menyusi shu bilan keladi
-    // (Hisobotlar/Maqolalar/Kitoblar). Bazada yo'q tur berilsa e'tiborsiz
-    // qoldiriladi va hamma nashrlar chiqadi (bo'sh sahifa ko'rsatmaymiz).
+    // ?type=<tur> — bosh sahifadagi "Tadqiqotlar" menyusi shu bilan keladi
+    // (Maqolalar/Ma'ruzalar/Tahlillar/Kitoblar). Bazada yo'q tur berilsa
+    // e'tiborsiz qoldiriladi va hamma nashrlar chiqadi (bo'sh sahifa ko'rsatmaymiz).
     let type = (Site.qs('type')||'').replace(/\+/g,' '); if(types.indexOf(type)<0) type='';
     let q='', sort='new';
     // Ekspert sahifasidan "Barchasini ko'rish" -> ?author=<ism> bilan keladi:
@@ -52,7 +52,7 @@
     typeSel.innerHTML = `<option value="">${esc(tt('allT'))}</option>` + types.map(t=>`<option value="${esc(t)}">${esc(ml(t))}</option>`).join('');
     if(type) typeSel.value = type;   // URL'dan kelgan tur tanlagichda ham ko'rinsin
     // Tur cheklangan sahifada bittagina tur qolsa tanlagich ma'nosiz — yashiramiz
-    // (masalan "Hisobotlar" sahifasida bazada faqat "Hisobot" bo'lsa).
+    // (masalan "Tahlillar" sahifasida bazada faqat "Tahlil" bo'lsa).
     if(scope.length && types.length < 2){
       const box = typeSel.closest('.pubsel');
       if(box) box.style.display = 'none';

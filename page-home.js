@@ -110,8 +110,8 @@
   try {
     var _cs = (window.Store && Store.settings && Store.settings()) || {};
     var _cml = function(v){ if(v && typeof v==='object'){ var L=(window.I18N?I18N.lang:'uz'); return v[L]||v.uz||v.ru||v.en||''; } return v||''; };
-    var _email = _cs.email || 'info@markaz.uz';
-    var _phone = _cs.phone || '+998 71 000 00 00';
+    var _email = _cs.email || 'info@cfps.uz';
+    var _phone = _cs.phone || '+998 71 239 36 55';
     var _tel   = 'tel:' + _phone.replace(/[^\d+]/g,'');
     var _setLink = function(id, txt, href){ var el=document.getElementById(id); if(!el) return; if(txt!=null) el.textContent=txt; if(href!=null) el.href=href; };
     _setLink('utilEmail', _email, 'mailto:'+_email);
@@ -147,16 +147,6 @@
     try { localStorage.setItem(THEME_KEY, siteTheme); } catch{}
     applySiteTheme(siteTheme);
   }));
-
-  // ---- header solid on scroll ----
-  const hdr = document.getElementById('hdr');
-  const hero = document.getElementById('hero');
-  function onScroll(){
-    const t = hero.offsetHeight - 90;
-    hdr.classList.toggle('solid', window.scrollY > t);
-  }
-  window.addEventListener('scroll', onScroll, {passive:true});
-  onScroll();
 
   // ---- build hero from latest 4 published news (CMS-connected) ----
   const mlGet = (v) => { if (v && typeof v === 'object') { const L = (window.I18N ? I18N.lang : 'uz'); return v[L] || v.uz || v.ru || v.en || ''; } return (window.I18N ? I18N.tl(v || '') : (v || '')); };
@@ -410,6 +400,7 @@
 
   // ---- hero slider ----
   try {
+    const hero = document.getElementById('hero');
     const slides = [...document.querySelectorAll('.slide')];
     const dots = [...document.querySelectorAll('.dot')];
     let cur = 0, timer = null, DUR = 6000;

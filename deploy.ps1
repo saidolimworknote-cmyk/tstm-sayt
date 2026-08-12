@@ -46,6 +46,7 @@ $skipFiles = @(
   'cache_public.json',       # avtomatik yasaladi
   'deploy.ps1',              # shu skriptning o'zi
   'backup.ps1', 'restore.ps1',   # Windows zaxira vositalari
+  'koch.ps1', 'ORNAT.ps1', 'ORNAT.bat',  # boshqa PC ga ko'chirish vositalari
   'eslint.config.mjs', '.stylelintrc.json',  # ishlab chiqish vositalari
   '.gitignore'
 )

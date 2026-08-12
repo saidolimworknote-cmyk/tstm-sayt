@@ -2,6 +2,10 @@
    Ilgari admin.html ichida inline <style> blok edi (331 qator). Tashqi
    faylga chiqarildi: qat`iy CSP (style-src `self`) inline <style> ni bloklaydi. */
   *{box-sizing:border-box;}
+  /* Forma boshqaruvlari shriftni meros olmaydi (brauzer standarti = Arial).
+     Admin panel deyarli butunlay forma elementlaridan iborat, shuning uchun
+     bu qoida bu yerda ayniqsa muhim. Izoh: site.css dagi shu qoida. */
+  button,input,select,textarea{font-family:inherit;}
   /* Utility/komponent klasslar — inline style="" o'rniga (CSP style-src 'self').
      admin-ui.js render funksiyalari shulardan foydalanadi. */
   .btn-login-full{width:100%;justify-content:center;padding:12px;}
@@ -95,9 +99,9 @@
     /* Radius shkalasi — sayt bilan bir xil, qirrali shakl qolmasin */
     --r:10px; --r-s:8px; --r-card:16px; --r-pill:999px;
     --sb:264px;
-    --serif:'Spectral',Georgia,serif;
-    --sans:'Inter',system-ui,sans-serif;
-    --mono:'IBM Plex Mono',ui-monospace,monospace;
+    --serif:'Montserrat',Georgia,serif;
+    --sans:'Montserrat',system-ui,sans-serif;
+    --mono:'Montserrat',ui-monospace,monospace;
   }
   html[data-theme="light"]{
     --bg:#ffffff; --panel:#ffffff; --panel-2:#fafbfc;

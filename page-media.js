@@ -216,7 +216,7 @@
     draw();
 
     // ---- matbuot xizmati ----
-    const email = s.email || 'info@markaz.uz';
+    const email = s.email || 'info@cfps.uz';
     const press = document.getElementById('press');
     if (press) press.innerHTML = `
       <div class="pl">

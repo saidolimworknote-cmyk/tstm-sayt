@@ -52,10 +52,14 @@
     nav_hap_news:         { uz: 'Yangiliklar TSTM', ru: 'Новости ЦВПИ', en: 'CFPS news' },
     nav_hap_experts:      { uz: 'Bizning ekspertlar OAVlarda', ru: 'Наши эксперты в СМИ', en: 'Our experts in the media' },
     nav_hap_events:       { uz: 'Tadbirlar TSTM', ru: 'Мероприятия ЦВПИ', en: 'CFPS events' },
-    nav_analytics:        { uz: 'Tahlillar', ru: 'Аналитика', en: 'Analysis' },
-    nav_an_reports:       { uz: 'Hisobotlar', ru: 'Отчёты', en: 'Reports' },
+    /* 2026-08-12: bo'lim nomi "Tahlillar" dan "Tadqiqotlar"ga o'zgardi, ichidagi
+       "Hisobotlar" bandi esa "Tahlillar" bo'lib qoldi (nav_an_reports kaliti
+       ATAYLAB nav_an_analysis ga o'zgartirilmadi — pastda alohida izoh bor). */
+    nav_analytics:        { uz: 'Tadqiqotlar', ru: 'Исследования', en: 'Research' },
+    nav_an_reports:       { uz: 'Tahlillar', ru: 'Аналитика', en: 'Analysis' },
     nav_an_articles:      { uz: 'Maqolalar', ru: 'Статьи', en: 'Articles' },
     nav_an_books:         { uz: 'Kitoblar', ru: 'Книги', en: 'Books' },
+    nav_an_lectures:      { uz: "Ma'ruzalar", ru: 'Лекции', en: 'Lectures' },
 
     /* ---- common ---- */
     home:         { uz: 'Bosh sahifa', ru: 'Главная', en: 'Home' },
@@ -175,7 +179,7 @@
     p_events_title:{ uz: 'Tadbirlar taqvimi', ru: 'Календарь мероприятий', en: 'Events calendar' },
     p_events_lead: { uz: "Konferensiyalar, davra suhbatlari, brifinglar va ta'lim dasturlari — markaz tashkil etadigan tadbirlar.", ru: 'Конференции, круглые столы, брифинги и образовательные программы — мероприятия центра.', en: 'Conferences, roundtables, briefings and educational programs organized by the center.' },
     p_pubs_title:  { uz: 'Tadqiqotlar va nashrlar', ru: 'Исследования и публикации', en: 'Research & publications' },
-    p_pubs_lead:   { uz: "Hisobotlar, tahliliy sharhlar va monografiyalar — yuklab olish uchun ochiq.", ru: 'Доклады, аналитические обзоры и монографии — доступны для скачивания.', en: 'Reports, analytical reviews and monographs — open for download.' },
+    p_pubs_lead:   { uz: "Tahlillar, maqolalar, ma'ruzalar va kitoblar — yuklab olish uchun ochiq.", ru: 'Аналитика, статьи, лекции и книги — доступны для скачивания.', en: 'Analysis, articles, lectures and books — open for download.' },
     p_research_title:{ uz: "Tadqiqot yo'nalishlari", ru: 'Направления исследований', en: 'Research areas' },
     p_research_lead:{ uz: 'Markaz olib boradigan asosiy tahliliy va ilmiy tadqiqot yo\'nalishlari.', ru: 'Основные аналитические и научно-исследовательские направления центра.', en: 'Core analytical and academic research areas of the center.' },
     p_research_recent:{ uz: "So'nggi tadqiqotlar", ru: 'Последние исследования', en: 'Recent research' },
@@ -185,8 +189,10 @@
     p_experts_title:{ uz: 'Ekspertlar', ru: 'Эксперты', en: 'Experts' },
     p_experts_lead:{ uz: 'Markaz ekspertlari — tahlilchilar va ilmiy xodimlar.', ru: 'Эксперты центра — аналитики и научные сотрудники.', en: 'The center experts — analysts and research staff.' },
     /* ---- "Tahlillar" bo'limining alohida sahifalari ---- */
-    p_reports_title:{ uz: 'Hisobotlar', ru: 'Отчёты', en: 'Reports' },
-    p_reports_lead:{ uz: 'Markazning tahliliy hisobotlari va statistik to‘plamlari.', ru: 'Аналитические отчёты и статистические сборники центра.', en: 'Analytical reports and statistical collections.' },
+    p_reports_title:{ uz: 'Tahlillar', ru: 'Аналитика', en: 'Analysis' },
+    p_reports_lead:{ uz: 'Markazning tahliliy materiallari va statistik to‘plamlari.', ru: 'Аналитические материалы и статистические сборники центра.', en: 'Analytical materials and statistical collections.' },
+    p_lectures_title:{ uz: "Ma'ruzalar", ru: 'Лекции', en: 'Lectures' },
+    p_lectures_lead:{ uz: 'Markaz ekspertlarining ma’ruza matnlari va taqdimotlari.', ru: 'Тексты лекций и презентации экспертов центра.', en: 'Lecture texts and presentations by the center’s experts.' },
     p_articles_title:{ uz: 'Maqolalar', ru: 'Статьи', en: 'Articles' },
     p_articles_lead:{ uz: 'Ekspert maqolalari va tahliliy sharhlar.', ru: 'Экспертные статьи и аналитические обзоры.', en: 'Expert articles and analytical reviews.' },
     p_books_title:{ uz: 'Kitoblar', ru: 'Книги', en: 'Books' },
@@ -334,6 +340,7 @@
     'Monografiya':            { ru: 'Монография', en: 'Monograph' },
     'Nashr':                  { ru: 'Публикация', en: 'Publication' },
     'Maqola':                 { ru: 'Статья', en: 'Article' },
+    "Ma'ruza":                { ru: 'Лекция', en: 'Lecture' },
     'Forum':                  { ru: 'Форум', en: 'Forum' },
     'Konferensiya':           { ru: 'Конференция', en: 'Conference' },
     'Seminar':                { ru: 'Семинар', en: 'Seminar' },

@@ -8,10 +8,12 @@ Sayt + boshqaruv paneli (admin). XAMPP'da ishlash uchun PHP backend bilan.
   `tadqiqotlar.html`, `markaz-haqida.html`, `rahbariyat.html`, `ekspertlar.html`, `media.html`, `aloqa.html`,
   `oav.html` + `sharh.html` — «Bizning ekspertlar OAVlarda» (ro'yxat va bitta sharh;
   admin'da **Ekspertlar OAVda** bo'limi, `media_posts` jadvali)
-- `hisobotlar.html`, `maqolalar.html`, `kitoblar.html` — «Tahlillar» menyusining
-  alohida sahifalari. Uchalasi ham `page-nashrlar.js` ni ishlatadi; qaysi nashr
-  turlarini ko'rsatish `<main data-ptypes="Tur1,Tur2">` atributida yoziladi
-  (CSP inline skriptga ruxsat bermagani uchun sozlama DOM orqali uzatiladi).
+- `maqolalar.html`, `maruzalar.html`, `tahlillar.html`, `kitoblar.html` — «Tadqiqotlar»
+  menyusining alohida sahifalari (2026-08-12 gacha bu menyu «Tahlillar» deb
+  atalgan va `hisobotlar.html` bo'lgan — u endi `tahlillar.html`). To'rttasi ham
+  `page-nashrlar.js` ni ishlatadi; qaysi nashr turlarini ko'rsatish
+  `<main data-ptypes="Tur1,Tur2">` atributida yoziladi (CSP inline skriptga
+  ruxsat bermagani uchun sozlama DOM orqali uzatiladi).
 - `rahbariyat.html` va `ekspertlar.html` — ikkalasi `page-rahbariyat.js` ni
   ishlatadi. Kimni ko'rsatish `<div id="grid" data-kind="Rahbariyat">` orqali
   hal qilinadi; xodimning bo'limi admin'da **Ekspertlar → Bo'lim** maydonida

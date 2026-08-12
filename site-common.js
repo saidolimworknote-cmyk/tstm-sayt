@@ -135,17 +135,25 @@
       { tk: 'nav_about_leadership', href: 'rahbariyat.html' },
       { tk: 'nav_about_experts', href: 'ekspertlar.html' }
     ]},
-    { tk: 'nav_happenings', href: 'yangiliklar.html', keys: ['news','events','oav'], children: [
+    { tk: 'nav_happenings', href: 'yangiliklar.html', keys: ['news','events'], children: [
       { tk: 'nav_hap_news', href: 'yangiliklar.html' },
-      { tk: 'nav_hap_experts', href: 'oav.html' },
       { tk: 'nav_hap_events', href: 'tadbirlar.html' }
     ]},
+    // 2026-08-12: "Tahlillar" -> "Tadqiqotlar"ga o'zgardi (nav_analytics'ning
+    // matni i18n.js da). Ichidagi eski "Hisobotlar" bandi endi "Tahlillar" deb
+    // ataladi (kalit — nav_an_reports — ATAYLAB o'zgarmadi, faqat matni;
+    // nav_hap_experts'ni Media'ga ko'chirganda ham xuddi shu naqsh ishlatilgan
+    // edi). Yangi "Ma'ruzalar" bandi qo'shildi.
     { tk: 'nav_analytics', href: 'nashrlar.html', keys: ['pubs','research'], children: [
-      { tk: 'nav_an_reports', href: 'hisobotlar.html' },
       { tk: 'nav_an_articles', href: 'maqolalar.html' },
+      { tk: 'nav_an_lectures', href: 'maruzalar.html' },
+      { tk: 'nav_an_reports', href: 'tahlillar.html' },
       { tk: 'nav_an_books', href: 'kitoblar.html' }
     ]},
-    { tk: 'nav_media', href: 'media.html', keys: ['media'], children: [
+    // 2026-08-12: "Bizning ekspertlarimiz OAVlarda" Voqealar'dan bu yerga
+    // ko'chirildi (birinchi band) — mazmunan Media bilan bir xil toifa.
+    { tk: 'nav_media', href: 'media.html', keys: ['media','oav'], children: [
+      { tk: 'nav_hap_experts', href: 'oav.html' },
       { tk: 'nav_media_photo', href: 'media.html?tab=photo' },
       { tk: 'nav_media_video', href: 'media.html?tab=video' },
       { tk: 'nav_media_info', href: 'media.html?tab=info' }
@@ -208,8 +216,8 @@
     el.innerHTML = `
       <div class="util"><div class="wrap">
         <span>${esc(T('util_country'))}</span>
-        <a href="mailto:${esc(s.email||'info@markaz.uz')}">${esc(s.email||'info@markaz.uz')}</a>
-        <a href="tel:${esc((s.phone||'').replace(/\s/g,''))}">${esc(s.phone||'+998 71 000 00 00')}</a>
+        <a href="mailto:${esc(s.email||'info@cfps.uz')}">${esc(s.email||'info@cfps.uz')}</a>
+        <a href="tel:${esc((s.phone||'').replace(/\s/g,''))}">${esc(s.phone||'+998 71 239 36 55')}</a>
         <span class="sp"></span>
         <div class="langs" role="group" aria-label="Til / Язык / Language">${langButtons()}</div>
       </div></div>
@@ -293,9 +301,9 @@
   // o'zi ergashadi. Ilgari ular qo'lda yozilgani uchun menyu qayta guruhlangach
   // footer eski bo'limlarni (Tadqiqotlar/Nashrlar) ko'rsatib qolgan edi.
   // Alohida "Aloqa" USTUNI ataylab yo'q (menyuda "Aloqa" bandi bor, telefon esa
-  // tepadagi util qatorida). Lekin manzil boshqa hech qayerda ko'rinmasdi va
-  // mobilda footer bo'shab qolardi — shuning uchun manzil bilan e-pochta brend
-  // ustuni ichida, tavsif ostida ixcham `.f-meta` bloki bo'lib turadi.
+  // tepadagi util qatorida). Manzil bilan e-pochta `.f-meta` blokida — 4 havola
+  // ustunidan KEYIN chiziladi va CSS orqali (`.f-top>.f-meta`, site.css) ular
+  // OSTIGA joylashadi (2026-08-12: ilgari brend ustuni ichida, chapda edi).
   function renderFooter(){
     const s = settings();
     const soc = s.social || {};
@@ -311,10 +319,6 @@
             <span><b>${esc(B.top)}</b><small>${esc(B.bot)}</small></span>
           </div>
           <p class="f-about">${esc(T('footer_about'))}</p>
-          <div class="f-meta">
-            <div>${ICON.pin}<span>${esc(mlGet(s.address)||"Toshkent sh., O'zbekiston")}</span></div>
-            <div>${ICON.mail}<a href="mailto:${esc(s.email||'info@markaz.uz')}">${esc(s.email||'info@markaz.uz')}</a></div>
-          </div>
           <div class="socials">${[
             {u:soc.telegram, i:ICON.tg, n:'Telegram'},
             {u:soc.youtube,  i:ICON.yt, n:'YouTube'},
@@ -326,6 +330,13 @@
         ${NAV.filter(n => n.children && n.children.length).map(n => `<div class="f-col"><h5>${esc(T(n.tk))}</h5>${
           n.children.map(c => `<a href="${c.href}">${esc(T(c.tk))}</a>`).join('')
         }</div>`).join('')}
+        <!-- Manzil/e-pochta. 2026-08-12: brend ustunidan bu yerga ko'chirildi —
+             endi sayt arxitekturasi (havola ustunlari) OSTIDA turadi
+             (CSS: .f-top greater-than .f-meta, site.css). -->
+        <div class="f-meta">
+          <div>${ICON.pin}<span>${esc(mlGet(s.address)||"Toshkent sh., O'zbekiston")}</span></div>
+          <div>${ICON.mail}<a href="mailto:${esc(s.email||'info@cfps.uz')}">${esc(s.email||'info@cfps.uz')}</a></div>
+        </div>
       </div>
       <div class="f-bot">
         <span>${esc(T('footer_copyright'))}</span>
@@ -354,7 +365,7 @@
     'yangiliklar.html':'news','yangilik.html':'news','tadbirlar.html':'events',
     'nashrlar.html':'pubs','nashr.html':'pubs','tadqiqotlar.html':'research','yonalish.html':'research',
     // "Tahlillar" bo'limining uch sahifasi nashrlar bilan bir xil bannerni oladi
-    'hisobotlar.html':'pubs','maqolalar.html':'pubs','kitoblar.html':'pubs',
+    'tahlillar.html':'pubs','maqolalar.html':'pubs','kitoblar.html':'pubs','maruzalar.html':'pubs',
     'markaz-haqida.html':'about','rahbariyat.html':'leadership','ekspertlar.html':'experts','media.html':'media',
     'aloqa.html':'contact','qidiruv.html':'search',
     'oav.html':'oav','sharh.html':'oav'
@@ -403,7 +414,7 @@
     // Iframe about:blank bo'lgani uchun nisbiy URL ishlamaydi -> abs() bilan.
     // Versiya SHART: bu fayl HTML'da <link> bilan ulanmagani uchun boshqa
     // joyda kesh buzilmaydi — o'zgartirsangiz raqamni oshiring.
-    var cssHref = abs('print.css?v=2');
+    var cssHref = abs('print.css?v=3');
 
     // Asl manba (tashqi nashr havolasi) — ekspert sharhlarida hujjatning
     // ishonchliligi uchun muhim, shuning uchun footerga chiqadi.
@@ -419,7 +430,12 @@
       + '<div class="content">' + (opts.content || '') + '</div>'
       + '<div class="foot"><span>' + esc(T('print_source')) + ': ' + esc(location.href) + '</span>' + origin + '<span>' + esc(T('print_date')) + ': ' + date + '</span></div>';
 
-    var fonts = '<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">';
+    // Shrift ta'riflari o'z serverimizdan (ilgari Google Fonts'dan kelardi).
+    // Iframe ALOHIDA hujjat — ota-sahifadagi @font-face unga MEROS BO'LMAYDI,
+    // shuning uchun fonts.css bu yerda qaytadan ulanishi shart. Aks holda
+    // print.css dagi 'Montserrat' hech qachon yuklanmay, chop etilgan hujjat
+    // zaxira shriftda chiqib ketardi.
+    var fonts = '<link rel="stylesheet" href="' + abs('fonts.css?v=1') + '">';
     var ifr = document.createElement('iframe');
     ifr.setAttribute('aria-hidden', 'true');
     ifr.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0;';

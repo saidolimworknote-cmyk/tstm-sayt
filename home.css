@@ -5,7 +5,22 @@
 
    MUHIM: bosh sahifa site.css ni ULAMAYDI — bu fayl to'liq mustaqil nusxa.
    Ichki sahifalarga tegishli o'zgarish site.css da alohida qilinadi. */
+
+/* Shrift ta'riflari (@font-face) bu faylda EMAS — `fonts.css` da, va u HTML
+   <head> ida shu fayldan OLDIN ulanadi.
+
+   TARIX (2026-08-11): bu yerda bir muddat o'z @font-face bloki turgan edi.
+   fonts.css joriy qilinganda u qolib ketdi va MANBASI YO'Q faylni ko'rsatib
+   turdi. Zarari jimgina edi: blok aynan `font-weight:600` va butun unicode
+   diapazonini da'vo qilgani uchun brauzer 600 og'irlik uchun AYNAN o'shani
+   tanlardi, u xato bilan tugardi va bosh sahifadagi barcha yarim qalin matn
+   zaxira shriftga tushardi. Sahifa "ishlayotgandek" ko'rinardi.
+   Saboq: @font-face ni faqat BITTA joyda saqlang. */
+
   *{box-sizing:border-box;}
+  /* Forma boshqaruvlari shriftni meros olmaydi (brauzer standarti = Arial).
+     Izoh: site.css dagi shu qoida. */
+  button,input,select,textarea{font-family:inherit;}
   html{scroll-behavior:smooth;}
 
   /* Utility/semantik klasslar — inline style="" o'rniga (CSP style-src'dan
@@ -26,16 +41,23 @@
      ikkinchi qatori mono shrift + UPPERCASE bo'lib ketgandi. Shuning uchun
      selektor `.brand.hp-brand ...` (0,3,1) — fayldagi tartibdan qat'i nazar
      g'olib. Bu yerga qoida qo'shsangiz, shu naqshni saqlang. */
-  .brand.hp-brand .nm{max-width:none;}
+  .brand.hp-brand .nm{max-width:none;color:var(--brand-mark);}
   .brand.hp-brand .nm b{font-family:var(--serif),serif;font-size:1.0625rem;font-weight:600;line-height:1.3;display:block;white-space:nowrap;}
-  .brand.hp-brand .nm small{font-family:var(--serif),serif;font-size:1.0625rem;font-weight:600;letter-spacing:0.2px;line-height:1.3;display:block;white-space:nowrap;margin-top:0;text-transform:none;opacity:1;}
+  /* text-transform:uppercase (2026-08-12) — tepa qator (org_name) manba
+     matnida allaqachon BOSH HARFLI, pastki qator (org_tagline) esa kichik
+     harfli keladi (i18n.js). Natijada ikki qator turlicha "og'irlikda" ko'rinardi
+     garchi font-size ikkalasida ham teng bo'lsa ham. Endi ikkalasi ham katta harf. */
+  .brand.hp-brand .nm small{font-family:var(--serif),serif;font-size:1.0625rem;font-weight:600;letter-spacing:0.2px;line-height:1.3;display:block;white-space:nowrap;margin-top:0;text-transform:uppercase;opacity:1;}
   .sec-head.hp-sechead{margin-bottom:40px;}   /* `.sec-head{margin-bottom:38px}` dan kuchli bo'lishi kerak */
   .hp-foot-brand{display:flex;align-items:center;gap:14px;margin-bottom:22px;}
   .flogo{height:46px;width:auto;}
   .hp-foot-div{width:1.5px;height:46px;background:rgba(255,255,255,.3);}
-  .hp-foot-txt{line-height:1.22;}
-  .hp-foot-txt b{font-family:var(--serif);font-weight:600;font-size:1rem;display:block;color:#fff;}
-  .hp-foot-txt small{font-family:var(--mono);font-size:0.59375rem;letter-spacing:.12em;text-transform:uppercase;display:block;margin-top:3px;}
+  /* 2026-08-12: footer'dagi markaz nomi endi header'dagi bilan (.brand.hp-brand
+     .nm) AYNAN bir xil o'lcham/shrift — faqat rang oq (header'da --brand-mark
+     navy). Ilgari kichikroq (1rem) va pastki qator mono+kichik edi. */
+  .hp-foot-txt{line-height:1.3;}
+  .hp-foot-txt b{font-family:var(--serif);font-weight:600;font-size:1.0625rem;display:block;color:#fff;}
+  .hp-foot-txt small{font-family:var(--serif);font-weight:600;font-size:1.0625rem;letter-spacing:0.2px;text-transform:uppercase;display:block;margin-top:0;color:#fff;}
   .hp-foot-links{display:flex;gap:24px;}
   .img-cover{width:100%;height:100%;object-fit:cover;}
   .ph-flush{padding:0;}
@@ -65,10 +87,16 @@
     --accent-soft:#e4eef6;
     --footer:#0D4483;
     --header-solid:rgba(255,255,255,.9);
+    /* Header'dagi markaz nomi endi logotipdagi "TSTM" harflari bilan AYNAN bir
+       xil rang (2026-08-12) — logo-mark.png dan piksel namunasi olingan
+       (#0b4f76). site.css bilan bir xil qiymat — batafsil izoh o'sha yerda. */
+    --brand-mark:#0b4f76;
     --ph-1:#e6e9ee; --ph-2:#dbdfe5;
-    --serif:'Spectral', Georgia, serif;
-    --sans:'Inter', system-ui, sans-serif;
-    --mono:'IBM Plex Mono', ui-monospace, monospace;
+    --serif:'Montserrat', Georgia, serif;
+    /* Sayt matn shrifti — `body{font-family:var(--sans)}` va `.gs-q` shu yerdan
+       o'qiydi. Izoh: site.css dagi shu o'zgaruvchi. */
+    --sans:'Montserrat', system-ui, sans-serif;
+    --mono:'Montserrat', ui-monospace, monospace;
     --wrap:min(1760px, 92vw);
   }
   html[data-theme="dark"]{
@@ -108,7 +136,12 @@
 
   /* ============ HEADER ============ */
   header{position:fixed;top:0;left:0;right:0;z-index:60;transition:background .3s, box-shadow .3s, border-color .3s;border-bottom:1px solid transparent;}
-  header .util{font-family:var(--mono);font-size:0.6875rem;letter-spacing:.1em;color:rgba(255,255,255,.62);background:#0a2342;border-bottom:1px solid rgba(255,255,255,.10);transition:height .3s, border-color .3s;}
+  /* 2026-08-12: rang oldingi holatiga (to'q-ko'k fon + oq matn) qaytarildi —
+     faqat bu qatorning KO'RINISHI (height:0 bug'i) tuzatilgan qoladi, pastda. */
+  /* color .62 -> .88 (2026-08-12): mono 11px kichik shrift + past shaffoflik
+     birgalikda matnni deyarli o'qib bo'lmas qilib qo'ygan edi ("ko'rinmay
+     qolyapti"). (site.css'da ham xuddi shu ta'rif bor.) */
+  header .util{font-family:var(--mono);font-size:0.6875rem;letter-spacing:.1em;color:rgba(255,255,255,.88);background:#0a2342;border-bottom:1px solid rgba(255,255,255,.10);transition:height .3s, border-color .3s;}
   header .util .wrap{display:flex;align-items:center;gap:22px;height:38px;}
   header .util .sp{flex:1;}
   header .util a{transition:color .2s;}
@@ -154,14 +187,25 @@
   header .ic{position:relative;}
   header .ic::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;}
 
-  /* header light state (over hero) — gradient + blur for separation */
+  /* header light state (over hero) — gradient + blur for separation.
+     2026-08-12: header endi HTML'da boshidanoq .solid (index.html) va bu
+     klass skroll orqali olib tashlanmaydi (page-home.js dagi eski
+     "header solid on scroll" bloki o'chirildi) — shuning uchun quyidagi
+     :not(.solid) qoidalari amalda ISHGA TUSHMAYDI. Ataylab o'chirilmadi:
+     tez qaytarish mumkin bo'lsin (index.html'dagi `class="solid"`ni olib
+     tashlash + page-home.js'ga scroll blokini qaytarish yetarli). */
   header:not(.solid){color:#fff;background:linear-gradient(180deg, rgba(7,11,15,.84) 0%, rgba(7,11,15,.46) 48%, rgba(7,11,15,0) 100%);backdrop-filter:saturate(1.1) blur(2.5px);-webkit-backdrop-filter:saturate(1.1) blur(2.5px);}
   header:not(.solid) .bar{background:transparent;}
   header:not(.solid) .brand .nm{text-shadow:0 1px 14px rgba(0,0,0,.45);}
   header:not(.solid) .brand .logo{filter:drop-shadow(0 2px 10px rgba(0,0,0,.35));}
   /* header solid state */
   header.solid{background:var(--header-solid);backdrop-filter:saturate(1.4) blur(8px);-webkit-backdrop-filter:saturate(1.4) blur(8px);border-color:var(--line);box-shadow:0 6px 24px -18px rgba(0,0,0,.4);color:var(--ink);}
-  header.solid .util{height:0;overflow:hidden;border-color:transparent;}
+  /* 2026-08-12: ilgari shu yerda `header.solid .util{height:0;overflow:hidden}`
+     turardi — .solid endi DOIM yoqilgan bo'lgani uchun (yuqoridagi izoh) bu
+     qator .util'ni HAR DOIM, hech qachon ko'rinmaydigan qilib qo'ygan edi
+     (bosh sahifada davlat nomi/email/telefon/til qatori butunlay yo'qolgan
+     edi). Ichki sahifalarda bu qator har doim ko'rinadi (site.css dagi
+     `body.inner header .util`) — bosh sahifa ham endi shunga mos keladi. */
   header.solid .bar .wrap{height:80px;}
   header.solid nav.main .item{padding:24px 0;}
   header.solid .langs span:not(.on){color:var(--muted);}
@@ -207,7 +251,11 @@
   .dot:hover{color:rgba(255,255,255,.8);}
   .dot.on{color:#fff;}
   .dot.on .ln{background:#fff;}
-  .hero-arrows{margin-left:auto;display:flex;gap:10px;pointer-events:auto;}  .hero-arrows button{width:48px;height:48px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.06);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;backdrop-filter:blur(4px);}
+  .hero-arrows{margin-left:auto;display:flex;gap:10px;pointer-events:auto;}
+  /* border-radius (2026-08-12): sayt bo'ylab "qirrasiz burchak" tuzatishida
+     (--r-ctl skalasi) bu tugmalar ADASHIB QOLGAN EDI — o'tkir burchak bilan
+     qolgan yagona boshqaruv shu edi. */
+  .hero-arrows button{width:48px;height:48px;border:1px solid rgba(255,255,255,.35);border-radius:var(--r-ctl);background:rgba(255,255,255,.06);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;backdrop-filter:blur(4px);}
   .hero-arrows button:hover{background:#fff;color:var(--ink);border-color:#fff;}
   .hero-arrows svg{width:18px;height:18px;}
 
@@ -405,29 +453,50 @@
   /* footer */
   footer{background:var(--footer);color:rgba(255,255,255,.72);padding:64px 0 30px;font-size:0.9375rem;}
   html[data-theme="dark"] footer{background:#22314e;border-top:1px solid #334566;}
-  /* 6 ustun: brend + menyuning 4 guruhi + aloqa. Ustun oralig'i 28px (40px emas) —
-     5 ta oraliq bilan 1181px atrofida havola ustunlari juda torayib ketardi. */
-  /* Chapda brend bloki (keng), o'ngda menyuning 4 guruhi. Ikkisi orasida BO'SH
-     ustun (2-track) — havola ustunlarini o'ng chekkaga suradi. (site.css'da ham
-     xuddi shu ta'rif bor — bu fayl alohida nusxa, ikkalasi birga yangilanadi.) */
+  /* 6 ustun: brend + bo'sh ustun + menyuning 4 guruhi. Ustun oralig'i 28px (40px
+     emas) — 5 ta oraliq bilan 1181px atrofida havola ustunlari juda torayib
+     ketardi. (site.css'da ham xuddi shu ta'rif bor — bu fayl alohida nusxa,
+     ikkalasi birga yangilanadi.) */
   .f-top{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,.45fr) repeat(4,minmax(0,.68fr));gap:40px 28px;padding-bottom:38px;border-bottom:1px solid rgba(255,255,255,.12);}
   .f-top>:first-child{grid-column:1;}
+  /* 2026-08-12 TUZATISH: ilgari faqat BIRINCHI havola ustuniga (nth-child(2))
+     grid-column:3 berilgan edi, "qolgani o'zi ergashadi" deb hisoblangan —
+     lekin CSS Grid avto-joylashtirish shunday ishlamaydi: qolgan 3 ustun
+     bo'sh 2-trackni (aynan shu bloklanishi kerak bo'lgan ustunni!) birinchi
+     bo'sh katak sifatida egallab olardi. Natijada ustunlar tartibsiz va
+     "Voqealar" ustuni tor bo'sh joyga siqilib, katta ekranda amalda
+     ko'rinmas bo'lib qolgan edi. Endi barcha 4tasi aniq belgilangan. */
   .f-top>.f-col:nth-child(2){grid-column:3;}
+  .f-top>.f-col:nth-child(3){grid-column:4;}
+  .f-top>.f-col:nth-child(4){grid-column:5;}
+  .f-top>.f-col:nth-child(5){grid-column:6;}
   footer .brand{color:#fff;margin-bottom:16px;}
   footer .brand .nm small{opacity:.55;}
   .f-about{font-size:0.90625rem;line-height:1.7;max-width:38ch;color:rgba(255,255,255,.66);}
   .f-col h5{font-family:var(--mono);font-size:0.75rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.5);margin:0 0 16px;font-weight:500;}
   .f-col a{display:block;font-size:0.9375rem;padding:6px 0;transition:color .2s, padding .2s;}
   .f-col a:hover{color:#fff;padding-left:5px;}
-  /* Ixcham aloqa bloki — brend ustuni ichida, tavsif ostida. Alohida "Aloqa"
-     USTUNI yo'q. (site.css'da ham xuddi shu ta'rif bor — alohida nusxa.) */
-  .f-meta{margin-top:18px;display:flex;flex-direction:column;gap:9px;font-size:0.875rem;line-height:1.5;color:rgba(255,255,255,.66);}
+  /* Manzil/e-pochta bloki. 2026-08-12: brend ustuni ichidan (tavsif ostidan)
+     ko'chirildi — endi HTML'da 4 havola ustunidan KEYIN keladi va sayt
+     arxitekturasi (havola ustunlari) OSTIDA, 2-qatorda joylashadi (grid-row:2,
+     3—6 ustunlar ostida). justify-self:end — 4 ustunning butun kengligiga
+     CHO'ZILMASIN (standart grid xatti-harakati), balki OQ CHEKKAGA (Media
+     ustuni ostiga) yopishsin. margin-top ATAYLAB YO'Q: grid'ning o'zidagi
+     40px qator oralig'i (gap) yetarli — ustiga qo'shilgan margin ikkalanib
+     manzilni havola ustunlaridan haddan tashqari uzoqlashtirib yuborgan edi.
+     Kenroq/tor ekran qoidalari pastda alohida — u yerda joylashuv qayta
+     belgilanadi. (site.css'da ham xuddi shu ta'rif bor.) */
+  .f-top>.f-meta{grid-column:3/7;grid-row:2;justify-self:end;}
+  .f-meta{display:flex;flex-direction:column;gap:9px;font-size:0.875rem;line-height:1.5;color:rgba(255,255,255,.66);}
   .f-meta>div{display:flex;align-items:flex-start;gap:9px;}
   .f-meta svg{width:15px;height:15px;flex:none;margin-top:2px;opacity:.62;}
   .f-meta a{color:inherit;transition:color .2s;}
   .f-meta a:hover{color:#fff;}
   .socials{display:flex;gap:8px;margin-top:16px;}
-  .socials a{width:34px;height:34px;border:1px solid rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;transition:.2s;}
+  /* border-radius (2026-08-12): sayt bo'ylab "qirrasiz burchak" tuzatishida
+     (--r-ctl skalasi, pastda) bu qoida ADASHIB QOLGAN EDI — site.css'dagi
+     ichki sahifalar allaqachon dumaloq, bosh sahifa yolg'iz o'tkir qolgandi. */
+  .socials a{width:34px;height:34px;border:1px solid rgba(255,255,255,.18);border-radius:var(--r-ctl);display:flex;align-items:center;justify-content:center;transition:.2s;}
   .socials a:hover{background:#fff;color:var(--footer);border-color:#fff;}
   .socials svg{width:15px;height:15px;}
   .f-bot{display:flex;align-items:center;justify-content:space-between;gap:18px;padding-top:24px;flex-wrap:wrap;font-family:var(--mono);font-size:0.75rem;letter-spacing:.05em;color:rgba(255,255,255,.5);}
@@ -469,7 +538,11 @@
   @media(max-width:1500px){
     .f-top{grid-template-columns:repeat(4,1fr);gap:30px 24px;}
     .f-top>:first-child{grid-column:1 / -1;}
-    .f-top>.f-col:nth-child(2){grid-column:auto;}
+    /* Desktopdagi aniq 3/4/5/6-ustun joylashuvi shu tor grid'da (atigi 4 track)
+       mavjud bo'lmagan ustunlarga ishora qilib qolmasin (yashirin, bo'sh
+       ustunlar hosil qilib maketni buzardi) — hammasi avto-oqimga qaytariladi. */
+    .f-top>.f-col:nth-child(2),.f-top>.f-col:nth-child(3),.f-top>.f-col:nth-child(4),.f-top>.f-col:nth-child(5){grid-column:auto;}
+    .f-top>.f-meta{grid-column:1 / -1;grid-row:3;justify-self:end;}
   }
   html,body{overflow-x:hidden;}
   @media(max-width:1080px){
@@ -553,6 +626,12 @@
        Desktopda o'z holicha qoladi. (site.css'da ham xuddi shu qoida bor —
        bu fayl alohida nusxa, ikkalasi birga yangilanishi kerak.) */
     .f-top .f-col{display:none;}
+    /* Havola ustunlari yashirin bo'lgani uchun ular egallashi kerak bo'lgan
+       qator ham yo'q — 1500px'dagi grid-row:3 shu boshqa hech narsa yo'q
+       bo'sh 2-qatorni qoldirib ketardi. auto — brenddan keyin darhol keladi.
+       justify-self:auto — bu tor ekranda o'ng chekkaga emas, footerning
+       qolgan qismi kabi to'liq kengga (chapdan) o'qilsin. */
+    .f-top>.f-meta{grid-row:auto;justify-self:auto;margin-top:12px;}
     .socials{margin-top:14px;}
     .f-bot{padding-top:18px;gap:10px;}
     .ev{grid-template-columns:64px 1fr;gap:14px;}

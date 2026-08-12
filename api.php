@@ -188,7 +188,7 @@ function vapid_jwt($pem, $audience) {
   $payload = b64url_encode(json_encode([
     'aud' => $audience,
     'exp' => time() + 12 * 3600,           // standart bo'yicha 24 soatdan oshmasin
-    'sub' => 'mailto:' . cfg('admin_email', 'info@markaz.uz')
+    'sub' => 'mailto:' . cfg('admin_email', 'info@cfps.uz')
   ], JSON_UNESCAPED_SLASHES));
   $data = $header . '.' . $payload;
   $key = openssl_pkey_get_private($pem);

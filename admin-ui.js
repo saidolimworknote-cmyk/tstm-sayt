@@ -142,7 +142,7 @@
         { k: 'title', label: 'To\'liq sarlavha', type: 'text', ml: 1, req: 1 },
         { k: 'shortTitle', label: 'Qisqa sarlavha (ixtiyoriy)', type: 'text', ml: 1, ph: 'Banner va ro\'yxatda ko\'rinadi — bo\'sh qolsa to\'liq sarlavha ishlatiladi' },
         { k: 'desc', label: 'Tavsif / annotatsiya', type: 'rich', ml: 1 },
-        { k: 'type', label: 'Turi', type: 'select', side: 1, opts: ['Hisobot', 'Tahliliy sharh', 'Monografiya', 'Maqola', "Statistik to'plam"] },
+        { k: 'type', label: 'Turi', type: 'select', side: 1, opts: ['Tahlil', 'Tahliliy sharh', 'Monografiya', 'Maqola', "Statistik to'plam", "Ma'ruza"] },
         { k: 'category', label: 'Mavzu (yo\'nalish)', type: 'select', side: 1, opts: ['Tashqi siyosat', 'Iqtisodiyot', 'Xavfsizlik', 'Markaziy Osiyo', 'Diplomatiya', 'Energetika'] },
         { k: 'region', label: 'Hudud', type: 'select', side: 1, opts: ['', 'Markaziy Osiyo', 'Janubiy Osiyo', 'Yevropa', 'Yaqin Sharq', 'Global'] },
         { k: 'author', label: 'Muallif (ekspert)', type: 'text', side: 1 },

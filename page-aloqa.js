@@ -11,8 +11,8 @@
       clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
     };
     const addr  = Site.mlGet(s.address) || "Toshkent sh., O'zbekiston";
-    const email = s.email || 'info@markaz.uz';
-    const phone = s.phone || '+998 71 000 00 00';
+    const email = s.email || 'info@cfps.uz';
+    const phone = s.phone || '+998 71 239 36 55';
     const rows = [
       {i:I.pin,   lab:T('footer_address'), val: addr},
       {i:I.mail,  lab:T('footer_email'),   val: email, href:'mailto:'+email},
@@ -49,40 +49,4 @@
       if (frame){ frame.src = 'https://www.google.com/maps?q='+enc+'&hl='+lang+'&z=17&output=embed'; frame.title = addr || mq; }
       if (open)   open.href = 'https://www.google.com/maps?q='+enc;
     })();
-
-    // ---- forma: validatsiya + haqiqiy javob ----
-    const form = document.getElementById('cform');
-    const btn  = document.getElementById('csubmit');
-    const lbl  = btn.querySelector('span');
-    const sendLabel = lbl.textContent;
-    const alert = document.getElementById('cmsg');
-    const inp  = form.querySelectorAll('input,textarea'); // [0]=ism [1]=email [2]=mavzu [3]=xabar
-    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const show = (type,key)=>{ alert.className = 'cform-alert show '+(type==='ok'?'ok':'bad'); alert.textContent = T(key); };
-    inp.forEach(el=> el.addEventListener('input', ()=> el.classList.remove('err')));
-
-    form.addEventListener('submit', e=>{
-      e.preventDefault();
-      inp.forEach(el=> el.classList.remove('err'));
-      const name = inp[0].value.trim(), em = inp[1].value.trim(),
-            subject = inp[2].value.trim(), text = inp[3].value.trim();
-      // majburiy maydonlar
-      let bad = false;
-      if (!name){ inp[0].classList.add('err'); bad = true; }
-      if (!em)  { inp[1].classList.add('err'); bad = true; }
-      if (!text){ inp[3].classList.add('err'); bad = true; }
-      if (bad){ show('bad','c_fill'); return; }
-      // email formati
-      if (!emailRe.test(em)){ inp[1].classList.add('err'); inp[1].focus(); show('bad','c_invalid_email'); return; }
-
-      btn.disabled = true; lbl.textContent = T('c_sending'); alert.className = 'cform-alert';
-      Promise.resolve(Store.addMessage({ name, email: em, subject, text }))
-        .then(res=>{
-          if (res && res.ok){ form.reset(); show('ok','c_thanks'); setTimeout(()=>alert.classList.remove('show'), 6000); }
-          else if (res && res.error === 'too_many'){ show('bad','c_toomany'); }
-          else { show('bad','c_error'); }
-        })
-        .catch(()=> show('bad','c_error'))
-        .then(()=>{ btn.disabled = false; lbl.textContent = sendLabel; });
-    });
   }});

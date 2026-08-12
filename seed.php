@@ -12,15 +12,19 @@ function default_seed() {
   $p = function ($s) { return '<p>' . $s . '</p>'; };
   return [
     'settings' => [
+      /* RU/EN qo'lda tasdiqlangan (2026-08-12) — avtomatik tarjimaga
+         ISHONILMAYDI: header/footerdagi brend nomi shu matndan ikki
+         muvozanatli qatorga bo'linadi (page-home.js/site-common.js
+         brandLines()), shuning uchun so'zma-so'z aniq bo'lishi shart. */
       'siteName' => $ml(
         'Tashqi siyosiy tadqiqotlar va xalqaro tashabbuslar markazi',
-        'Центр внешнеполитических исследований и международных инициатив',
-        'Center for Foreign Policy Research and International Initiatives'
+        'Центр Внешнеполитических Исследований',
+        'Center for Foreign Policy Studies'
       ),
       'shortName' => 'TSTM',
       'address' => $ml("Mahmudjon G'ofurov ko'chasi, Toshkent", 'ул. Махмуджона Гофурова, Ташкент', 'Mahmudjon Gofurov St., Tashkent'),
-      'email' => 'info@markaz.uz',
-      'phone' => '+998 71 000 00 00',
+      'email' => 'info@cfps.uz',
+      'phone' => '+998 71 239 36 55',
       'social' => ['telegram' => 'https://t.me/', 'youtube' => '#', 'facebook' => '#', 'x' => '#'],
       'langs' => ['uz' => true, 'ru' => true, 'en' => true],
       'theme' => 'light',
@@ -50,7 +54,7 @@ function default_seed() {
       ['id' => uidgen(), 'name' => $ml('Nodira Yusupova'), 'role' => $ml('Direktor o\'rinbosari'), 'sub' => $ml('Xalqaro munosabatlar bo\'yicha'), 'photo' => '', 'bio' => $ml(''), 'order' => 2],
     ],
     'publications' => [
-      ['id' => uidgen(), 'title' => $ml('Markaziy Osiyoda yangi diplomatik arxitektura'), 'type' => 'Hisobot', 'category' => 'Tashqi siyosat', 'region' => 'Markaziy Osiyo', 'author' => 'Bobur Rahimov', 'year' => '2026', 'status' => 'published', 'cover' => '', 'pdf' => '', 'desc' => $ml('')],
+      ['id' => uidgen(), 'title' => $ml('Markaziy Osiyoda yangi diplomatik arxitektura'), 'type' => 'Tahlil', 'category' => 'Tashqi siyosat', 'region' => 'Markaziy Osiyo', 'author' => 'Bobur Rahimov', 'year' => '2026', 'status' => 'published', 'cover' => '', 'pdf' => '', 'desc' => $ml('')],
     ],
     'heroSlides' => [
       ['id' => uidgen(), 'category' => $ml('Tahlil'), 'headline' => $ml('Markaziy Osiyo xavfsizligi va yangi diplomatik istiqbollar'), 'link' => '#', 'image' => '', 'status' => 'published', 'order' => 1],
