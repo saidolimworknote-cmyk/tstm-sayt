@@ -1,0 +1,40 @@
+  /* biz-kimmiz.html — faoliyat kartalari va ishlash bosqichlari.
+     Qolgan bloklar (about-intro, statband, about-cta, prose) site.css dagi
+     umumiy uslublardan foydalanadi — bu yerda faqat shu sahifaga xoslari. */
+
+  /* Faoliyat shakllari kartalari — `.sec-cards`/`.scard` (site.css), ular
+     markaz-haqida.html dagi bo'lim kartalari bilan bir xil komponent. */
+
+  /* --- Ishlash uslubi: raqamlangan bosqichlar ---
+     Bosqichlarni bog'lab turuvchi chiziq ::before orqali chiziladi (desktopda
+     gorizontal, mobilda vertikal). Raqam doirasi chiziq ustida "tugun" bo'lib
+     turadi, shuning uchun uning foni --bg bilan bir xil. */
+  .who-steps{list-style:none;display:grid;grid-template-columns:repeat(4,1fr);gap:0 26px;margin:0;padding:0;counter-reset:wstep;}
+  .wstep{position:relative;padding:56px 0 0;}
+  .wstep::before{content:"";position:absolute;top:23px;left:0;right:-26px;height:1px;background:var(--line);}
+  .wstep:last-child::before{right:0;}
+  .wstep .n{position:absolute;top:0;left:0;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--bg);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:600;font-size:1rem;color:var(--accent);transition:.25s;}
+  .wstep:hover .n{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .wstep h3{font-family:var(--serif);font-weight:500;font-size:1.1875rem;line-height:1.26;margin:0 0 10px;color:var(--ink);max-width:22ch;}
+  .wstep p{color:var(--ink-2);font-size:0.90625rem;line-height:1.65;margin:0;max-width:34ch;}
+
+  @media(max-width:1180px){
+    .who-steps{grid-template-columns:repeat(2,1fr);gap:44px 26px;}
+    .wstep:nth-child(2)::before{right:0;}
+  }
+  @media(max-width:760px){
+    /* Mobilda bosqichlar ustun bo'lib tushadi: chiziq raqam doirasidan
+       PASTGA vertikal ketadi, matn esa doiraning o'ng tomonida turadi. */
+    .who-steps{grid-template-columns:1fr;gap:0;}
+    .wstep{padding:0 0 30px 62px;}
+    .wstep::before{top:46px;bottom:0;left:23px;right:auto;width:1px;height:auto;}
+    .wstep:last-child::before{display:none;}
+    .wstep .n{width:46px;height:46px;}
+    .wstep h3{font-size:1.0625rem;max-width:none;}
+    .wstep p{max-width:none;font-size:0.875rem;}
+  }
+  @media print{
+    header,footer,.page-banner{display:none !important;}
+    body.inner{padding-top:0 !important;}
+    .wstep{break-inside:avoid;}
+  }

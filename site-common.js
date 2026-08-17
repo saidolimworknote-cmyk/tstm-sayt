@@ -131,13 +131,17 @@
   // nechta sahifaga javob beradi (masalan Voqealar = yangiliklar + tadbirlar),
   // chunki alohida menyu bandlari olib tashlandi, sahifalar esa qoldi.
   const NAV = [
-    { tk: 'nav_about', href: 'markaz-haqida.html', keys: ['about'], children: [
+    { tk: 'nav_about', href: 'markaz-haqida.html', keys: ['about','who','partners'], children: [
+      { tk: 'nav_about_who',      href: 'biz-kimmiz.html' },
       { tk: 'nav_about_leadership', href: 'rahbariyat.html' },
-      { tk: 'nav_about_experts', href: 'ekspertlar.html' }
+      { tk: 'nav_about_experts',  href: 'ekspertlar.html' },
+      { tk: 'nav_about_partners', href: 'hamkorlar.html' }
     ]},
-    { tk: 'nav_happenings', href: 'yangiliklar.html', keys: ['news','events'], children: [
-      { tk: 'nav_hap_news', href: 'yangiliklar.html' },
-      { tk: 'nav_hap_events', href: 'tadbirlar.html' }
+    { tk: 'nav_happenings', href: 'tadbirlar.html', keys: ['news','events','meetings','roundtables','conferences','life'], children: [
+      { tk: 'nav_ev_meetings', href: 'uchrashuvlar.html' },
+      { tk: 'nav_ev_roundtables', href: 'davra-suhbatlari.html' },
+      { tk: 'nav_ev_conferences', href: 'konferensiyalar.html' },
+      { tk: 'nav_ev_life', href: 'markaz-hayoti.html' }
     ]},
     // 2026-08-12: "Tahlillar" -> "Tadqiqotlar"ga o'zgardi (nav_analytics'ning
     // matni i18n.js da). Ichidagi eski "Hisobotlar" bandi endi "Tahlillar" deb
@@ -363,10 +367,11 @@
   // sahifa fayli -> banner kaliti
   const BANNER_MAP = {
     'yangiliklar.html':'news','yangilik.html':'news','tadbirlar.html':'events',
+    'uchrashuvlar.html':'events','davra-suhbatlari.html':'events','konferensiyalar.html':'events','markaz-hayoti.html':'events',
     'nashrlar.html':'pubs','nashr.html':'pubs','tadqiqotlar.html':'research','yonalish.html':'research',
     // "Tahlillar" bo'limining uch sahifasi nashrlar bilan bir xil bannerni oladi
     'tahlillar.html':'pubs','maqolalar.html':'pubs','kitoblar.html':'pubs','maruzalar.html':'pubs',
-    'markaz-haqida.html':'about','rahbariyat.html':'leadership','ekspertlar.html':'experts','media.html':'media',
+    'markaz-haqida.html':'about','biz-kimmiz.html':'about','rahbariyat.html':'leadership','ekspertlar.html':'experts','hamkorlar.html':'about','media.html':'media',
     'aloqa.html':'contact','qidiruv.html':'search',
     'oav.html':'oav','sharh.html':'oav'
   };

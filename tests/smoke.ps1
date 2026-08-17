@@ -33,7 +33,9 @@ Write-Host "`n[1] Sahifalar 200 qaytaradi"
 $pages = 'index.html','nashrlar.html','yangiliklar.html','aloqa.html',
          'media.html','rahbariyat.html','markaz-haqida.html','tadqiqotlar.html',
          'tadbirlar.html','yonalish.html','oav.html','sharh.html',
-         'ekspertlar.html','hisobotlar.html','maqolalar.html','kitoblar.html','admin.html'
+         'ekspertlar.html','tahlillar.html','maruzalar.html','maqolalar.html','kitoblar.html',
+         'uchrashuvlar.html','davra-suhbatlari.html','konferensiyalar.html','markaz-hayoti.html',
+         'biz-kimmiz.html','hamkorlar.html','admin.html'
 foreach ($p in $pages) {
   $r = Get2 "$Base/$([uri]::EscapeDataString($p))"
   Check "sahifa: $p" ((Code $r) -eq 200) "status=$(Code $r)"
@@ -101,6 +103,23 @@ Check "SSRF endpoint rad (400)" ((Code $r) -eq 400) "status=$(Code $r)"
 $r = Post2 "$Base/api.php?action=item&coll=users&id=1" @{} $null
 $rg = Get2 "$Base/api.php?action=item&coll=users&id=1"
 Check "maxfiy kolleksiya item rad (401/404)" ((Code $rg) -in 401,404) "status=$(Code $rg)"
+
+# ---- 8. Menyu havolalari o'lik emas ----
+# NEGA KERAK: menyu ikki joyda yoziladi — site-common.js dagi NAV (ichki
+# sahifalar) va index.html dagi qo'lda yozilgan nusxa (bosh sahifa). Biri
+# yangilanib ikkinchisi qolib ketsa yoki band sahifasi yaratilmasa, tashrifchi
+# menyudan 404 ga tushadi (2026-08-17 da "Biz kimmiz"/"Hamkorlar" bilan aynan
+# shunday bo'lgan). Shu ro'yxat ikkala nusxadagi BARCHA ichki havolani qamraydi.
+Write-Host "`n[8] Menyu havolalari 200 qaytaradi"
+$navLinks = 'biz-kimmiz.html','rahbariyat.html','ekspertlar.html','hamkorlar.html',
+            'uchrashuvlar.html','davra-suhbatlari.html','konferensiyalar.html','markaz-hayoti.html',
+            'maqolalar.html','maruzalar.html','tahlillar.html','kitoblar.html',
+            'oav.html','media.html?tab=photo','media.html?tab=video','media.html?tab=info',
+            'markaz-haqida.html','tadbirlar.html','nashrlar.html','aloqa.html'
+foreach ($l in $navLinks) {
+  $r = Get2 "$Base/$l"
+  Check "menyu havolasi: $l" ((Code $r) -eq 200) "status=$(Code $r)"
+}
 
 # ---- Xulosa ----
 Write-Host "`n$("=" * 60)"

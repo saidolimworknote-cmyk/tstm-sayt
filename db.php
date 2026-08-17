@@ -86,8 +86,13 @@ $SCHEMA = [
     ['key' => 'link'], ['key' => 'image'], ['key' => 'status'],
     ['key' => 'order', 'col' => 'sort_order', 'type' => 'int'],
   ]],
+  // 2026-08-17: `hamkorlar.html` sahifasi qo'shilganda kengaytirildi — hamkorlar
+  // toifa bo'yicha guruhlanadi, kartada mamlakat va qisqacha tavsif ko'rsatiladi.
+  // Eski yozuvlarda bu maydonlar bo'sh: sahifa ularni "Boshqa" guruhiga soladi.
   'partners' => ['table' => 'partners', 'cols' => [
     ['key' => 'name'], ['key' => 'url'], ['key' => 'logo'],
+    ['key' => 'category'], ['key' => 'country'],
+    ['key' => 'descr', 'type' => 'json'],
   ]],
   'pages' => ['table' => 'pages', 'cols' => [
     ['key' => 'title', 'type' => 'json'], ['key' => 'slug'],
@@ -126,6 +131,7 @@ function db() {
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
     PDO::ATTR_EMULATE_PREPARES => false,
+    PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci",
   ];
   $dsn = "mysql:host=$DB_HOST;port=$DB_PORT;dbname=$DB_NAME;charset=$DB_CHARSET";
 
@@ -140,6 +146,7 @@ function db() {
         ulanish ochiladi. */
   try {
     $pdo = new PDO($dsn, $DB_USER, $DB_PASS, $opt);
+    $pdo->exec("SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
   } catch (PDOException $e) {
     /* 2) Ulanmadi — sabablardan biri "baza hali yo'q" bo'lishi mumkin (butunlay
           yangi mahalliy o'rnatish). Server darajasiga ulanib yaratib ko'ramiz.
@@ -152,6 +159,7 @@ function db() {
       $root = new PDO($dsn0, $DB_USER, $DB_PASS, $opt);
       $root->exec("CREATE DATABASE IF NOT EXISTS `$DB_NAME` CHARACTER SET $DB_CHARSET COLLATE {$DB_CHARSET}_unicode_ci");
       $pdo = new PDO($dsn, $DB_USER, $DB_PASS, $opt);
+      $pdo->exec("SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
     } catch (PDOException $e2) {
       throw $e;
     }
@@ -283,7 +291,8 @@ function provision_schema($pdo) {
   $pdo->exec("CREATE TABLE IF NOT EXISTS partners (
     id VARCHAR(40) PRIMARY KEY,
     name VARCHAR(255), url VARCHAR(500), logo VARCHAR(500),
-    $seq
+    category VARCHAR(80), country VARCHAR(120), descr LONGTEXT,
+    $seq, INDEX(category)
   )$tail");
 
   $pdo->exec("CREATE TABLE IF NOT EXISTS pages (
@@ -443,6 +452,12 @@ function migrate($pdo) {
   ]);
   ensure_cols($pdo, 'publications', [
     'short_title' => 'LONGTEXT',
+  ]);
+  // hamkorlar.html — toifa bo'yicha guruhlash va karta matni (2026-08-17)
+  ensure_cols($pdo, 'partners', [
+    'category' => 'VARCHAR(80)',
+    'country'  => 'VARCHAR(120)',
+    'descr'    => 'LONGTEXT',
   ]);
 }
 

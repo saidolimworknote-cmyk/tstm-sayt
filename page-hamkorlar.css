@@ -1,0 +1,71 @@
+  /* hamkorlar.html — kirish bloki, toifa guruhlari va hamkor kartalari.
+     Filtr chiplari (.mfilter/.fchip), .about-cta va .empty site.css dan keladi. */
+
+  /* --- Kirish: matn chapda, raqamlar o'ngda --- */
+  .pt-intro{display:grid;grid-template-columns:1.25fr 1fr;gap:64px;align-items:center;}
+  .pt-intro h2{font-family:var(--serif);font-weight:500;font-size:clamp(24px,2.7vw,34px);line-height:1.2;margin:16px 0 16px;color:var(--ink);max-width:18ch;}
+  .pt-intro p{color:var(--ink-2);font-size:1rem;line-height:1.75;margin:0;max-width:58ch;}
+  .pt-stats{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:var(--r-card);background:var(--surface);overflow:hidden;}
+  .pt-stats .s{padding:30px 22px;border-right:1px solid var(--line);text-align:center;}
+  .pt-stats .s:last-child{border-right:0;}
+  .pt-stats .s .n{font-family:var(--serif);font-weight:600;font-size:2.5rem;line-height:1;color:var(--accent);}
+  .pt-stats .s .c{font-family:var(--mono);font-size:0.65625rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:11px;line-height:1.5;}
+
+  /* --- Toifa guruhi --- */
+  .mfilter{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:44px;}
+  .pt-group{margin-bottom:56px;}
+  .pt-group:last-child{margin-bottom:0;}
+  .pt-ghead{display:flex;align-items:center;gap:14px;padding-bottom:16px;margin-bottom:28px;border-bottom:1px solid var(--line);}
+  /* `.is-hidden` (site.css) — bu fayl site.css dan KEYIN yuklanadi, shuning uchun
+     `display:flex` uni bosib ketardi. Yagona toifasiz guruhda sarlavha ortiqcha
+     bo'lgani uchun yashirish shu qatorga tayanadi — olib tashlamang. */
+  .pt-ghead.is-hidden{display:none;}
+  .pt-ghead h2{font-family:var(--serif);font-weight:500;font-size:clamp(19px,1.9vw,24px);line-height:1.2;margin:0;color:var(--ink);}
+  .pt-ghead .cnt{font-family:var(--mono);font-size:0.6875rem;letter-spacing:.06em;padding:4px 11px;border-radius:var(--r-pill);background:var(--accent-soft);color:var(--accent);}
+
+  /* --- Hamkor kartasi --- */
+  .pt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  /* align-items:center — tavsif/mamlakat kiritilmagan hamkorda matn logotip
+     yonida "osilib" qolmasin (ma'lumot to'lgach logotip o'zi markazlashadi). */
+  .pt-card{display:grid;grid-template-columns:96px 1fr;gap:22px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:26px 26px 24px;transition:transform .25s, box-shadow .25s, border-color .25s;}
+  .pt-card.is-link:hover{transform:translateY(-5px);box-shadow:var(--lift);border-color:color-mix(in srgb,var(--accent) 26%,var(--line));}
+  /* Logotip qutisi: oq fon logotiplar uchun eng ishonchli zamin (ko'p logotip
+     shaffof PNG va quyuq temada ko'rinmay qolardi). */
+  .pt-logo{width:96px;height:96px;border:1px solid var(--line);border-radius:var(--r-ctl);background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;}
+  .pt-logo img{max-width:76%;max-height:76%;object-fit:contain;}
+  .pt-logo .mono{font-family:var(--serif);font-weight:600;font-size:1.75rem;letter-spacing:.02em;color:var(--accent);}
+  .pt-body{min-width:0;}
+  .pt-body h3{font-family:var(--serif);font-weight:500;font-size:1.1875rem;line-height:1.28;margin:0 0 7px;color:var(--ink);overflow-wrap:anywhere;}
+  .pt-geo{display:inline-flex;align-items:center;font-family:var(--mono);font-size:0.65625rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:11px;}
+  .pt-body p{color:var(--ink-2);font-size:0.90625rem;line-height:1.62;margin:0 0 14px;}
+  .pt-go{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:0.6875rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent2-d);transition:gap .2s;}
+  .pt-go svg{width:14px;height:14px;flex:none;}
+  .pt-card.is-link:hover .pt-go{gap:13px;}
+
+  @media(max-width:1180px){
+    .pt-intro{grid-template-columns:1fr;gap:34px;}
+    .pt-intro h2{max-width:none;}
+    .pt-grid{grid-template-columns:repeat(2,1fr);}
+  }
+  @media(max-width:760px){
+    .mfilter{margin-bottom:30px;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none;}
+    .mfilter::-webkit-scrollbar{display:none;}
+    .mfilter .fchip{flex:none;white-space:nowrap;}
+    .pt-stats{grid-template-columns:1fr;}
+    .pt-stats .s{border-right:0;border-bottom:1px solid var(--line);padding:22px 18px;}
+    .pt-stats .s:last-child{border-bottom:0;}
+    .pt-stats .s .n{font-size:2rem;}
+    .pt-group{margin-bottom:40px;}
+    .pt-ghead{margin-bottom:20px;}
+    .pt-grid{grid-template-columns:1fr;gap:14px;}
+    .pt-card{grid-template-columns:64px 1fr;gap:16px;padding:18px;}
+    .pt-logo{width:64px;height:64px;}
+    .pt-logo .mono{font-size:1.25rem;}
+    .pt-body h3{font-size:1.0625rem;}
+    .pt-body p{font-size:0.84375rem;}
+  }
+  @media print{
+    header,footer,.page-banner,.mfilter{display:none !important;}
+    body.inner{padding-top:0 !important;}
+    .pt-card{break-inside:avoid;box-shadow:none !important;}
+  }

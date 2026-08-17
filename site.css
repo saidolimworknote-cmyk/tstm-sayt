@@ -380,9 +380,9 @@ section.block{padding:74px 0;}
 
 /* media gallery */
 .tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:38px;}
-.tabs button{font-family:var(--mono);font-size:0.75rem;letter-spacing:.06em;text-transform:uppercase;padding:13px 20px;border:0;background:none;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:.15s;}
-.tabs button:hover{color:var(--ink);}
-.tabs button.on{color:var(--accent);border-bottom-color:var(--accent);}
+.tabs button, .tabs a.tab-link{font-family:var(--mono);font-size:0.75rem;letter-spacing:.06em;text-transform:uppercase;padding:13px 20px;border:0;background:none;color:var(--muted);text-decoration:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:.15s;display:inline-block;}
+.tabs button:hover, .tabs a.tab-link:hover{color:var(--ink);}
+.tabs button.on, .tabs a.tab-link.on{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
 .gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
 .gtile{position:relative;aspect-ratio:4/3;overflow:hidden;border:1px solid var(--line);background:var(--surface);cursor:pointer;}
 .gtile img{width:100%;height:100%;object-fit:cover;transition:transform .4s;}
@@ -950,6 +950,31 @@ html[data-theme="dark"]{
 .aval .ci svg{width:24px;height:24px;}
 .aval h3{font-family:var(--serif);font-weight:500;font-size:1.25rem;line-height:1.24;margin:0 0 11px;color:var(--ink);}
 .aval p{color:var(--ink-2);font-size:0.90625rem;line-height:1.65;margin:0;}
+
+/* Bo'lim kartalari — bir bo'limning ichki sahifalariga yo'l ko'rsatuvchi
+   havola-kartalar (markaz-haqida.html dagi 4 bo'lim, biz-kimmiz.html dagi
+   faoliyat shakllari). Ikkala sahifada bir xil ko'rinishi uchun ATAYLAB shu
+   umumiy faylda — nusxa ko'chirmang. */
+.sec-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;}
+.scard{position:relative;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:32px 28px 30px;overflow:hidden;transition:transform .25s, box-shadow .25s, border-color .25s;}
+.scard::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r-card) var(--r-card) 0 0;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .3s;}
+.scard:hover{transform:translateY(-6px);box-shadow:var(--lift);border-color:color-mix(in srgb,var(--accent) 26%,var(--line));}
+.scard:hover::before{transform:scaleX(1);}
+.scard .ico{width:52px;height:52px;border:1px solid var(--line);border-radius:var(--r-ctl);display:flex;align-items:center;justify-content:center;color:var(--accent);margin-bottom:22px;transition:.25s;}
+.scard:hover .ico{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 30%,transparent);}
+.scard .ico svg{width:24px;height:24px;}
+.scard h3{font-family:var(--serif);font-weight:500;font-size:1.25rem;line-height:1.24;margin:0 0 11px;color:var(--ink);}
+.scard p{color:var(--ink-2);font-size:0.90625rem;line-height:1.62;margin:0 0 20px;}
+.scard .go{margin-top:auto;font-family:var(--mono);font-size:0.6875rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent2-d);display:inline-flex;align-items:center;gap:8px;transition:gap .2s;}
+.scard:hover .go{gap:14px;}
+@media(max-width:1180px){.sec-cards{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:680px){
+  .sec-cards{grid-template-columns:1fr;gap:16px;}
+  .scard{padding:26px 22px 24px;}
+  .scard .ico{width:44px;height:44px;margin-bottom:18px;}
+  .scard .ico svg{width:21px;height:21px;}
+  .scard h3{font-size:1.125rem;}
+}
 
 /* jamoa/hamkorlik bloki — vazmin panel */
 .about-cta{display:flex;align-items:center;justify-content:space-between;gap:36px;flex-wrap:wrap;

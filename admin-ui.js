@@ -87,6 +87,12 @@
 
   const STLABEL = { published: 'Nashr etilgan', draft: 'Qoralama', active: 'Faol', inactive: 'Nofaol', unsubscribed: 'Bekor qilgan' };
 
+  /* Hamkorlar toifalari — `hamkorlar.html` shu qiymatlar bo'yicha guruhlaydi.
+     Qiymat BAZAGA o'zbekcha yoziladi, saytda esa tashrifchining tiliga
+     o'giriladi (`page-hamkorlar.js` dagi CAT_KEY xaritasi). Ya'ni bu ro'yxatni
+     o'zgartirsangiz, o'sha xaritani va i18n kalitlarini ham yangilang. */
+  const PARTNER_CATS = ['', 'Xalqaro tashkilotlar', 'Ilmiy-tadqiqot markazlari', 'Universitetlar', 'Davlat organlari', 'Diplomatik vakolatxonalar'];
+
   /* -------------------- Collection configs -------------------- */
   const C = {
     news: {
@@ -131,7 +137,7 @@
         { k: 'date', label: 'Sana', type: 'date', side: 1 },
         { k: 'time', label: 'Boshlanish vaqti', type: 'text', side: 1, ph: '10:00' },
         { k: 'location', label: 'Manzil', type: 'text', ml: 1, side: 1 },
-        { k: 'type', label: 'Turi', type: 'select', side: 1, opts: ['Konferensiya', 'Davra suhbati', "Ta'lim dasturi", 'Brifing', 'Taqdimot', 'Forum'] },
+        { k: 'type', label: 'Turi', type: 'select', side: 1, opts: ['Uchrashuv', 'Davra suhbati', 'Konferensiya', 'Markaz hayoti', "Ta'lim dasturi", 'Brifing', 'Taqdimot', 'Forum'] },
         { k: 'status', label: 'Holat', type: 'status', side: 1 }
       ]
     },
@@ -196,11 +202,16 @@
       ]
     },
     partners: {
-      label: 'Hamkorlar', singular: 'hamkor', icon: 'partners',
-      columns: [{ k: 'name', label: 'Tashkilot', thumb: 'logo' }, { k: 'url', label: 'Veb-sayt' }],
+      label: 'Hamkorlar', singular: 'hamkor', icon: 'partners', search: 'name',
+      columns: [{ k: 'name', label: 'Tashkilot', thumb: 'logo' }, { k: 'category', label: 'Toifa' }, { k: 'country', label: 'Mamlakat' }, { k: 'url', label: 'Veb-sayt' }],
       fields: [
         { k: 'name', label: 'Tashkilot nomi', type: 'text', req: 1 },
+        { k: 'descr', label: 'Qisqacha tavsif', type: 'text', ml: 1, ph: 'Bir-ikki jumla — hamkorlikning mazmuni' },
         { k: 'logo', label: 'Logotip', type: 'image', side: 1 },
+        // Toifa hamkorlar.html sahifasida guruh sarlavhasi bo'lib ishlatiladi.
+        // Bo'sh qolsa hamkor "Boshqa hamkorlar" guruhiga tushadi.
+        { k: 'category', label: 'Toifa', type: 'select', side: 1, opts: PARTNER_CATS },
+        { k: 'country', label: 'Mamlakat / mintaqa', type: 'text', side: 1, ph: "O'zbekiston" },
         { k: 'url', label: 'Veb-sayt (URL)', type: 'text', side: 1, ph: 'https://' }
       ]
     },
