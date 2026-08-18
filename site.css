@@ -175,6 +175,11 @@ nav.main .item:hover>a,nav.main .item:hover>span{color:var(--accent);}
 nav.main .item.active>a{color:var(--accent);}
 .drop{position:absolute;top:100%;left:-18px;min-width:248px;background:var(--panel);border:1px solid var(--line);border-top:2px solid var(--accent);box-shadow:0 26px 56px -22px rgba(8,24,46,.45);padding:8px 0;opacity:0;visibility:hidden;transform:translateY(8px);transition:.22s;}
 nav.main .item:hover .drop{opacity:1;visibility:visible;transform:none;}
+/* Sahifasi yo'q "guruh" bandi (Markaz haqida): matn <span role=button>,
+   bosilganda .open qo'shiladi. Hover bilan ochilish o'z holicha qoladi. */
+nav.main .item.is-group>span{cursor:pointer;user-select:none;}
+nav.main .item.open>span{color:var(--accent);}
+nav.main .item.open .drop{opacity:1;visibility:visible;transform:none;}
 .drop a{display:block;padding:13px 22px;font-size:0.875rem;line-height:1.35;color:var(--ink-2);transition:.16s;border-left:2px solid transparent;}
 .drop a:hover{background:var(--accent-soft);color:var(--accent);border-left-color:var(--accent);}
 .ic{width:20px;height:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.85;transition:opacity .2s;}
@@ -226,6 +231,22 @@ body.inner{padding-top:116px;}
 .crumb >span:last-child{color:#fff;}
 .page-banner h1{font-family:var(--serif);font-weight:500;font-size:clamp(28px,3.4vw,44px);line-height:1.12;margin:0;max-width:34ch;}
 .page-banner .lead{color:rgba(255,255,255,.72);font-size:1.03rem;margin:18px 0 0;max-width:60ch;}
+
+/* --- Bo'lim ichi navigatsiyasi (site-common.js -> renderSectionNav) ---
+   "Markaz haqida" menyu bandi sahifasiz guruhga aylangani uchun bo'limning
+   4 sahifasi o'rtasida yurish shu qator orqali bo'ladi. Header'ga yopishadi:
+   `--hdr-h` ni renderHeader o'lchab yozadi (header balandligi ekran kengligiga
+   qarab o'zgaradi, shuning uchun qattiq raqam yaramaydi). */
+.secnav{position:sticky;top:var(--hdr-h,118px);z-index:40;background:var(--panel);border-bottom:1px solid var(--line);}
+.secnav .wrap{display:flex;align-items:stretch;gap:2px;padding:0 40px;overflow-x:auto;scrollbar-width:none;}
+.secnav .wrap::-webkit-scrollbar{display:none;}
+.secnav-t{align-self:center;flex:none;font-family:var(--mono);font-size:0.65625rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding-right:20px;margin-right:14px;border-right:1px solid var(--line);}
+.secnav a{position:relative;flex:none;display:flex;align-items:center;padding:16px;font-size:0.9375rem;color:var(--ink-2);white-space:nowrap;transition:color .18s;}
+/* Tanlangan bo'lim ostidagi chiziq — hover'da ham chapdan o'ngga chiziladi. */
+.secnav a::after{content:"";position:absolute;left:16px;right:16px;bottom:0;height:2px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .22s;}
+.secnav a:hover,.secnav a.on{color:var(--accent);}
+.secnav a.on::after,.secnav a:hover::after{transform:none;}
+@media(prefers-reduced-motion:reduce){.secnav a::after{transition:none;}}
 /* Sarlavha bannerni bosib ketmasligi uchun xavfsizlik chegarasi. Faqat to'liq
    sarlavha sahifa ICHIDA ham ko'rsatiladigan sahifalarda (nashr.html) qo'llanadi —
    shunda kesilgan matn hech qachon yo'qolmaydi. Odatda admin "Qisqa sarlavha"
@@ -629,6 +650,8 @@ html[data-theme="light"] .f-bot{color:rgba(255,255,255,.7);}
 .mnav .close svg{width:26px;height:26px;}
 .mnav a{display:block;font-family:var(--serif);font-size:1.375rem;padding:14px 0;border-bottom:1px solid var(--line);color:var(--ink);}
 .mnav a.sub{font-family:var(--sans);font-size:0.9375rem;padding:9px 0 9px 16px;color:var(--ink-2);border-bottom:0;}
+/* Mobil menyuda guruh bandi havola emas — ostidagi .sub havolalar sarlavhasi. */
+.mnav .mgroup{font-family:var(--mono);font-size:0.6875rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:22px 0 10px;border-bottom:1px solid var(--line);}
 
 /* responsive */
 @media(max-width:1180px){
@@ -655,6 +678,14 @@ html[data-theme="light"] .f-bot{color:rgba(255,255,255,.7);}
   .f-top>.f-meta{grid-column:1 / -1;grid-row:3;justify-self:end;}
 }
 html,body{overflow-x:hidden;}
+/* `overflow-x:hidden` (yuqoridagi qator) body'ni SKROLL KONTEYNERGA aylantiradi
+   — spetsifikatsiya bo'yicha bir o'q `hidden` bo'lsa ikkinchisi `auto` bo'ladi.
+   Ichidagi `position:sticky` esa o'sha konteyner ichida "yopishadi", ya'ni
+   ekranga nisbatan umuman yopishmaydi (.secnav shu sababli tushib ketardi).
+   `clip` xuddi shunday kesadi, lekin skroll konteyner YARATMAYDI.
+   Eski brauzer `clip` ni tanimasa yuqoridagi `hidden` kuchda qoladi: qator
+   yopishmaydi, boshqa hech narsa buzilmaydi. */
+body.inner{overflow-x:clip;}
 @media(max-width:1080px){
   .cards{grid-template-columns:repeat(3,1fr);}
   .pub-grid{grid-template-columns:repeat(2,1fr);}
@@ -731,6 +762,13 @@ html,body{overflow-x:hidden;}
   .article .art-lead{font-size:1.15rem;line-height:1.5;padding-left:14px;}
   .article .content blockquote{font-size:1.125rem;padding-left:16px;}
   body.inner{padding-top:64px;}
+  /* Tor ekranda bo'lim nomi qatorning yarmini egallaydi — havolalarga joy
+     bo'shatiladi (qator gorizontal suriladi). */
+  .secnav{top:var(--hdr-h,64px);}
+  .secnav .wrap{padding:0 18px;}
+  .secnav-t{display:none;}
+  .secnav a{padding:13px 12px;font-size:0.875rem;}
+  .secnav a::after{left:12px;right:12px;}
   header .bar .wrap{height:62px !important;}
   body.inner header .util{height:0;overflow:hidden;border-color:transparent;}
   .about-intro{grid-template-columns:1fr;gap:28px;}
@@ -1005,7 +1043,7 @@ html[data-theme="dark"]{
   .print-head, .print-foot, .article .content, .pub-detail .prose { background:#fff !important; }
 
   /* --- ekran UI'sini olib tashlaymiz --- */
-  header, footer, .nav-burger, .mnav, .skip-link, .gs-ov, .gs-bar, .sub-ov,
+  header, footer, .nav-burger, .mnav, .secnav, .skip-link, .gs-ov, .gs-bar, .sub-ov,
   .act-row, .arrow-link, .sec-head, .a11y-panel, .a11y-overlay, #a11y-read-overlay,
   .theme-tog, #viewct, .crumb, .related-sec { display:none !important; }
 

@@ -82,6 +82,44 @@
   // versiyasiga o'tilganda yangilanmay qolgan edi: bosh sahifaga kirgan
   // odam hamon eski oynani ko'rardi. Nusxa ko'chirmang.
   try { if (window.Subscribe) window.Subscribe.arm(); } catch(e){ console.error("subscribe:", e); }
+  // ---- ochiluvchi ro'yxat: BOSISH bilan ochish ----
+  // Sahifasi yo'q "guruh" bandi (Markaz haqida) hech qayerga olib bormaydi,
+  // shuning uchun bosishga javob berishi SHART — sensorli ekranda hover yo'q.
+  // Ichki sahifalardagi egizagi: site-common.js -> renderHeader ("Ochiluvchi
+  // ro'yxat"). Bosh sahifa site-common.js ni YUKLAMAYDI, shuning uchun bu
+  // mantiq shu yerda takrorlanadi — birini o'zgartirsangiz ikkinchisini ham.
+  (function(){
+    var groups = document.querySelectorAll('header nav.main .item.is-group');
+    if (!groups.length) return;
+    function closeGroups(except){
+      groups.forEach(function(g){
+        if (g === except) return;
+        g.classList.remove('open');
+        var b = g.querySelector('[aria-expanded]'); if (b) b.setAttribute('aria-expanded','false');
+      });
+    }
+    groups.forEach(function(g){
+      var btn = g.querySelector('[role=button]');
+      if (!btn) return;
+      function toggle(){
+        var on = !g.classList.contains('open');
+        closeGroups(g);
+        g.classList.toggle('open', on);
+        btn.setAttribute('aria-expanded', on ? 'true' : 'false');
+      }
+      btn.addEventListener('click', toggle);
+      btn.addEventListener('keydown', function(e){
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+      });
+      g.addEventListener('mouseleave', function(){ closeGroups(); });
+    });
+    document.addEventListener('click', function(e){
+      // `closest` faqat elementlarda bor (site-common.js dagi egizagi kabi).
+      var t = e.target;
+      if (!t || typeof t.closest !== 'function' || !t.closest('header nav.main .item.is-group')) closeGroups();
+    });
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeGroups(); });
+  })();
   // ---- mobil menyu ----
   (function(){
     var mnav = document.getElementById('mnav');

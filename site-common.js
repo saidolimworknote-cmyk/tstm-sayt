@@ -131,7 +131,11 @@
   // nechta sahifaga javob beradi (masalan Voqealar = yangiliklar + tadbirlar),
   // chunki alohida menyu bandlari olib tashlandi, sahifalar esa qoldi.
   const NAV = [
-    { tk: 'nav_about', href: 'markaz-haqida.html', keys: ['about','who','partners'], children: [
+    // `group: true` — bu band SAHIFA EMAS, faqat ochiluvchi ro'yxat sarlavhasi
+    // (2026-08-19). Bosilganda hech qayerga o'tmaydi, ostidagi 4 bo'lim ochiladi.
+    // Ilgari u `markaz-haqida.html` ga olib borardi; o'sha sahifaning kontenti
+    // `biz-kimmiz.html` ga ko'chirildi, eski manzil esa o'sha yerga yo'naltiradi.
+    { tk: 'nav_about', group: true, keys: ['about','who','partners'], children: [
       { tk: 'nav_about_who',      href: 'biz-kimmiz.html' },
       { tk: 'nav_about_leadership', href: 'rahbariyat.html' },
       { tk: 'nav_about_experts',  href: 'ekspertlar.html' },
@@ -211,7 +215,13 @@
       const car = n.children ? ' <i class="car"></i>' : '';
       const drop = n.children ? '<div class="drop">' + n.children.map(c => `<a href="${c.href}">${esc(T(c.tk))}</a>`).join('') + '</div>' : '';
       const active = (n.keys || [n.key]).indexOf(activeKey) >= 0 ? ' active' : '';
-      return `<div class="item${active}"><a href="${n.href}">${esc(T(n.tk))}${car}</a>${drop}</div>`;
+      // Sahifasi yo'q band (`group`) <a> emas, <span role=button> bo'ladi:
+      // bosilganda ro'yxat ochiladi, hech qayerga o'tilmaydi. Klaviatura va
+      // skrin-riderlar uchun aria-haspopup/aria-expanded qo'yiladi.
+      const label = n.group
+        ? `<span role="button" tabindex="0" aria-haspopup="true" aria-expanded="false">${esc(T(n.tk))}${car}</span>`
+        : `<a href="${n.href}">${esc(T(n.tk))}${car}</a>`;
+      return `<div class="item${active}${n.group ? ' is-group' : ''}">${label}${drop}</div>`;
     }).join('');
 
     const el = document.createElement('header');
@@ -266,7 +276,9 @@
         <div class="mnav-langs" role="group" aria-label="Til / Язык / Language">${langButtons()}</div>
         <div class="close" id="mClose" role="button" tabindex="0" aria-label="${esc(T('close')||'Yopish')}">${ICON.close}</div>
       </div>` +
-      NAV.map(n => `<a href="${n.href}">${esc(T(n.tk))}</a>` +
+      NAV.map(n => (n.group
+          ? `<div class="mgroup">${esc(T(n.tk))}</div>`
+          : `<a href="${n.href}">${esc(T(n.tk))}</a>`) +
         (n.children ? n.children.map(c => `<a class="sub" href="${c.href}">${esc(T(c.tk))}</a>`).join('') : '')
       ).join('');
     document.body.appendChild(drawer);
@@ -275,6 +287,44 @@
     drawer.querySelector('#mClose').addEventListener('click', closeDrawer);
     // Menyu havolasi / utilita tugmasi bosilganda drawer yopilsin (a11y & qidiruv panel ustidan ochilsin)
     drawer.querySelectorAll('a, .a11y-btn').forEach(a => a.addEventListener('click', closeDrawer));
+
+    // ---------- Ochiluvchi ro'yxat: BOSISH bilan ochish ----------
+    // Desktopda ro'yxat hover bilan ochiladi (CSS), lekin sahifasi yo'q "guruh"
+    // bandi (`NAV[].group`) uchun bosish ham ishlashi SHART: sensorli ekranda
+    // hover yo'q, va band endi hech qayerga olib bormaydi — bosishga javob
+    // bermasa foydalanuvchi uni "buzuq" deb o'ylaydi.
+    const groups = el.querySelectorAll('nav.main .item.is-group');
+    const closeGroups = (except) => groups.forEach(g => {
+      if (g === except) return;
+      g.classList.remove('open');
+      const b = g.querySelector('[aria-expanded]'); if (b) b.setAttribute('aria-expanded', 'false');
+    });
+    groups.forEach(g => {
+      const btn = g.querySelector('[role=button]');
+      if (!btn) return;
+      const toggle = () => {
+        const on = !g.classList.contains('open');
+        closeGroups(g);
+        g.classList.toggle('open', on);
+        btn.setAttribute('aria-expanded', on ? 'true' : 'false');
+      };
+      btn.addEventListener('click', toggle);
+      btn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+      });
+      // Sichqoncha banddan chiqib ketganda ochiq holat osilib qolmasin
+      // (hover bilan ochilgan ro'yxat ustiga bosilsa .open qo'shilib qolardi).
+      g.addEventListener('mouseleave', () => closeGroups());
+    });
+    if (groups.length){
+      document.addEventListener('click', (e) => {
+        // `closest` faqat elementlarda bor — hujjat/oyna nishoniga tushsa ham
+        // xatosiz ishlashi uchun metodning o'zi tekshiriladi.
+        const t = e.target;
+        if (!t || typeof t.closest !== 'function' || !t.closest('nav.main .item.is-group')) closeGroups();
+      });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeGroups(); });
+    }
 
     // theme toggles
     applyTheme(document.documentElement.getAttribute('data-theme'));
@@ -294,6 +344,19 @@
     });
     // Escape bilan drawer yopilsin
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && drawer.classList.contains('open')) closeDrawer(); });
+
+    // Header BALANDLIGI CSS o'zgaruvchisiga yoziladi: bo'lim navigatsiyasi
+    // (.secnav) aynan uning ostiga yopishishi kerak, balandlik esa ekran
+    // kengligiga qarab o'zgaradi — qattiq raqam yozib bo'lmaydi.
+    // O'lchov DARHOL olinadi: header allaqachon DOMda (prepend qilingan), va
+    // requestAnimationFrame fonda turgan oynada umuman chaqirilmaydi — o'sha
+    // yo'l bilan qilinganda o'zgaruvchi bo'sh qolib, .secnav header ostiga
+    // kirib ketardi. Keyingi o'zgarishlar (oyna kengligi, shrift kattaligi)
+    // uchun kuzatuvchilar qo'shiladi.
+    const setHdrH = () => document.documentElement.style.setProperty('--hdr-h', el.offsetHeight + 'px');
+    setHdrH();
+    w.addEventListener('resize', setHdrH);
+    if (w.ResizeObserver) { try { new ResizeObserver(setHdrH).observe(el); } catch{} }
 
     // Brend matnini joyga moslash (layout hisoblangandan keyin + oyna o'lchami o'zgarganda)
     requestAnimationFrame(fitBrand);
@@ -363,6 +426,38 @@
     document.querySelectorAll('.rv').forEach(el=>io.observe(el));
   }
 
+  // ---------- Bo'lim ichi navigatsiyasi (section rail) ----------
+  // "Markaz haqida" menyusi endi sahifasiz GURUH (NAV[].group) — bo'limning
+  // 4 sahifasi o'rtasida yurish uchun ilgari hub sahifa (markaz-haqida.html)
+  // xizmat qilardi, u esa `biz-kimmiz.html` ga birlashtirildi. Uning o'rnini
+  // banner ostidagi shu qator bosadi: tashrifchi qaysi bo'limda turganini
+  // ko'radi va bir bosishda qardosh sahifaga o'tadi.
+  //
+  // Ro'yxat NAV dan olinadi — menyu o'zgarsa bu qator ham o'zgaradi, alohida
+  // nusxa saqlanmaydi. Faqat `group` bandlar uchun chiziladi: sahifasi BOR
+  // bo'limlarda (Voqealar, Tadqiqotlar, Media) o'sha sahifaning o'zi shu
+  // vazifani bajaradi.
+  function currentFile(){
+    return decodeURIComponent((location.pathname.split('/').pop() || 'index.html').toLowerCase());
+  }
+  function renderSectionNav(){
+    const file = currentFile();
+    const grp = NAV.find(n => n.group && (n.children || []).some(c => c.href.split('?')[0].toLowerCase() === file));
+    if (!grp) return;
+    const banner = document.querySelector('.page-banner');
+    if (!banner || document.querySelector('.secnav')) return;
+    const el = document.createElement('nav');
+    el.className = 'secnav';
+    el.setAttribute('aria-label', T(grp.tk));
+    el.innerHTML = '<div class="wrap"><span class="secnav-t">' + esc(T(grp.tk)) + '</span>'
+      + grp.children.map(c => {
+          const on = c.href.split('?')[0].toLowerCase() === file;
+          return `<a href="${c.href}"${on ? ' class="on" aria-current="page"' : ''}>${esc(T(c.tk))}</a>`;
+        }).join('')
+      + '</div>';
+    banner.insertAdjacentElement('afterend', el);
+  }
+
   // ---------- banner background ----------
   // sahifa fayli -> banner kaliti
   const BANNER_MAP = {
@@ -371,7 +466,7 @@
     'nashrlar.html':'pubs','nashr.html':'pubs','tadqiqotlar.html':'research','yonalish.html':'research',
     // "Tahlillar" bo'limining uch sahifasi nashrlar bilan bir xil bannerni oladi
     'tahlillar.html':'pubs','maqolalar.html':'pubs','kitoblar.html':'pubs','maruzalar.html':'pubs',
-    'markaz-haqida.html':'about','biz-kimmiz.html':'about','rahbariyat.html':'leadership','ekspertlar.html':'experts','hamkorlar.html':'about','media.html':'media',
+    'biz-kimmiz.html':'about','rahbariyat.html':'leadership','ekspertlar.html':'experts','hamkorlar.html':'about','media.html':'media',
     'aloqa.html':'contact','qidiruv.html':'search',
     'oav.html':'oav','sharh.html':'oav'
   };
@@ -488,6 +583,7 @@
       try { opts.render(); } catch(e){ console.error(e); }
     }
     try { applyBanner(opts.active); } catch(e){ console.error('applyBanner:', e); }
+    try { renderSectionNav(); } catch(e){ console.error('renderSectionNav:', e); }
     try { renderFooter(); } catch(e){ console.error('renderFooter:', e); }
     try { if (w.I18N) w.I18N.translate(document); } catch(e){ console.error(e); }
     try { enhanceSelects(document); } catch(e){ console.error('enhanceSelects:', e); }
@@ -628,5 +724,5 @@
     (root || document).querySelectorAll('select:not(.a11y-sel)').forEach(enhanceSelect);
   }
 
-  w.Site = { initPage, renderHeader, renderFooter, mlGet, dispTitle, esc, safeUrl, fmtDate, dayMonth, qs, settings, lang, brandLogo, t: T, ICON, NAV, initReveal, showSubscribe, printDoc, enhanceSelect, enhanceSelects };
+  w.Site = { initPage, renderHeader, renderFooter, renderSectionNav, mlGet, dispTitle, esc, safeUrl, fmtDate, dayMonth, qs, settings, lang, brandLogo, t: T, ICON, NAV, initReveal, showSubscribe, printDoc, enhanceSelect, enhanceSelects };
 })(window);

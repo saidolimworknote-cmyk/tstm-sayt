@@ -3,8 +3,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://SIZNING-DOMENINGIZ.uz/</loc><priority>1.0</priority></url>
   <!-- Markaz haqida bo'limi: 4 ta ichki sahifa -->
-  <url><loc>https://SIZNING-DOMENINGIZ.uz/markaz-haqida.html</loc><priority>0.8</priority></url>
-  <url><loc>https://SIZNING-DOMENINGIZ.uz/biz-kimmiz.html</loc><priority>0.7</priority></url>
+  <url><loc>https://SIZNING-DOMENINGIZ.uz/biz-kimmiz.html</loc><priority>0.8</priority></url>
   <url><loc>https://SIZNING-DOMENINGIZ.uz/rahbariyat.html</loc><priority>0.7</priority></url>
   <url><loc>https://SIZNING-DOMENINGIZ.uz/ekspertlar.html</loc><priority>0.7</priority></url>
   <url><loc>https://SIZNING-DOMENINGIZ.uz/hamkorlar.html</loc><priority>0.7</priority></url>

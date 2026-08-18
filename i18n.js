@@ -74,6 +74,14 @@
     pcat_diplo:           { uz: 'Diplomatik vakolatxonalar', ru: 'Дипломатические представительства', en: 'Diplomatic missions' },
     pcat_other:           { uz: 'Boshqa hamkorlar', ru: 'Другие партнёры', en: 'Other partners' },
     partners_filter_all:  { uz: 'Barchasi', ru: 'Все', en: 'All' },
+    /* Hamkorlar sahifasidagi qidiruv va natija matnlari. `partners_found`
+       raqamdan KEYIN qo'yiladi ("6 ta hamkor" / "6 партнёров" / "6 partners"),
+       shuning uchun uch tilda ham raqamga ergashadigan shaklda yozilgan —
+       t() da o'rin almashtirish ({n} kabi) yo'q. */
+    partners_search_ph:   { uz: "Nomi yoki davlat bo’yicha qidirish", ru: 'Поиск по названию или стране', en: 'Search by name or country' },
+    partners_found:       { uz: 'ta hamkor', ru: 'партнёров', en: 'partners' },
+    partners_none:        { uz: "So’rovingizga mos hamkor topilmadi.", ru: 'По вашему запросу партнёров не найдено.', en: 'No partners match your query.' },
+    partners_reset:       { uz: 'Filtrni tozalash', ru: 'Сбросить фильтр', en: 'Clear filters' },
     partners_stat_orgs:   { uz: 'Hamkor tashkilot', ru: 'Организаций-партнёров', en: 'Partner organizations' },
     partners_stat_geo:    { uz: 'Davlat va mintaqa', ru: 'Стран и регионов', en: 'Countries & regions' },
     partners_stat_cats:   { uz: 'Hamkorlik yo’nalishi', ru: 'Направлений сотрудничества', en: 'Areas of cooperation' },

@@ -3,7 +3,8 @@
      umumiy uslublardan foydalanadi — bu yerda faqat shu sahifaga xoslari. */
 
   /* Faoliyat shakllari kartalari — `.sec-cards`/`.scard` (site.css), ular
-     markaz-haqida.html dagi bo'lim kartalari bilan bir xil komponent. */
+     ilgari markaz-haqida.html dagi bo'lim kartalari bilan bir xil komponent
+     edi; o'sha sahifa 2026-08-19 da shu sahifaga birlashtirildi. */
 
   /* --- Ishlash uslubi: raqamlangan bosqichlar ---
      Bosqichlarni bog'lab turuvchi chiziq ::before orqali chiziladi (desktopda
@@ -34,7 +35,7 @@
     .wstep p{max-width:none;font-size:0.875rem;}
   }
   @media print{
-    header,footer,.page-banner{display:none !important;}
+    header,footer,.page-banner,.secnav{display:none !important;}
     body.inner{padding-top:0 !important;}
     .wstep{break-inside:avoid;}
   }

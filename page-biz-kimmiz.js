@@ -1,11 +1,27 @@
 /* biz-kimmiz.html sahifasining skripti.
-   Sahifa uch qismdan iborat: faoliyat shakllari (kartalar), ishlash uslubi
-   (bosqichlar) va admin matni. Kartalar matni i18n'dan keladi — ular markaz
-   faoliyatining DOIMIY tavsifi. Institutsional tarix esa admin panel ->
-   Sahifalar -> slug `biz-kimmiz` dan olinadi; matn bo'lmasa bo'lim yashirin
-   qoladi (kodda o'ylab topilgan sana turmasin). */
+
+   2026-08-19: `markaz-haqida.html` shu sahifaga BIRLASHTIRILDI (menyudagi
+   "Markaz haqida" endi sahifasiz guruh — site-common.js dagi NAV[].group).
+   Shu sababli bu yerga eski `page-markaz-haqida.js` dan uch narsa ko'chdi:
+   tadqiqot yo'nalishlari kartalari, "Maqsad va vazifalar" matni va admin'ning
+   "markaz-haqida" sahifa matni. Admin kiritgan hech bir matn yo'qolmasligi
+   uchun uchala matn bloki ham saqlab qolindi; bo'shi ko'rinmaydi.
+
+   Kartalar va bosqichlar matni i18n'dan keladi — ular markaz faoliyatining
+   DOIMIY tavsifi. Institutsional matnlar esa admin panel -> Sahifalar dan
+   olinadi (kodda o'ylab topilgan sana turmasin). */
   Site.initPage({ active:'about', render(){
     const T = Site.t, esc = Site.esc;
+    const s = Store.settings();
+
+    // ---- bayonot: admin (settings.aboutIntro) mavjud bo'lsa ustunlik beriladi ----
+    // Ilgari bu sozlama faqat markaz-haqida.html da ishlardi; sahifa
+    // birlashtirilgach admin'ning matni yo'qolmasin deb shu yerga ko'chirildi.
+    const introEl = document.querySelector('[data-i18n-html="who_statement"]');
+    if(introEl){
+      const intro = (s.aboutIntro && s.aboutIntro[Site.lang]) || (s.aboutIntro && s.aboutIntro.uz);
+      if(intro){ introEl.removeAttribute('data-i18n-html'); introEl.innerHTML = esc(intro); }
+    }
 
     // ---- faoliyat shakllari: har biri tegishli bo'limga havola ----
     const I = {
@@ -28,6 +44,32 @@
         <span class="go">${esc(T('more'))} →</span>
       </a>`).join('');
 
+    // ---- tadqiqot yo'nalishlari (markaz-haqida.html dan ko'chdi) ----
+    const DI = {
+      diplo:'<path d="M12 3v18M5 7l7-4 7 4M5 7v8l7 4 7-4V7M3 21h18"/>',
+      shield:'<path d="M12 3 5 6v6c0 4 3 6.5 7 9 4-2.5 7-5 7-9V6z"/>',
+      trade:'<path d="M3 7h18M3 7l3-4h12l3 4M5 7v13h14V7M9 11h6"/>',
+      globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 3.8 5.8 3.8 9S14.5 18.5 12 21c-2.5-2.5-3.8-5.8-3.8-9S9.5 5.5 12 3Z"/>',
+      chart:'<path d="M4 19V5M4 19h16M8 16v-4M12 16V8M16 16v-7"/>',
+      energy:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>'
+    };
+    const areas = [
+      { ic:'diplo',  t:T('dir1_t'), d:T('dir1_d') },
+      { ic:'shield', t:T('dir2_t'), d:T('dir2_d') },
+      { ic:'trade',  t:T('dir3_t'), d:T('dir3_d') },
+      { ic:'globe',  t:T('dir4_t'), d:T('dir4_d') },
+      { ic:'chart',  t:T('dir5_t'), d:T('dir5_d') },
+      { ic:'energy', t:T('dir6_t'), d:T('dir6_d') }
+    ];
+    document.getElementById('areas').innerHTML = areas.map((a,i)=>`
+      <a class="rcard" href="yonalish.html?id=${i}">
+        <span class="num">${String(i+1).padStart(2,'0')}</span>
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${DI[a.ic]}</svg></div>
+        <h3>${esc(a.t)}</h3>
+        <p>${esc(a.d)}</p>
+        <span class="go">${esc(T('yo_about'))} →</span>
+      </a>`).join('');
+
     // ---- ishlash uslubi: 4 bosqich ----
     const steps = [1,2,3,4].map(i => ({ t:T('who_how'+i+'_t'), d:T('who_how'+i+'_d') }));
     document.getElementById('whoSteps').innerHTML = steps.map((s,i)=>`
@@ -37,8 +79,7 @@
         <p>${esc(s.d)}</p>
       </li>`).join('');
 
-    // ---- statistika (markaz-haqida bilan bir xil manba: admin sozlamalari) ----
-    const s = Store.settings();
+    // ---- statistika (admin sozlamalaridan; bo'lmasa standart) ----
     const defStats = [
       { n:'300+', c:T('stat_research') },
       { n:'45',   c:T('stat_experts')  },
@@ -51,13 +92,21 @@
     document.getElementById('statband').innerHTML = stats.map(x=>
       `<div class="s"><div class="n">${esc(x.n)}</div><div class="c">${esc(x.c)}</div></div>`).join('');
 
-    // ---- admin matni (bo'lmasa bo'lim ko'rinmaydi) ----
-    const pg = Store.all('pages').find(p => p.status === 'published' && p.slug === 'biz-kimmiz');
-    const html = pg ? (Site.mlGet(pg.body)||'').trim() : '';
-    if(html){
-      document.getElementById('whoStory').innerHTML = html;
-      document.getElementById('whoStorySec').classList.remove('is-hidden');
-    }
+    // ---- admin matnlari: uchtasi ham ixtiyoriy, bo'lmasa bo'lim ko'rinmaydi ----
+    // Ilgari "Maqsad va vazifalar" matn bo'lmasa "tez orada" deb turardi;
+    // bo'sh va'da o'rniga endi bo'lim butunlay chizilmaydi (boshqa matn
+    // bloklari bilan bir xil qoida).
+    const pages = Store.all('pages').filter(p => p.status === 'published');
+    const bodyOf = (slug) => { const pg = pages.find(p => p.slug === slug); return pg ? (Site.mlGet(pg.body)||'').trim() : ''; };
+    const fill = (slug, bodyId, secId) => {
+      const html = bodyOf(slug);
+      if(!html) return;
+      document.getElementById(bodyId).innerHTML = html;
+      document.getElementById(secId).classList.remove('is-hidden');
+    };
+    fill('maqsad',        'goalBody',  'goalSec');
+    fill('markaz-haqida', 'aboutBody', 'aboutBodySec');
+    fill('biz-kimmiz',    'whoStory',  'whoStorySec');
 
     Site.initReveal();
   }});

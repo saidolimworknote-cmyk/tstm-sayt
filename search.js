@@ -74,7 +74,7 @@
         items.push({kind:'event',kl:T('search_k_event'),title:e.title,text:e.body,href:'tadbirlar.html',cover:e.cover||'',date:e.date||'',cat:e.type||''});
       });
       Store.all('pages').filter(function(p){return p.status==='published';}).forEach(function(p){
-        items.push({kind:'page',kl:T('search_k_page'),title:p.title,text:p.body,href:'markaz-haqida.html?slug='+encodeURIComponent(p.slug),cover:'',date:'',cat:''});
+        items.push({kind:'page',kl:T('search_k_page'),title:p.title,text:p.body,href:'biz-kimmiz.html?slug='+encodeURIComponent(p.slug),cover:'',date:'',cat:''});
       });
       Store.all('experts').forEach(function(e){
         items.push({kind:'expert',kl:T('search_k_expert'),title:e.name,text:e.role,href:'expert.html?id='+e.id,cover:e.photo||'',date:'',cat:''});

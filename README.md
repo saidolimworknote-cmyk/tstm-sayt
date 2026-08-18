@@ -5,9 +5,14 @@ Sayt + boshqaruv paneli (admin). XAMPP'da ishlash uchun PHP backend bilan.
 ## 📦 Tarkibi
 - **Bosh sahifa - Hi-Fi.html** — saytning bosh sahifasi
 - Ichki sahifalar: `yangiliklar.html`, `yangilik.html`, `tadbirlar.html`, `nashrlar.html`,
-  `tadqiqotlar.html`, `markaz-haqida.html`, `rahbariyat.html`, `ekspertlar.html`, `media.html`, `aloqa.html`,
+  `tadqiqotlar.html`, `biz-kimmiz.html`, `rahbariyat.html`, `ekspertlar.html`, `hamkorlar.html`,
+  `media.html`, `aloqa.html`,
   `oav.html` + `sharh.html` — «Bizning ekspertlar OAVlarda» (ro'yxat va bitta sharh;
   admin'da **Ekspertlar OAVda** bo'limi, `media_posts` jadvali)
+- `markaz-haqida.html` — **yo'naltiruvchi** sahifa (`biz-kimmiz.html` ga). 2026-08-19 da
+  «Markaz haqida» menyu bandi sahifasiz guruhga aylantirilgan, hub sahifaning butun
+  kontenti esa `biz-kimmiz.html` ga ko'chirilgan. Fayl o'chirilmadi — eski havolalar
+  va qidiruv indeksi shu manzilga ishora qiladi (batafsili faylning o'zida yozilgan).
 - `maqolalar.html`, `maruzalar.html`, `tahlillar.html`, `kitoblar.html` — «Tadqiqotlar»
   menyusining alohida sahifalari (2026-08-12 gacha bu menyu «Tahlillar» deb
   atalgan va `hisobotlar.html` bo'lgan — u endi `tahlillar.html`). To'rttasi ham
@@ -237,6 +242,27 @@ bir qismi. Har bir o'chirilgan qoidaning sababi konfiguratsiya ichida izohlangan
 
 > ⚠️ `-webkit-backdrop-filter` va `-webkit-mask-image` prefikslarini **olib
 > tashlamang** — Safari/iOS uchun hozir ham zarur, autoprefixer esa yo'q.
+
+### Navigatsiya
+
+Menyu 4 ta ochiluvchi band + «Aloqa» dan iborat. Manba — `site-common.js` dagi
+`NAV` massivi; bosh sahifadagi menyu esa `index.html` ichida QO'LDA yozilgan
+alohida nusxa (bosh sahifa `site-common.js` ni yuklamaydi) — **ikkalasini birga
+yangilang**.
+
+- **«Markaz haqida» bandi sahifa emas** (`NAV[].group === true`): bosilganda
+  hech qayerga o'tmaydi, faqat ostidagi 4 bo'lim ochiladi. HTML'da u `<a>` emas,
+  `<span role="button">` bo'lib chiziladi va `.item.is-group` sinfini oladi.
+  Bosish mantiqi ikki joyda: `site-common.js` → `renderHeader` va
+  `page-home.js` (bosh sahifa uchun nusxa).
+- **Bo'lim ichi navigatsiyasi** (`.secnav`) — banner ostidagi yopishqoq qator:
+  sahifasiz guruhning 4 sahifasi o'rtasida yurish uchun. `site-common.js` →
+  `renderSectionNav` uni `NAV` dan o'zi quradi, HTML'ga qo'shish shart emas.
+  Header balandligi `--hdr-h` o'zgaruvchisiga o'lchab yoziladi.
+
+> ⚠️ `.secnav` yopishishi uchun `body.inner` da `overflow-x:clip` turadi
+> (`overflow-x:hidden` skroll konteyner yaratib, `position:sticky` ni o'ldiradi).
+> Bu qatorni `hidden` ga qaytarmang.
 
 ### Uslub fayllari
 
