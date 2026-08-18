@@ -299,6 +299,33 @@ ko'rinmaydi**: format `<main data-ekind="...">` atributida e'lon qilinadi
   to'planganda chiqadi (bitta yilda u hech narsani filtrlamaydi).
 - Uslublar — `page-tadbirlar.css` (voqea sahifasi ham shu faylni ulaydi).
 
+### Tadqiqotlar bo'limi — har bir sahifa o'z formatida
+
+Voqealar bo'limidagi bilan bir xil naqsh: beshta sahifa `page-nashrlar.js` ni
+ishlatadi, format esa `<main data-pkind="...">` da e'lon qilinadi.
+
+| Sahifa | `data-pkind` | Format | Nega shunday |
+|--------|--------------|--------|--------------|
+| `maqolalar.html` | `articles` | o'qish ro'yxati (keng qator, annotatsiya bilan) | Maqola matn janri — sarlavha va matn asosiy, muqova yordamchi |
+| `maruzalar.html` | `lectures` | ma'ruzachi tepada bo'lgan kartalar | «Kim aytdi» sarlavhadan kam ahamiyatli emas |
+| `tahlillar.html` | `reports` | muqovali kartalar + hudud/muallif | Rasmiy tahliliy mahsulot — muqova va PDF asosiy |
+| `kitoblar.html` | `books` | kitob javoni (tik 3:4 muqova, 4 tadan) | Muqova kitobning taniqlik belgisi |
+| `nashrlar.html` | *(yo'q)* | muqovali kartalar | Butun bo'limning umumiy ro'yxati |
+
+> ⚠️ **Tur → bo'lim mosligi `site-common.js` dagi `PUB_KINDS` da** — bitta joyda.
+> `admin-ui.js` dagi nashr turlari ro'yxatiga yangi qiymat qo'shsangiz shu
+> yerga ham qo'shing.
+>
+> **Nega kerak bo'ldi:** 2026-08-12 da menyudagi «Hisobotlar» «Tahlillar» deb
+> qayta nomlangan va sahifa `Tahlil` turini filtrlaydigan qilingan, lekin
+> bazadagi yozuvlar `Hisobot` turida qolgan. Natijada `tahlillar.html`
+> **butunlay bo'sh** turardi va 7 ta nashrdan **4 tasi** hech bir kichik
+> sahifada ko'rinmasdi. `PUB_KINDS` eskirgan nomlarni ham qabul qiladi.
+
+Boshqaruv qatori (qidiruv / tur / saralash / toifa chiplari) ma'lumot
+miqdoriga moslashadi — Hamkorlar sahifasidagi qoida: har bir element faqat
+haqiqatan foydali bo'lganda ko'rinadi (ostonalar `page-nashrlar.js` boshida).
+
 ### Uslub fayllari
 
 | Fayl | Kim ishlatadi |

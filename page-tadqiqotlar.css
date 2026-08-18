@@ -1,0 +1,101 @@
+  /* Tadqiqotlar bo'limi — har bir sahifaning O'Z formati.
+     Umumiy bo'laklar (.pub-grid/.pub muqovali kartasi, .pubtools, .filterbar,
+     .fchip, .rescount, .empty) site.css dan keladi; bu yerda faqat shu
+     bo'limga xos uchta yangi format va muqovali kartaga qo'shimchalar.
+     Qaysi format qayerda ishlatilishi — page-nashrlar.js boshidagi izohda. */
+
+  /* ================= 1. O'qish ro'yxati (maqolalar) =================
+     Maqola matn janri: bitta ustunli keng qator, sarlavha va annotatsiya
+     asosiy, muqova esa chapda kichik yordamchi rasm. */
+  .art-list{display:flex;flex-direction:column;gap:18px;}
+  .art-row{display:grid;grid-template-columns:190px 1fr;gap:26px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden;transition:transform .25s, box-shadow .25s, background .25s, border-color .25s;}
+  .art-row:hover{transform:translateY(-4px);box-shadow:var(--lift);background:var(--panel);}
+  .ar-thumb{position:relative;display:block;min-height:170px;background:var(--bg-2);border-right:1px solid var(--line);overflow:hidden;}
+  .ar-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s cubic-bezier(.2,.7,.2,1);}
+  .art-row:hover .ar-thumb img{transform:scale(1.055);}
+  .ar-thumb .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border:0;color:var(--muted);opacity:.4;}
+  .ar-thumb .ph svg{width:38px;height:38px;}
+  .ar-body{padding:22px 26px 20px;display:flex;flex-direction:column;min-width:0;}
+  .ar-meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:0.65625rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:11px;}
+  .ar-type{color:var(--accent);background:var(--accent-soft);border-radius:var(--r-pill);padding:4px 11px;}
+  .art-row h3{font-family:var(--serif);font-weight:500;font-size:1.25rem;line-height:1.28;margin:0 0 10px;}
+  .art-row h3 a{color:var(--ink);transition:color .18s;}
+  .art-row:hover h3 a{color:var(--accent);}
+  .ar-ex{color:var(--ink-2);font-size:0.90625rem;line-height:1.62;margin:0 0 16px;}
+  /* Muallif chapda, amallar o'ngda; ikkalasi kartaning pastiga yopishadi. */
+  .ar-foot{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-top:auto;}
+  .ar-author{font-family:var(--mono);font-size:0.6875rem;letter-spacing:.06em;color:var(--muted);}
+  .ar-acts{display:flex;align-items:center;gap:22px;flex-wrap:wrap;}
+  /* `.dl` uslublari site.css da `.pub .dl` deb yozilgan — ya'ni FAQAT muqovali
+     karta ichida ishlaydi. Yangi formatlarda u umuman uslubsiz qolib, SVG o'z
+     tabiiy o'lchamida (ulkan) chiqib ketardi. Shuning uchun bu yerda o'z
+     ko'rinishi beriladi. */
+  .ar-acts .dl{display:inline-flex;align-items:center;gap:9px;margin-top:0;padding-top:0;font-family:var(--mono);font-size:0.6875rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent2-d);transition:gap .2s;white-space:nowrap;}
+  .ar-acts .dl:hover{gap:14px;}
+  .ar-acts .dl svg{width:14px;height:14px;flex:none;}
+
+  /* ================= 2. Ma'ruzalar =================
+     Muallif kartaning TEPASIDA: ma'ruzada "kim aytdi" sarlavha bilan teng
+     ahamiyatga ega. Muqova ishlatilmaydi — ma'ruzada u kamdan-kam bo'ladi. */
+  .talk-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
+  .talk-card{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:24px 26px 22px;transition:transform .25s, box-shadow .25s, background .25s, border-color .25s;}
+  .talk-card:hover{transform:translateY(-5px);box-shadow:var(--lift);background:var(--panel);}
+  .tk-head{display:flex;align-items:center;gap:12px;padding-bottom:16px;margin-bottom:16px;border-bottom:1px solid var(--line);}
+  .tk-ico{flex:none;width:34px;height:34px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;}
+  .tk-ico svg{width:17px;height:17px;}
+  .tk-author{font-family:var(--mono);font-size:0.71875rem;letter-spacing:.06em;color:var(--ink-2);min-width:0;overflow-wrap:anywhere;}
+  .talk-card h3{font-family:var(--serif);font-weight:500;font-size:1.1875rem;line-height:1.3;margin:0 0 14px;color:var(--ink);}
+  .talk-card:hover h3{color:var(--accent);}
+  .tk-meta{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:0.65625rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:auto;}
+  .tk-file{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-family:var(--mono);font-size:0.6875rem;letter-spacing:.1em;color:var(--accent2-d);}
+  .tk-file svg{width:14px;height:14px;flex:none;}
+
+  /* ================= 3. Muqovali kartaga qo'shimcha (tahlillar) ================= */
+  .pub-author{font-family:var(--mono);font-size:0.65625rem;letter-spacing:.06em;color:var(--muted);margin-top:10px;}
+  /* "Batafsil" va PDF yonma-yon; ikkalasi kartaning pastiga yopishadi. */
+  .pub-actions{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-top:auto;padding-top:22px;}
+  .pub-actions .dl{margin-top:0;padding-top:0;}
+
+  /* ================= 4. Kitob javoni (kitoblar) =================
+     Muqova kitobning taniqlik belgisi: tik nisbat (3:4), yirik va qatorda
+     to'rtta. Yon soya javondagi kitob tuyg'usini beradi. */
+  .book-shelf{display:grid;grid-template-columns:repeat(4,1fr);gap:30px 26px;}
+  .book{display:flex;flex-direction:column;gap:16px;}
+  .bk-cover{position:relative;aspect-ratio:3/4;background:var(--bg-2);border:1px solid var(--line);border-radius:var(--r-ctl);overflow:hidden;box-shadow:0 10px 26px -18px rgba(8,24,46,.5);transition:transform .28s cubic-bezier(.2,.7,.2,1), box-shadow .28s;}
+  .book:hover .bk-cover{transform:translateY(-8px);box-shadow:0 26px 46px -24px rgba(8,24,46,.62);}
+  .bk-cover img{width:100%;height:100%;object-fit:cover;display:block;}
+  .bk-cover .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border:0;color:var(--muted);opacity:.4;}
+  .bk-cover .ph svg{width:40px;height:40px;}
+  /* Kitob gardishi: muqovaning chap chetidagi ingichka "tik" chiziq. */
+  .bk-cover::before{content:"";position:absolute;top:0;bottom:0;left:0;width:7px;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(0,0,0,.20),rgba(0,0,0,0));}
+  .bk-body{display:flex;flex-direction:column;gap:7px;}
+  .book h3{font-family:var(--serif);font-weight:500;font-size:1.0625rem;line-height:1.3;margin:0;color:var(--ink);transition:color .18s;}
+  .book:hover h3{color:var(--accent);}
+  .bk-meta{display:flex;flex-direction:column;gap:3px;font-family:var(--mono);font-size:0.65625rem;letter-spacing:.06em;color:var(--muted);}
+  .bk-file{display:inline-flex;align-items:center;gap:7px;margin-top:4px;font-family:var(--mono);font-size:0.65625rem;letter-spacing:.1em;color:var(--accent2-d);}
+  .bk-file svg{width:13px;height:13px;flex:none;}
+
+  @media(max-width:1180px){
+    .book-shelf{grid-template-columns:repeat(3,1fr);}
+  }
+  @media(max-width:900px){
+    .talk-grid{grid-template-columns:1fr;}
+    .art-row{grid-template-columns:150px 1fr;gap:18px;}
+    .ar-body{padding:18px 20px 16px;}
+  }
+  @media(max-width:760px){
+    /* Tor ekranda muqova qatorning ustiga chiqadi — matnga to'liq kenglik */
+    .art-row{grid-template-columns:1fr;}
+    .ar-thumb{min-height:170px;border-right:0;border-bottom:1px solid var(--line);}
+    .art-row h3{font-size:1.125rem;}
+    .ar-foot{gap:12px;}
+    .book-shelf{grid-template-columns:repeat(2,1fr);gap:24px 16px;}
+    .talk-card{padding:20px;}
+  }
+
+  @media print{
+    header,footer,.page-banner,.secnav,.pubtools,.filterbar,.rescount{display:none !important;}
+    body.inner{padding-top:0 !important;}
+    .art-row,.talk-card,.book,.pub{break-inside:avoid;box-shadow:none !important;}
+    .art-row,.talk-card,.bk-cover{border-color:#ccc !important;}
+  }

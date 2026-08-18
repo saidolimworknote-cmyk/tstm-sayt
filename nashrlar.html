@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="fonts.css?v=1">
 <link rel="stylesheet" href="site.css?v=96">
 <link rel="stylesheet" href="subscribe.css?v=4">
+<link rel="stylesheet" href="page-tadqiqotlar.css?v=2">
 <link rel="stylesheet" href="page-nashrlar.css?v=3">
 </head>
 <body>
@@ -35,17 +36,21 @@
     </div>
     <div class="filterbar" id="filters"></div>
     <div class="rescount" id="count"></div>
-    <div class="pub-grid" id="list"></div>
+    <!-- Konteyner ATAYLAB neytral: qaysi grid ishlatilishi formatga bog'liq
+         (page-nashrlar.js har bir formatga o'z o'ramini beradi). Ilgari bu yerda
+         `pub-grid` sinfi turardi va render ichiga yana bitta grid qo'yilganda
+         grid ichida grid hosil bo'lib, kartalar 88px ga siqilib qolgan edi. -->
+    <div id="list"></div>
   </div></section>
 </main>
 
 <script src="diag.js?v=2"></script>
 <script src="i18n.js?v=67"></script>
 <script src="admin-store.js?v=52"></script>
-<script src="site-common.js?v=83"></script>
+<script src="site-common.js?v=84"></script>
 <script src="subscribe.js?v=2"></script>
 <script src="search.js?v=49"></script>
 <script src="a11y.js?v=56"></script>
-<script src="page-nashrlar.js?v=5"></script>
+<script src="page-nashrlar.js?v=3"></script>
 </body>
 </html>

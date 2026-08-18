@@ -460,6 +460,48 @@
   // Sahifa fayli -> tur (data-ekind bo'lmagan holat uchun zaxira)
   function eventKindById(id){ return EVENT_KINDS.find(k => k.id === id) || null; }
 
+  /* ---------- Nashr turlari (Tadqiqotlar bo'limi) ----------
+     `publications.type` bitta satr; sayt uni 4 ta sahifaga taqsimlaydi.
+     EVENT_KINDS bilan bir xil naqsh — moslik BITTA joyda.
+
+     NEGA KERAK BO'LDI: 2026-08-12 da menyudagi "Hisobotlar" bandi "Tahlillar"
+     deb qayta nomlangan va sahifa `Tahlil` turini filtrlaydigan qilingan,
+     lekin BAZADAGI yozuvlar `Hisobot` turida qolgan. Natijada tahlillar.html
+     butunlay bo'sh turardi va 7 ta nashrdan 4 tasi hech bir kichik sahifada
+     ko'rinmasdi (faqat nashrlar.html da). Endi eski nom ham `reports` ga
+     olib keladi.
+
+     Moslik ikki bosqichda: avval ANIQ qiymat (admin ro'yxatidagilar), keyin
+     kalit so'z (qo'lda kiritilgan yoki eskirgan qiymatlar uchun). Aniq
+     moslik birinchi bo'lgani muhim: "Tahliliy sharh" -> maqolalar,
+     "Tahlil" -> tahlillar, garchi ikkalasida ham "tahlil" bo'lsa ham. */
+  const PUB_KINDS = [
+    { id: 'articles', page: 'maqolalar.html', tk: 'nav_an_articles',
+      types: ['Maqola', 'Tahliliy sharh'],
+      re: /maqola|sharh|article|commentary|стать|обзор|коммент/ },
+    { id: 'lectures', page: 'maruzalar.html', tk: 'nav_an_lectures',
+      types: ["Ma'ruza", 'Taqdimot'],
+      re: /ma'ruza|taqdimot|ma'ruzasi|lecture|presentation|доклад|лекц|презентац/ },
+    { id: 'reports',  page: 'tahlillar.html', tk: 'nav_an_reports',
+      // `Hisobot` — 2026-08-12 gacha ishlatilgan nom, bazada hamon uchraydi.
+      types: ['Tahlil', 'Hisobot', "Statistik to'plam"],
+      re: /tahlil|hisobot|report|analys|analit|отчёт|отчет|анализ|аналит|статистич/ },
+    { id: 'books',    page: 'kitoblar.html',  tk: 'nav_an_books',
+      types: ['Monografiya', 'Kitob'],
+      re: /monografi|kitob|book|monograph|монограф|книг/ }
+  ];
+  function pubKind(type){
+    const v = (type && typeof type === 'object')
+      ? Object.keys(type).map(k => type[k]).join(' ')
+      : String(type || '');
+    const t = v.toLowerCase().replace(/[‘’ʻʼ`]/g, "'").trim();
+    if (!t) return null;
+    return PUB_KINDS.find(k => k.types.some(x => x.toLowerCase().replace(/[‘’ʻʼ`]/g, "'") === t))
+        || PUB_KINDS.find(k => k.re.test(t))
+        || null;
+  }
+  function pubKindById(id){ return PUB_KINDS.find(k => k.id === id) || null; }
+
   // ---------- Bo'lim ichi navigatsiyasi (section rail) ----------
   // "Markaz haqida" menyusi endi sahifasiz GURUH (NAV[].group) — bo'limning
   // 4 sahifasi o'rtasida yurish uchun ilgari hub sahifa (markaz-haqida.html)
@@ -758,5 +800,5 @@
     (root || document).querySelectorAll('select:not(.a11y-sel)').forEach(enhanceSelect);
   }
 
-  w.Site = { initPage, renderHeader, renderFooter, renderSectionNav, EVENT_KINDS, eventKind, eventKindById, mlGet, dispTitle, esc, safeUrl, fmtDate, dayMonth, qs, settings, lang, brandLogo, t: T, ICON, NAV, initReveal, showSubscribe, printDoc, enhanceSelect, enhanceSelects };
+  w.Site = { initPage, renderHeader, renderFooter, renderSectionNav, EVENT_KINDS, eventKind, eventKindById, PUB_KINDS, pubKind, pubKindById, mlGet, dispTitle, esc, safeUrl, fmtDate, dayMonth, qs, settings, lang, brandLogo, t: T, ICON, NAV, initReveal, showSubscribe, printDoc, enhanceSelect, enhanceSelects };
 })(window);
