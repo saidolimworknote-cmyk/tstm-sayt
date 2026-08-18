@@ -9,6 +9,10 @@ Sayt + boshqaruv paneli (admin). XAMPP'da ishlash uchun PHP backend bilan.
   `media.html`, `aloqa.html`,
   `oav.html` + `sharh.html` — «Bizning ekspertlar OAVlarda» (ro'yxat va bitta sharh;
   admin'da **Ekspertlar OAVda** bo'limi, `media_posts` jadvali)
+- `tadbir.html` — bitta voqeaning doimiy sahifasi (`tadbir.html?id=...`): to'liq
+  matn, sana/vaqt/manzil jadvali, chop etish, havola, ulashish va «Taqvimga
+  qo'shish» (.ics fayli brauzerda yasaladi). Ilgari voqealar faqat ro'yxatlarda
+  ko'rinardi va tavsif 150 belgida kesilib, hech qachon to'liq o'qilmasdi.
 - `markaz-haqida.html` — **yo'naltiruvchi** sahifa (`biz-kimmiz.html` ga). 2026-08-19 da
   «Markaz haqida» menyu bandi sahifasiz guruhga aylantirilgan, hub sahifaning butun
   kontenti esa `biz-kimmiz.html` ga ko'chirilgan. Fayl o'chirilmadi — eski havolalar
@@ -132,6 +136,15 @@ Sayt 3 tilli: **UZ / RU / EN**. Har bir kontent admin panelda 3 tilda tahrirlana
 - Baza login/parolini o'zgartirish: **`config.php`** (`db_host`, `db_name`, `db_user`,
   `db_pass`). Bu fayl git'ga tushmaydi; namunasi — `config.sample.php`.
 - Jadvallar ro'yxatiga `subscribers` va `msg_throttle` ham kiradi.
+- **Ustun qo'shish:** `db.php` da uchta joy — `$SCHEMA`, `CREATE TABLE` va
+  `migrate()` ichidagi `ensure_cols()`. Uchinchisi mavjud bazalarni yangilaydi.
+  Naqsh: `events.cover` (2026-08-19).
+
+> ⚠️ **Kesh va sxema.** Ommaviy javob `cache_public.json` da keshlanadi va u
+> odatda faqat admin kontentni o'zgartirganda yangilanadi. Jadvalga yangi ustun
+> qo'shilganda esa kesh eski shaklni saqlab turadi va yangi maydon saytda «yo'q»
+> bo'lib ko'rinardi. Shuning uchun `provision()` sxemani qayta qurgan joyda
+> `cache_invalidate()` ham chaqiriladi (db.php o'zgarganda bir marta).
 
 ---
 
@@ -263,6 +276,28 @@ yangilang**.
 > ⚠️ `.secnav` yopishishi uchun `body.inner` da `overflow-x:clip` turadi
 > (`overflow-x:hidden` skroll konteyner yaratib, `position:sticky` ni o'ldiradi).
 > Bu qatorni `hidden` ga qaytarmang.
+
+### Voqealar bo'limi — har bir sahifa o'z formatida
+
+Beshta sahifa bitta skriptni (`page-tadbirlar.js`) ishlatadi, lekin **bir xil
+ko'rinmaydi**: format `<main data-ekind="...">` atributida e'lon qilinadi
+(CSP inline skriptga ruxsat bermaydi).
+
+| Sahifa | `data-ekind` | Format | Nega shunday |
+|--------|--------------|--------|--------------|
+| `uchrashuvlar.html` | `meet` | rasmiy reyestr: `sana \| mavzu \| manzil` | Uchrashuv qayd etiladi, o'qilmaydi — sana bo'yicha kuzatish oson bo'lsin |
+| `davra-suhbatlari.html` | `round` | muhokama kartalari (yirik mavzu + tavsif) | Bu yerda «nima haqida» muhimroq |
+| `konferensiyalar.html` | `conf` | afisha (eng yaqini) + reyestr arxivi | Oldindan e'lon qilinadigan yirik tadbir — barcha ma'lumot bir ekranda |
+| `markaz-hayoti.html` | `life` | foto lenta | Ichki hayot — vizual janr |
+| `tadbirlar.html` | *(yo'q)* | umumiy taqvim | Butun bo'lim bir joyda |
+
+- Voqea turi (`events.type`) qaysi bo'limga tegishli ekani **bitta joyda**:
+  `site-common.js` → `EVENT_KINDS`. `admin-ui.js` dagi tur ro'yxatiga yangi
+  qiymat qo'shsangiz shu yerga ham kalit so'z qo'shing, aks holda voqea faqat
+  `tadbirlar.html` da ko'rinadi.
+- O'tgan voqealar **yil bo'yicha arxiv**da. Yil filtri faqat bir nechta yil
+  to'planganda chiqadi (bitta yilda u hech narsani filtrlamaydi).
+- Uslublar — `page-tadbirlar.css` (voqea sahifasi ham shu faylni ulaydi).
 
 ### Uslub fayllari
 

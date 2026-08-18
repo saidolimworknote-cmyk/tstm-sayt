@@ -61,6 +61,9 @@ $SCHEMA = [
     ['key' => 'title', 'type' => 'json'], ['key' => 'date', 'type' => 'date'],
     ['key' => 'time'], ['key' => 'location', 'type' => 'json'],
     ['key' => 'type'], ['key' => 'status'], ['key' => 'body', 'type' => 'json'],
+    // Voqea muqovasi (2026-08-19): voqea sahifasi va "Markaz hayoti"
+    // foto lentasi shu rasmga tayanadi. Nashrlardagi `cover` bilan bir xil.
+    ['key' => 'cover'],
   ]],
   'experts' => ['table' => 'experts', 'cols' => [
     ['key' => 'name', 'type' => 'json'], ['key' => 'role', 'type' => 'json'],
@@ -201,6 +204,14 @@ function provision($pdo) {
 
   provision_schema($pdo);
 
+  /* Sxema o'zgargan (masalan jadvalga ustun qo'shilgan) — ommaviy kesh esa
+     ESKI shakldagi javobni saqlab turibdi va u faqat admin kontentni
+     tahrirlaganda yangilanadi. Ya'ni yangi db.php ni serverga chiqarganda
+     yangi maydon saytda "yo'q" bo'lib ko'rinaverardi. Sxema qayta qurilgan
+     joyda keshni ham tashlaymiz: bu blok db.php o'zgarganda BIR MARTA
+     ishlaydi, shuning uchun tekinga sarf yo'q. */
+  cache_invalidate();
+
   try {
     $pdo->exec("CREATE TABLE IF NOT EXISTS schema_meta (
       k VARCHAR(32) PRIMARY KEY,
@@ -260,7 +271,7 @@ function provision_schema($pdo) {
   $pdo->exec("CREATE TABLE IF NOT EXISTS events (
     id VARCHAR(40) PRIMARY KEY,
     title LONGTEXT, date DATE NULL, time VARCHAR(20), location LONGTEXT,
-    type VARCHAR(120), status VARCHAR(40), body LONGTEXT,
+    type VARCHAR(120), status VARCHAR(40), body LONGTEXT, cover VARCHAR(500),
     $seq, INDEX(status), INDEX(date)
   )$tail");
 
@@ -452,6 +463,11 @@ function migrate($pdo) {
   ]);
   ensure_cols($pdo, 'publications', [
     'short_title' => 'LONGTEXT',
+  ]);
+  // Voqealar bo'limi qayta qurildi: har bir voqeaning o'z sahifasi va
+  // "Markaz hayoti" foto lentasi uchun muqova rasmi (2026-08-19)
+  ensure_cols($pdo, 'events', [
+    'cover' => 'VARCHAR(500)',
   ]);
   // hamkorlar.html — toifa bo'yicha guruhlash va karta matni (2026-08-17)
   ensure_cols($pdo, 'partners', [

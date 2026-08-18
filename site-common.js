@@ -426,6 +426,40 @@
     document.querySelectorAll('.rv').forEach(el=>io.observe(el));
   }
 
+  /* ---------- Voqea turlari (Voqealar bo'limi) ----------
+     Admin voqea turini BITTA satr sifatida tanlaydi (`events.type`), sayt esa
+     uni 4 ta sahifaga taqsimlaydi. Moslik shu yerda — bitta joyda: ilgari bu
+     uzun if-zanjiri sifatida page-tadbirlar.js ichida turardi va voqeaning
+     o'z sahifasi (tadbir.html) uni takrorlashga majbur bo'lardi.
+
+     Tur uch tilda ham yozilishi mumkin (admin ro'yxati o'zbekcha, lekin eski
+     yozuvlarda ruscha/inglizcha qiymat uchraydi), shuning uchun kalit so'zlar
+     uch tilda sanaladi. admin-ui.js dagi `events` -> `type` ro'yxatiga yangi
+     tur qo'shsangiz shu yerga ham kalit so'z qo'shing — aks holda voqea faqat
+     "Tadbirlar" (barchasi) sahifasida ko'rinadi. */
+  const EVENT_KINDS = [
+    { id: 'meet',  page: 'uchrashuvlar.html',      tk: 'nav_ev_meetings',
+      re: /uchrashuv|muzokara|brifing|meeting|talks|briefing|встреч|переговор|брифинг/ },
+    { id: 'round', page: 'davra-suhbatlari.html',  tk: 'nav_ev_roundtables',
+      re: /davra|muhokama|roundtable|round table|discussion|круглый стол|обсужден|дискусс/ },
+    { id: 'conf',  page: 'konferensiyalar.html',   tk: 'nav_ev_conferences',
+      re: /konferensiy|simpozium|forum|taqdimot|conference|symposium|presentation|конференц|симпозиум|форум|презентац/ },
+    { id: 'life',  page: 'markaz-hayoti.html',     tk: 'nav_ev_life',
+      re: /markaz hayoti|ta'lim|maktab|seminar|trening|center life|training|school|workshop|жизнь центр|образовательн|семинар|тренинг|школ/ }
+  ];
+  // Ko'p tilli qiymat ham, oddiy satr ham qabul qilinadi. Apostrofning turli
+  // shakllari (' ’ ʻ ʼ `) bir xil hisoblanadi — "Ta'lim" va "Ta’lim" bir tur.
+  function eventKind(type){
+    const v = (type && typeof type === 'object')
+      ? Object.keys(type).map(k => type[k]).join(' ')
+      : String(type || '');
+    const t = v.toLowerCase().replace(/[‘’ʻʼ`]/g, "'");
+    if (!t.trim()) return null;
+    return EVENT_KINDS.find(k => k.re.test(t)) || null;
+  }
+  // Sahifa fayli -> tur (data-ekind bo'lmagan holat uchun zaxira)
+  function eventKindById(id){ return EVENT_KINDS.find(k => k.id === id) || null; }
+
   // ---------- Bo'lim ichi navigatsiyasi (section rail) ----------
   // "Markaz haqida" menyusi endi sahifasiz GURUH (NAV[].group) — bo'limning
   // 4 sahifasi o'rtasida yurish uchun ilgari hub sahifa (markaz-haqida.html)
@@ -724,5 +758,5 @@
     (root || document).querySelectorAll('select:not(.a11y-sel)').forEach(enhanceSelect);
   }
 
-  w.Site = { initPage, renderHeader, renderFooter, renderSectionNav, mlGet, dispTitle, esc, safeUrl, fmtDate, dayMonth, qs, settings, lang, brandLogo, t: T, ICON, NAV, initReveal, showSubscribe, printDoc, enhanceSelect, enhanceSelects };
+  w.Site = { initPage, renderHeader, renderFooter, renderSectionNav, EVENT_KINDS, eventKind, eventKindById, mlGet, dispTitle, esc, safeUrl, fmtDate, dayMonth, qs, settings, lang, brandLogo, t: T, ICON, NAV, initReveal, showSubscribe, printDoc, enhanceSelect, enhanceSelects };
 })(window);

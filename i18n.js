@@ -306,6 +306,35 @@
     ev_soon:     { uz: 'Tez orada', ru: 'Скоро', en: 'Soon' },
     ev_today:    { uz: 'Bugun', ru: 'Сегодня', en: 'Today' },
 
+    /* ---- Voqealar bo'limi: har bir sahifa o'z faoliyat turiga MOS
+       sarlavhalar bilan ishlaydi (page-tadbirlar.js dagi LAYOUT). Umumiy
+       "Kelgusi tadbirlar / O'tgan tadbirlar" juftligi tadbirlar.html
+       (barcha voqealar) sahifasida qoladi. ---- */
+    ev_up_meet:   { uz: 'Rejalashtirilgan uchrashuvlar', ru: 'Запланированные встречи', en: 'Scheduled meetings' },
+    ev_ar_meet:   { uz: "O’tkazilgan uchrashuvlar", ru: 'Проведённые встречи', en: 'Meetings held' },
+    ev_up_round:  { uz: 'Rejalashtirilgan muhokamalar', ru: 'Запланированные обсуждения', en: 'Scheduled discussions' },
+    ev_ar_round:  { uz: "O’tkazilgan davra suhbatlari", ru: 'Проведённые круглые столы', en: 'Roundtables held' },
+    ev_up_conf:   { uz: 'Kelgusi konferensiyalar', ru: 'Предстоящие конференции', en: 'Upcoming conferences' },
+    ev_ar_conf:   { uz: "O’tkazilgan konferensiyalar", ru: 'Проведённые конференции', en: 'Conferences held' },
+    ev_up_life:   { uz: 'Yaqin kunlarda', ru: 'В ближайшее время', en: 'Coming up' },
+    ev_ar_life:   { uz: 'Lavhalar', ru: 'Хроника', en: 'Chronicle' },
+
+    ev_none_meet:  { uz: "Rejalashtirilgan uchrashuv yo’q", ru: 'Запланированных встреч нет', en: 'No scheduled meetings' },
+    ev_none_round: { uz: "Rejalashtirilgan muhokama yo’q", ru: 'Запланированных обсуждений нет', en: 'No scheduled discussions' },
+    ev_none_conf:  { uz: "Kelgusi konferensiya yo’q", ru: 'Предстоящих конференций нет', en: 'No upcoming conferences' },
+    ev_none_life:  { uz: "Yaqin kunlarga tadbir rejalashtirilmagan", ru: 'На ближайшее время мероприятий не запланировано', en: 'Nothing scheduled for the coming days' },
+    ev_ar_none:    { uz: "Arxivda hozircha yozuv yo’q", ru: 'В архиве пока нет записей', en: 'The archive is empty for now' },
+
+    /* Voqea sahifasi (tadbir.html) */
+    ev_when:      { uz: 'Sana', ru: 'Дата', en: 'Date' },
+    ev_time_l:    { uz: 'Boshlanish vaqti', ru: 'Время начала', en: 'Start time' },
+    ev_where:     { uz: 'Manzil', ru: 'Место проведения', en: 'Venue' },
+    ev_type_l:    { uz: 'Voqea turi', ru: 'Тип мероприятия', en: 'Event type' },
+    ev_details:   { uz: 'Batafsil', ru: 'Подробнее', en: 'Details' },
+    ev_ics:       { uz: "Taqvimga qo’shish", ru: 'Добавить в календарь', en: 'Add to calendar' },
+    ev_related:   { uz: "Shu bo’limdagi boshqa voqealar", ru: 'Другие события этого раздела', en: 'Other events in this section' },
+    ev_year_from: { uz: 'Yil', ru: 'Год', en: 'Year' },
+
     /* ---- media page ---- */
     m_empty_photo: { uz: 'Hozircha rasm yuklanmagan', ru: 'Фотографии пока не загружены', en: 'No photos uploaded yet' },
     m_soon_video:  { uz: "Videomateriallar tez orada qo'shiladi", ru: 'Видеоматериалы скоро появятся', en: 'Videos coming soon' },

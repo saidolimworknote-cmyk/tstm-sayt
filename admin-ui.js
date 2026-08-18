@@ -130,7 +130,7 @@
     },
     events: {
       label: 'Tadbirlar', singular: 'tadbir', icon: 'events', status: true, search: 'title',
-      columns: [{ k: 'title', label: 'Tadbir', ml: 1 }, { k: 'date', label: 'Sana', type: 'date' }, { k: 'time', label: 'Vaqt' }, { k: 'type', label: 'Turi' }, { k: 'status', label: 'Holat', type: 'status' }],
+      columns: [{ k: 'title', label: 'Tadbir', ml: 1, thumb: 'cover' }, { k: 'date', label: 'Sana', type: 'date' }, { k: 'time', label: 'Vaqt' }, { k: 'type', label: 'Turi' }, { k: 'status', label: 'Holat', type: 'status' }],
       fields: [
         { k: 'title', label: 'Tadbir nomi', type: 'text', ml: 1, req: 1 },
         { k: 'body', label: 'Tavsif', type: 'rich', ml: 1 },
@@ -138,6 +138,9 @@
         { k: 'time', label: 'Boshlanish vaqti', type: 'text', side: 1, ph: '10:00' },
         { k: 'location', label: 'Manzil', type: 'text', ml: 1, side: 1 },
         { k: 'type', label: 'Turi', type: 'select', side: 1, opts: ['Uchrashuv', 'Davra suhbati', 'Konferensiya', 'Markaz hayoti', "Ta'lim dasturi", 'Brifing', 'Taqdimot', 'Forum'] },
+        // Muqova "Markaz hayoti" sahifasida ASOSIY element (foto lenta), qolgan
+        // bo'limlarda voqea sahifasini bezaydi. Bo'sh qolsa hech narsa buzilmaydi.
+        { k: 'cover', label: 'Muqova (rasm)', type: 'image', side: 1 },
         { k: 'status', label: 'Holat', type: 'status', side: 1 }
       ]
     },

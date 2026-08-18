@@ -1,4 +1,4 @@
-# TSTM — avtomatlashtirilgan smoke / xavfsizlik testi
+﻿# TSTM — avtomatlashtirilgan smoke / xavfsizlik testi
 # ==================================================================
 # Har o'zgarishdan keyin ishga tushiring — sayt buzilmaganini va asosiy
 # xavfsizlik himoyalari joyida ekanini tekshiradi.
@@ -35,7 +35,7 @@ $pages = 'index.html','nashrlar.html','yangiliklar.html','aloqa.html',
          'tadbirlar.html','yonalish.html','oav.html','sharh.html',
          'ekspertlar.html','tahlillar.html','maruzalar.html','maqolalar.html','kitoblar.html',
          'uchrashuvlar.html','davra-suhbatlari.html','konferensiyalar.html','markaz-hayoti.html',
-         'biz-kimmiz.html','hamkorlar.html','admin.html'
+         'biz-kimmiz.html','hamkorlar.html','tadbir.html','admin.html'
 foreach ($p in $pages) {
   $r = Get2 "$Base/$([uri]::EscapeDataString($p))"
   Check "sahifa: $p" ((Code $r) -eq 200) "status=$(Code $r)"
