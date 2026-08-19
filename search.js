@@ -70,11 +70,30 @@
         // qidiruv esa ikkala sarlavhani ham qamraydi (pastdagi titleLow qarang).
         items.push({kind:'pub',kl:T('search_k_pub'),title:p.title,disp:p.shortTitle||'',text:p.desc,href:'nashr.html?id='+p.id,cover:p.cover||'',date:p.year||'',cat:p.category||''});
       });
+      // Voqeaning o'z doimiy sahifasi bor (`tadbir.html?id=`) — 2026-08-19 da
+      // qo'shilgan. Ilgari bu yerda umumiy `tadbirlar.html` turardi: qidiruvda
+      // aniq voqeani topgan tashrifchi butun ro'yxatga tushib, uni yana qo'lda
+      // qidirishga majbur bo'lardi.
       Store.all('events').filter(function(e){return e.status==='published';}).forEach(function(e){
-        items.push({kind:'event',kl:T('search_k_event'),title:e.title,text:e.body,href:'tadbirlar.html',cover:e.cover||'',date:e.date||'',cat:e.type||''});
+        items.push({kind:'event',kl:T('search_k_event'),title:e.title,text:e.body,
+          href:'tadbir.html?id='+encodeURIComponent(e.id),cover:e.cover||'',date:e.date||'',cat:e.type||''});
       });
+      // "Sahifalar" kolleksiyasidagi yozuvlarning HAMMASI ham saytda
+      // chizilmaydi — faqat `biz-kimmiz.html` dagi uchta matn bloki
+      // (page-biz-kimmiz.js -> fill). Qolganlari (masalan `rahbariyat`) eski
+      // importdan qolgan: ularni indeksga qo'shish tashrifchini hech narsa
+      // ko'rsatmaydigan sahifaga olib borardi. Shuning uchun ikki shart bor:
+      // slug shu jadvalda bo'lsin VA matni bo'sh bo'lmasin. Havola esa aynan
+      // o'sha bo'limning langariga boradi — ilgari `?slug=` uzatilardi, lekin
+      // uni hech kim o'qimasdi va tashrifchi sahifa boshiga tushardi.
+      var PAGE_ANCHORS = { 'maqsad':'goalSec', 'markaz-haqida':'aboutBodySec',
+                           'biz-kimmiz':'whoStorySec', 'tarix':'whoStorySec' };
       Store.all('pages').filter(function(p){return p.status==='published';}).forEach(function(p){
-        items.push({kind:'page',kl:T('search_k_page'),title:p.title,text:p.body,href:'biz-kimmiz.html?slug='+encodeURIComponent(p.slug),cover:'',date:'',cat:''});
+        var anchor = PAGE_ANCHORS[p.slug];
+        if(!anchor) return;
+        if(!String(mlGet(p.body)||'').replace(/<[^>]*>/g,'').trim()) return;
+        items.push({kind:'page',kl:T('search_k_page'),title:p.title,text:p.body,
+          href:'biz-kimmiz.html#'+anchor,cover:'',date:'',cat:''});
       });
       Store.all('experts').forEach(function(e){
         items.push({kind:'expert',kl:T('search_k_expert'),title:e.name,text:e.role,href:'expert.html?id='+e.id,cover:e.photo||'',date:'',cat:''});

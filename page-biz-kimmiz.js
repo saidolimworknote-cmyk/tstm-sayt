@@ -96,17 +96,37 @@
     // Ilgari "Maqsad va vazifalar" matn bo'lmasa "tez orada" deb turardi;
     // bo'sh va'da o'rniga endi bo'lim butunlay chizilmaydi (boshqa matn
     // bloklari bilan bir xil qoida).
+    // Har bir bo'lim BIR NECHTA slug qabul qiladi: birinchi to'ldirilgani
+    // ishlatiladi. Sabab — "Sahifalar" jadvalidagi yozuvlar turli davrlarda
+    // turlicha nomlangan: institutsional tarix uchun bazada `tarix` yozuvi
+    // turibdi, kod esa faqat `biz-kimmiz` ni qidirardi. Natijada admin
+    // `tarix` ga matn yozsa ham "Bizning yo'limiz" bo'limi hech qachon
+    // chiqmasdi. Yangi slug qo'shsangiz — shu ro'yxatga qo'shing va
+    // search.js dagi PAGE_ANCHORS jadvaliga ham kiriting.
     const pages = Store.all('pages').filter(p => p.status === 'published');
     const bodyOf = (slug) => { const pg = pages.find(p => p.slug === slug); return pg ? (Site.mlGet(pg.body)||'').trim() : ''; };
-    const fill = (slug, bodyId, secId) => {
-      const html = bodyOf(slug);
+    const fill = (slugs, bodyId, secId) => {
+      const html = slugs.map(bodyOf).find(Boolean);
       if(!html) return;
       document.getElementById(bodyId).innerHTML = html;
       document.getElementById(secId).classList.remove('is-hidden');
     };
-    fill('maqsad',        'goalBody',  'goalSec');
-    fill('markaz-haqida', 'aboutBody', 'aboutBodySec');
-    fill('biz-kimmiz',    'whoStory',  'whoStorySec');
+    fill(['maqsad'],                 'goalBody',  'goalSec');
+    fill(['markaz-haqida'],          'aboutBody', 'aboutBodySec');
+    fill(['biz-kimmiz', 'tarix'],    'whoStory',  'whoStorySec');
+
+    // Langarga o'tish MATN chizilgandan KEYIN. Bo'limlar boshida
+    // `is-hidden` bo'lgani uchun brauzer sahifa yuklanayotganda
+    // `biz-kimmiz.html#goalSec` ni topa olmaydi va tashrifchi sahifa
+    // boshida qolib ketardi (qidiruv natijalari aynan shu langarlarga
+    // yuboradi — search.js -> PAGE_ANCHORS).
+    try{
+      const id = (location.hash||'').slice(1);
+      const target = id && document.getElementById(id);
+      if(target && !target.classList.contains('is-hidden')){
+        requestAnimationFrame(() => target.scrollIntoView({ block:'start', behavior:'smooth' }));
+      }
+    }catch{}
 
     Site.initReveal();
   }});

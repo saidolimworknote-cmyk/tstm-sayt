@@ -339,6 +339,34 @@ Boshqaruv qatori (qidiruv / tur / saralash / toifa chiplari) ma'lumot
 miqdoriga moslashadi — Hamkorlar sahifasidagi qoida: har bir element faqat
 haqiqatan foydali bo'lganda ko'rinadi (ostonalar `page-nashrlar.js` boshida).
 
+### «Sahifalar» kolleksiyasi — hammasi ham saytda chizilmaydi
+
+Admin'dagi **Sahifalar** jadvali erkin matn saqlaydi, lekin sayt uni faqat
+`biz-kimmiz.html` dagi **uchta** blokda ko'rsatadi. Moslik `page-biz-kimmiz.js`
+dagi `fill()` chaqiruvlarida:
+
+| Sahifadagi bo'lim | Qabul qilinadigan slug | Element |
+|-------------------|------------------------|---------|
+| Maqsad va vazifalar | `maqsad` | `#goalSec` |
+| Markaz haqida | `markaz-haqida` | `#aboutBodySec` |
+| Bizning yo'limiz | `biz-kimmiz` yoki `tarix` | `#whoStorySec` |
+
+Har bir bo'lim bir nechta slug qabul qiladi — birinchi TO'LDIRILGANI ishlatiladi.
+Matn bo'sh bo'lsa bo'lim butunlay chizilmaydi (bo'sh va'da qoldirilmaydi).
+
+Ro'yxatda YO'Q sluglar (`rahbariyat`, `tuzilma`) — eski importdan qolgan
+yozuvlar: ular saytda hech qayerda ko'rinmaydi. `rahbariyat.html` odamlar
+ro'yxatini `experts` jadvalidan oladi, `pages` dan emas.
+
+> ⚠️ Bu jadval **ikki joyda** takrorlanadi: `page-biz-kimmiz.js` → `fill()` va
+> `search.js` → `PAGE_ANCHORS`. Yangi slug qo'shsangiz ikkalasini ham
+> yangilang. Qidiruv indeksiga faqat shu jadvaldagi VA matni bo'sh bo'lmagan
+> yozuvlar tushadi — aks holda tashrifchi hech narsa ko'rsatmaydigan sahifaga
+> tushardi. Natija havolasi bo'lim langariga boradi (`biz-kimmiz.html#goalSec`),
+> shuning uchun `page-biz-kimmiz.js` matn chizilgach langarga o'zi skroll
+> qiladi — bo'limlar boshida `is-hidden` bo'lgani uchun brauzer buni o'zi
+> qila olmaydi.
+
 ### Uslub fayllari
 
 | Fayl | Kim ishlatadi |
