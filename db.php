@@ -611,7 +611,25 @@ function coll_replace($pdo, $coll, $items) {
 function settings_load($pdo) {
   $r = $pdo->query("SELECT data FROM settings WHERE id=1")->fetch();
   if (!$r) return null;
-  return json_decode($r['data'], true);
+  $s = json_decode($r['data'], true);
+  if (!is_array($s)) return $s;
+  // Saqlangan qiymatlar standartlar USTIGA qo'yiladi. Bazada yo'q kalit
+  // (keyinroq qo'shilgan sozlama — 'workHours', 'legal' va h.k.) standart
+  // qiymatini oladi; aks holda faqat YANGI o'rnatishlarda ishlab, mavjud
+  // saytda admin panelda bo'sh maydon bo'lib qolardi.
+  require_once __DIR__ . '/seed.php';
+  $d = default_settings();
+  $out = array_merge($d, $s);
+  // Ichma-ich obyektlar uchun bir qavat chuqurroq: saqlangan 'social' bloki
+  // butunlay o'rniga qo'yilsa, keyin qo'shilgan tarmoq (instagram/linkedin)
+  // kaliti yo'qolib ketardi. Ro'yxatlar (stats, banners) ATAYLAB bunga
+  // kirmaydi — ular to'liq admin nazoratida.
+  foreach (['social', 'legal', 'langs', 'logos'] as $k) {
+    if (isset($d[$k]) && is_array($d[$k]) && isset($s[$k]) && is_array($s[$k])) {
+      $out[$k] = array_merge($d[$k], $s[$k]);
+    }
+  }
+  return $out;
 }
 function settings_save($pdo, $obj) {
   $st = $pdo->prepare("INSERT INTO settings (id, data) VALUES (1, :d) ON DUPLICATE KEY UPDATE data=VALUES(data)");

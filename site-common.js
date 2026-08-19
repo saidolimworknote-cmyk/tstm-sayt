@@ -182,9 +182,34 @@
     yt: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 12s0-3.2-.4-4.7c-.2-.8-.9-1.5-1.7-1.7C19.4 5.2 12 5.2 12 5.2s-7.4 0-8.9.4c-.8.2-1.5.9-1.7 1.7C1 8.8 1 12 1 12s0 3.2.4 4.7c.2.8.9 1.5 1.7 1.7 1.5.4 8.9.4 8.9.4s7.4 0 8.9-.4c.8-.2 1.5-.9 1.7-1.7C23 15.2 23 12 23 12ZM9.8 15.3V8.7l6 3.3-6 3.3Z"/></svg>',
     fb: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.7l-.4 2.9h-2.3v7A10 10 0 0 0 22 12Z"/></svg>',
     x: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 3h3l-6.6 7.5L21.7 21h-6l-4.7-6.1L5.6 21H2.5l7-8L2 3h6.2l4.2 5.6L17.5 3Zm-1 16h1.6L7.6 4.7H5.9L16.5 19Z"/></svg>',
+    ig: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.2" fill="currentColor" stroke="none"/></svg>',
+    li: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5ZM3 9h4v12H3V9Zm7 0h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05C21.4 8.65 22 10.9 22 14v7h-4v-6.2c0-1.5-.03-3.4-2.08-3.4-2.08 0-2.4 1.6-2.4 3.3V21h-4V9Z"/></svg>',
     pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg>',
     mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7.2 8.5 6 8.5-6"/></svg>'
   };
+
+  /* Sozlamalardagi ijtimoiy tarmoqlar — BITTA joyda. Ilgari bu ro'yxat
+     footerda ham, aloqa sahifasida ham alohida yozilgan edi: yangi tarmoq
+     qo'shilsa, biri yangilanib ikkinchisi eskicha qolib ketardi.
+     Bo'sh yoki "#" qiymat = tarmoq yo'q, chizilmaydi. */
+  function socialLinks(){
+    const soc = settings().social || {};
+    return [
+      { u: soc.telegram,  i: ICON.tg, n: 'Telegram' },
+      { u: soc.youtube,   i: ICON.yt, n: 'YouTube' },
+      { u: soc.facebook,  i: ICON.fb, n: 'Facebook' },
+      { u: soc.x,         i: ICON.x,  n: 'X' },
+      { u: soc.instagram, i: ICON.ig, n: 'Instagram' },
+      { u: soc.linkedin,  i: ICON.li, n: 'LinkedIn' }
+    ].filter(l => l.u && l.u !== '#');
+  }
+
+  /* Mualliflik qatori: sozlamada {yil} bo'lsa joriy yilga almashadi —
+     shunda yil o'zgarganda hech kim hech narsani qo'lda tuzatmaydi. */
+  function copyrightText(){
+    const v = mlGet(settings().copyright) || T('footer_copyright');
+    return String(v).replace(/{(yil|year|god|год)}/gi, new Date().getFullYear());
+  }
 
   // ---------- THEME ----------
   const THEME_KEY = 'tstm_site_theme';
@@ -371,9 +396,21 @@
   // tepadagi util qatorida). Manzil bilan e-pochta `.f-meta` blokida — 4 havola
   // ustunidan KEYIN chiziladi va CSS orqali (`.f-top>.f-meta`, site.css) ular
   // OSTIGA joylashadi (2026-08-12: ilgari brend ustuni ichida, chapda edi).
+  /* Huquqiy havolalar. Sozlamada manzil ko'rsatilmagan bo'lsa havola
+     CHIZILMAYDI — ilgari ikkalasi ham href="#" bo'lib, bosilganda sahifa
+     joyida qolardi va tashrifchi havola buzuq deb o'ylardi. */
+  function legalLinks(){
+    const lg = settings().legal || {};
+    const a = [
+      { u: lg.privacy, tk: 'footer_privacy' },
+      { u: lg.terms,   tk: 'footer_terms' }
+    ].filter(l => l.u && String(l.u).trim() && l.u !== '#')
+     .map(l => `<a href="${safeUrl(l.u)}">${esc(T(l.tk))}</a>`).join('');
+    return a ? `<div class="foot-links">${a}</div>` : '';
+  }
+
   function renderFooter(){
     const s = settings();
-    const soc = s.social || {};
     const B = brandLines(), SN = shortName();
     const el = document.createElement('footer');
     el.innerHTML = `<div class="wrap">
@@ -385,14 +422,9 @@
             <span class="fd"></span>
             <span><b>${esc(B.top)}</b><small>${esc(B.bot)}</small></span>
           </div>
-          <p class="f-about">${esc(T('footer_about'))}</p>
-          <div class="socials">${[
-            {u:soc.telegram, i:ICON.tg, n:'Telegram'},
-            {u:soc.youtube,  i:ICON.yt, n:'YouTube'},
-            {u:soc.facebook, i:ICON.fb, n:'Facebook'},
-            {u:soc.x,        i:ICON.x,  n:'X'}
-          ].filter(l => l.u && l.u !== '#')
-           .map(l => `<a href="${safeUrl(l.u)}" target="_blank" rel="noopener" aria-label="${l.n}">${l.i}</a>`).join('')}</div>
+          <p class="f-about">${esc(mlGet(s.footerAbout) || T('footer_about'))}</p>
+          <div class="socials">${socialLinks()
+            .map(l => `<a href="${safeUrl(l.u)}" target="_blank" rel="noopener" aria-label="${l.n}">${l.i}</a>`).join('')}</div>
         </div>
         ${NAV.filter(n => n.children && n.children.length).map(n => `<div class="f-col"><h5>${esc(T(n.tk))}</h5>${
           n.children.map(c => `<a href="${c.href}">${esc(T(c.tk))}</a>`).join('')
@@ -406,8 +438,8 @@
         </div>
       </div>
       <div class="f-bot">
-        <span>${esc(T('footer_copyright'))}</span>
-        <div class="foot-links"><a href="#">${esc(T('footer_privacy'))}</a><a href="#">${esc(T('footer_terms'))}</a></div>
+        <span>${esc(copyrightText())}</span>
+        ${legalLinks()}
       </div>
     </div>`;
     document.body.appendChild(el);
@@ -800,5 +832,5 @@
     (root || document).querySelectorAll('select:not(.a11y-sel)').forEach(enhanceSelect);
   }
 
-  w.Site = { initPage, renderHeader, renderFooter, renderSectionNav, EVENT_KINDS, eventKind, eventKindById, PUB_KINDS, pubKind, pubKindById, mlGet, dispTitle, esc, safeUrl, fmtDate, dayMonth, qs, settings, lang, brandLogo, t: T, ICON, NAV, initReveal, showSubscribe, printDoc, enhanceSelect, enhanceSelects };
+  w.Site = { initPage, renderHeader, renderFooter, renderSectionNav, EVENT_KINDS, eventKind, eventKindById, PUB_KINDS, pubKind, pubKindById, mlGet, dispTitle, esc, safeUrl, fmtDate, dayMonth, qs, settings, lang, brandLogo, socialLinks, copyrightText, t: T, ICON, NAV, initReveal, showSubscribe, printDoc, enhanceSelect, enhanceSelects };
 })(window);

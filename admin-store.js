@@ -289,9 +289,20 @@
   }
 
   // ---------- Auth / session ----------
+  // Muvaffaqiyatsiz kirishning SABABI. checkLogin() ATAYLAB boolean qaytaradi
+  // (obyekt qaytsa `if (ok)` truthy bo'lib bloklangan holatda ham panelga kirib
+  // ketardi), shuning uchun sabab alohida shu yerda turadi va UI uni
+  // loginError() orqali o'qiydi.
+  //   { code: 'locked', retryAfter } — juda ko'p xato urinish (429)
+  //   { code: 'network' }            — serverga umuman yetib borilmadi
+  //   null                           — oddiy xato login yoki parol
+  let _loginErr = null;
+  function loginError() { return _loginErr; }
+
   // Promise<boolean> qaytaradi (async fetch — brauzerni bloklamaydi)
   function checkLogin(u, pw) {
     load();
+    _loginErr = null;
     // XAMPP rejimi: serverda tekshirib, PHP sessiyasini ochamiz
     if (API_OK) {
       return fetch(API + '?action=login', {
@@ -299,7 +310,18 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ u: u.trim(), p: pw })
       })
-        .then(r => r.ok ? r.json() : null)
+        // 429 — juda ko'p xato urinish, IP vaqtincha bloklangan. Ilgari bu
+        // shunchaki `!r.ok` bo'lib "login yoki parol noto'g'ri" deb ko'rsatilardi
+        // va admin nega hech narsa o'tmayotganini bilolmasdi.
+        .then(r => {
+          if (r.status === 429) {
+            return r.json().catch(() => ({})).then(j => {
+              _loginErr = { code: 'locked', retryAfter: Math.max(0, parseInt(j.retry_after, 10) || 0) };
+              return null;
+            });
+          }
+          return r.ok ? r.json() : null;
+        })
         .then(r => {
           if (r && r.ok && r.csrf) CSRF = r.csrf;
           // Kirishdan OLDIN yuklangan ma'lumotda shaxsiy bo'limlar (murojaatlar,
@@ -309,7 +331,10 @@
           if (r && r.ok) { _db = null; load(); }
           return !!(r && r.ok);
         })
-        .catch(() => false);
+        // Serverga yetib borilmadi (Apache o'chiq, tarmoq uzildi) — bu ham
+        // "parol noto'g'ri" emas. Sababini aytmasak, admin parolni bekorga
+        // qayta-qayta terib, o'zini 429 blokiga tiqib qo'yadi.
+        .catch(() => { _loginErr = { code: 'network' }; return false; });
     }
     // fallback: PHP ishlamayotganda. Bo'sh zaxira parol bilan kirishni taqiqlaymiz
     // (haqiqiy autentifikatsiya faqat server tomonda — api.php orqali bo'ladi).
@@ -589,6 +614,6 @@
 
   w.Store = {
     uid, ml, all, find, upsert, remove, settings, setSettings,
-    checkLogin, changePassword, login, logout, isAuthed, verifySession, auditLog, errorLog, errorResolve, item, pushStats, pushSend, addMessage, subscribe, uploadImage, uploadPdf, uploadHtml, bumpView, getView, reset, raw: load
+    checkLogin, loginError, changePassword, login, logout, isAuthed, verifySession, auditLog, errorLog, errorResolve, item, pushStats, pushSend, addMessage, subscribe, uploadImage, uploadPdf, uploadHtml, bumpView, getView, reset, raw: load
   };
 })(window);

@@ -18,6 +18,11 @@
   };
   const mlGet = (v) => (v && typeof v === 'object') ? (v.uz || v.ru || v.en || '') : (v || '');
   const fmtDate = (d) => { if (!d) return '—'; const [y, m, day] = d.split('-'); return day + '.' + m + '.' + y; };
+  // Kutish vaqti — kirish bloklanganda ("2 daqiqa", "45 soniya")
+  const fmtWait = (sec) => {
+    const s = Math.max(0, Math.round(+sec || 0));
+    return s >= 60 ? Math.ceil(s / 60) + ' daqiqa' : (s || 1) + ' soniya';
+  };
 
   // Rasmni canvas orqali kichraytirib (JPEG) dataURL qaytaradi — data.json shishib ketmasligi uchun
   function resizeImage(file, maxDim, cb) {
@@ -280,8 +285,19 @@
       const btn = $('#loginForm button[type=submit]');
       if (btn) btn.disabled = true;
       Promise.resolve(Store.checkLogin(u, p)).then((ok) => {
-        if (ok) { Store.login(); showApp(); }
-        else { $('#loginErr').classList.add('show'); }
+        if (ok) { Store.login(); showApp(); return; }
+        // Bloklanish (429), server yo'qligi va oddiy xato parol — UCHTA boshqa
+        // holat. Ilgari uchalasiga bir xil "Login yoki parol noto'g'ri" chiqardi
+        // va admin nima bo'layotganini tushunmasdi.
+        const err = Store.loginError && Store.loginError();
+        const el = $('#loginErr');
+        el.textContent =
+          (err && err.code === 'locked')
+            ? `Juda ko'p xato urinish. ${fmtWait(err.retryAfter)}dan keyin qayta urinib ko'ring.`
+          : (err && err.code === 'network')
+            ? 'Serverga ulanib bo\'lmadi. Aloqani tekshiring va qayta urinib ko\'ring.'
+            : 'Login yoki parol noto\'g\'ri.';
+        el.classList.add('show');
       }).finally(() => { if (btn) btn.disabled = false; });
     });
     $('#themeToggle').addEventListener('click', () => {
@@ -1673,6 +1689,8 @@
             <div class="field"><label>Telefon</label><input class="ctl" id="setPhone" value="${esc(s.phone)}"></div></div>
             <div class="field"><label>Xarita joyi (aloqa sahifasi)</label><input class="ctl" id="setMap" value="${esc(s.mapQuery || '')}" placeholder="41.310961,69.246750">
               <div class="a-t12-muted-mt5">Google Maps koordinatasi <b>"kenglik,uzunlik"</b> (aniq pin uchun tavsiya etiladi) yoki to'liq manzil matni.</div></div>
+            ${mlField('workHours', 'Ish vaqti', s.workHours)}
+            <div class="a-t12-muted-mt5">Aloqa sahifasida ko'rsatiladi. Masalan: <b>Dush–Juma · 09:00–18:00</b>.</div>
           </div>
           <div class="card a-p24"><b class="a-serif17-mb18">Ijtimoiy tarmoqlar</b>
             <div class="grid2">
@@ -1680,7 +1698,21 @@
               <div class="field"><label>YouTube</label><input class="ctl" id="soc_youtube" value="${esc(s.social.youtube)}"></div>
               <div class="field"><label>Facebook</label><input class="ctl" id="soc_facebook" value="${esc(s.social.facebook)}"></div>
               <div class="field"><label>X (Twitter)</label><input class="ctl" id="soc_x" value="${esc(s.social.x)}"></div>
+              <div class="field"><label>Instagram</label><input class="ctl" id="soc_instagram" value="${esc(s.social.instagram || '')}" placeholder="https://instagram.com/..."></div>
+              <div class="field"><label>LinkedIn</label><input class="ctl" id="soc_linkedin" value="${esc(s.social.linkedin || '')}" placeholder="https://linkedin.com/company/..."></div>
             </div>
+            <div class="a-t12-muted-mt5">Bo'sh qoldirilgan (yoki <b>#</b>) tarmoq saytda umuman ko'rsatilmaydi.</div>
+          </div>
+          <div class="card a-p24-mt20"><b class="a-serif17-mb6">Footer (sayt pastki qismi)</b>
+            <div class="a-muted13-mb18">Brend ostidagi tavsif, mualliflik qatori va huquqiy havolalar.</div>
+            ${mlField('footerAbout', 'Qisqa tavsif', s.footerAbout)}
+            ${mlField('copyright', 'Mualliflik qatori', s.copyright)}
+            <div class="a-t12-muted-mt5"><b>{yil}</b> yozsangiz, joriy yilga almashadi — har yanvarda qo'lda tuzatish shart emas.</div>
+            <div class="grid2">
+              <div class="field"><label>Maxfiylik siyosati havolasi</label><input class="ctl" id="legPrivacy" value="${esc((s.legal && s.legal.privacy) || '')}" placeholder="maxfiylik.html"></div>
+              <div class="field"><label>Foydalanish shartlari havolasi</label><input class="ctl" id="legTerms" value="${esc((s.legal && s.legal.terms) || '')}" placeholder="shartlar.html"></div>
+            </div>
+            <div class="a-t12-muted-mt5">Bo'sh qoldirilsa havola footerda chizilmaydi (ilgari ikkalasi ham hech qayerga eltmasdi).</div>
           </div>
         </div>
         <div>
@@ -1801,7 +1833,13 @@
         siteName: getML('siteName'), address: getML('address'),
         shortName: $('#setShort').value, email: $('#setEmail').value, phone: $('#setPhone').value,
         mapQuery: $('#setMap').value,
-        social: { telegram: $('#soc_telegram').value, youtube: $('#soc_youtube').value, facebook: $('#soc_facebook').value, x: $('#soc_x').value },
+        workHours: getML('workHours'), footerAbout: getML('footerAbout'), copyright: getML('copyright'),
+        legal: { privacy: $('#legPrivacy').value.trim(), terms: $('#legTerms').value.trim() },
+        social: {
+          telegram: $('#soc_telegram').value, youtube: $('#soc_youtube').value,
+          facebook: $('#soc_facebook').value, x: $('#soc_x').value,
+          instagram: $('#soc_instagram').value, linkedin: $('#soc_linkedin').value
+        },
         langs: { uz: $('[data-lang-tog=uz]').checked, ru: $('[data-lang-tog=ru]').checked, en: $('[data-lang-tog=en]').checked },
         theme: $('#setTheme').value
       };

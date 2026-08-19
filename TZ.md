@@ -121,7 +121,7 @@ Tizim quyidagilar uchun mo'ljallangan:
 | **Audit loglar** | Kim/qachon/nima o'zgartirdi jurnali (filtr bilan, o'qish uchun) | ✅ |
 | **Xatoliklar (diagnostika)** | Sayt va server xatolari — sababi, yechimi, takrorlanish soni; "hal qilindi" belgisi | ✅ |
 | **Bildirishnoma** | Obunachilar soni; bir bosishda barcha obunachilarga so'nggi yangilik haqida xabar | ✅ |
-| Sozlamalar | Sayt nomi, tillar, tema, statistika, parol almashtirish | ✅ |
+| Sozlamalar | Sayt nomi, aloqa (manzil/e-pochta/telefon/xarita/ish vaqti), 6 ta ijtimoiy tarmoq, logotiplar, tillar, tema, banner fonlari, statistika, footer matni va huquqiy havolalari, parol almashtirish | ✅ |
 
 ### 4.3. Ta'minot turlariga talablar
 

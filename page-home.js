@@ -160,10 +160,32 @@
     var _fa = document.getElementById('fAddr');
     if(_fa) _fa.textContent = _cml(_cs.address) || "Toshkent sh., O'zbekiston";
     // ijtimoiy tarmoqlar — faqat to'ldirilganlari ko'rinadi ("#"/bo'sh bo'lsa yashiriladi)
+    // ESLATMA: bosh sahifa site-common.js ni yuklamaydi (mustaqil sahifa),
+    // shuning uchun ro'yxat shu yerda takrorlanadi. Sozlamaga yangi tarmoq
+    // qo'shsangiz — site-common.js dagi socialLinks() ga ham qo'shing.
     var _soc = _cs.social || {};
-    [['fsTelegram',_soc.telegram],['fsYoutube',_soc.youtube],['fsFacebook',_soc.facebook],['fsX',_soc.x]].forEach(function(p){
+    [['fsTelegram',_soc.telegram],['fsYoutube',_soc.youtube],['fsFacebook',_soc.facebook],
+     ['fsX',_soc.x],['fsInstagram',_soc.instagram],['fsLinkedin',_soc.linkedin]].forEach(function(p){
       var a = document.getElementById(p[0]); if(!a) return;
       if (p[1] && p[1] !== '#'){ a.href = p[1]; a.style.display=''; }
+      else { a.style.display='none'; }
+    });
+    // Footer matnlari sozlamadan. data-i18n olib tashlanadi — aks holda
+    // keyingi I18N.translate() qaytadan eski standart matnni yozib qo'yardi.
+    var _put = function(id, txt){
+      var el = document.getElementById(id); if(!el || !txt) return;
+      el.removeAttribute('data-i18n'); el.textContent = txt;
+    };
+    _put('fAbout', _cml(_cs.footerAbout));
+    // {yil} -> joriy yil (mualliflik sanasi hech qachon eskirmasin)
+    var _cp = _cml(_cs.copyright);
+    if (_cp) _put('fCopy', _cp.replace(/{(yil|year|год)}/gi, new Date().getFullYear()));
+    // Huquqiy havolalar: manzil ko'rsatilmagan bo'lsa havola YASHIRILADI —
+    // ilgari ikkalasi ham href="#" bo'lib hech qayerga eltmasdi.
+    var _leg = _cs.legal || {};
+    [['fLegalPrivacy',_leg.privacy],['fLegalTerms',_leg.terms]].forEach(function(p){
+      var a = document.getElementById(p[0]); if(!a) return;
+      if (p[1] && String(p[1]).trim() && p[1] !== '#'){ a.href = p[1]; a.style.display=''; }
       else { a.style.display='none'; }
     });
   } catch{}

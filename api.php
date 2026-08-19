@@ -415,6 +415,10 @@ switch ($action) {
       $up = $pdo->prepare("INSERT INTO login_attempts (ip, cnt, t, locked_until) VALUES (:ip,:c,:t,:l)
                            ON DUPLICATE KEY UPDATE cnt=VALUES(cnt), t=VALUES(t), locked_until=VALUES(locked_until)");
       $up->execute([':ip' => $ip, ':c' => $cnt, ':t' => $now, ':l' => $locked]);
+      // Blok AYNAN shu urinishda qo'yildi — buni darrov aytamiz. Ilgari bu holda
+      // ham oddiy "ok:false" qaytardi va foydalanuvchi bloklanganini faqat
+      // keyingi urinishida bilardi.
+      if ($locked) jexit(['ok' => false, 'error' => 'locked', 'retry_after' => $locked - $now], 429);
       echo json_encode(['ok' => false]);
     }
     break;

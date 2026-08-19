@@ -17,23 +17,19 @@
       {i:I.pin,   lab:T('footer_address'), val: addr},
       {i:I.mail,  lab:T('footer_email'),   val: email, href:'mailto:'+email},
       {i:I.phone, lab:T('footer_phone'),   val: phone, href:'tel:'+phone.replace(/\s/g,'')},
-      {i:I.clock, lab:T('c_hours'),        val: T('c_hours_v')}
+      // Ish vaqti — admin sozlamasidan (bo'sh bo'lsa i18n dagi standart)
+      {i:I.clock, lab:T('c_hours'),        val: Site.mlGet(s.workHours) || T('c_hours_v')}
     ];
     document.getElementById('cinfo').innerHTML = rows.map(r=>{
       const v = r.href ? `<a class="val" href="${safeUrl(r.href)}">${esc(r.val)}</a>` : `<div class="val">${esc(r.val)}</div>`;
       return `<div class="crow"><div class="ci">${r.i}</div><div><div class="lab">${esc(r.lab)}</div>${v}</div></div>`;
     }).join('');
 
-    // ijtimoiy tarmoqlar (sozlamalarda "#"/bo'sh bo'lmaganlari)
-    const soc = s.social || {}, SI = Site.ICON;
-    const links = [
-      {u:soc.telegram, i:SI.tg, n:'Telegram'},
-      {u:soc.youtube,  i:SI.yt, n:'YouTube'},
-      {u:soc.facebook, i:SI.fb, n:'Facebook'},
-      {u:soc.x,        i:SI.x,  n:'X'}
-    ].filter(l => l.u && l.u !== '#');
+    // Ijtimoiy tarmoqlar — ro'yxat site-common.js da (Site.socialLinks), shu
+    // bilan footer bilan bir manbadan o'qiladi: yangi tarmoq qo'shilsa ikkala
+    // joyda birdan paydo bo'ladi.
     const cs = document.getElementById('csocial');
-    if (cs) cs.innerHTML = links.map(l=>`<a href="${esc(l.u)}" target="_blank" rel="noopener" aria-label="${esc(l.n)}" title="${esc(l.n)}">${l.i}</a>`).join('');
+    if (cs) cs.innerHTML = Site.socialLinks().map(l=>`<a href="${safeUrl(l.u)}" target="_blank" rel="noopener" aria-label="${esc(l.n)}" title="${esc(l.n)}">${l.i}</a>`).join('');
 
     // xarita paneli: manzil
     const ma = document.getElementById('mapAddr'); if (ma) ma.textContent = addr;

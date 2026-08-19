@@ -7,11 +7,14 @@
    o'sha zahoti bcrypt bilan xeshlanib saqlanadi. U bo'sh bo'lsa
    parolsiz kirish MUMKIN EMAS (qarang: config.sample.php).
    ============================================================ */
-function default_seed() {
+/* Sozlamalarning standart qiymatlari — ALOHIDA funksiya, chunki ular bo'sh
+   bazani to'ldirishdan tashqari YANA bir joyda kerak: db.php dagi
+   settings_load() saqlangan sozlamalarni shu standartlar USTIGA qo'yadi.
+   Aks holda eski bazaga keyin qo'shilgan kalit (masalan 'workHours')
+   umuman yetib bormasdi va admin panelda bo'sh maydon ko'rinardi. */
+function default_settings() {
   $ml = function ($uz, $ru = '', $en = '') { return ['uz' => $uz, 'ru' => $ru, 'en' => $en]; };
-  $p = function ($s) { return '<p>' . $s . '</p>'; };
   return [
-    'settings' => [
       /* RU/EN qo'lda tasdiqlangan (2026-08-12) — avtomatik tarjimaga
          ISHONILMAYDI: header/footerdagi brend nomi shu matndan ikki
          muvozanatli qatorga bo'linadi (page-home.js/site-common.js
@@ -25,7 +28,26 @@ function default_seed() {
       'address' => $ml("Mahmudjon G'ofurov ko'chasi, Toshkent", 'ул. Махмуджона Гофурова, Ташкент', 'Mahmudjon Gofurov St., Tashkent'),
       'email' => 'info@cfps.uz',
       'phone' => '+998 71 239 36 55',
-      'social' => ['telegram' => 'https://t.me/', 'youtube' => '#', 'facebook' => '#', 'x' => '#'],
+      'social' => ['telegram' => 'https://t.me/', 'youtube' => '#', 'facebook' => '#', 'x' => '#', 'instagram' => '', 'linkedin' => ''],
+      // Aloqa sahifasidagi "Ish vaqti" qatori. Ilgari i18n.js ichida qotib
+      // turardi (c_hours_v) — admin uni o'zgartira olmasdi.
+      'workHours' => $ml('Dush–Juma · 09:00–18:00', 'Пн–Пт · 09:00–18:00', 'Mon–Fri · 09:00–18:00'),
+      // Footerdagi brend ostidagi qisqa tavsif (ilgari i18n: footer_about).
+      'footerAbout' => $ml(
+        "Mustaqil tahliliy markaz. Tashqi siyosat, mintaqaviy xavfsizlik va xalqaro hamkorlik bo'yicha ekspert-tahliliy tadqiqotlar.",
+        'Независимый аналитический центр. Экспертно-аналитические исследования по внешней политике, региональной безопасности и международному сотрудничеству.',
+        'Independent think tank. Expert and analytical research on foreign policy, regional security and international cooperation.'
+      ),
+      // Footerning pastki qatori. {yil} — joriy yilga almashadi, shuning uchun
+      // sana hech qachon eskirmaydi (ilgari i18n'da "© 2026 ..." qotib turardi).
+      'copyright' => $ml(
+        '© {yil} Tashqi siyosiy tadqiqotlar va xalqaro tashabbuslar markazi',
+        '© {yil} Центр внешнеполитических исследований и международных инициатив',
+        '© {yil} Center for Foreign Policy Research and International Initiatives'
+      ),
+      // Footerdagi huquqiy havolalar. Bo'sh bo'lsa havola UMUMAN chizilmaydi —
+      // ilgari ikkalasi ham href="#" bo'lib, bosilganda hech qayerga eltmasdi.
+      'legal' => ['privacy' => '', 'terms' => ''],
       'langs' => ['uz' => true, 'ru' => true, 'en' => true],
       'theme' => 'light',
       'logo' => '',
@@ -37,7 +59,14 @@ function default_seed() {
         ['n' => '60', 'c' => $ml('Xalqaro hamkor', 'Международных партнёров', 'International partners')],
         ['n' => '32', 'c' => $ml('Yillik tajriba', 'Года опыта', 'Years of experience')],
       ],
-    ],
+  ];
+}
+
+function default_seed() {
+  $ml = function ($uz, $ru = '', $en = '') { return ['uz' => $uz, 'ru' => $ru, 'en' => $en]; };
+  $p = function ($s) { return '<p>' . $s . '</p>'; };
+  return [
+    'settings' => default_settings(),
     'auth' => ['username' => 'markaz_admini', 'password' => ''],
     'users' => [
       ['id' => uidgen(), 'name' => 'Bosh administrator', 'login' => 'markaz_admini', 'email' => 'admin@markaz.uz', 'role' => 'Administrator', 'status' => 'active', 'last' => '2026-06-13'],
