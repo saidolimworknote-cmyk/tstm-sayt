@@ -1707,7 +1707,7 @@
             <div class="a-muted13-mb18">Brend ostidagi tavsif, mualliflik qatori va huquqiy havolalar.</div>
             ${mlField('footerAbout', 'Qisqa tavsif', s.footerAbout)}
             ${mlField('copyright', 'Mualliflik qatori', s.copyright)}
-            <div class="a-t12-muted-mt5"><b>{yil}</b> yozsangiz, joriy yilga almashadi — har yanvarda qo'lda tuzatish shart emas.</div>
+            <div class="a-t12-muted-mt5-mb14"><b>{yil}</b> yozsangiz, joriy yilga almashadi — har yanvarda qo'lda tuzatish shart emas.</div>
             <div class="grid2">
               <div class="field"><label>Maxfiylik siyosati havolasi</label><input class="ctl" id="legPrivacy" value="${esc((s.legal && s.legal.privacy) || '')}" placeholder="maxfiylik.html"></div>
               <div class="field"><label>Foydalanish shartlari havolasi</label><input class="ctl" id="legTerms" value="${esc((s.legal && s.legal.terms) || '')}" placeholder="shartlar.html"></div>

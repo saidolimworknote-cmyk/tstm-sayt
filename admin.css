@@ -33,6 +33,9 @@
   .a-t12-ink2{font-size:12px;color:var(--ink-2);} .a-t125-ink2{font-size:12.5px;color:var(--ink-2);}
   .a-t12-muted{font-size:12px;color:var(--muted);} .a-t12-muted-mt4{font-size:12px;color:var(--muted);margin-top:4px;}
   .a-t12-muted-mt5{color:var(--muted);font-size:12px;margin-top:5px;}
+  /* Xuddi shunday izoh, lekin ostidan yana maydon kelganda — aks holda izoh
+     keyingi maydon yorlig'iga yopishib qolardi. */
+  .a-t12-muted-mt5-mb14{color:var(--muted);font-size:12px;margin-top:5px;margin-bottom:14px;}
   .a-t13-ink2-lh{font-size:13px;color:var(--ink-2);line-height:1.65;}
   .a-mt8-muted13{margin-top:8px;color:var(--muted);font-size:13px;}
   .a-mt10-muted13{margin-top:10px;font-size:13px;color:var(--muted);}
@@ -286,6 +289,12 @@
   .ctl{width:100%;font-family:var(--sans);font-size:14px;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:var(--r-s);padding:10px 13px;outline:none;transition:.14s;}
   textarea.ctl{min-height:88px;resize:vertical;line-height:1.5;}
   .ctl:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
+  /* En yordamchisi .ctl bilan birga ishlatilganda. .ctl{width:100%} shu faylda
+     KEYINROQ turgani uchun bir xil og'irlikdagi .a-w110-none{width:110px} ni
+     bosib ketardi — natijada statistika qatoridagi raqam maydoni butun enni
+     egallab, izoh maydoni bilan o'chirish tugmasini ekrandan chiqarib
+     yuborardi (sahifada gorizontal skrol paydo bo'lardi). */
+  .ctl.a-w110-none{width:110px;}
   select.ctl{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a909a' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:34px;cursor:pointer;}
   .field .hint{font-size:11.5px;color:var(--muted);margin-top:6px;}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
