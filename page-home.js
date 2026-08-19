@@ -199,14 +199,22 @@
     'radial-gradient(1050px 540px at 84% 10%, rgba(52,182,255,.17), transparent 58%),radial-gradient(780px 500px at 6% 102%, rgba(18,64,96,.42), transparent 56%),linear-gradient(140deg,#103a54 0%,#0a2130 48%,#08161f 100%)'
   ];
   /* Hero manbasi \u2014 ikki bosqichli:
-     1) Admin "Hero slayder" bo'limidagi rasmli published slaydlar (muharrir nazorati)
+     1) Admin "Hero slayder" bo'limidagi published slaydlar (muharrir nazorati)
      2) Ular bo'lmasa \u2014 so'nggi 5 published yangilik (avtomatik zaxira)
-     Rasmsiz slayd hero'ni gradient fonga tushirib yuboradi, shuning uchun
-     1-bosqich faqat rasmi borlarini oladi. */
+
+     RASM SHART EMAS. Ilgari filtr `&& s.image` ham talab qilardi \u2014 "rasmsiz
+     slayd hero'ni gradient fonga tushirib yuboradi" degan mulohaza bilan. Amalda
+     bu 1-bosqichni butunlay o'ldirdi: 2026-08-19 da bazadagi 3 ta published
+     slaydning HAMMASIDA `image` bo'sh edi, shuning uchun muharrir tanlagan
+     sarlavhalar hech qachon ko'rinmay, sayt jimgina yangiliklar zaxirasiga
+     tushib turgan edi \u2014 admin'da esa "Hero slayder 3" deb turardi.
+     Gradient fon nosozlik emas: heroBgVal() rasmsiz slaydga heroFallbacks[i]
+     dagi institutsional gradientni beradi (pastda), ya'ni ko'rinish baribir
+     to'liq. Rasm qo'shilgan zahoti o'sha slayd avtomatik rasmga o'tadi. */
   function heroItems(){
     try {
       const slides = Store.all('heroSlides')
-        .filter(s => s.status === 'published' && s.image)
+        .filter(s => s.status === 'published')
         .sort((a,b) => (a.order||0) - (b.order||0));
       if(slides.length) return slides.map(s => ({
         cat: s.category || '', title: s.headline, href: s.link || '', img: s.image || '', date: ''

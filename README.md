@@ -20,9 +20,13 @@ Sayt + boshqaruv paneli (admin). XAMPP'da ishlash uchun PHP backend bilan.
 - `maqolalar.html`, `maruzalar.html`, `tahlillar.html`, `kitoblar.html` — «Tadqiqotlar»
   menyusining alohida sahifalari (2026-08-12 gacha bu menyu «Tahlillar» deb
   atalgan va `hisobotlar.html` bo'lgan — u endi `tahlillar.html`). To'rttasi ham
-  `page-nashrlar.js` ni ishlatadi; qaysi nashr turlarini ko'rsatish
-  `<main data-ptypes="Tur1,Tur2">` atributida yoziladi (CSP inline skriptga
-  ruxsat bermagani uchun sozlama DOM orqali uzatiladi).
+  `page-nashrlar.js` ni ishlatadi; sahifa qaysi bo'lim ekani
+  `<main data-pkind="articles">` atributida yoziladi (CSP inline skriptga
+  ruxsat bermagani uchun sozlama DOM orqali uzatiladi). Atributga turlar
+  ro'yxati EMAS, bo'lim identifikatori beriladi — `articles`, `lectures`,
+  `reports`, `books`. Qaysi `publications.type` qiymatlari qaysi bo'limga
+  tushishi `site-common.js` dagi `PUB_KINDS` jadvalida, ya'ni BITTA joyda
+  turadi (aniq nom bo'yicha moslik, topilmasa — regex bo'yicha).
 - `rahbariyat.html` va `ekspertlar.html` — ikkalasi `page-rahbariyat.js` ni
   ishlatadi. Kimni ko'rsatish `<div id="grid" data-kind="Rahbariyat">` orqali
   hal qilinadi; xodimning bo'limi admin'da **Ekspertlar → Bo'lim** maydonida
@@ -36,8 +40,9 @@ Sayt + boshqaruv paneli (admin). XAMPP'da ishlash uchun PHP backend bilan.
 - `subscribe.js` + `subscribe.css` — obuna (push-bildirishnoma) oynasi; **barcha**
   sahifaga ulanadi, jumladan bosh sahifaga ham
 - `seed.php` — bo'sh bazani to'ldiruvchi standart boshlang'ich kontent
-- `index.php` — bosh sahifaga yo'naltiradi
-- `.htaccess` — Apache sozlamalari
+- `.htaccess` — Apache sozlamalari (`DirectoryIndex index.html index.php`, ya'ni
+  papka manzili to'g'ridan-to'g'ri `index.html` ni ochadi — alohida yo'naltiruvchi
+  `index.php` YO'Q va kerak emas)
 - `robots.txt`, `sitemap.xml` — qidiruv tizimlari (SEO) uchun
 - `*.js`, `site.css`, `logo-*.png` — kod va resurslar
 
@@ -49,22 +54,30 @@ Sayt + boshqaruv paneli (admin). XAMPP'da ishlash uchun PHP backend bilan.
 ## 🚀 XAMPP'da ishga tushirish
 
 1. **XAMPP**'ni o'rnating, **Apache** va **MySQL**'ni ishga tushiring (Start).
-2. Ushbu `tstm-sayt` papkasini XAMPP'ning **`htdocs`** papkasiga ko'chiring.
-   Masalan: `C:\xampp\htdocs\tstm-sayt`
+2. Loyiha papkasini XAMPP'ning **`htdocs`** papkasiga qo'ying. Ikki yo'l bor:
+   - **ko'chirish:** `C:\xampp\htdocs\sayt`;
+   - **junction (tavsiya etiladi):** papka ish stolida qolib, htdocs'da unga
+     ishorat turadi — bitta nusxa bo'lgani uchun tahrir darhol saytda ko'rinadi:
+     ```
+     mklink /J C:\xampp\htdocs\sayt C:\Users\<siz>\Desktop\sayt
+     ```
+     (`mklink /J` uchun administrator huquqi shart emas.)
 3. *(Ixtiyoriy)* `config.sample.php` ni `config.php` deb nusxalang. Mahalliy
    XAMPP uchun shart emas — `config.php` bo'lmasa standart qiymatlar
    (`root`, parolsiz) ishlatiladi.
 4. Brauzerda oching:
-   - **Sayt:** `http://localhost/tstm-sayt/`
-   - **Admin panel:** `http://localhost/tstm-sayt/admin.html`
+   - **Sayt:** `http://localhost/sayt/`
+   - **Admin panel:** `http://localhost/sayt/admin.html`
 
-> `http://localhost/tstm-sayt/` ochilganda `index.php` avtomatik bosh sahifaga olib boradi.
+> Manzilning oxirgi qismi — htdocs ichidagi **papka nomi**. Yuqoridagi misolda u
+> `sayt`; boshqacha nomlasangiz manzil ham shunga qarab o'zgaradi.
+> `ISHGA_TUSHIRISH.bat` `/sayt/` ni ochadi.
 
 ---
 
 ## 🔐 Admin panelga kirish
 
-**Manzil:** `http://localhost/tstm-sayt/admin.html` · **Login:** `markaz_admini`
+**Manzil:** `http://localhost/sayt/admin.html` · **Login:** `markaz_admini`
 
 Parol **kodda saqlanmaydi** va bu hujjatda ham yozilmaydi — u serverda faqat
 bcrypt xesh holida (`auth` jadvali) turadi. Parolni saytga mas'ul shaxsdan
