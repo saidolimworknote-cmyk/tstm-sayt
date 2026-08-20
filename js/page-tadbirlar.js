@@ -165,11 +165,17 @@ Site.initPage({
     const L = LAYOUT[kindId] || LAYOUT.all;
 
     /* ---------- kelgusi ---------- */
+    /* 2026-08-20: kelgusi voqea yo'q, LEKIN arxivda bor bo'lsa "Kelgusi ... yo'q"
+       degan katta bo'sh blok CHIZILMAYDI. Ilgari u sahifaning boshini butunlay
+       egallab turardi va o'tkazilgan tadbir pastda, ekrandan tashqarida qolardi
+       — admin yangi konferensiya qo'shib, sahifani ochib "ko'rinmayapti" degan
+       xulosaga kelardi. Bo'sh holat endi faqat bo'lim HAQIQATAN bo'sh
+       bo'lganda (na kelgusi, na o'tgan) ko'rsatiladi. */
     const upEl = document.getElementById('upcoming');
     if (upEl) {
-      upEl.innerHTML = up.length
-        ? head(L.upTk, up.length) + L.up(up)
-        : head(L.upTk, 0) + empty(L.noneTk);
+      if (up.length) upEl.innerHTML = head(L.upTk, up.length) + L.up(up);
+      else if (past.length) upEl.innerHTML = '';
+      else upEl.innerHTML = head(L.upTk, 0) + empty(L.noneTk);
     }
 
     /* ---------- arxiv: YIL bo'yicha ----------

@@ -81,6 +81,23 @@
       re: /monografi|kitob|book|monograph|монограф|книг/ }
   ];
 
+  /* ---------- Xodim bo'limlari (Markaz haqida) ----------
+     Bu ikkisi yuqoridagilardan FARQ QILADI: moslik `type` emas, `kind`
+     maydoni bo'yicha, va "topilmadi" holati YO'Q — "Rahbariyat" bo'lmagan
+     har bir xodim ekspert hisoblanadi (maydon bo'sh qolsa ham). Sayt shu
+     qoidada ishlaydi: rahbariyat.html da `data-kind="Rahbariyat"`,
+     ekspertlar.html da esa atribut yo'q va u "qolganlarni" ko'rsatadi. */
+  var EXPERT_KINDS = [
+    { id: 'leadership', page: 'rahbariyat.html', tk: 'nav_about_leadership',
+      label: 'Rahbariyat', singular: 'rahbar',
+      types: ['Rahbariyat'],
+      re: /rahbariyat|rahbar|leadership|руководств/ },
+    { id: 'expert', page: 'ekspertlar.html', tk: 'nav_about_experts',
+      label: 'Ekspertlar', singular: 'ekspert',
+      types: ['Ekspert'],
+      re: /.*/ }   // zaxira: qolgan HAMMASI (bo'sh qiymat ham) shu yerga tushadi
+  ];
+
   // Ko'p tilli qiymat ham, oddiy satr ham qabul qilinadi. Apostrofning turli
   // shakllari (' ’ ʻ ʼ `) bir xil hisoblanadi — "Ta'lim" va "Ta’lim" bir tur.
   function norm(type) {
@@ -119,14 +136,28 @@
     return PUB_KINDS.find(function (k) { return k.id === id; }) || null;
   }
 
-  /* Admin panel uchun: kolleksiya kaliti bo'yicha to'g'ri jadvalni tanlaydi.
-     `events` -> EVENT_KINDS, `publications` -> PUB_KINDS, boshqasi -> null. */
-  function kindFor(coll, type) {
-    if (coll === 'events') return eventKind(type);
-    if (coll === 'publications') return pubKind(type);
+  // "Rahbariyat" bo'lmaganning hammasi ekspert — bo'sh qiymat ham.
+  function expertKind(v) {
+    var t = norm(v);
+    return EXPERT_KINDS[0].re.test(t) ? EXPERT_KINDS[0] : EXPERT_KINDS[1];
+  }
+
+  /* Yozuvning qaysi MAYDONI bo'limni belgilaydi. Voqea va nashrda bu `type`,
+     xodimda esa `kind` — admin kodi shu funksiya orqali to'g'ri maydonni
+     oladi va har bir kolleksiya uchun alohida shart yozilmaydi. */
+  function kindField(coll) {
+    return coll === 'experts' ? 'kind' : 'type';
+  }
+  /* Admin panel uchun: kolleksiya kaliti bo'yicha to'g'ri jadvalni tanlaydi. */
+  function kindFor(coll, value) {
+    if (coll === 'events') return eventKind(value);
+    if (coll === 'publications') return pubKind(value);
+    if (coll === 'experts') return expertKind(value);
     return null;
   }
-  // Kolleksiyaning umumiy (barchasi ko'rinadigan) sahifasi
+  /* Kolleksiyaning umumiy (barchasi ko'rinadigan) sahifasi.
+     `experts` da bunday sahifa YO'Q: har bir xodim ikki bo'limdan birida
+     albatta ko'rinadi, ya'ni "biror bo'limga tushmay qolish" holati bo'lmaydi. */
   function fallbackPage(coll) {
     if (coll === 'events') return { page: 'tadbirlar.html', label: 'Tadbirlar (umumiy)' };
     if (coll === 'publications') return { page: 'nashrlar.html', label: 'Nashrlar (umumiy)' };
@@ -139,12 +170,14 @@
   function sectionOf(coll) {
     if (coll === 'events') return 'Voqealar';
     if (coll === 'publications') return 'Tadqiqotlar';
+    if (coll === 'experts') return 'Markaz haqida';
     return '';
   }
   // Kolleksiyaning bo'limlari (admin yon menyusi shundan quriladi)
   function kindsOf(coll) {
     if (coll === 'events') return EVENT_KINDS;
     if (coll === 'publications') return PUB_KINDS;
+    if (coll === 'experts') return EXPERT_KINDS;
     return [];
   }
   function kindById(coll, id) {
@@ -152,10 +185,10 @@
   }
 
   w.ContentKinds = {
-    EVENT_KINDS: EVENT_KINDS, PUB_KINDS: PUB_KINDS,
+    EVENT_KINDS: EVENT_KINDS, PUB_KINDS: PUB_KINDS, EXPERT_KINDS: EXPERT_KINDS,
     eventKind: eventKind, eventKindById: eventKindById,
-    pubKind: pubKind, pubKindById: pubKindById,
-    kindFor: kindFor, fallbackPage: fallbackPage,
+    pubKind: pubKind, pubKindById: pubKindById, expertKind: expertKind,
+    kindFor: kindFor, kindField: kindField, fallbackPage: fallbackPage,
     kindsOf: kindsOf, kindById: kindById, sectionOf: sectionOf
   };
 })(window);

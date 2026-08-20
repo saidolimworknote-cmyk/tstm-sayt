@@ -477,7 +477,7 @@ sahifada** ko'rinishi yozilgan.
 
 | Admin guruhi | Saytdagi menyu | Ichida |
 |---|---|---|
-| Markaz haqida | Markaz haqida | Markaz matnlari · Ekspertlar · Hamkorlar |
+| Markaz haqida | Markaz haqida | Markaz matnlari · Rahbariyat · Ekspertlar · Hamkorlar |
 | Voqealar | Voqealar | Yangiliklar · Uchrashuvlar · Davra suhbatlari · Konferensiyalar · Markaz hayoti · Barchasi |
 | Tadqiqotlar | Tadqiqotlar | Maqolalar · Ma'ruzalar · Tahlillar · Kitoblar · Barchasi |
 | Media | Media | Ekspertlar OAVda · Media kutubxona |
@@ -498,7 +498,12 @@ bitta ro'yxat emas — saytdagi sahifalarning har biri alohida bo'lim:
 - Yon menyudagi raqam ham o'sha bo'limniki (Tahlillar 3, Kitoblar 2 …).
 - **«Barchasi»** bandi bitta jadvalning to'liq ro'yxati — umumiy ko'rish va
   qidiruv uchun. Faqat shu yerda «Saytda» ustuni ko'rinadi.
-- Manzillar: `#/publications/k/reports`, `#/events/k/conf` va h.k.
+- Xuddi shu naqsh **Rahbariyat / Ekspertlar** uchun ham: bitta `experts`
+  jadvali, bo'limni `kind` maydoni belgilaydi (`Rahbariyat` bo'lmagan har bir
+  xodim ekspert hisoblanadi — maydon bo'sh qolsa ham). Bu ikkisida
+  «Barchasi» bandi YO'Q: har bir xodim ikki bo'limdan birida albatta
+  ko'rinadi, ya'ni "hech qayerga tushmadi" holati bo'lmaydi.
+- Manzillar: `#/publications/k/reports`, `#/events/k/conf`, `#/experts/k/leadership`.
   Bo'lim ichida ochilgan tahrir «Orqaga»da o'sha bo'limga qaytadi.
 
 > Turni o'zgartirsangiz (masalan «Tahlillar»da turib «Maqola» tanlasangiz),

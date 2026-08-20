@@ -178,14 +178,6 @@
   .sb-item.active{background:var(--sb-active);color:var(--accent-ink);font-weight:600;}
   .sb-item.active::before{content:"";position:absolute;left:-12px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--accent);}
   .sb-item svg{width:18px;height:18px;flex:none;stroke-width:1.7;}
-  /* Izohli band: bo'lim nomi ostida u saytda QAYSI sahifada ko'rinishi yoziladi
-     (2026-08-20). Ikona yuqoriga tekislanadi, aks holda ikki qatorli matnning
-     o'rtasida osilib qoladi. */
-  .sb-item .sb-txt{display:block;min-width:0;}
-  .sb-item .sb-note{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.02em;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .sb-item.has-note{align-items:flex-start;padding-top:8px;padding-bottom:8px;}
-  .sb-item.has-note svg{margin-top:1px;}
-  .sb-item.active .sb-note{color:var(--accent-ink);opacity:.75;}
   .sb-item .ct{margin-left:auto;font-size:11px;font-family:var(--mono);background:var(--line);color:var(--ink-2);padding:1px 7px;border-radius:var(--r-pill);}
   .sb-item.active .ct{background:var(--accent);color:#fff;}
   .sb-foot{padding:12px;border-top:1px solid var(--line);}

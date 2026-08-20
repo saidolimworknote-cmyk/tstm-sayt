@@ -200,7 +200,7 @@
         // Saytda qaysi sahifada ko'rinishini belgilaydi. Bo'sh qolsa —
         // "Ekspert" (ekspertlar.html). Faqat "Rahbariyat" tanlansa
         // rahbariyat.html sahifasiga tushadi.
-        { k: 'kind', label: 'Bo\'lim (qaysi sahifada)', type: 'select', side: 1, opts: ['Ekspert', 'Rahbariyat'] },
+        { k: 'kind', label: 'Bo\'lim (qaysi sahifada)', type: 'select', side: 1, kindHint: 1, opts: ['Ekspert', 'Rahbariyat'] },
         { k: 'photo', label: 'Portret', type: 'image', side: 1 },
         { k: 'phone', label: 'Telefon', type: 'text', side: 1, ph: '+998 71 000 00 00' },
         { k: 'email', label: 'E-pochta', type: 'text', side: 1, ph: 'ism@markaz.uz' },
@@ -259,28 +259,29 @@
      Endi guruh nomlari ham, tartibi ham `site-common.js` dagi `NAV` bilan
      bir xil. Saytdagi menyuni o'zgartirsangiz SHU YERNI ham yangilang.
 
-     `note` — bandning ostida chiqadigan kichik izoh: yozuv saytda qaysi
-     sahifa(lar)da ko'rinishini aytadi. */
+     Bandlar ostida fayl nomi (`tahlillar.html` va h.k.) YOZILMAYDI — bo'lim
+     nomining o'zi saytdagi sahifa nomi, ya'ni izoh ortiqcha bo'lardi. Sayt
+     sahifasiga havola ro'yxat sarlavhasi ostida ("saytda ko'rish"). */
   const NAV = [
     { group: 'Asosiy', items: [{ key: 'dashboard', label: 'Boshqaruv paneli', icon: 'dashboard', view: 'dashboard' }] },
     { group: 'Markaz haqida', items: [
-      { key: 'aboutPage', label: 'Markaz matnlari', icon: 'pages', view: 'aboutPage', note: 'biz-kimmiz.html' },
-      { key: 'experts', note: 'rahbariyat · ekspertlar' },
-      { key: 'partners', note: 'hamkorlar.html' }
+      { key: 'aboutPage', label: 'Markaz matnlari', icon: 'pages', view: 'aboutPage' },
+      { kindsOf: 'experts' },
+      'partners'
     ] },
     { group: 'Voqealar', items: [
-      { key: 'news', note: 'yangiliklar.html' },
+      'news',
       { kindsOf: 'events' }
     ] },
     { group: 'Tadqiqotlar', items: [
       { kindsOf: 'publications' }
     ] },
     { group: 'Media', items: [
-      { key: 'mediaPosts', note: 'oav.html' },
-      { key: 'media', label: 'Media kutubxona', icon: 'media', view: 'media', note: 'media.html' }
+      'mediaPosts',
+      { key: 'media', label: 'Media kutubxona', icon: 'media', view: 'media' }
     ] },
     { group: 'Bosh sahifa', items: [
-      { key: 'heroSlides', note: 'index.html' }
+      'heroSlides'
     ] },
     { group: 'Tizim', items: [{ key: 'messages', label: 'Murojaatlar', icon: 'mail', view: 'messages' }, 'subscribers', 'users', { key: 'audit', label: 'Audit loglar', icon: 'audit', view: 'audit' }, { key: 'errors', label: 'Xatoliklar', icon: 'bug', view: 'errors' }, { key: 'push', label: 'Bildirishnoma', icon: 'bell', view: 'push' }, { key: 'settings', label: 'Sozlamalar', icon: 'settings', view: 'settings' }] }
   ];
@@ -445,19 +446,22 @@
           const coll = it.kindsOf;
           (CK ? CK.kindsOf(coll) : []).forEach(k => items.push({
             key: coll + ':' + k.id, label: k.label, icon: C[coll].icon,
-            view: 'list', coll: coll, kind: k.id, note: k.page
+            view: 'list', coll: coll, kind: k.id
           }));
-          const fb = CK ? CK.fallbackPage(coll) : null;
-          items.push({ key: coll, label: 'Barchasi', icon: C[coll].icon,
-            view: 'list', coll: coll, note: fb ? fb.page : '' });
+          // "Barchasi" faqat umumiy sayt sahifasi BOR kolleksiyada ma'noli.
+          // Xodimlarda bunday sahifa yo'q: har bir xodim ikki bo'limdan birida
+          // albatta ko'rinadi, ya'ni "hech qayerga tushmadi" holati bo'lmaydi.
+          if (CK && CK.fallbackPage(coll)) {
+            items.push({ key: coll, label: 'Barchasi', icon: C[coll].icon,
+              view: 'list', coll: coll });
+          }
           return;
         }
         items.push(it);
       });
       items.forEach(it => {
-        // Band uch shaklda yozilishi mumkin:
-        //   'news'                          -> kolleksiya, hammasi C dan
-        //   { key:'news', note:'...' }      -> kolleksiya + izoh
+        // Band ikki shaklda yozilishi mumkin:
+        //   'news'                             -> kolleksiya, hammasi C dan
         //   { key:'media', label, icon, view } -> alohida ko'rinish
         const base = typeof it === 'string' ? { key: it } : it;
         const isColl = !!C[base.key] && !base.view;
@@ -465,17 +469,14 @@
           ? Object.assign({ label: C[base.key].label, icon: C[base.key].icon, view: 'list', coll: base.key }, base)
           : base;
         // Bo'lim bandida FAQAT o'sha bo'limga tushadigan yozuvlar sanaladi
-        const n = o.kind ? Store.all(o.coll).filter(x => kindIdOf(o.coll, x.type) === o.kind).length
+        const n = o.kind ? Store.all(o.coll).filter(x => kindIdOf(o.coll, x) === o.kind).length
                 : (o.coll ? counts[o.coll] : null);
         let ct = n === null ? '' : `<span class="ct">${n}</span>`;
         if (o.key === 'messages') {
           const unread = Store.all('messages').filter(m => !m.read).length;
           ct = unread ? `<span class="ct a-accent-chip">${unread}</span>` : '';
         }
-        // `note` — yozuv saytda qayerda ko'rinishi. Admin yozuvni qayerga
-        // qo'shishni menyuning o'zidan ko'rsin degan maqsadda.
-        const note = o.note ? `<span class="sb-note">${esc(o.note)}</span>` : '';
-        h += `<div class="sb-item${note ? ' has-note' : ''}${o.kind ? ' is-sub' : ''}" data-key="${o.key}" data-view="${o.view}" ${o.coll ? `data-coll="${o.coll}"` : ''} ${o.kind ? `data-kind="${o.kind}"` : ''}>${ic(o.icon)}<span class="sb-txt">${esc(o.label)}${note}</span>${ct}</div>`;
+        h += `<div class="sb-item${o.kind ? ' is-sub' : ''}" data-key="${o.key}" data-view="${o.view}" ${o.coll ? `data-coll="${o.coll}"` : ''} ${o.kind ? `data-kind="${o.kind}"` : ''}>${ic(o.icon)}<span>${esc(o.label)}</span>${ct}</div>`;
       });
     });
     $('#sbNav').innerHTML = h;
@@ -738,22 +739,26 @@
      Tur bo'sh yoki notanish bo'lsa yozuv faqat umumiy sahifada ko'rinadi —
      buni ham ochiq aytamiz, "yo'qolib qoldi" degan taassurot bo'lmasin. */
   const CK = window.ContentKinds || null;
-  function kindInfo(coll, type) {
+  function kindInfo(coll, value) {
     if (!CK) return null;
-    const k = CK.kindFor(coll, type);
+    const k = CK.kindFor(coll, value);
+    if (k) return { label: k.label, page: k.page, exact: true };
+    // Bo'limga tushmadi -> faqat umumiy sahifada ko'rinadi. Umumiy sahifasi
+    // bo'lmagan kolleksiyada (xodimlar) bu holat umuman bo'lmaydi.
     const fb = CK.fallbackPage(coll);
-    if (!fb) return null;
-    return k ? { label: k.label, page: k.page, exact: true }
-             : { label: fb.label, page: fb.page, exact: false };
+    return fb ? { label: fb.label, page: fb.page, exact: false } : null;
   }
   function kindCell(coll, type) {
     const i = kindInfo(coll, type);
     if (!i) return '—';
     return `<span class="kind-tag${i.exact ? '' : ' weak'}" title="${esc(i.page)}">${esc(i.label)}</span>`;
   }
-  // Yozuvning turi qaysi bo'limga tushishi (id yoki null)
-  function kindIdOf(coll, type) {
-    const k = CK && CK.kindFor(coll, type);
+  // Yozuv qaysi bo'limga tushishi (id yoki null). Bo'limni belgilaydigan
+  // maydon kolleksiyaga qarab farq qiladi: voqea/nashrda `type`, xodimda `kind`.
+  function kindIdOf(coll, rec) {
+    if (!CK) return null;
+    const v = (rec && typeof rec === 'object') ? rec[CK.kindField(coll)] : rec;
+    const k = CK.kindFor(coll, v);
     return k ? k.id : null;
   }
   // Joriy bo'lim ta'rifi (yon menyudan tanlangan)
@@ -786,7 +791,7 @@
     const kd = curKind();
     setTitle(kd ? kd.label : cfg.label);
     let items = Store.all(state.coll);
-    if (kd) items = items.filter(x => kindIdOf(state.coll, x.type) === kd.id);
+    if (kd) items = items.filter(x => kindIdOf(state.coll, x) === kd.id);
     if (cfg.sort) items.sort((a, b) => (a[cfg.sort] || 0) - (b[cfg.sort] || 0));
     if (cfg.status && state.statusFilter) items = items.filter(x => x.status === state.statusFilter);
     if (state.q && cfg.search) {
@@ -865,7 +870,7 @@
        o'ylashi shart emas — bo'limning o'zi turni belgilaydi. Tur maydoni
        ochiq qoladi: kerak bo'lsa boshqasiga o'zgartirsa bo'ladi (o'shanda
        maydon ostidagi izoh yangi manzilni darhol ko'rsatadi). */
-    if (isNew && kd && kd.types && kd.types.length) item.type = kd.types[0];
+    if (isNew && kd && kd.types && kd.types.length && CK) item[CK.kindField(state.coll)] = kd.types[0];
     const singular = kd ? kd.singular : cfg.singular;
     setTitle((isNew ? 'Yangi ' : 'Tahrirlash — ') + singular);
     editors = [];
@@ -1258,7 +1263,7 @@
        menyudan tanlangani emas: admin "Tahlillar"da turib turni "Maqola"ga
        o'zgartirsa, yozuv endi Maqolalarga tegishli — o'sha ro'yxat ochiladi,
        aks holda "saqladim, lekin ro'yxatda yo'q" degan holat chiqardi. */
-    const nk = kindIdOf(state.coll, obj.type);
+    const nk = kindIdOf(state.coll, obj);
     if (state.kind && nk && nk !== state.kind) state.kind = nk;
     setActive(state.kind ? state.coll + ':' + state.kind : state.coll);
     toast(isNew ? 'Qo\'shildi' : 'Saqlandi');
