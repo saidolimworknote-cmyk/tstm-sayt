@@ -33,19 +33,19 @@
      voqeaning o'z sahifasi (tadbir.html) uni takrorlashga majbur bo'lardi. */
   var EVENT_KINDS = [
     { id: 'meet',  page: 'uchrashuvlar.html',     tk: 'nav_ev_meetings',
-      label: 'Uchrashuvlar',
+      label: 'Uchrashuvlar', singular: 'uchrashuv',
       types: ['Uchrashuv', 'Brifing'],
       re: /uchrashuv|muzokara|brifing|meeting|talks|briefing|встреч|переговор|брифинг/ },
     { id: 'round', page: 'davra-suhbatlari.html', tk: 'nav_ev_roundtables',
-      label: 'Davra suhbatlari',
+      label: 'Davra suhbatlari', singular: 'davra suhbati',
       types: ['Davra suhbati'],
       re: /davra|muhokama|roundtable|round table|discussion|круглый стол|обсужден|дискусс/ },
     { id: 'conf',  page: 'konferensiyalar.html',  tk: 'nav_ev_conferences',
-      label: 'Konferensiyalar',
+      label: 'Konferensiyalar', singular: 'konferensiya',
       types: ['Konferensiya', 'Forum', 'Taqdimot'],
       re: /konferensiy|simpozium|forum|taqdimot|conference|symposium|presentation|конференц|симпозиум|форум|презентац/ },
     { id: 'life',  page: 'markaz-hayoti.html',    tk: 'nav_ev_life',
-      label: 'Markaz hayoti',
+      label: 'Markaz hayoti', singular: 'voqea',
       types: ['Markaz hayoti', "Ta'lim dasturi"],
       re: /markaz hayoti|ta'lim|maktab|seminar|trening|center life|training|school|workshop|жизнь центр|образовательн|семинар|тренинг|школ/ }
   ];
@@ -63,20 +63,20 @@
      "Tahlil" -> tahlillar, garchi ikkalasida ham "tahlil" bo'lsa ham. */
   var PUB_KINDS = [
     { id: 'articles', page: 'maqolalar.html', tk: 'nav_an_articles',
-      label: 'Maqolalar',
+      label: 'Maqolalar', singular: 'maqola',
       types: ['Maqola', 'Tahliliy sharh'],
       re: /maqola|sharh|article|commentary|стать|обзор|коммент/ },
     { id: 'lectures', page: 'maruzalar.html', tk: 'nav_an_lectures',
-      label: "Ma'ruzalar",
+      label: "Ma'ruzalar", singular: "ma'ruza",
       types: ["Ma'ruza", 'Taqdimot'],
       re: /ma'ruza|taqdimot|ma'ruzasi|lecture|presentation|доклад|лекц|презентац/ },
     { id: 'reports',  page: 'tahlillar.html', tk: 'nav_an_reports',
-      label: 'Tahlillar',
+      label: 'Tahlillar', singular: 'tahlil',
       // `Hisobot` — 2026-08-12 gacha ishlatilgan nom, bazada hamon uchraydi.
       types: ['Tahlil', 'Hisobot', "Statistik to'plam"],
       re: /tahlil|hisobot|report|analys|analit|отчёт|отчет|анализ|аналит|статистич/ },
     { id: 'books',    page: 'kitoblar.html',  tk: 'nav_an_books',
-      label: 'Kitoblar',
+      label: 'Kitoblar', singular: 'kitob',
       types: ['Monografiya', 'Kitob'],
       re: /monografi|kitob|book|monograph|монограф|книг/ }
   ];
@@ -132,11 +132,30 @@
     if (coll === 'publications') return { page: 'nashrlar.html', label: 'Nashrlar (umumiy)' };
     return null;
   }
+  /* Saytning MENYUSIDAGI bo'lim nomi. Sayt sahifasining sarlavhasidan farq
+     qiladi: menyuda "Tadqiqotlar", sahifaning o'zida esa "Tadqiqotlar va
+     nashrlar". Admin panelda menyudagi nom ishlatiladi — ikkalasi bir xil
+     o'qilsin. Manba: site-common.js -> NAV (nav_analytics / nav_happenings). */
+  function sectionOf(coll) {
+    if (coll === 'events') return 'Voqealar';
+    if (coll === 'publications') return 'Tadqiqotlar';
+    return '';
+  }
+  // Kolleksiyaning bo'limlari (admin yon menyusi shundan quriladi)
+  function kindsOf(coll) {
+    if (coll === 'events') return EVENT_KINDS;
+    if (coll === 'publications') return PUB_KINDS;
+    return [];
+  }
+  function kindById(coll, id) {
+    return kindsOf(coll).find(function (k) { return k.id === id; }) || null;
+  }
 
   w.ContentKinds = {
     EVENT_KINDS: EVENT_KINDS, PUB_KINDS: PUB_KINDS,
     eventKind: eventKind, eventKindById: eventKindById,
     pubKind: pubKind, pubKindById: pubKindById,
-    kindFor: kindFor, fallbackPage: fallbackPage
+    kindFor: kindFor, fallbackPage: fallbackPage,
+    kindsOf: kindsOf, kindById: kindById, sectionOf: sectionOf
   };
 })(window);

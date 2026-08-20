@@ -478,14 +478,35 @@ sahifada** ko'rinishi yozilgan.
 | Admin guruhi | Saytdagi menyu | Ichida |
 |---|---|---|
 | Markaz haqida | Markaz haqida | Markaz matnlari · Ekspertlar · Hamkorlar |
-| Voqealar | Voqealar | Yangiliklar · Tadbirlar |
-| Tadqiqotlar | Tadqiqotlar | Nashrlar |
+| Voqealar | Voqealar | Yangiliklar · Uchrashuvlar · Davra suhbatlari · Konferensiyalar · Markaz hayoti · Barchasi |
+| Tadqiqotlar | Tadqiqotlar | Maqolalar · Ma'ruzalar · Tahlillar · Kitoblar · Barchasi |
 | Media | Media | Ekspertlar OAVda · Media kutubxona |
 | Bosh sahifa | — | Hero slayder |
 | Tizim | — | Murojaatlar · Obunachilar · Foydalanuvchilar · Audit · Xatoliklar · Bildirishnoma · Sozlamalar |
 
 > ⚠️ Saytdagi menyuni (`js/site-common.js` → `NAV`) o'zgartirsangiz admindagi
 > guruhlarni ham yangilang — ular ataylab bir-birining ko'zgusi.
+
+**Bo'limlar saytdagi sahifalarning o'zi.** «Voqealar» va «Tadqiqotlar» adminda
+bitta ro'yxat emas — saytdagi sahifalarning har biri alohida bo'lim:
+
+- «Tahlillar» ni bosasiz → faqat tahlillar chiqadi, tugma «Yangi tahlil»
+  bo'ladi va yangi yozuvning **turi oldindan qo'yiladi**. Ya'ni qayerga
+  qo'shayotganingiz va u qayerda chiqishi bir xil nom bilan ataladi.
+- Sarlavha ostida **«saytda ko'rish ↗»** havolasi — qo'shgan narsangizni
+  darhol o'z ko'zingiz bilan tekshirasiz.
+- Yon menyudagi raqam ham o'sha bo'limniki (Tahlillar 3, Kitoblar 2 …).
+- **«Barchasi»** bandi bitta jadvalning to'liq ro'yxati — umumiy ko'rish va
+  qidiruv uchun. Faqat shu yerda «Saytda» ustuni ko'rinadi.
+- Manzillar: `#/publications/k/reports`, `#/events/k/conf` va h.k.
+  Bo'lim ichida ochilgan tahrir «Orqaga»da o'sha bo'limga qaytadi.
+
+> Turni o'zgartirsangiz (masalan «Tahlillar»da turib «Maqola» tanlasangiz),
+> saqlagandan keyin **Maqolalar** ro'yxati ochiladi — yozuv endi o'sha yerda.
+> Aks holda «saqladim, lekin ro'yxatda yo'q» degan holat chiqardi.
+
+Baza o'zgarmadi: bu bitta jadval (`publications` / `events`) va `type`
+ustuni — bo'limlar faqat admin ko'rinishi.
 
 **«Saytda» ustuni va tur izohi.** Voqea va nashrning turi bitta satr bo'lib
 saqlanadi, sayt esa uni 4 tadan sahifaga taqsimlaydi. Admin buni endi ko'radi:

@@ -249,6 +249,13 @@
   .page-head{display:flex;align-items:flex-end;gap:18px;margin-bottom:24px;flex-wrap:wrap;}
   .page-head .h{font-family:var(--serif);font-weight:600;font-size:26px;line-height:1.1;}
   .page-head .d{color:var(--muted);font-size:13px;margin-top:3px;}
+  /* Bo'lim sarlavhasi ostidagi "saytda ko'rish" havolasi — qo'shilgan yozuvni
+     darhol o'z ko'zi bilan tekshirish uchun (2026-08-20). */
+  .page-head .d .site-link{color:var(--accent);border-bottom:1px solid transparent;}
+  .page-head .d .site-link:hover{border-bottom-color:currentColor;}
+  /* Yon menyudagi bo'lim bandlari (Maqolalar, Tahlillar, ...) — guruh
+     ichidagi ierarxiya ko'rinib tursin. */
+  .sb-item.is-sub{padding-left:20px;}
   .page-head .sp{flex:1;}
 
   /* ---------------- COMPONENTS ---------------- */

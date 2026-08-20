@@ -270,10 +270,10 @@
     ] },
     { group: 'Voqealar', items: [
       { key: 'news', note: 'yangiliklar.html' },
-      { key: 'events', note: '4 ta bo\'lim — turiga qarab' }
+      { kindsOf: 'events' }
     ] },
     { group: 'Tadqiqotlar', items: [
-      { key: 'publications', note: '4 ta bo\'lim — turiga qarab' }
+      { kindsOf: 'publications' }
     ] },
     { group: 'Media', items: [
       { key: 'mediaPosts', note: 'oav.html' },
@@ -286,7 +286,7 @@
   ];
 
   /* -------------------- State / boot -------------------- */
-  let state = { view: 'dashboard', coll: null, q: '', statusFilter: '' };
+  let state = { view: 'dashboard', coll: null, kind: null, q: '', statusFilter: '' };
   let gsr = null, gsrActive = -1; // global qidiruv dropdown
 
   function logoSrc() {
@@ -433,7 +433,28 @@
     let h = '';
     NAV.forEach(g => {
       h += `<div class="sb-group">${g.group}</div>`;
+      /* `{ kindsOf: 'publications' }` — bitta band emas, BO'LIMLAR RO'YXATI.
+         Saytda "Nashrlar" degan bo'lim yo'q: "Tadqiqotlar" bor va ichida
+         Maqolalar / Ma'ruzalar / Tahlillar / Kitoblar. Admin ham xuddi shu
+         bo'limlarni ko'rsin — "Tahlillar"ga qo'shilgan narsa tahlillarga
+         borishi menyuning O'ZIDAN ko'rinib tursin. Oxirida "Barchasi" bandi:
+         bitta jadvalning to'liq ro'yxati (qidiruv va umumiy ko'rish uchun). */
+      const items = [];
       g.items.forEach(it => {
+        if (it && it.kindsOf) {
+          const coll = it.kindsOf;
+          (CK ? CK.kindsOf(coll) : []).forEach(k => items.push({
+            key: coll + ':' + k.id, label: k.label, icon: C[coll].icon,
+            view: 'list', coll: coll, kind: k.id, note: k.page
+          }));
+          const fb = CK ? CK.fallbackPage(coll) : null;
+          items.push({ key: coll, label: 'Barchasi', icon: C[coll].icon,
+            view: 'list', coll: coll, note: fb ? fb.page : '' });
+          return;
+        }
+        items.push(it);
+      });
+      items.forEach(it => {
         // Band uch shaklda yozilishi mumkin:
         //   'news'                          -> kolleksiya, hammasi C dan
         //   { key:'news', note:'...' }      -> kolleksiya + izoh
@@ -443,7 +464,10 @@
         const o = isColl
           ? Object.assign({ label: C[base.key].label, icon: C[base.key].icon, view: 'list', coll: base.key }, base)
           : base;
-        let ct = o.coll ? `<span class="ct">${counts[o.coll]}</span>` : '';
+        // Bo'lim bandida FAQAT o'sha bo'limga tushadigan yozuvlar sanaladi
+        const n = o.kind ? Store.all(o.coll).filter(x => kindIdOf(o.coll, x.type) === o.kind).length
+                : (o.coll ? counts[o.coll] : null);
+        let ct = n === null ? '' : `<span class="ct">${n}</span>`;
         if (o.key === 'messages') {
           const unread = Store.all('messages').filter(m => !m.read).length;
           ct = unread ? `<span class="ct a-accent-chip">${unread}</span>` : '';
@@ -451,13 +475,13 @@
         // `note` — yozuv saytda qayerda ko'rinishi. Admin yozuvni qayerga
         // qo'shishni menyuning o'zidan ko'rsin degan maqsadda.
         const note = o.note ? `<span class="sb-note">${esc(o.note)}</span>` : '';
-        h += `<div class="sb-item${note ? ' has-note' : ''}" data-key="${o.key}" data-view="${o.view}" ${o.coll ? `data-coll="${o.coll}"` : ''}>${ic(o.icon)}<span class="sb-txt">${esc(o.label)}${note}</span>${ct}</div>`;
+        h += `<div class="sb-item${note ? ' has-note' : ''}${o.kind ? ' is-sub' : ''}" data-key="${o.key}" data-view="${o.view}" ${o.coll ? `data-coll="${o.coll}"` : ''} ${o.kind ? `data-kind="${o.kind}"` : ''}>${ic(o.icon)}<span class="sb-txt">${esc(o.label)}${note}</span>${ct}</div>`;
       });
     });
     $('#sbNav').innerHTML = h;
     $$('#sbNav .sb-item').forEach(el => el.addEventListener('click', () => {
-      const coll = el.dataset.coll;
-      location.hash = coll ? `#/${coll}` : `#/${el.dataset.key}`;
+      const coll = el.dataset.coll, kind = el.dataset.kind;
+      location.hash = coll ? (kind ? `#/${coll}/k/${kind}` : `#/${coll}`) : `#/${el.dataset.key}`;
       $('#sidebar').classList.remove('open');
     }));
     updateNotifBadge();
@@ -564,11 +588,20 @@
     const v = parts[0];
     state.q = ''; $('#globalSearch').value = ''; hideGSR();
     if (C[v]) {
-      state.view = parts[1] === 'new' ? 'new' : parts[1] === 'edit' ? 'edit' : 'list';
-      state.coll = v; state.editId = parts[2] || null; state.statusFilter = '';
-      setActive(v);
+      /* Manzil shakllari:
+           #/publications                     -> butun ro'yxat ("Barchasi")
+           #/publications/k/reports           -> faqat "Tahlillar" bo'limi
+           #/publications/k/reports/new       -> yangi tahlil (turi oldindan qo'yiladi)
+           #/publications/new                 -> yangi nashr (tur tanlanmagan)
+           #/publications/k/reports/edit/ID   -> tahrir, "Orqaga" bo'limga qaytadi
+           #/publications/edit/ID             -> tahrir, "Orqaga" butun ro'yxatga */
+      let rest = parts.slice(1), kind = null;
+      if (rest[0] === 'k') { kind = rest[1] || null; rest = rest.slice(2); }
+      state.view = rest[0] === 'new' ? 'new' : rest[0] === 'edit' ? 'edit' : 'list';
+      state.coll = v; state.kind = kind; state.editId = rest[1] || null; state.statusFilter = '';
+      setActive(kind ? v + ':' + kind : v);
     } else {
-      state.view = v; state.coll = null; setActive(v);
+      state.view = v; state.coll = null; state.kind = null; setActive(v);
     }
     render();
     document.querySelector('.content').scrollTop = 0;
@@ -718,6 +751,22 @@
     if (!i) return '—';
     return `<span class="kind-tag${i.exact ? '' : ' weak'}" title="${esc(i.page)}">${esc(i.label)}</span>`;
   }
+  // Yozuvning turi qaysi bo'limga tushishi (id yoki null)
+  function kindIdOf(coll, type) {
+    const k = CK && CK.kindFor(coll, type);
+    return k ? k.id : null;
+  }
+  // Joriy bo'lim ta'rifi (yon menyudan tanlangan)
+  function curKind() {
+    return (CK && state.kind) ? CK.kindById(state.coll, state.kind) : null;
+  }
+  // Bo'lim ichida ochilgan tahrir "Orqaga"da o'sha bo'limga qaytsin
+  function listHash() {
+    return state.kind ? `#/${state.coll}/k/${state.kind}` : `#/${state.coll}`;
+  }
+  function editHash(id) {
+    return state.kind ? `#/${state.coll}/k/${state.kind}/edit/${id}` : `#/${state.coll}/edit/${id}`;
+  }
   // Forma ostidagi jonli izoh (`kindHint` maydonlari uchun)
   function kindHintHTML(type) {
     const i = kindInfo(state.coll, type);
@@ -729,8 +778,15 @@
 
   /* ==================== LIST ==================== */
   function viewList(c) {
-    const cfg = C[state.coll]; setTitle(cfg.label);
+    const cfg = C[state.coll];
+    /* Bo'lim tanlangan bo'lsa (masalan "Tahlillar") ro'yxat ham, sarlavha ham,
+       "Yangi ..." tugmasi ham SHU bo'limniki bo'ladi. Maqsad: admin nimani
+       qayerga qo'shayotganini o'ylab o'tirmasin — bo'lim nomi saytdagi
+       sahifa nomi bilan bir xil. */
+    const kd = curKind();
+    setTitle(kd ? kd.label : cfg.label);
     let items = Store.all(state.coll);
+    if (kd) items = items.filter(x => kindIdOf(state.coll, x.type) === kd.id);
     if (cfg.sort) items.sort((a, b) => (a[cfg.sort] || 0) - (b[cfg.sort] || 0));
     if (cfg.status && state.statusFilter) items = items.filter(x => x.status === state.statusFilter);
     if (state.q && cfg.search) {
@@ -743,9 +799,12 @@
         ${sopts.map(s => `<button class="chip ${state.statusFilter === s ? 'on' : ''}" data-f="${s}">${STLABEL[s]}</button>`).join('')}
       </div>` : '';
 
-    const head = cfg.columns.map(col => `<th${col.type === 'status' ? ' class="a-w140"' : ''}>${col.label}</th>`).join('') + '<th class="a-w96r">Amal</th>';
+    // Bo'lim ichida "Saytda" ustuni ortiqcha — barcha qatorda bir xil qiymat.
+    // U faqat "Barchasi" ro'yxatida ma'noli.
+    const cols = kd ? cfg.columns.filter(col => col.type !== 'kind') : cfg.columns;
+    const head = cols.map(col => `<th${col.type === 'status' ? ' class="a-w140"' : ''}>${col.label}</th>`).join('') + '<th class="a-w96r">Amal</th>';
     const rows = items.map(x => {
-      const tds = cfg.columns.map(col => {
+      const tds = cols.map(col => {
         let val = x[col.k];
         if (col.type === 'status') return `<td><span class="badge ${val}">${STLABEL[val] || val}</span></td>`;
         if (col.type === 'date') return `<td class="mono a-t125-ink2">${fmtDate(val)}</td>`;
@@ -766,23 +825,31 @@
         <button class="icon-btn" data-act="del" title="O'chirish">${ic('trash')}</button></div></td></tr>`;
     }).join('');
 
+    const singular = kd ? kd.singular : cfg.singular;
+    // Bo'lim sarlavhasi ostida uning sayt sahifasiga havola — "qo'shdim, endi
+    // qayerda ko'ray?" degan savol umuman tug'ilmasin.
+    const sitePage = kd ? kd.page : (CK && CK.fallbackPage(state.coll) || {}).page;
+    const siteLink = sitePage
+      ? ` · <a class="site-link" href="${esc(sitePage)}" target="_blank" rel="noopener">saytda ko'rish ↗</a>`
+      : '';
     c.innerHTML = `
-      <div class="page-head"><div><div class="h">${cfg.label}</div><div class="d">${items.length} ta yozuv</div></div><div class="sp"></div>
-        <button class="btn primary" id="addBtn">${ic('plus')} Yangi ${esc(cfg.singular)}</button></div>
+      <div class="page-head"><div><div class="h">${esc(kd ? kd.label : cfg.label)}</div><div class="d">${items.length} ta yozuv${siteLink}</div></div><div class="sp"></div>
+        <button class="btn primary" id="addBtn">${ic('plus')} Yangi ${esc(singular)}</button></div>
       <div class="toolbar-row">${filters}</div>
       <div class="card">
         ${items.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table></div>`
-        : `<div class="empty">${ic('empty')}<div class="t">Hozircha yozuv yo'q</div><div>Yangi ${esc(cfg.singular)} qo'shish uchun yuqoridagi tugmani bosing</div></div>`}
+        : `<div class="empty">${ic('empty')}<div class="t">Hozircha yozuv yo'q</div><div>Yangi ${esc(singular)} qo'shish uchun yuqoridagi tugmani bosing</div></div>`}
       </div>`;
 
-    $('#addBtn').onclick = () => location.hash = `#/${state.coll}/new`;
+    $('#addBtn').onclick = () => location.hash = state.kind
+      ? `#/${state.coll}/k/${state.kind}/new` : `#/${state.coll}/new`;
     $$('.chip[data-f]').forEach(b => b.onclick = () => { state.statusFilter = b.dataset.f; render(); });
     $$('#content tbody tr').forEach(tr => {
       const id = tr.dataset.id;
-      tr.querySelector('[data-act=edit]').onclick = () => location.hash = `#/${state.coll}/edit/${id}`;
+      tr.querySelector('[data-act=edit]').onclick = () => location.hash = editHash(id);
       tr.querySelector('[data-act=del]').onclick = (e) => { e.stopPropagation(); confirmDelete(state.coll, id); };
       tr.style.cursor = 'pointer';
-      tr.addEventListener('click', (e) => { if (!e.target.closest('.row-act')) location.hash = `#/${state.coll}/edit/${id}`; });
+      tr.addEventListener('click', (e) => { if (!e.target.closest('.row-act')) location.hash = editHash(id); });
     });
   }
 
@@ -792,7 +859,15 @@
     const cfg = C[state.coll];
     const item = state.view === 'edit' ? (Store.find(state.coll, state.editId) || {}) : {};
     const isNew = state.view !== 'edit';
-    setTitle((isNew ? 'Yangi ' : 'Tahrirlash — ') + cfg.singular);
+    const kd = curKind();
+    /* "Tahlillar" bo'limidan "Yangi tahlil" bosilganda TURI OLDINDAN qo'yiladi.
+       Admin turni qo'lda topib tanlashi va u qaysi sahifaga olib borishini
+       o'ylashi shart emas — bo'limning o'zi turni belgilaydi. Tur maydoni
+       ochiq qoladi: kerak bo'lsa boshqasiga o'zgartirsa bo'ladi (o'shanda
+       maydon ostidagi izoh yangi manzilni darhol ko'rsatadi). */
+    if (isNew && kd && kd.types && kd.types.length) item.type = kd.types[0];
+    const singular = kd ? kd.singular : cfg.singular;
+    setTitle((isNew ? 'Yangi ' : 'Tahrirlash — ') + singular);
     editors = [];
     const hasML = cfg.fields.some(f => f.ml);
     const main = cfg.fields.filter(f => !f.side);
@@ -803,9 +878,9 @@
 
     c.innerHTML = `
       <div class="page-head">
-        <button class="btn ghost" data-go="#/${state.coll}">${ic('back')} Orqaga</button>
-        <div><div class="h">${isNew ? 'Yangi ' + esc(cfg.singular) : esc(mlGet(item[cfg.fields[0].k]) || 'Tahrirlash')}</div>
-        <div class="d">${cfg.label}</div></div><div class="sp"></div>${langBar}</div>
+        <button class="btn ghost" data-go="${listHash()}">${ic('back')} Orqaga</button>
+        <div><div class="h">${isNew ? 'Yangi ' + esc(singular) : esc(mlGet(item[cfg.fields[0].k]) || 'Tahrirlash')}</div>
+        <div class="d">${esc(kd && CK ? (CK.sectionOf(state.coll) || cfg.label) + ' · ' + kd.label : cfg.label)}</div></div><div class="sp"></div>${langBar}</div>
       <form id="entForm">
         <div class="${side.length ? 'two-col' : ''}">
           <div class="card a-p24">${main.map(f => fieldHTML(f, item)).join('')}</div>
@@ -813,7 +888,7 @@
         </div>
         <div class="form-actions">
           <button class="btn primary" type="submit">${ic('save')} Saqlash</button>
-          <button class="btn ghost" type="button" data-go="#/${state.coll}">Bekor qilish</button>
+          <button class="btn ghost" type="button" data-go="${listHash()}">Bekor qilish</button>
           <div class="sp"></div>
           ${!isNew ? `<button class="btn danger" type="button" id="delBtn">${ic('trash')} O'chirish</button>` : ''}
         </div>
@@ -1178,9 +1253,16 @@
     });
     if (missing) { toast('Majburiy (*) maydonlarni to\'ldiring', 1); return; }
     Store.upsert(state.coll, obj);
-    renderSidebar(); setActive(state.coll);
+    renderSidebar();
+    /* Saqlangandan keyin qaysi bo'limga qaytishni TURI hal qiladi, yon
+       menyudan tanlangani emas: admin "Tahlillar"da turib turni "Maqola"ga
+       o'zgartirsa, yozuv endi Maqolalarga tegishli — o'sha ro'yxat ochiladi,
+       aks holda "saqladim, lekin ro'yxatda yo'q" degan holat chiqardi. */
+    const nk = kindIdOf(state.coll, obj.type);
+    if (state.kind && nk && nk !== state.kind) state.kind = nk;
+    setActive(state.kind ? state.coll + ':' + state.kind : state.coll);
     toast(isNew ? 'Qo\'shildi' : 'Saqlandi');
-    location.hash = `#/${state.coll}`;
+    location.hash = listHash();
   }
 
   /* ==================== MESSAGES (foydalanuvchi murojaatlari) ==================== */
@@ -2044,8 +2126,11 @@
 
   function confirmDelete(coll, id) {
     confirmModal('O\'chirishni tasdiqlang', 'Bu yozuv butunlay o\'chiriladi. Davom etasizmi?', () => {
-      Store.remove(coll, id); renderSidebar(); setActive(coll);
-      if (state.view !== 'list') location.hash = `#/${coll}`; else render();
+      // Bo'lim ichida o'chirilgan bo'lsa o'sha bo'limda qolamiz (butun
+      // ro'yxatga otib yubormaymiz) — yon menyudagi tanlov ham saqlanadi.
+      Store.remove(coll, id); renderSidebar();
+      setActive(state.kind ? coll + ':' + state.kind : coll);
+      if (state.view !== 'list') location.hash = listHash(); else render();
       toast('O\'chirildi');
     });
   }
