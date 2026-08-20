@@ -3,9 +3,9 @@
 # Loyihadan FAQAT serverga kerakli fayllarni ajratib, zip qiladi.
 #
 # Ishlatish:
-#   powershell -ExecutionPolicy Bypass -File deploy.ps1
-#   powershell -ExecutionPolicy Bypass -File deploy.ps1 -Out "D:\paket"
-#   powershell -ExecutionPolicy Bypass -File deploy.ps1 -NoZip   # faqat papka
+#   powershell -ExecutionPolicy Bypass -File tools\deploy.ps1
+#   powershell -ExecutionPolicy Bypass -File tools\deploy.ps1 -Out "D:\paket"
+#   powershell -ExecutionPolicy Bypass -File tools\deploy.ps1 -NoZip   # faqat papka
 #
 # NEGA SKRIPT, QO'LDA EMAS:
 #   1) `.htaccess` va `uploads\.htaccess` — nuqta bilan boshlanadi. FTP
@@ -24,7 +24,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$src = $PSScriptRoot
+$src = Split-Path $PSScriptRoot -Parent   # skript tools ichida; loyiha ildizi bir pogona yuqorida
 $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 $pkg = Join-Path $Out "tstm-$stamp"
 
@@ -35,8 +35,12 @@ Write-Host "Natija: $pkg"
 Write-Host ""
 
 # ---- Serverga KETMAYDIGAN narsalar --------------------------------
-# Papkalar
-$skipDirs = @('backups', '.git', '.idea', '.claude', '.vscode', 'tests', 'node_modules')
+# Papkalar. 2026-08-20 dan ishlab chiqish vositalari `tools\` da, hujjatlar
+# esa `docs\` da — ilgari ular ildizda yotgani uchun har birini NOMI bo'yicha
+# sanab chiqish kerak edi va yangi skript qo'shilganda unutilib, serverga
+# chiqib ketishi mumkin edi. Endi butun papka chetlab o'tiladi.
+$skipDirs = @('backups', '.git', '.idea', '.claude', '.vscode',
+              'tests', 'tools', 'docs', 'node_modules')
 # Aniq fayl nomlari
 $skipFiles = @(
   'config.php',              # serverda o'ziniki yaratiladi (baza paroli)
@@ -44,9 +48,6 @@ $skipFiles = @(
   'login_attempts.json',     # brute-force holati
   'views.json',              # ko'rishlar hisoblagichi
   'cache_public.json',       # avtomatik yasaladi
-  'deploy.ps1',              # shu skriptning o'zi
-  'backup.ps1', 'restore.ps1',   # Windows zaxira vositalari
-  'koch.ps1', 'ORNAT.ps1', 'ORNAT.bat',  # boshqa PC ga ko'chirish vositalari
   'eslint.config.mjs', '.stylelintrc.json',  # ishlab chiqish vositalari
   '.gitignore'
 )
@@ -195,7 +196,7 @@ if (-not $NoZip) {
 # .htaccess uni baribir to'sadi), lekin u o'rnatuvchi mutaxassislar uchun
 # zarur. Shuning uchun zip YONIGA qo'yiladi - topshiriladigan to'plam shu:
 #   tstm-<sana>.zip + hosting-import.sql + TOPSHIRISH.md
-$doc = Join-Path $src 'TOPSHIRISH.md'
+$doc = Join-Path $src 'docs\TOPSHIRISH.md'
 if (Test-Path $doc) {
   Copy-Item $doc (Join-Path $Out 'TOPSHIRISH.md') -Force
   Write-Host "  [OK]   TOPSHIRISH.md paket yoniga qo'yildi"

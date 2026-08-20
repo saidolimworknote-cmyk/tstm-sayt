@@ -16,13 +16,13 @@ skript bor:
 
 ```powershell
 # Domen hali ma'lum bo'lmasa - shunchaki:
-powershell -ExecutionPolicy Bypass -File deploy.ps1
+powershell -ExecutionPolicy Bypass -File tools\deploy.ps1
 
 # Domen ma'lum bo'lgach (sitemap.xml va robots.txt ga yoziladi):
-powershell -ExecutionPolicy Bypass -File deploy.ps1 -Domain tstm.uz
+powershell -ExecutionPolicy Bypass -File tools\deploy.ps1 -Domain tstm.uz
 ```
 
-Natija: `%USERPROFILE%\Desktop\tstm-deploy\tstm-<sana>.zip` (~5.8 MB, 98 fayl).
+Natija: `%USERPROFILE%\Desktop\tstm-deploy\tstm-<sana>.zip` (~7.1 MB, 125 fayl).
 
 Skript oxirida O'ZI tekshiradi:
 
@@ -288,7 +288,7 @@ Get-ScheduledTask TSTM-Backup | Get-ScheduledTaskInfo   # LastTaskResult = 0 bo'
 Get-Content backups\backup.log -Tail 10                 # har ishlashning natijasi
 
 # Qo'lda, darhol olish
-powershell -ExecutionPolicy Bypass -File backup.ps1
+powershell -ExecutionPolicy Bypass -File tools\backup.ps1
 ```
 
 **Har bir zaxirada nima bor** — `backups\tstm-YYYYMMDD-HHmmss\`:
@@ -327,17 +327,17 @@ Server buzilsa yoki ma'lumot yo'qolsa, eng oxirgi zaxiradan tiklang:
 ```powershell
 # Eng oxirgi zaxirani asl bazaga tiklaydi (uploads bilan). Tasdiqlash so'raydi.
 # uploads IKKALA joyga tiklanadi: loyiha va C:\xampp\htdocs\tstm-sayt\uploads.
-powershell -ExecutionPolicy Bypass -File restore.ps1
+powershell -ExecutionPolicy Bypass -File tools\restore.ps1
 
 # Aniq bir zaxiradan:
-powershell -ExecutionPolicy Bypass -File restore.ps1 -From "backups\tstm-20260803-095616"
+powershell -ExecutionPolicy Bypass -File tools\restore.ps1 -From "backups\tstm-20260803-095616"
 ```
 
 > **Zaxirani muntazam sinab turing.** Tiklashni haqiqiy bazaga tegmasdan sinov
 > bazasida tekshirish mumkin (asl ma'lumot xavfsiz qoladi):
 >
 > ```powershell
-> powershell -ExecutionPolicy Bypass -File restore.ps1 -Db tstm_restore_test -Force
+> powershell -ExecutionPolicy Bypass -File tools\restore.ps1 -Db tstm_restore_test -Force
 > # yozuvlar soni asl bazaga mos kelishini tekshiring, so'ng:
 > # DROP DATABASE tstm_restore_test;
 > ```

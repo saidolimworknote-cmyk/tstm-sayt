@@ -2,8 +2,8 @@
 # ------------------------------------------------------------------
 # backup.ps1 yaratgan zaxirani tiklaydi (baza + uploads).
 # Ishlatish:
-#   powershell -ExecutionPolicy Bypass -File restore.ps1 -From "backups\tstm-YYYYMMDD-HHmmss"
-#   powershell -ExecutionPolicy Bypass -File restore.ps1            # eng oxirgi zaxirani tiklaydi
+#   powershell -ExecutionPolicy Bypass -File tools\restore.ps1 -From "backups\tstm-YYYYMMDD-HHmmss"
+#   powershell -ExecutionPolicy Bypass -File tools\restore.ps1            # eng oxirgi zaxirani tiklaydi
 #
 # DIQQAT: bu joriy bazaning ustiga yozadi. Avval tasdiqlash so'raladi.
 # -Force bilan tasdiqlashsiz ishlaydi. -Db bilan boshqa bazaga tiklash mumkin
@@ -15,7 +15,7 @@ param(
   [switch]$Force
 )
 $ErrorActionPreference = 'Stop'
-$root = Split-Path -Parent $MyInvocation.MyCommand.Path
+$root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)   # tools dan ildizga
 $mysql = 'C:\xampp\mysql\bin\mysql.exe'
 $dbHost = '127.0.0.1'; $dbPort = '3306'; $dbName = 'tstm'; $dbUser = 'root'; $dbPass = ''
 

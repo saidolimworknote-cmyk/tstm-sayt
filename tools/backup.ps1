@@ -1,8 +1,8 @@
 # TSTM — zaxira nusxa olish skripti
 # ------------------------------------------------------------------
 # Bazani (mysqldump) + yuklangan fayllarni (uploads/) bitta papkaga arxivlaydi.
-# Ishlatish:   powershell -ExecutionPolicy Bypass -File backup.ps1
-#              powershell -ExecutionPolicy Bypass -File backup.ps1 -Quiet   # jadval uchun
+# Ishlatish:   powershell -ExecutionPolicy Bypass -File tools\backup.ps1
+#              powershell -ExecutionPolicy Bypass -File tools\backup.ps1 -Quiet   # jadval uchun
 # Natija:      backups\tstm-YYYYMMDD-HHmmss\  (sql + uploads.zip + meta.txt)
 #              + ikkinchi nusxa boshqa diskda ($MirrorTo)
 #
@@ -23,7 +23,7 @@ $ErrorActionPreference = 'Stop'
 function Say($m, $c = 'Gray') { if (-not $Quiet) { Write-Host $m -ForegroundColor $c } }
 
 # --- Sozlamalar (config.php dan o'qiladi, bo'lmasa XAMPP standarti) ---
-$root   = Split-Path -Parent $MyInvocation.MyCommand.Path
+$root   = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)   # tools dan ildizga
 $mysqldump = 'C:\xampp\mysql\bin\mysqldump.exe'
 $dbHost = '127.0.0.1'; $dbPort = '3306'; $dbName = 'tstm'; $dbUser = 'root'; $dbPass = ''
 
@@ -97,7 +97,7 @@ Baza:     $dbName @ $dbHost`:$dbPort
 SQL:      database.sql ($sqlKB KB)
 Uploads:  uploads.zip ($fileCount fayl; $onlyLive tasi faqat htdocs'da edi)
 Manbalar: $($sources -join ' + ')
-Tiklash:  powershell -ExecutionPolicy Bypass -File restore.ps1 -From "$dir"
+Tiklash:  powershell -ExecutionPolicy Bypass -File tools\restore.ps1 -From "$dir"
 "@
 Set-Content -Path (Join-Path $dir 'meta.txt') -Value $meta -Encoding utf8
 Say "  [3/4] meta.txt yozildi" 'Green'

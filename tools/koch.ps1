@@ -9,10 +9,10 @@
 #   OQING.txt    - qadamma-qadam yo'riqnoma
 #
 # Ishlatish:
-#   powershell -ExecutionPolicy Bypass -File koch.ps1
-#   powershell -ExecutionPolicy Bypass -File koch.ps1 -Out "D:\"
-#   powershell -ExecutionPolicy Bypass -File koch.ps1 -NoGit         # git tarixisiz (yengilroq)
-#   powershell -ExecutionPolicy Bypass -File koch.ps1 -WithBackups   # eski zaxiralar ham (~113 MB)
+#   powershell -ExecutionPolicy Bypass -File tools\koch.ps1
+#   powershell -ExecutionPolicy Bypass -File tools\koch.ps1 -Out "D:\"
+#   powershell -ExecutionPolicy Bypass -File tools\koch.ps1 -NoGit         # git tarixisiz (yengilroq)
+#   powershell -ExecutionPolicy Bypass -File tools\koch.ps1 -WithBackups   # eski zaxiralar ham (~113 MB)
 #
 # NEGA SKRIPT, QO'LDA EMAS:
 #   1) `.htaccess` va `uploads\.htaccess` nuqta bilan boshlanadi - Explorer va
@@ -30,7 +30,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$src   = $PSScriptRoot
+$src   = Split-Path $PSScriptRoot -Parent   # skript tools ichida; loyiha ildizi bir pogona yuqorida
 $stamp = Get-Date -Format 'yyyyMMdd-HHmm'
 $stage = Join-Path $env:TEMP "tstm-koch-$PID"
 $zip   = Join-Path $Out "TSTM-SAYT-$stamp.zip"
@@ -131,8 +131,11 @@ Ok "jami uploads: $uplCount fayl"
 # ---- 4. O'rnatuvchi va yo'riqnoma ----------------------------------
 Write-Host ""
 Write-Host "[4/5] O'rnatuvchi qo'shilmoqda" -ForegroundColor Cyan
+# O'rnatuvchi loyihada `tools\` ichida turadi, lekin paketda ILDIZDA bo'lishi
+# kerak: qabul qiluvchi zip'ni ochib ORNAT.bat ni ikki marta bosadi. Rekursiv
+# nusxa ularni `tools\` da ham qoldiradi — bu zarar qilmaydi.
 foreach ($f in @('ORNAT.ps1', 'ORNAT.bat')) {
-  $p = Join-Path $src $f
+  $p = Join-Path $src (Join-Path 'tools' $f)
   if (Test-Path $p) { Copy-Item $p (Join-Path $stage $f) -Force; Ok $f }
   else { Xato "$f loyihada topilmadi" }
 }

@@ -262,13 +262,13 @@
     const s = Store.settings();
     const lg = (s.logos && (s.logos.uz || s.logos.ru || s.logos.en)) || s.logo;
     if (lg) return lg;
-    return (document.documentElement.getAttribute('data-theme') === 'dark') ? 'logo-mark-white.png' : 'logo-mark.png';
+    return (document.documentElement.getAttribute('data-theme') === 'dark') ? 'img/logo-mark-white.png' : 'img/logo-mark.png';
   }
   function applyTheme(t) {
     document.documentElement.setAttribute('data-theme', t);
     $('#themeIcon').innerHTML = t === 'dark' ? ICON.sun : ICON.moon;
     $('#themeLabel').textContent = t === 'dark' ? 'Yorug\' rejim' : 'Quyuq rejim';
-    $('#sbLogo').src = logoSrc(); $('#loginLogo').src = (t === 'dark' ? 'logo-tstm-white.png' : 'logo-tstm.png');
+    $('#sbLogo').src = logoSrc(); $('#loginLogo').src = (t === 'dark' ? 'img/logo-tstm-white.png' : 'img/logo-tstm.png');
     if (Store.settings().logo) { $('#sbLogo').src = Store.settings().logo; }
   }
 
@@ -1806,7 +1806,7 @@
     renderStats();
     // logo
     // logo (3 tilli)
-    const DEF_LOGO = { uz: 'logo-tstm.png', ru: 'logo-tstm.png', en: 'logo-tstm.png' };
+    const DEF_LOGO = { uz: 'img/logo-tstm.png', ru: 'img/logo-tstm.png', en: 'img/logo-tstm.png' };
     const LGL = { uz: "O'zbek", ru: 'Rus', en: 'Ingliz' };
     const logos = Object.assign({ uz: '', ru: '', en: '' }, s.logos || {});
     if (!logos.uz && s.logo) logos.uz = s.logo; // orqaga moslik

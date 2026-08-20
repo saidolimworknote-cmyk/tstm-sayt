@@ -88,7 +88,7 @@ Tizim quyidagilar uchun mo'ljallangan:
 
 #### 4.1.4. Kod sifati
 - Statik tahlil: `eslint.config.mjs` (JS) va `.stylelintrc.json` (CSS) — ikkalasi loyiha ildizida va hech qanday npm paketiga bog'liq emas.
-- Tekshiruv: `npx eslint .` va `npx stylelint "*.css"` — **0 ta xato, 0 ta ogohlantirish**.
+- Tekshiruv: `npx eslint .` va `npx stylelint "css/*.css"` — **0 ta xato, 0 ta ogohlantirish**.
 - Bo'sh `catch {}` bloklari ataylab qo'llaniladi (yuqoridagi «xatoga chidamli render» tamoyili) va konfiguratsiyada `allowEmptyCatch` bilan hujjatlashtirilgan.
 - Uslub fayllari: `site.css` (12 ta ichki sahifa) va `home.css` (faqat bosh sahifa, mustaqil nusxa). Bosh sahifa uslublari inline `<style>` blokidan alohida faylga chiqarildi — HTML 71 KB → 24 KB, uslub alohida keshlanadi. Ko'chirish vizual jihatdan **piksel-aniq bir xil** ekani avtomatik solishtiruv bilan tasdiqlangan.
 
@@ -456,15 +456,25 @@ Loyiha bilan birga quyidagi hujjatlar mavjud:
 ## ILOVA A. TIZIM FAYLLAR TARKIBI (qisqacha)
 
 ```
-BACKEND:   api.php, db.php, seed.php, config.php (git'da yo'q)
-FRONTEND:  index.html (bosh sahifa) + ichki HTML sahifalar
-SKRIPTLAR: page-*.js (sahifa modullari), site-common.js, i18n.js, a11y.js, search.js
-DIAGNOSTIKA: diag.js (xato yig'uvchi va panel)
-ADMIN:     admin.html, admin-ui.js, admin-store.js
-USLUB:     site.css (ichki sahifalar), home.css (bosh sahifa)
-XAVFSIZLIK: .htaccess, uploads/.htaccess
-KOD SIFATI: eslint.config.mjs, .stylelintrc.json
-HUJJAT:    README.md, SECURITY.md, DEPLOY.md, TZ.md
+ILDIZ:     index.html (bosh sahifa) + 28 ta ichki HTML sahifa
+           api.php, db.php, seed.php, config.php (git'da yo'q)
+           .htaccess, sw.js, robots.txt, sitemap.xml
+css/       site.css (ichki sahifalar), home.css (bosh sahifa),
+           print.css (chop etish), admin.css, page-*.css
+js/        site-common.js, i18n.js, a11y.js, search.js, subscribe.js,
+           page-*.js (sahifa modullari), diag.js (diagnostika),
+           admin-ui.js, admin-store.js
+img/       logo-*.png        fonts/  Montserrat (woff2)
+uploads/   yuklangan fayllar + uploads/.htaccess
+docs/      SECURITY.md, DEPLOY.md, TZ.md, TOPSHIRISH.md  (README.md ildizda)
+tools/     deploy.ps1, backup.ps1, restore.ps1, koch.ps1, ORNAT.*
+tests/     smoke.ps1
+KOD SIFATI: eslint.config.mjs, .stylelintrc.json (ildizda)
+
+Papkalarga ajratish 2026-08-20 da bajarildi. Ildizda qolgan fayllar ATAYLAB
+shunday: `index.html` — DirectoryIndex; `*.html` — fayl nomi sayt manzili;
+`sw.js` — Service Worker qamrovi faqat o'z papkasidan pastga tarqaladi;
+`robots.txt`/`sitemap.xml` — standart bo'yicha faqat ildizda o'qiladi.
 ```
 
 ---

@@ -77,7 +77,9 @@ Check "admin noindex (X-Robots-Tag)" ($ha -match 'X-Robots-Tag:.*noindex')
 
 # ---- 4. Maxfiy fayllar HTTP orqali bloklangan ----
 Write-Host "`n[4] Maxfiy fayllar bloklangan (403/404)"
-foreach ($f in 'config.php','db.php','seed.php','data.json','.htaccess','.gitignore','SECURITY.md','views.json') {
+# 2026-08-20: hujjatlar `docs\` ga ko'chdi. `.htaccess` dagi to'siq FAYL NOMIGA
+# qaraydi (FilesMatch), ya'ni papka ichida ham ishlaydi — shuni tekshiramiz.
+foreach ($f in 'config.php','db.php','seed.php','data.json','.htaccess','.gitignore','docs/SECURITY.md','views.json') {
   $r = Get2 "$Base/$f"
   Check "bloklangan: $f" ((Code $r) -in 403,404) "status=$(Code $r)"
 }

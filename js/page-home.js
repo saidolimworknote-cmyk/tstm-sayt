@@ -140,7 +140,7 @@
   try {
     var _lg = (window.I18N ? I18N.lang : 'uz');
     var _st = (window.Store && Store.settings && Store.settings()) || {};
-    var _defLogo = {uz:'logo-mark.png',ru:'logo-mark-ru.png',en:'logo-mark-en.png'};
+    var _defLogo = {uz:'img/logo-mark.png',ru:'img/logo-mark-ru.png',en:'img/logo-mark-en.png'};
     var _logo = (_st.logos && _st.logos[_lg]) || _st.logo || _defLogo[_lg] || _defLogo.uz;
     if (_logo) document.querySelectorAll('.brand-logo').forEach(function(img){ img.src = _logo; });
   } catch{}

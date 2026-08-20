@@ -2,6 +2,63 @@
 
 Sayt + boshqaruv paneli (admin). XAMPP'da ishlash uchun PHP backend bilan.
 
+## 🗂️ Loyiha tuzilishi
+
+2026-08-20 da fayllar papkalarga ajratildi (ilgari 104 tasi ham ildizda yotardi).
+
+```
+sayt/
+├── index.html            bosh sahifa
+├── *.html                ichki sahifalar (28 ta) — bularning nomi = sayt MANZILI
+│
+├── api.php               yagona backend kirish nuqtasi (?action=...)
+├── db.php                MySQL qatlami: $SCHEMA, jadvallar, kesh
+├── seed.php              bo'sh bazaning boshlang'ich kontenti
+├── config.php            baza logini/paroli (git'ga TUSHMAYDI)
+│
+├── css/                  barcha uslublar (19 fayl)
+├── js/                   barcha skriptlar (26 fayl)
+├── img/                  logotiplar (6 fayl)
+├── fonts/                Montserrat (woff2)
+├── uploads/              admin yuklagan rasm va hujjatlar
+│
+├── docs/                 SECURITY.md · DEPLOY.md · TZ.md · TOPSHIRISH.md
+├── tools/                deploy.ps1 · backup.ps1 · restore.ps1 · koch.ps1 · ORNAT.*
+├── tests/                smoke.ps1 (avtomatik tekshiruv)
+├── backups/              SQL zaxiralar (git'ga TUSHMAYDI)
+│
+├── .htaccess             butun xavfsizlik qatlami (CSP, to'siqlar, gzip, kesh)
+├── sw.js                 Service Worker
+├── robots.txt  sitemap.xml
+└── README.md             shu fayl
+```
+
+### Nega ayrim fayllar ildizda QOLDI
+
+Bular papkaga ko'chirilsa sayt buziladi — ko'chirmang:
+
+| Fayl | Sabab |
+|------|-------|
+| `index.html` | `.htaccess` dagi `DirectoryIndex` uni ildizdan qidiradi |
+| `*.html` (sahifalar) | Fayl nomi = sayt manzili. Ko'chirilsa barcha havola, `sitemap.xml` va qidiruv indeksi buziladi |
+| `sw.js` | Service Worker faqat O'ZI turgan papka va undan pastini boshqara oladi. `js/` ga ko'chsa push-bildirishnoma butun sayt uchun ishlamay qoladi |
+| `api.php`, `db.php`, `seed.php`, `config.php` | Butun frontend `api.php?action=...` ga murojaat qiladi |
+| `robots.txt`, `sitemap.xml` | Standart bo'yicha faqat ildizda o'qiladi |
+| `.htaccess` | Apache uni papka bo'yicha qo'llaydi |
+| `uploads/` | Yuklangan fayl yo'llari BAZADA `uploads/...` ko'rinishida saqlangan |
+
+### Qayerni o'zgartirsam nima buziladi
+
+| O'zgartirdim | Yodda tuting |
+|--------------|--------------|
+| `css/*.css` yoki `js/*.js` | HTML'dagi `?v=N` raqamini oshiring, aks holda tashrifchida eski nusxa qoladi |
+| `css/print.css` | Uning versiyasi HTML'da EMAS — `js/site-common.js` dagi `abs('css/print.css?v=N')` da |
+| `js/site-common.js` → `NAV` | Bosh sahifa menyusi `index.html` ichida QO'LDA yozilgan — ikkalasini birga yangilang |
+| `js/i18n.js` | Bosh sahifa ham, ichki sahifalar ham shu fayldan matn oladi |
+| `css/site.css` | Faqat ichki sahifalar. Bosh sahifa — `css/home.css` (mustaqil nusxa) |
+| `db.php` → `$SCHEMA` | Yangi ustun qo'shsangiz `CREATE TABLE` va `migrate()` ni ham yangilang |
+| `tools/` yoki `docs/` | Bu papkalar serverga CHIQMAYDI (`deploy.ps1` ularni chetlab o'tadi) |
+
 ## 📦 Tarkibi
 - **index.html** — saytning bosh sahifasi (2026-08-10 gacha `Bosh sahifa - Hi-Fi.html`
   deb atalardi; eski nom va uni yo'naltiruvchi `index.php` olib tashlangan)
@@ -164,10 +221,10 @@ Sayt 3 tilli: **UZ / RU / EN**. Har bir kontent admin panelda 3 tilda tahrirlana
 
 ## 🔒 Xavfsizlik
 
-To'liq tavsif — **[SECURITY.md](SECURITY.md)** (arxitektura, himoya choralari,
+To'liq tavsif — **[SECURITY.md](docs/SECURITY.md)** (arxitektura, himoya choralari,
 ma'lum cheklovlar).
 
-Hostingga chiqarish cheklisti — **[DEPLOY.md](DEPLOY.md)** (baza foydalanuvchisi,
+Hostingga chiqarish cheklisti — **[DEPLOY.md](docs/DEPLOY.md)** (baza foydalanuvchisi,
 HTTPS/HSTS, fayl huquqlari, tekshiruv ro'yxati).
 
 Qisqacha:
@@ -255,7 +312,7 @@ deb belgilash mumkin.
 
 ```bash
 npx eslint .              # JS  — 0 xato, 0 ogohlantirish
-npx stylelint "*.css"     # CSS — 0 xato
+npx stylelint "css/*.css"     # CSS — 0 xato
 ```
 
 Konfiguratsiyalar — `eslint.config.mjs` va `.stylelintrc.json`. Ikkalasi ham

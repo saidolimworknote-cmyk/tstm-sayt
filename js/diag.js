@@ -266,7 +266,7 @@
   function hhmmss(d) { return two(d.getHours()) + ':' + two(d.getMinutes()) + ':' + two(d.getSeconds()); }
 
   function buildPanel() {
-    var st = document.createElement('link'); st.rel = 'stylesheet'; st.href = 'diag.css?v=1'; document.head.appendChild(st);
+    var st = document.createElement('link'); st.rel = 'stylesheet'; st.href = 'css/diag.css?v=1'; document.head.appendChild(st);
 
     var fab = document.createElement('button');
     fab.id = 'diagFab'; fab.type = 'button';

@@ -50,7 +50,7 @@
   // til bo'yicha standart. Header/footer/chop etish — hammasi shu orqali.
   function brandLogo(){
     const s = settings();
-    const def = { uz: 'logo-mark.png', ru: 'logo-mark-ru.png', en: 'logo-mark-en.png' };
+    const def = { uz: 'img/logo-mark.png', ru: 'img/logo-mark-ru.png', en: 'img/logo-mark-en.png' };
     return (s.logos && s.logos[lang]) || s.logo || def[lang] || def.uz;
   }
 
@@ -267,7 +267,7 @@
       </div></div>
       <div class="bar"><div class="wrap">
         <a class="brand brand-row" href="index.html" aria-label="${esc(SN)}">
-          <img class="logo logo-c" src="logo-mark.png" alt="${esc(SN)}">
+          <img class="logo logo-c" src="img/logo-mark.png" alt="${esc(SN)}">
           <span class="divider"></span>
           <span class="nm"><b>${esc(B.top)}</b><small>${esc(B.bot)}</small></span>
         </a>
@@ -290,7 +290,7 @@
     var mainEl = document.querySelector('main'); if (mainEl && !mainEl.id) { mainEl.id = 'main-content'; mainEl.setAttribute('role','main'); }
 
     // logo override from settings (til bo'yicha) + standart 3 tilli marka
-    const DEFLOGO = { uz: 'logo-mark.png', ru: 'logo-mark-ru.png', en: 'logo-mark-en.png' };
+    const DEFLOGO = { uz: 'img/logo-mark.png', ru: 'img/logo-mark-ru.png', en: 'img/logo-mark-en.png' };
     const lg = (s.logos && s.logos[lang]) || s.logo || DEFLOGO[lang] || DEFLOGO.uz;
     if (lg) el.querySelectorAll('.brand .logo').forEach(img => img.src = lg);
 
@@ -422,8 +422,8 @@
       <div class="f-top">
         <div>
           <div class="f-brand">
-            <img class="flogo-c" src="${(s.logos && s.logos[lang]) || s.logo || ({uz:'logo-mark.png',ru:'logo-mark-ru.png',en:'logo-mark-en.png'}[lang]) || 'logo-mark.png'}" alt="${esc(SN)}">
-            <img class="flogo-w" src="logo-mark-white.png" alt="${esc(SN)}">
+            <img class="flogo-c" src="${(s.logos && s.logos[lang]) || s.logo || ({uz:'img/logo-mark.png',ru:'img/logo-mark-ru.png',en:'img/logo-mark-en.png'}[lang]) || 'img/logo-mark.png'}" alt="${esc(SN)}">
+            <img class="flogo-w" src="img/logo-mark-white.png" alt="${esc(SN)}">
             <span class="fd"></span>
             <span><b>${esc(B.top)}</b><small>${esc(B.bot)}</small></span>
           </div>
@@ -670,7 +670,7 @@
     // Iframe about:blank bo'lgani uchun nisbiy URL ishlamaydi -> abs() bilan.
     // Versiya SHART: bu fayl HTML'da <link> bilan ulanmagani uchun boshqa
     // joyda kesh buzilmaydi — o'zgartirsangiz raqamni oshiring.
-    var cssHref = abs('print.css?v=4');
+    var cssHref = abs('css/print.css?v=4');
 
     // Asl manba (tashqi nashr havolasi) — ekspert sharhlarida hujjatning
     // ishonchliligi uchun muhim, shuning uchun footerga chiqadi.
@@ -691,7 +691,7 @@
     // shuning uchun fonts.css bu yerda qaytadan ulanishi shart. Aks holda
     // print.css dagi 'Montserrat' hech qachon yuklanmay, chop etilgan hujjat
     // zaxira shriftda chiqib ketardi.
-    var fonts = '<link rel="stylesheet" href="' + abs('fonts.css?v=1') + '">';
+    var fonts = '<link rel="stylesheet" href="' + abs('css/fonts.css?v=1') + '">';
     var ifr = document.createElement('iframe');
     ifr.setAttribute('aria-hidden', 'true');
     ifr.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0;';

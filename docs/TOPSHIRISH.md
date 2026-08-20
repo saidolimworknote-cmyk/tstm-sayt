@@ -10,7 +10,7 @@
 
 | Fayl | Hajmi | Nima |
 |---|---|---|
-| `tstm-<sana>.zip` | ~5.8 MB | Saytning to'liq fayllari (98 ta) |
+| `tstm-<sana>.zip` | ~7.1 MB | Saytning to'liq fayllari (125 ta) |
 | `hosting-import.sql` | ~1.4 MB | Baza dumpi (kontent) |
 
 > ⚠️ `hosting-import.sql` — **maxfiy fayl**: ichida admin parolining bcrypt
