@@ -73,6 +73,11 @@
     return { top: ws.slice(0, cut).join(' ').toUpperCase(), bot: ws.slice(cut).join(' ') };
   }
   const shortName = () => String(settings().shortName || 'TSTM');
+  // Bir qatorli TO'LIQ nom — chop etilgan hujjat, muallif o'rni va shunga
+  // o'xshash joylar uchun. Lockup emas, ya'ni bo'linmaydi va katta harfga
+  // aylantirilmaydi. Ilgari bunday joylarda T('org_name') ishlatilardi va u
+  // nomning faqat BIRINCHI YARMINI (ustiga katta harflarda) berardi.
+  const orgName = () => String(mlGet(settings().siteName) || '').trim() || T('org_full');
 
   // Nom sozlamadan keladi, ya'ni uzunligi oldindan noma'lum. Brend matni menyu
   // ustiga chiqib ketmasligi uchun mavjud joyga qarab shriftni kichraytiramiz.
@@ -605,6 +610,49 @@
   // Bu yerda nusxa TUTMANG — ilgari ikkita nusxa bo'lgani uchun bosh
   // sahifada eski e-pochtali oyna qolib ketgan edi.
 
+  /* ---------- Chop etish: rasmiy blank (letterhead) ----------
+     Ikkita chop etish yo'li bor va IKKALASI ham shu blankni ishlatadi:
+       1) "Chop etish" tugmasi -> printDoc() -> yashirin iframe + print.css;
+       2) brauzerning o'z chop etishi (Ctrl+P) -> sahifadagi `.print-head` /
+          `.print-foot` bloklari + site.css dagi @media print.
+     Markaz nomi HAMISHA admin sozlamasidan (`settings.siteName`) olinadi.
+     2026-08-20 gacha `.print-head` to'rtta page-*.js da alohida-alohida
+     yasalar va nomni i18n'dagi qotib qolgan T('org_name') dan olardi — ya'ni
+     admin nomni almashtirsa ham qog'ozda ESKI nom chiqaverardi (ruschada esa
+     nomning faqat yarmi). Endi manba bitta: shu ikki funksiya. */
+  function printHeadHTML(){
+    const B = brandLines();
+    return '<div class="print-head"><img src="' + safeUrl(brandLogo()) + '" alt="">'
+         + '<div class="ph-txt"><b>' + esc(B.top) + '</b><span>' + esc(B.bot) + '</span></div></div>';
+  }
+  // extra — qo'shimcha o'rta ustun (masalan ekspert sharhidagi "Asl nashr").
+  function printFootHTML(extra){
+    return '<div class="print-foot"><span>' + esc(T('print_source')) + ': ' + esc(location.href) + '</span>'
+         + (extra || '')
+         + '<span>' + esc(T('print_date')) + ': ' + esc(fmtDate(new Date().toISOString().slice(0, 10))) + '</span></div>';
+  }
+
+  /* Ro'yxat sahifalari (hamkorlar, rahbariyat, tadbirlar, tadqiqotlar, biz
+     kimmiz...) o'z CSS'ida chop etishda `header, footer, .page-banner` ni
+     yashiradi. Natijada qog'ozda na idora nomi, na sahifa sarlavhasi qolardi —
+     kimdan kelgani noma'lum kartalar ro'yxati chiqardi. Shu sabab blankni
+     `initPage()` da BARCHA ichki sahifaga qo'yamiz; batafsil sahifalar uni
+     o'zi qo'ygan bo'lsa (`.print-head` allaqachon bor) tegmaymiz. */
+  function injectPrintFrame(){
+    const main = document.querySelector('main');
+    if (!main || main.querySelector('.print-head')) return;
+    const h1 = main.querySelector('.page-banner h1');
+    const wrap = document.createElement('div');
+    wrap.className = 'print-frame-top';
+    wrap.innerHTML = printHeadHTML()
+      + (h1 ? '<div class="print-title">' + esc(h1.textContent.trim()) + '</div>' : '');
+    main.insertBefore(wrap, main.firstChild);
+    const foot = document.createElement('div');
+    foot.className = 'print-frame-bot';
+    foot.innerHTML = printFootHTML();
+    main.appendChild(foot);
+  }
+
   // ---------- Chop etish (print) — toza, mustaqil hujjat ----------
   // Sahifaning murakkab tuzilishiga bog'liq bo'lmasligi uchun chop qilinadigan
   // kontentni yashirin iframe ichida yangidan, toza tartibda quramiz va o'shani chop qilamiz.
@@ -622,7 +670,7 @@
     // Iframe about:blank bo'lgani uchun nisbiy URL ishlamaydi -> abs() bilan.
     // Versiya SHART: bu fayl HTML'da <link> bilan ulanmagani uchun boshqa
     // joyda kesh buzilmaydi — o'zgartirsangiz raqamni oshiring.
-    var cssHref = abs('print.css?v=3');
+    var cssHref = abs('print.css?v=4');
 
     // Asl manba (tashqi nashr havolasi) — ekspert sharhlarida hujjatning
     // ishonchliligi uchun muhim, shuning uchun footerga chiqadi.
@@ -693,6 +741,7 @@
     try { applyBanner(opts.active); } catch(e){ console.error('applyBanner:', e); }
     try { renderSectionNav(); } catch(e){ console.error('renderSectionNav:', e); }
     try { renderFooter(); } catch(e){ console.error('renderFooter:', e); }
+    try { injectPrintFrame(); } catch(e){ console.error('injectPrintFrame:', e); }
     try { if (w.I18N) w.I18N.translate(document); } catch(e){ console.error(e); }
     try { enhanceSelects(document); } catch(e){ console.error('enhanceSelects:', e); }
     initReveal();
@@ -832,5 +881,5 @@
     (root || document).querySelectorAll('select:not(.a11y-sel)').forEach(enhanceSelect);
   }
 
-  w.Site = { initPage, renderHeader, renderFooter, renderSectionNav, EVENT_KINDS, eventKind, eventKindById, PUB_KINDS, pubKind, pubKindById, mlGet, dispTitle, esc, safeUrl, fmtDate, dayMonth, qs, settings, lang, brandLogo, socialLinks, copyrightText, t: T, ICON, NAV, initReveal, showSubscribe, printDoc, enhanceSelect, enhanceSelects };
+  w.Site = { initPage, renderHeader, renderFooter, renderSectionNav, EVENT_KINDS, eventKind, eventKindById, PUB_KINDS, pubKind, pubKindById, mlGet, dispTitle, esc, safeUrl, fmtDate, dayMonth, qs, settings, lang, brandLogo, brandLines, orgName, shortName, socialLinks, copyrightText, t: T, ICON, NAV, initReveal, showSubscribe, printDoc, printHeadHTML, printFootHTML, enhanceSelect, enhanceSelects };
 })(window);

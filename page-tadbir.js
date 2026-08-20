@@ -36,7 +36,7 @@ Site.initPage({ active: 'events', render(){
   const typeLbl  = ml(ev.type);
   const loc      = ml(ev.location);
   const bodyHtml = (ml(ev.body) || '').trim();
-  document.title = title + ' — TSTM';
+  document.title = title + ' — ' + Site.shortName();
 
   // "Bugun" / "Tez orada" belgisi — ro'yxatlardagi bilan bir xil qoida.
   const now = new Date(); now.setHours(0,0,0,0);
@@ -60,8 +60,8 @@ Site.initPage({ active: 'events', render(){
               + fact(ICO.pin, T('ev_where'), loc)
               + fact(ICO.tag, T('ev_type_l'), typeLbl);
 
-  const printHead = `<div class="print-head"><img src="${Site.safeUrl(Site.brandLogo())}" alt=""><div class="ph-txt"><b>${esc(T('org_name'))}</b><span>${esc(T('org_tagline'))}</span></div></div>`;
-  const printFoot = `<div class="print-foot"><span>${esc(T('print_source'))}: ${esc(location.href)}</span><span>${esc(T('print_date'))}: ${esc(Site.fmtDate(new Date().toISOString().slice(0,10)))}</span></div>`;
+  const printHead = Site.printHeadHTML();
+  const printFoot = Site.printFootHTML();
 
   // Shu bo'limdagi boshqa voqealar — sanaga eng yaqinlari
   const related = Store.all('events')

@@ -6,30 +6,39 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 @page{margin:18mm 16mm;}
 body{font-family:'Montserrat',Arial,sans-serif;color:#111;font-size:11.5pt;line-height:1.55;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-.ph{display:flex;align-items:center;gap:13px;border-bottom:2px solid #0f5689;padding-bottom:12px;margin-bottom:22px;}
-.ph img{height:46px;width:auto;}
-.ph b{font-family:'Montserrat',Georgia,serif;font-size:13.5pt;font-weight:600;text-transform:uppercase;color:#0f2540;display:block;line-height:1.15;}
-.ph span{font-family:'Montserrat',Georgia,serif;font-size:10.5pt;color:#37506a;display:block;}
-h1{font-family:'Montserrat',Georgia,serif;font-weight:600;font-size:21pt;line-height:1.15;color:#000;margin:0 0 10px;}
-.meta{display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-family:'Montserrat',monospace;font-size:9pt;color:#555;border-bottom:1px solid #ccc;padding-bottom:10px;margin-bottom:18px;}
-.meta .tag{color:#0f5689;border:1px solid #0f5689;padding:1px 8px;text-transform:uppercase;letter-spacing:.08em;}
-.lead{font-family:'Montserrat',Georgia,serif;font-size:13pt;font-weight:500;line-height:1.5;color:#111;border-left:3px solid #0f5689;padding-left:14px;margin:0 0 18px;}
+/* Blank (letterhead). 2026-08-20: nom ikkala qatorda ham BIR XIL — katta
+   harf, bir o'lcham, bir og'irlik, brend rangi. Ilgari pastki qator kichik,
+   kichik harfli va och kulrang edi, ya'ni nomning ikkinchi yarmi "shior"ga
+   o'xshab qolardi va saytning o'z sarlavhasidan farq qilardi. */
+.ph{display:flex;align-items:center;gap:14px;border-bottom:1.5pt solid #0b4f76;padding-bottom:11px;margin-bottom:20px;}
+.ph img{height:40px;width:auto;}
+.ph .ph-txt,.ph > div{min-width:0;}
+.ph b,.ph span{font-family:'Montserrat',Georgia,serif;font-size:11pt;font-weight:600;letter-spacing:.01em;text-transform:uppercase;color:#0b4f76;display:block;line-height:1.28;}
+h1{font-family:'Montserrat',Georgia,serif;font-weight:600;font-size:15.5pt;line-height:1.25;color:#000;margin:0 0 9px;page-break-after:avoid;}
+.meta{display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-family:'Montserrat',monospace;font-size:8.5pt;color:#555;border-bottom:1px solid #ccc;padding-bottom:9px;margin-bottom:16px;}
+.meta .tag{color:#0b4f76;border:1px solid #0b4f76;padding:1px 8px;text-transform:uppercase;letter-spacing:.08em;}
+.lead{font-family:'Montserrat',Georgia,serif;font-size:12pt;font-weight:500;line-height:1.5;color:#111;border-left:3px solid #0b4f76;padding-left:14px;margin:0 0 18px;page-break-inside:avoid;}
 /* Imzo bloki (kim / qayerda) — ekspert sharhlari uchun. Sahifadagi .oav-byline
    ning chop etish ko'rinishi: ikonkasiz, yorliq + qiymat juftliklari. */
 .byline{display:flex;flex-wrap:wrap;gap:6px 26px;margin:0 0 16px;padding-bottom:12px;border-bottom:1px solid #ccc;page-break-inside:avoid;}
 .byline > div{display:flex;align-items:baseline;gap:8px;}
 .byline .lab{font-family:'Montserrat',monospace;font-size:8.5pt;letter-spacing:.1em;text-transform:uppercase;color:#555;}
 .byline .val{font-size:11pt;color:#000;font-weight:600;}
-.img{margin:0 0 18px;text-align:center;}
+.img{margin:0 0 18px;text-align:center;page-break-inside:avoid;}
 .img img{max-width:100%;max-height:92mm;width:auto;height:auto;object-fit:contain;border:1px solid #ccc;border-radius:10px;display:inline-block;}
 .content{font-size:11.5pt;line-height:1.6;color:#111;}
-.content p{margin:0 0 12px;}
-.content h2,.content h3{font-family:'Montserrat',Georgia,serif;color:#000;margin:16px 0 8px;line-height:1.2;}
-.content ul,.content ol{margin:0 0 12px;padding-left:22px;}.content li{margin-bottom:6px;}
-.content img{max-width:100%;height:auto;margin:10px 0;}
-.content blockquote{border-left:3px solid #0f5689;padding-left:14px;font-style:italic;margin:12px 0;}
+.content p{margin:0 0 12px;orphans:3;widows:3;}
+/* Sarlavha sahifa oxirida yolg'iz qolmasin — matni bilan birga ko'chsin */
+.content h2,.content h3{font-family:'Montserrat',Georgia,serif;color:#000;margin:16px 0 8px;line-height:1.25;font-size:13pt;page-break-after:avoid;page-break-inside:avoid;}
+.content h3{font-size:12pt;}
+.content ul,.content ol{margin:0 0 12px;padding-left:22px;}.content li{margin-bottom:6px;orphans:2;widows:2;}
+.content img{max-width:100%;height:auto;margin:10px 0;page-break-inside:avoid;}
+.content blockquote{border-left:3px solid #0b4f76;padding-left:14px;font-style:italic;margin:12px 0;page-break-inside:avoid;}
 .content a{color:#000;text-decoration:none;}
-.foot{display:flex;justify-content:space-between;gap:16px;border-top:1px solid #ccc;margin-top:26px;padding-top:10px;font-family:'Montserrat',monospace;font-size:8.5pt;color:#555;}
+/* Qog'ozda havolani bosib bo'lmaydi — tashqi manzil matn holida yoziladi.
+   Ichki langarlar (#...) va pochta havolalari bundan mustasno. */
+.content a[href^="http"]::after{content:" (" attr(href) ")";font-family:'Montserrat',monospace;font-size:8pt;color:#555;word-break:break-all;}
+.foot{display:flex;justify-content:space-between;gap:16px;border-top:1px solid #ccc;margin-top:26px;padding-top:10px;font-family:'Montserrat',monospace;font-size:8.5pt;color:#555;page-break-inside:avoid;}
 .foot span{word-break:break-all;}
 /* Nashr imzosi (page-nashr.js -> bylinePrint) — ilgari inline style edi */
 .print-byline{margin-top:22px;padding-top:12px;border-top:1px solid #ccc;text-align:right;}

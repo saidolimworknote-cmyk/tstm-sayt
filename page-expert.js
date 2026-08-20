@@ -14,7 +14,7 @@
       return;
     }
     const name = ml(e.name);
-    document.title = name + ' — TSTM';
+    document.title = name + ' — ' + Site.shortName();
     const bio = ml(e.bio);
 
     // Muallif maydoni ekspert ismiga mos kelsa — uning materiali deb hisoblaymiz.

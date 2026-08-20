@@ -120,7 +120,7 @@
        muallif kartaning tepasida, ikonka bilan ajratib ko'rsatiladi. */
     const talkCard = (p) => `<a class="talk-card rv" href="${href(p)}">
       <div class="tk-head"><span class="tk-ico">${micSvg}</span>
-        <span class="tk-author">${esc(p.author || T('org_name'))}</span></div>
+        <span class="tk-author">${esc(p.author || Site.orgName())}</span></div>
       <h3>${esc(Site.dispTitle(p))}</h3>
       <div class="tk-meta">${ml(p.category || '') ? `<span>${esc(ml(p.category))}</span>` : ''}${p.year ? `<span>${esc(p.year)}</span>` : ''}</div>
       ${p.pdf ? `<span class="tk-file">${dlSvg}${esc(fileExt(p))}</span>` : ''}

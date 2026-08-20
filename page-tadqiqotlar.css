@@ -95,7 +95,11 @@
 
   @media print{
     header,footer,.page-banner,.secnav,.pubtools,.filterbar,.rescount{display:none !important;}
+    /* Banner (sarlavha) chop etishda yashirildi -> uning o'rniga zaxira
+       sarlavha yoqiladi. Uslubi site.css -> @media print .print-title;
+       matnini site-common.js -> injectPrintFrame() yozadi. */
+    .print-title{display:block !important;}
     body.inner{padding-top:0 !important;}
-    .art-row,.talk-card,.book,.pub{break-inside:avoid;box-shadow:none !important;}
+    .art-row,.talk-card,.book,.pub{break-inside:avoid;box-shadow:none !important;background:#fff !important;}
     .art-row,.talk-card,.bk-cover{border-color:#ccc !important;}
   }

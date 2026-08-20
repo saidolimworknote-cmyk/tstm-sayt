@@ -11,7 +11,7 @@
         <section class="block"><div class="wrap"><div class="empty"><div class="t">${T('not_found_t')}</div><div class="mt-20"><a class="btn outline" href="yangiliklar.html">← ${T('all_news')}</a></div></div></div></section>`;
       return;
     }
-    document.title = Site.mlGet(n.title) + ' — TSTM';
+    document.title = Site.mlGet(n.title) + ' — ' + Site.shortName();
     const bodyRaw = Site.mlGet(n.body);
     const excerpt = Site.mlGet(n.excerpt);
     // Admin yozgan "Qisqa anons" (excerpt) — HAR DOIM ko'rishlar tagida, rasm ustida
@@ -28,8 +28,8 @@
     const related = Store.all('news').filter(x=>x.status==='published' && x.id!==n.id)
       .sort((a,b)=> String(b.date||'').localeCompare(String(a.date||''))).slice(0,3);
     // chop etish uchun: rasmiy sarlavha (idora nomi) + manba/sana footeri
-    const printHead = `<div class="print-head"><img src="${Site.safeUrl(Site.brandLogo())}" alt=""><div class="ph-txt"><b>${Site.esc(T('org_name'))}</b><span>${Site.esc(T('org_tagline'))}</span></div></div>`;
-    const printFoot = `<div class="print-foot"><span>${Site.esc(T('print_source'))}: ${Site.esc(location.href)}</span><span>${Site.esc(T('print_date'))}: ${Site.fmtDate(new Date().toISOString().slice(0,10))}</span></div>`;
+    const printHead = Site.printHeadHTML();
+    const printFoot = Site.printFootHTML();
     main.innerHTML = `${printHead}
       <div class="page-banner"><div class="wrap">
         <div class="crumb"><a href="index.html">${T('home')}</a><span class="sep">/</span><a href="yangiliklar.html">${T('nav_news')}</a><span class="sep">/</span><span>${n.category?Site.esc(Site.mlGet(n.category)):T('search_k_news')}</span></div>

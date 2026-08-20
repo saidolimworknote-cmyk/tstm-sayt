@@ -3,7 +3,8 @@
 Sayt + boshqaruv paneli (admin). XAMPP'da ishlash uchun PHP backend bilan.
 
 ## 📦 Tarkibi
-- **Bosh sahifa - Hi-Fi.html** — saytning bosh sahifasi
+- **index.html** — saytning bosh sahifasi (2026-08-10 gacha `Bosh sahifa - Hi-Fi.html`
+  deb atalardi; eski nom va uni yo'naltiruvchi `index.php` olib tashlangan)
 - Ichki sahifalar: `yangiliklar.html`, `yangilik.html`, `tadbirlar.html`, `nashrlar.html`,
   `tadqiqotlar.html`, `biz-kimmiz.html`, `rahbariyat.html`, `ekspertlar.html`, `hamkorlar.html`,
   `media.html`, `aloqa.html`,
@@ -379,3 +380,33 @@ Bosh sahifaning uslublari ilgari HTML ichida inline `<style>` blokida turardi
 (663 qator). Alohida faylga chiqarildi: HTML 71 KB → 24 KB, uslub endi alohida
 keshlanadi. Bosh sahifadagi o'zgarish ichki sahifalarga **o'tmaydi** va aksincha —
 umumiy o'zgarish ikkala faylda ham qilinishi kerak.
+
+### Chop etish (print)
+
+Ikkita mustaqil yo'l bor va **ikkalasi ham bir xil rasmiy blank** (letterhead)
+bilan chiqadi:
+
+| Yo'l | Qanday ishga tushadi | Uslub fayli |
+|------|----------------------|-------------|
+| «Chop etish» tugmasi | `Site.printDoc()` — kontent yashirin iframe ichida qaytadan, toza tartibda quriladi | `print.css` |
+| Brauzerning o'zi (Ctrl+P) | sahifadagi `.print-head` / `.print-title` / `.print-foot` bloklari | `site.css` → `@media print` |
+
+- **Markaz nomi HAMISHA admin sozlamasidan** (`settings.siteName`) olinadi —
+  manba bitta: `site-common.js` → `printHeadHTML()` va `printFootHTML()`.
+  Nomni bu yerdan tashqarida qo'lda yasamang.
+  > 2026-08-20 gacha blank to'rtta `page-*.js` da alohida-alohida yasalar va
+  > nomni i18n'dagi qotib qolgan `T('org_name')` dan olardi. Natijada admin
+  > nomni almashtirsa ham qog'ozda **eski** nom chiqaverardi, ruschada esa
+  > nomning faqat yarmi («ЦЕНТР ВНЕШНЕПОЛИТИЧЕСКИХ / Исследований»).
+- Blank barcha ichki sahifaga `initPage()` → `injectPrintFrame()` orqali
+  qo'yiladi. Batafsil sahifalar (`yangilik`, `tadbir`, `nashr`, `sharh`) uni
+  o'zi qo'yadi — o'sha yerda funksiya ikkinchi nusxa yasamaydi.
+  > Ro'yxat sahifalari o'z CSS'ida chop etishda `header, footer, .page-banner`
+  > ni yashiradi. Ilgari ular blanksiz chiqar, ya'ni qog'ozda na idora nomi,
+  > na sahifa sarlavhasi qolardi. Endi sarlavha `.print-title` dan chiqadi.
+- **Bosh sahifa alohida:** `home.css` dagi `@media print`. U hujjat emas,
+  shuning uchun blank qurilmaydi — aylanuvchi hero slayderi va bezaklar olib
+  tashlanib, mazmun oq qog'ozda o'qiladigan holga keltiriladi.
+- `print.css` HTML'ga `<link>` bilan ulanmaydi (uni `printDoc()` iframe ichida
+  yuklaydi), shuning uchun uni o'zgartirsangiz **versiyani `site-common.js` dagi
+  `print.css?v=N` da qo'lda oshiring**.

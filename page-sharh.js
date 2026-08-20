@@ -11,7 +11,7 @@
         <section class="block"><div class="wrap"><div class="empty"><div class="t">${T('not_found_t')}</div><div class="mt-20"><a class="btn outline" href="oav.html">← ${T('all_oav')}</a></div></div></div></section>`;
       return;
     }
-    document.title = Site.mlGet(p.title) + ' — TSTM';
+    document.title = Site.mlGet(p.title) + ' — ' + Site.shortName();
 
     const bodyRaw = Site.mlGet(p.body);
     const excerpt = Site.mlGet(p.excerpt);
@@ -39,12 +39,12 @@
     const related = Store.all('mediaPosts').filter(x=>x.status==='published' && x.id!==p.id)
       .sort((a,b)=> String(b.date||'').localeCompare(String(a.date||''))).slice(0,3);
 
-    const printHead = `<div class="print-head"><img src="${Site.safeUrl(Site.brandLogo())}" alt=""><div class="ph-txt"><b>${Site.esc(T('org_name'))}</b><span>${Site.esc(T('org_tagline'))}</span></div></div>`;
+    const printHead = Site.printHeadHTML();
     // Brauzerning o'z chop etishi (Ctrl+P) uchun footer. Asl nashr havolasi
     // shu yerda ham bo'lsin — qog'ozda tugmani bosib bo'lmaydi.
-    const printFoot = `<div class="print-foot"><span>${Site.esc(T('print_source'))}: ${Site.esc(location.href)}</span>${
+    const printFoot = Site.printFootHTML(
       srcUrl ? `<span>${Site.esc(T('print_orig'))}: ${Site.esc(p.source)}</span>` : ''
-    }<span>${Site.esc(T('print_date'))}: ${Site.fmtDate(new Date().toISOString().slice(0,10))}</span></div>`;
+    );
 
     main.innerHTML = `${printHead}
       <div class="page-banner"><div class="wrap">

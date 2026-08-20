@@ -270,10 +270,10 @@ hisoblangan: oyiga 6 ta yangilik, 2–3 ta nashr, 2 ta tadbir va 2 ta fotoalbom
 | **Birinchi tashrif jami** | ~940 KB | **~700 KB** |
 | **Takroriy tashrif** (CSS/JS keshdan) | ~50 KB | ~30 KB |
 
-> ⚠️ **Hozirda `mod_deflate` YOQILMAGAN** — matnli fayllar to'liq hajmda
-> uzatilmoqda. Uni yoqish trafikni **72% ga kamaytiradi** va sahifa ochilish
-> tezligini sezilarli oshiradi. Hostingga chiqarishda birinchi navbatda
-> bajarilishi kerak (qarang: DEPLOY.md).
+> ✅ **`mod_deflate` yoqilgan** — `.htaccess` da gzip bloki bor va u ishlayapti
+> (tekshirildi: `site.css` uchun javob `Content-Encoding: gzip`). Matnli fayllar
+> **72% kichikroq** uzatiladi. Hostingda ham shu holat saqlanishi kerak —
+> Apache'da `mod_deflate` moduli yoqiq bo'lsin (qarang: DEPLOY.md, 6-bo'lim).
 
 **Oylik trafik prognozi:**
 
@@ -456,8 +456,8 @@ Loyiha bilan birga quyidagi hujjatlar mavjud:
 ## ILOVA A. TIZIM FAYLLAR TARKIBI (qisqacha)
 
 ```
-BACKEND:   api.php, db.php, seed.php, config.php (git'da yo'q), index.php
-FRONTEND:  Bosh sahifa - Hi-Fi.html + 12 ichki HTML sahifa
+BACKEND:   api.php, db.php, seed.php, config.php (git'da yo'q)
+FRONTEND:  index.html (bosh sahifa) + ichki HTML sahifalar
 SKRIPTLAR: page-*.js (sahifa modullari), site-common.js, i18n.js, a11y.js, search.js
 DIAGNOSTIKA: diag.js (xato yig'uvchi va panel)
 ADMIN:     admin.html, admin-ui.js, admin-store.js

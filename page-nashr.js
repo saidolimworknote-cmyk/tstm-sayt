@@ -18,10 +18,10 @@
     // undan farq qiladi) YOKI sarlavha bannerga sig'maydigan darajada uzun bo'lsa
     // (2 qator ≈ 68 belgi — .page-banner.tight cheklovi) — matn hech qachon yo'qolmaydi.
     const showFull = fullTitle !== dispT || fullTitle.length > 68;
-    document.title = dispT + ' — TSTM';
+    document.title = dispT + ' — ' + Site.shortName();
     // chop etish uchun: rasmiy sarlavha (idora nomi) + manba/sana footeri
-    const printHead = `<div class="print-head"><img src="${Site.safeUrl(Site.brandLogo())}" alt=""><div class="ph-txt"><b>${Site.esc(T('org_name'))}</b><span>${Site.esc(T('org_tagline'))}</span></div></div>`;
-    const printFoot = `<div class="print-foot"><span>${Site.esc(T('print_source'))}: ${Site.esc(location.href)}</span><span>${Site.esc(T('print_date'))}: ${Site.fmtDate(new Date().toISOString().slice(0,10))}</span></div>`;
+    const printHead = Site.printHeadHTML();
+    const printFoot = Site.printFootHTML();
     // `desc` ommaviy `load` javobida QISQARTIRILGAN holda keladi (HTML'siz, faqat
     // matn) — to'liq matn 1.3 MB joy olardi va HAR BIR sahifada yuklanardi.
     // Shuning uchun avval qisqa variantni ko'rsatamiz (sahifa darhol ochiladi),

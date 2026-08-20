@@ -59,8 +59,9 @@
     partners_visit:       { uz: 'Saytga o\'tish', ru: 'Перейти на сайт', en: 'Visit website' },
     partners_all_kicker:  { uz: 'Hamkorlik tarmog\'i', ru: 'Сеть партнёров', en: 'Partner network' },
     partners_all_title:   { uz: 'Xalqaro hamkorlar to\'liq ro\'yxati', ru: 'Полный список международных партнёров', en: 'Full list of international partners' },
-    partners_cta_title:   { uz: 'Hamkorlik qilishni istaysizmi?', ru: 'Хотите стать партнёром?', en: 'Interested in partnering?' },
-    partners_cta_text:    { uz: "Biz bilan bog'laning — hamkorlik shartlari va imkoniyatlar haqida gaplashamiz.", ru: 'Свяжитесь с нами — обсудим условия и возможности сотрудничества.', en: 'Get in touch — we can discuss partnership terms and opportunities.' },
+    /* 2026-08-20: `partners_cta_*` (ochiq "Hamkorlik qilishni istaysizmi?"
+       taklifi) olib tashlandi — markaz hamma bilan hamkorlik qilavermaydi va
+       saytda ochiq chaqiriq qoldirish noto'g'ri kutish uyg'otardi. */
 
     /* ---- hamkorlar.html: toifalar ----
        Bazada toifa O'ZBEKCHA satr sifatida saqlanadi (admin: Hamkorlar -> Toifa).
@@ -264,8 +265,17 @@
     footer_privacy:  { uz: 'Maxfiylik siyosati', ru: 'Политика конфиденциальности', en: 'Privacy policy' },
     footer_terms:    { uz: 'Saytdan foydalanish', ru: 'Условия использования', en: 'Terms of use' },
     footer_copyright:{ uz: '© 2026 Tashqi siyosiy tadqiqotlar va xalqaro tashabbuslar markazi', ru: '© 2026 Центр внешнеполитических исследований и международных инициатив', en: '© 2026 Center for Foreign Policy Research and International Initiatives' },
-    org_tagline:     { uz: 'va xalqaro tashabbuslar markazi', ru: 'Исследований', en: 'Policy Studies' },
-    org_name:        { uz: 'TASHQI SIYOSIY TADQIQOTLAR', ru: 'ЦЕНТР ВНЕШНЕПОЛИТИЧЕСКИХ', en: 'CENTER FOR FOREIGN' },
+    /* Markaz nomi. Haqiqiy manba — admin → Sozlamalar → "Markaz nomi"
+       (`settings.siteName`); bu yerdagilar sozlama BO'SH bo'lgandagi zaxira.
+       `org_full` — bir qatorli to'liq nom (chop etish, muallif o'rni va h.k.),
+       `org_name`/`org_tagline` — logotip yonidagi ikki qatorli lockup va
+       index.html dagi statik matn (JS yuklanguncha ko'rinadigan).
+       2026-08-20: ruscha zaxira YARIM nom edi ("ЦЕНТР ВНЕШНЕПОЛИТИЧЕСКИХ" +
+       "Исследований"), ya'ni "и международных инициатив" butunlay tushib
+       qolardi. Uchala til ham endi to'liq nomni beradi. */
+    org_full:        { uz: 'Tashqi siyosiy tadqiqotlar va xalqaro tashabbuslar markazi', ru: 'Центр внешнеполитических исследований и международных инициатив', en: 'Center for Foreign Policy Research and International Initiatives' },
+    org_tagline:     { uz: 'VA XALQARO TASHABBUSLAR MARKAZI', ru: 'И МЕЖДУНАРОДНЫХ ИНИЦИАТИВ', en: 'AND INTERNATIONAL INITIATIVES' },
+    org_name:        { uz: 'TASHQI SIYOSIY TADQIQOTLAR', ru: 'ЦЕНТР ВНЕШНЕПОЛИТИЧЕСКИХ ИССЛЕДОВАНИЙ', en: 'CENTER FOR FOREIGN POLICY RESEARCH' },
 
     /* ---- page banners ---- */
     p_news_title:  { uz: "Yangiliklar va e'lonlar", ru: 'Новости и анонсы', en: 'News & announcements' },

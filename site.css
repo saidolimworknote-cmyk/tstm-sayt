@@ -1031,7 +1031,7 @@ html[data-theme="dark"]{
    CHOP ETISH (print) — maqola / nashrni toza, rasmiy hujjat
    ko'rinishida bitta varaqqa joylaydi. Ekranda .print-* yashirin.
    ============================================================ */
-.print-head, .print-foot { display:none; }
+.print-head, .print-foot, .print-title { display:none; }
 
 @media print {
   @page { margin: 18mm 15mm; }
@@ -1051,19 +1051,37 @@ html[data-theme="dark"]{
   section.block { padding:0 !important; }
   .wrap { max-width:none !important; width:auto !important; margin:0 !important; padding:0 !important; }
 
-  /* --- rasmiy sarlavha (idora nomi) --- */
-  .print-head { display:flex !important; align-items:center; gap:13px;
-    padding-bottom:12px; margin-bottom:22px; border-bottom:2px solid #0f5689; }
-  .print-head img { height:44px; width:auto; }
-  .print-head .ph-txt b { font-family:var(--serif),Georgia,serif; font-size:13.5pt; font-weight:600;
-    display:block; line-height:1.15; text-transform:uppercase; color:#0f2540; }
-  .print-head .ph-txt span { font-family:var(--serif),Georgia,serif; font-size:10.5pt; color:#37506a; display:block; }
+  /* --- rasmiy blank (idora nomi) ---
+     2026-08-20: nomning ikkala qatori ham bir xil ko'rinadi (katta harf, bir
+     o'lcham/og'irlik, brend rangi) — saytning header'idagi lockup bilan aynan
+     bir xil. Ilgari pastki qator kichik, kichik harfli va och kulrang bo'lib,
+     nomning ikkinchi yarmi "shior"ga o'xshab qolardi.
+     Blank endi print.css dagi `.ph` bilan ham piksel-mos (bir xil o'lchamlar).
+     Matnni site-common.js -> printHeadHTML() beradi, manba — admin sozlamasi. */
+  .print-head { display:flex !important; align-items:center; gap:14px;
+    padding-bottom:11px; margin-bottom:20px; border-bottom:1.5pt solid #0b4f76; }
+  .print-head img { height:40px; width:auto; }
+  .print-head .ph-txt { min-width:0; }
+  .print-head .ph-txt b, .print-head .ph-txt span {
+    font-family:var(--serif),Georgia,serif; font-size:11pt; font-weight:600; letter-spacing:.01em;
+    display:block; line-height:1.28; text-transform:uppercase; color:#0b4f76 !important; }
+
+  /* Hujjat sarlavhasining ZAXIRA nusxasi — site-common.js -> injectPrintFrame()
+     uni har bir ichki sahifaga qo'yadi, lekin u ODATDA YASHIRIN qoladi: sarlavha
+     `.page-banner h1` da allaqachon bor va ikkitasi chiqsa takror bo'lardi.
+     Uni FAQAT bannerni chop etishda yashiradigan sahifalar yoqadi — o'sha
+     sahifalarning o'z CSS'ida (`page-hamkorlar.css` va h.k.):
+        .page-banner{display:none} bilan bir qatorda .print-title{display:block}
+     Shunda "bannerni yashirdim -> o'rniga sarlavhani yoqdim" bitta joyda turadi. */
+  .print-title { font-family:var(--serif),Georgia,serif;
+    font-weight:600; font-size:15.5pt; line-height:1.25; color:#000 !important;
+    margin:0 0 16px; padding-bottom:9px; border-bottom:1px solid #ccc; page-break-after:avoid; }
 
   /* --- banner -> oddiy qora sarlavha --- */
   .page-banner { background:#fff !important; color:#000 !important; overflow:visible !important; min-height:0 !important; }
   .page-banner::after, .page-banner::before { display:none !important; }
   .page-banner .wrap { padding:0 !important; }
-  .page-banner h1 { color:#000 !important; font-size:21pt; line-height:1.15; max-width:none; margin:0; }
+  .page-banner h1 { color:#000 !important; font-size:15.5pt; line-height:1.25; max-width:none; margin:0; page-break-after:avoid; }
   /* Chop etishda hujjat sarlavhasi hamisha TO'LIQ nom bo'lsin. Bannerdagi qisqa
      (displey) sarlavha rasmiy hujjatda kerak emas: `.has-full` bo'lsa uni
      yashiramiz va uning o'rniga to'liq nomni (.ptitle) chiqaramiz. Bu element
@@ -1071,7 +1089,8 @@ html[data-theme="dark"]{
      egallaydi va ekrandagi 2-qator cheklovi (line-clamp) unga ta'sir qilmaydi. */
   .page-banner.has-full h1 { display:none !important; }
   .page-banner .ptitle { display:block !important; font-family:var(--serif),Georgia,serif;
-    font-weight:600; font-size:21pt; line-height:1.15; color:#000 !important; margin:0; max-width:none; }
+    font-weight:600; font-size:15.5pt; line-height:1.25; color:#000 !important; margin:0; max-width:none;
+    page-break-after:avoid; }
   /* sahifa ichidagi "TO'LIQ NOMI" bloki chop etishda ortiqcha — sarlavha allaqachon tepada */
   .pub-detail .full-title { display:none !important; }
 
@@ -1079,16 +1098,16 @@ html[data-theme="dark"]{
   .article { max-width:none; }
   .article .meta { color:#444 !important; font-size:9.5pt; margin:12px 0 16px; padding-bottom:10px;
     border-bottom:1px solid #ccc; display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
-  .article .meta .tag { background:none !important; color:#0f5689 !important; border:1px solid #0f5689; padding:1px 8px; }
+  .article .meta .tag { background:none !important; color:#0b4f76 !important; border:1px solid #0b4f76; padding:1px 8px; }
   .article .hero-img { height:auto !important; margin:0 0 16px; border:0; text-align:center;
     page-break-inside:avoid; overflow:visible; }
   .article .hero-img img { max-width:100%; max-height:92mm; width:auto; height:auto;
     object-fit:contain; border:1px solid #ccc; border-radius:10px; display:inline-block; }
-  .article .art-lead { color:#000 !important; border-left-color:#0f5689 !important; }
+  .article .art-lead { color:#000 !important; border-left-color:#0b4f76 !important; }
   .article .content { color:#000 !important; font-size:11.5pt; line-height:1.55; }
   .article .content h2, .article .content h3 { color:#000 !important; page-break-after:avoid; }
   .article .content img { max-width:100% !important; page-break-inside:avoid; }
-  .article .content blockquote { border-left:3px solid #0f5689; color:#000 !important; font-style:italic; }
+  .article .content blockquote { border-left:3px solid #0b4f76; color:#000 !important; font-style:italic; }
   .article .content a { color:#000 !important; text-decoration:none; }
 
   /* --- ekspert sharhi (sharh.html) imzo qatori ---
@@ -1108,13 +1127,13 @@ html[data-theme="dark"]{
   .pub-detail { display:block !important; }
   .pub-detail > div:first-child { float:right; width:48mm; margin:2px 0 10px 12mm; page-break-inside:avoid; }
   .pub-detail .cov { width:100%; aspect-ratio:3/4; border:1px solid #ccc; overflow:hidden; }
-  .pub-detail .cov .badge { background:#0f5689 !important; color:#fff !important; }
+  .pub-detail .cov .badge { background:#0b4f76 !important; color:#fff !important; }
   .pub-detail .dlbtn { display:none !important; }
   .pub-detail .metalist { margin-top:12px; border-top:1px solid #ccc; }
   .pub-detail .metalist .r { border-bottom:1px solid #ddd; padding:8px 0; }
   .pub-detail .metalist .r .k { color:#555 !important; }
   .pub-detail .metalist .r .v { color:#000 !important; }
-  .pub-detail .kicker { color:#0f5689 !important; margin-bottom:10px; }
+  .pub-detail .kicker { color:#0b4f76 !important; margin-bottom:10px; }
   .pub-detail .prose { color:#000 !important; font-size:11.5pt; line-height:1.55; max-width:none;
     border:0 !important; padding:0 !important; }
   /* Dark rejim uchun qo'yilgan `.prose *{color:...!important}` himoyasi (507-513 qatorlar)
@@ -1135,8 +1154,39 @@ html[data-theme="dark"]{
   /* --- rasmiy footer (manba + sana) --- */
   .print-foot { display:flex !important; justify-content:space-between; gap:16px; clear:both;
     margin-top:24px; padding-top:10px; border-top:1px solid #ccc;
-    font-family:var(--mono),monospace; font-size:8.5pt; color:#555; }
+    font-family:var(--mono),monospace; font-size:8.5pt; color:#555; page-break-inside:avoid; }
   .print-foot span { word-break:break-all; }
+
+  /* --- matn qog'ozda chiroyli uzilsin (butun sayt uchun) ---
+     Ilgari bu qoidalar faqat `.article .content` da bor edi: nashr matni,
+     ekspert sharhi va ro'yxat sahifalari ularsiz chiqardi — sarlavha
+     sahifaning eng pastida yolg'iz qolib, matni keyingi varaqqa o'tardi. */
+  p, li { orphans:3; widows:3; }
+  h1, h2, h3, h4 { page-break-after:avoid; }
+  img, blockquote { page-break-inside:avoid; }
+
+  /* !! Chop etishdagi ENG OG'IR nuqson edi (2026-08-20 da topildi).
+     `.rv` — "ko'rinish maydoniga kirganda paydo bo'l" animatsiyasi: element
+     `opacity:0` da turadi va `.in` sinfini faqat IntersectionObserver qo'shadi.
+     Foydalanuvchi sahifani oxirigacha aylantirmay Ctrl+P bosса, ekranga
+     tushmagan hamma narsa `opacity:0` da qolgan bo'ladi va qog'ozda BO'SH
+     chiqadi — uzun sahifada bu 1-varaqdan keyingi hammasi degani.
+     Chop etishda animatsiyaning ma'nosi yo'q: hammasi ko'rinadi. */
+  .rv { opacity:1 !important; transform:none !important; }
+
+  /* Raqamlar lentasi (biz-kimmiz.html) — quyuq temada `--accent`/`--muted`
+     ochroq bo'ladi va oq qog'ozda deyarli ko'rinmaydi. Ranglar qat'iy beriladi. */
+  .statband { border-color:#ccc !important; break-inside:avoid; }
+  .statband .s { border-color:#ccc !important; }
+  .statband .s .n { color:#0b4f76 !important; }
+  .statband .s .c { color:#555 !important; }
+
+  /* Qog'ozda havolani bosib bo'lmaydi — tashqi manzilni matn holida yozamiz.
+     Ichki langar (#...), mailto va tel havolalariga tegilmaydi. */
+  .article .content a[href^="http"]::after,
+  .pub-detail .prose a[href^="http"]::after {
+    content:" (" attr(href) ")"; font-family:var(--mono),monospace;
+    font-size:8pt; color:#555 !important; word-break:break-all; }
 }
 
 

@@ -25,7 +25,7 @@
     const a = AREAS[id];
     const title = T(a.key + '_t');
 
-    document.title = title + ' — TSTM';
+    document.title = title + ' — ' + Site.shortName();
     document.getElementById('cr').textContent = title;
     document.getElementById('yotitle').textContent = title;
     document.getElementById('yolead').textContent = T(a.key + '_d');

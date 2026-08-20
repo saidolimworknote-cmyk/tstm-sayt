@@ -104,6 +104,10 @@
   }
   @media print{
     header,footer,.page-banner,.secnav,.pt-bar,.pt-count{display:none !important;}
+    /* Banner (sarlavha) chop etishda yashirildi -> uning o'rniga zaxira
+       sarlavha yoqiladi. Uslubi site.css -> @media print .print-title;
+       matnini site-common.js -> injectPrintFrame() yozadi. */
+    .print-title{display:block !important;}
     body.inner{padding-top:0 !important;}
-    .pt-card{break-inside:avoid;box-shadow:none !important;}
+    .pt-card,.pt-stats,.pt-stats .s{break-inside:avoid;box-shadow:none !important;background:#fff !important;border-color:#ccc !important;}
   }

@@ -115,7 +115,11 @@
 
   @media print{
     header,footer,.page-banner,.secnav,.tabs,.act-row,.ev-years,.related-sec{display:none !important;}
+    /* Banner (sarlavha) chop etishda yashirildi -> uning o'rniga zaxira
+       sarlavha yoqiladi. Uslubi site.css -> @media print .print-title;
+       matnini site-common.js -> injectPrintFrame() yozadi. */
+    .print-title{display:block !important;}
     body.inner{padding-top:0 !important;}
-    .reg-row,.topic-card,.life-card,.conf-lead,.evf{break-inside:avoid;box-shadow:none !important;}
+    .reg-row,.topic-card,.life-card,.conf-lead,.evf{break-inside:avoid;box-shadow:none !important;background:#fff !important;}
     .life-card,.topic-card,.conf-lead,.ev-facts{border-color:#ccc !important;}
   }

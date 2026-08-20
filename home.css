@@ -825,3 +825,49 @@
   }
   /* WCAG 2.5.8: tap-nishonlar kamida 24px — padding + manfiy margin, maket siljimaydi */
   .arrow-link,.f-bot a,.f-meta a{padding-top:4px;padding-bottom:4px;margin-top:-4px;margin-bottom:-4px;}
+
+  /* ============================================================
+     CHOP ETISH (Ctrl+P) — bosh sahifa.
+     2026-08-20 gacha bu faylda @media print umuman YO'Q edi: bosh sahifa
+     qog'ozga ekrandagidek — quyuq hero foni, menyu, o'q tugmalari va suzuvchi
+     panellar bilan chiqardi (rangli plakat, o'qib bo'lmaydigan matn).
+     Bosh sahifa hujjat emas, shuning uchun bu yerda "rasmiy blank" qurilmaydi;
+     vazifa — ekran bezaklarini olib tashlab, mazmunni oq qog'ozda o'qiladigan
+     qilish. Rasmiy blankli chop etish batafsil sahifalarda (site.css).
+     ============================================================ */
+  @media print{
+    @page{margin:18mm 15mm;}
+    *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+      box-shadow:none !important;text-shadow:none !important;}
+    html,body{background:#fff !important;color:#000 !important;font-size:11pt;}
+    /* Ekran boshqaruvi va bezaklari. `.hero` — aylanuvchi slayder: slaydlar
+       bir-birining ustida (position:absolute) turadi va qog'ozda ustma-ust
+       bosilib chiqadi, ustiga to'liq ekranli quyuq rasm ketadi. Bu hujjat
+       mazmuni emas, shuning uchun butunlay olib tashlanadi. Xuddi shunday
+       `.pmarquee` — yuruvchi hamkorlar lentasi. */
+    header,footer,.mnav,.nav-burger,.hero,.skip-link,.gs-ov,.gs-bar,
+    .sub-ov,.a11y-panel,.a11y-overlay,#a11y-read-overlay,.theme-tog,.arrow-link,
+    .pmarquee,.partners-sec{display:none !important;}
+    section{padding:0 0 16px !important;break-inside:auto;}
+    .wrap{max-width:none !important;width:auto !important;margin:0 !important;padding:0 !important;}
+    h1,h2,h3{color:#000 !important;page-break-after:avoid;}
+    h2{font-size:14pt;line-height:1.25;margin:0 0 10px;}
+    h3{font-size:11.5pt;line-height:1.3;}
+    p,li{orphans:3;widows:3;color:#000 !important;}
+    /* `.rv` — "ko'rinishga kirganda paydo bo'l" animatsiyasi `opacity:0` da
+       boshlanadi. Sahifani oxirigacha aylantirmay Ctrl+P bosilsa, ekranga
+       tushmagan bo'limlar qog'ozda BO'SH chiqardi. Chop etishda hammasi
+       ko'rinsin (site.css da ham xuddi shunday qoida bor). */
+    .rv{opacity:1 !important;transform:none !important;}
+    .dir,.pub,.feat,.nitem,.exp,.stats{break-inside:avoid;border-color:#ccc !important;
+      background:#fff !important;transform:none !important;}
+    /* Statistika lentasi ekranda QUYUQ ko'k fonda, matni OQ. Fonni oqartirgach
+       matn ham oq qolib, qog'ozda butun blok bo'sh chiqardi — shuning uchun
+       raqam va yorliq ranglari ham qaytadan beriladi. */
+    .stats{border:1px solid #ccc !important;}
+    .stat{border-right:1px solid #ccc !important;}
+    .stat:last-child{border-right:0 !important;}
+    .stat .n{color:#0b4f76 !important;}
+    .stat .c{color:#555 !important;}
+    img{max-width:100% !important;height:auto !important;page-break-inside:avoid;}
+  }
