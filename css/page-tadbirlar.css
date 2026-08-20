@@ -36,22 +36,7 @@
   /* ================= 3. Afisha (konferensiyalar) =================
      Eng yaqin konferensiya bir ekranda: rasm, nomi, tavsif va rasmiy
      "faktlar" jadvali (sana / vaqt / manzil). */
-  .conf-lead{display:grid;grid-template-columns:minmax(0,420px) 1fr;gap:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden;margin-bottom:34px;}
-  .cl-media{position:relative;min-height:300px;background:var(--bg-2);border-right:1px solid var(--line);}
-  .cl-media img{width:100%;height:100%;object-fit:cover;display:block;}
   /* Muqova yuklanmagan konferensiya — sana "taqvim varag'i" bo'lib turadi. */
-  .cl-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:linear-gradient(145deg,var(--accent-soft),transparent 70%);}
-  .cl-dd{font-family:var(--serif);font-weight:600;font-size:4.5rem;line-height:.9;color:var(--accent);}
-  .cl-mm{font-family:var(--mono);font-size:0.8125rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2);}
-  .cl-yy{font-family:var(--mono);font-size:0.75rem;color:var(--muted);}
-  .cl-body{padding:32px 34px 30px;display:flex;flex-direction:column;}
-  .cl-top{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
-  .cl-body h3{font-family:var(--serif);font-weight:500;font-size:clamp(21px,2.2vw,28px);line-height:1.2;margin:0 0 14px;color:var(--ink);}
-  .cl-body>p{color:var(--ink-2);font-size:0.9375rem;line-height:1.68;margin:0 0 22px;}
-  .cl-facts{display:flex;flex-wrap:wrap;gap:26px;margin:0 0 24px;padding:18px 0 0;border-top:1px solid var(--line);}
-  .cl-facts dt{font-family:var(--mono);font-size:0.65625rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
-  .cl-facts dd{margin:0;font-size:0.9375rem;color:var(--ink);}
-  .cl-acts{margin-top:auto;display:flex;gap:12px;flex-wrap:wrap;}
 
   /* ================= 4. Foto lenta (markaz hayoti) ================= */
   .life-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
@@ -88,8 +73,6 @@
   .evf dd{margin:0;font-size:0.9375rem;line-height:1.45;color:var(--ink);}
 
   @media(max-width:1180px){
-    .conf-lead{grid-template-columns:1fr;}
-    .cl-media{min-height:240px;border-right:0;border-bottom:1px solid var(--line);}
     .life-grid{grid-template-columns:repeat(2,1fr);}
   }
   @media(max-width:900px){
@@ -105,8 +88,6 @@
     .reg-title{font-size:1rem;}
     .topic-card{padding:20px;}
     .topic-card h3{font-size:1.1875rem;}
-    .cl-body{padding:22px;}
-    .cl-facts{gap:18px;}
     .life-grid{grid-template-columns:1fr;gap:14px;}
     .lc-ph{height:190px;}
     .ev-facts{grid-template-columns:1fr;}
@@ -120,6 +101,48 @@
        matnini site-common.js -> injectPrintFrame() yozadi. */
     .print-title{display:block !important;}
     body.inner{padding-top:0 !important;}
-    .reg-row,.topic-card,.life-card,.conf-lead,.evf{break-inside:avoid;box-shadow:none !important;background:#fff !important;}
-    .life-card,.topic-card,.conf-lead,.ev-facts{border-color:#ccc !important;}
+    .reg-row,.topic-card,.life-card,.evf{break-inside:avoid;box-shadow:none !important;background:#fff !important;}
   }
+
+  /* ===== Rasm slayderi — voqea sahifasi (2026-08-20) =====
+     10 tagacha rasm. Kutubxona yo'q: track `translateX(-i*100%)` bilan suriladi.
+     Balandlik `aspect-ratio` bilan qat'iy — slayd almashganda sahifa sakramaydi. */
+  .ev-slider{margin:0 0 22px;}
+  .evs-view{position:relative;overflow:hidden;border-radius:var(--r-card);border:1px solid var(--line);background:var(--bg-2);}
+  .evs-track{display:flex;transition:transform .45s cubic-bezier(.2,.7,.2,1);}
+  .evs-slide{flex:0 0 100%;aspect-ratio:16/9;background:var(--bg-2);}
+  .evs-slide img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in;}
+  .evs-nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;
+    border:1px solid rgba(255,255,255,.35);background:rgba(0,0,0,.42);color:#fff;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;transition:.2s;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
+  .evs-nav:hover{background:#fff;color:var(--ink);border-color:#fff;}
+  .evs-nav svg{width:20px;height:20px;}
+  .evs-prev{left:14px;} .evs-next{right:14px;}
+  .evs-count{position:absolute;right:14px;bottom:12px;font-family:var(--mono);font-size:11px;
+    background:rgba(0,0,0,.55);color:#fff;padding:3px 9px;border-radius:var(--r-pill);}
+  .evs-dots{display:flex;justify-content:center;gap:8px;margin-top:12px;}
+  .evs-dot{width:8px;height:8px;padding:0;border-radius:50%;border:0;background:var(--line);cursor:pointer;transition:.2s;}
+  .evs-dot.on{background:var(--accent);transform:scale(1.25);}
+  @media(prefers-reduced-motion:reduce){ .evs-track{transition:none;} }
+  @media(max-width:640px){
+    .evs-nav{width:36px;height:36px;} .evs-prev{left:8px;} .evs-next{right:8px;}
+  }
+
+  /* To'liq ekran ko'rish — rasm bosilganda. Overlay JS bilan yasaladi. */
+  .evfs{position:fixed;inset:0;z-index:1200;background:rgba(6,12,20,.94);display:none;
+    align-items:center;justify-content:center;padding:32px;}
+  .evfs.open{display:flex;}
+  .evfs img{max-width:100%;max-height:100%;object-fit:contain;border-radius:var(--r-s);}
+  .evfs-x{position:absolute;top:18px;right:18px;width:42px;height:42px;border-radius:50%;
+    border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.08);color:#fff;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;}
+  .evfs-x:hover{background:#fff;color:#111;}
+  .evfs-x svg{width:20px;height:20px;}
+
+  /* Konferensiya post kartasidagi "rasm soni" belgisi */
+  .ncard .ph-count{position:absolute;right:10px;top:10px;display:inline-flex;align-items:center;gap:5px;
+    font-family:var(--mono);font-size:11px;background:rgba(0,0,0,.55);color:#fff;padding:3px 9px;border-radius:var(--r-pill);}
+  .ncard .ph-count svg{width:13px;height:13px;}
+  .ncard .body .ev-loc{display:inline-flex;align-items:center;gap:5px;}
+  .ncard .body .ev-loc svg{width:13px;height:13px;flex:none;}
+  @media print{ .evs-nav,.evs-dots,.evs-count{display:none !important;} .evs-track{transform:none !important;} .evs-slide{flex-basis:auto;} }

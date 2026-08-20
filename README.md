@@ -358,7 +358,7 @@ ko'rinmaydi**: format `<main data-ekind="...">` atributida e'lon qilinadi
 |--------|--------------|--------|--------------|
 | `uchrashuvlar.html` | `meet` | rasmiy reyestr: `sana \| mavzu \| manzil` | Uchrashuv qayd etiladi, o'qilmaydi — sana bo'yicha kuzatish oson bo'lsin |
 | `davra-suhbatlari.html` | `round` | muhokama kartalari (yirik mavzu + tavsif) | Bu yerda «nima haqida» muhimroq |
-| `konferensiyalar.html` | `conf` | afisha (eng yaqini) + reyestr arxivi | Oldindan e'lon qilinadigan yirik tadbir — barcha ma'lumot bir ekranda |
+| `konferensiyalar.html` | `conf` | post kartalari, yangidan eskiga | Kelgusi/o'tgan AJRATILMAYDI (2026-08-20) — markaz bo'lajak yig'ilishlarni oldindan e'lon qilmaydi |
 | `markaz-hayoti.html` | `life` | foto lenta | Ichki hayot — vizual janr |
 | `tadbirlar.html` | *(yo'q)* | umumiy taqvim | Butun bo'lim bir joyda |
 
@@ -367,6 +367,18 @@ ko'rinmaydi**: format `<main data-ekind="...">` atributida e'lon qilinadi
   qiymat qo'shsangiz shu yerga ham qo'shing, aks holda voqea faqat
   `tadbirlar.html` da ko'rinadi. Admin panel ham xuddi shu jadvaldan o'qiydi —
   ro'yxatdagi «Saytda» ustuni va formadagi izoh shundan chiqadi.
+- **Rasm to'plami (slayder).** Har bir voqeaga **10 tagacha rasm** biriktiriladi
+  (admin → voqea formasi → «Rasmlar (slayder uchun)»). Ular voqeaning
+  o'z sahifasida (`tadbir.html`) slayder bo'lib chiqadi: yon strelkalar,
+  nuqtalar, klaviatura strelkalari va telefonda barmoq bilan surish; rasm
+  bosilsa to'liq ekranda ochiladi. Ro'yxatdagi kartada esa faqat muqova va
+  «N ta rasm» belgisi ko'rinadi — 10 ta karta × 10 ta rasm sahifani
+  og'irlashtirmasin.
+  > Muqova (`cover`) alohida maydon bo'lib qoladi va slayderda BIRINCHI
+  > bo'lib ko'rsatiladi (agar to'plamda takrorlanmasa). Ya'ni faqat muqova
+  > qo'yilgan eski voqealar avvalgidek ko'rinaveradi.
+  > Tartib admin panelda rasmni **sudrab** o'zgartiriladi.
+  > Ma'lumot: `events.photos` — `[{url}]`, `media.photos` bilan bir xil shakl.
 - O'tgan voqealar **yil bo'yicha arxiv**da. Yil filtri faqat bir nechta yil
   to'planganda chiqadi (bitta yilda u hech narsani filtrlamaydi).
 - Uslublar — `page-tadbirlar.css` (voqea sahifasi ham shu faylni ulaydi).

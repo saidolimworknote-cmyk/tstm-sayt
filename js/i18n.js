@@ -393,6 +393,10 @@
     search_hint:  { uz: "Qidirish uchun yozing yoki quyidan tanlang", ru: 'Введите запрос или выберите ниже', en: 'Type to search or pick below' },
     search_clear: { uz: 'Tozalash', ru: 'Очистить', en: 'Clear' },
     close:        { uz: 'Yopish', ru: 'Закрыть', en: 'Close' },
+    /* Voqea sahifasidagi rasm slayderi (2026-08-20). Faqat skrin-rider va
+       sichqoncha uchun yorliq — ekranda matn ko'rinmaydi (strelka ikonkasi). */
+    ev_photo_prev:{ uz: 'Oldingi rasm', ru: 'Предыдущее фото', en: 'Previous photo' },
+    ev_photo_next:{ uz: 'Keyingi rasm', ru: 'Следующее фото', en: 'Next photo' },
     f_author:     { uz: 'Muallif', ru: 'Автор', en: 'Author' },
     f_all:        { uz: 'Hammasi', ru: 'Все', en: 'All' },
     a11y_title:   { uz: 'Maxsus imkoniyatlar', ru: 'Спец. возможности', en: 'Accessibility' },

@@ -63,6 +63,33 @@ Site.initPage({ active: 'events', render(){
   const printHead = Site.printHeadHTML();
   const printFoot = Site.printFootHTML();
 
+  /* ---------- Rasm slayderi (2026-08-20) ----------
+     Voqeaga 10 tagacha rasm biriktiriladi (`events.photos`). Bitta rasm bo'lsa
+     oddiy surat, bir nechtasi bo'lsa — yon strelka, nuqta va barmoq bilan
+     surish (swipe) ishlaydigan slayder. Rasm bosilsa to'liq ekranda ochiladi.
+     Muqova (`cover`) alohida maydon: agar to'plamda bo'lmasa, birinchi
+     bo'lib qo'shiladi — admin muqova qo'yib, rasm to'plamini bo'sh qoldirsa
+     ham sahifa avvalgidek ko'rinadi. */
+  const photos = (Array.isArray(ev.photos) ? ev.photos : [])
+    .map(p => (p && p.url) || '').filter(Boolean);
+  if (ev.cover && photos.indexOf(ev.cover) < 0) photos.unshift(ev.cover);
+
+  const sliderHTML = !photos.length ? '' : (photos.length === 1
+    ? `<div class="hero-img"><img src="${Site.safeUrl(photos[0])}" alt=""></div>`
+    : `<div class="ev-slider" id="evSlider">
+        <div class="evs-view">
+          <div class="evs-track" data-track>${photos.map(u =>
+            `<div class="evs-slide"><img src="${Site.safeUrl(u)}" alt="" loading="lazy"></div>`).join('')}</div>
+          <button type="button" class="evs-nav evs-prev" data-prev aria-label="${esc(T('ev_photo_prev'))}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button type="button" class="evs-nav evs-next" data-next aria-label="${esc(T('ev_photo_next'))}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <span class="evs-count" data-count>1 / ${photos.length}</span>
+        </div>
+        <div class="evs-dots" data-dots>${photos.map((_, i) =>
+          `<button type="button" class="evs-dot${i ? '' : ' on'}" data-go="${i}" aria-label="${i + 1}"></button>`).join('')}</div>
+      </div>`);
+
   // Shu bo'limdagi boshqa voqealar — sanaga eng yaqinlari
   const related = Store.all('events')
     .filter(x => x.status === 'published' && x.id !== ev.id)
@@ -77,7 +104,7 @@ Site.initPage({ active: 'events', render(){
     </div></div>
     <section class="block"><div class="wrap"><div class="article">
       <div class="meta">${typeLbl ? `<span class="tag">${esc(typeLbl)}</span>` : ''}${badge}<span class="dt mono muted">${esc(Site.fmtDate(ev.date))}</span><span class="dt mono muted vct-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" class="ico-15"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg><b id="viewn">·</b> ${esc(T('views_label'))}</span></div>
-      ${ev.cover ? `<div class="hero-img"><img src="${Site.safeUrl(ev.cover)}" alt=""></div>` : ''}
+      ${sliderHTML}
       <dl class="ev-facts">${facts}</dl>
       <div class="content">${bodyHtml || '<p class="muted">' + esc(T('soon_text')) + '</p>'}</div>
       <div class="act-row" id="actRow">
@@ -102,6 +129,80 @@ Site.initPage({ active: 'events', render(){
 
   Site.initReveal();
   Store.bumpView('events', ev.id, function(c){ const el = document.getElementById('viewn'); if(el) el.textContent = c; });
+
+  /* ---- slayder harakati ----
+     Sof CSS transform bilan: `translateX(-i * 100%)`. Kutubxona yo'q.
+     CSP eslatmasi: inline `style=""` bloklangan, lekin `el.style.x = ...`
+     (CSSOM) ruxsat etilgan — site-common.js dagi banner ham shunday ishlaydi. */
+  (function initSlider(){
+    const box = document.getElementById('evSlider');
+    if (!box) return;
+    const track = box.querySelector('[data-track]');
+    const dots  = [...box.querySelectorAll('[data-go]')];
+    const cnt   = box.querySelector('[data-count]');
+    const n = dots.length;
+    let i = 0;
+
+    function show(k){
+      i = (k + n) % n;
+      track.style.transform = 'translateX(' + (-i * 100) + '%)';
+      dots.forEach((d, x) => d.classList.toggle('on', x === i));
+      if (cnt) cnt.textContent = (i + 1) + ' / ' + n;
+    }
+    box.querySelector('[data-prev]').onclick = () => show(i - 1);
+    box.querySelector('[data-next]').onclick = () => show(i + 1);
+    dots.forEach((d, x) => { d.onclick = () => show(x); });
+
+    // Klaviatura: slayder ko'rinib turganda chap/o'ng strelkalar ishlaydi
+    document.addEventListener('keydown', (e) => {
+      if (document.querySelector('.evfs.open')) return;   // to'liq ekran o'zi boshqaradi
+      if (e.key === 'ArrowLeft') show(i - 1);
+      else if (e.key === 'ArrowRight') show(i + 1);
+    });
+
+    // Barmoq bilan surish. 40px dan kam siljish — bosish deb hisoblanadi
+    // (aks holda rasmni ochmoqchi bo'lgan odam slaydni surib yuborardi).
+    let x0 = null, dx = 0;
+    const view = box.querySelector('.evs-view');
+    view.addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; dx = 0; }, { passive: true });
+    view.addEventListener('touchmove',  (e) => { if (x0 !== null) dx = e.touches[0].clientX - x0; }, { passive: true });
+    view.addEventListener('touchend',   () => {
+      if (x0 !== null && Math.abs(dx) > 40) show(i + (dx < 0 ? 1 : -1));
+      x0 = null;
+    });
+
+    /* To'liq ekran ko'rish. Overlay HTML'da EMAS — kerak bo'lganda yasaladi:
+       rasmsiz voqealarda bekorga DOM band qilmaydi. */
+    let fs = null;
+    function openFs(){
+      if (!fs) {
+        fs = document.createElement('div');
+        fs.className = 'evfs';
+        fs.innerHTML = '<button type="button" class="evfs-x" aria-label="' + esc(T('close')) + '">'
+          + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M6 6l12 12M18 6 6 18"/></svg></button>'
+          + '<img alt="">';
+        document.body.appendChild(fs);
+        fs.querySelector('.evfs-x').onclick = closeFs;
+        fs.onclick = (e) => { if (e.target === fs) closeFs(); };
+      }
+      fs.querySelector('img').src = box.querySelectorAll('.evs-slide img')[i].src;
+      fs.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeFs(){
+      if (!fs) return;
+      fs.classList.remove('open');
+      fs.querySelector('img').removeAttribute('src');   // xotirani bo'shatamiz
+      document.body.style.overflow = '';
+    }
+    box.querySelectorAll('.evs-slide img').forEach(im => { im.onclick = openFs; });
+    document.addEventListener('keydown', (e) => {
+      if (!fs || !fs.classList.contains('open')) return;
+      if (e.key === 'Escape') closeFs();
+      else if (e.key === 'ArrowLeft')  { show(i - 1); openFs(); }
+      else if (e.key === 'ArrowRight') { show(i + 1); openFs(); }
+    });
+  })();
 
   /* ---- amal tugmalari ---- */
   const row = document.getElementById('actRow');

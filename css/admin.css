@@ -460,3 +460,18 @@
     .grid2,.grid3{grid-template-columns:1fr;}
     .userchip .un,.userchip .ur{display:none;}
   }
+
+  /* ===== Rasm to'plami maydoni (2026-08-20) =====
+     Voqea sahifasidagi slayder uchun 10 tagacha rasm. Tartib sudrab
+     o'zgartiriladi va u slayderdagi ketma-ketlikni belgilaydi. */
+  .imgs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:12px;}
+  .imgs-grid:empty{display:none;}
+  .imgs-tile{position:relative;aspect-ratio:4/3;border:1px solid var(--line);border-radius:var(--r-s);overflow:hidden;background:var(--line-2);cursor:grab;}
+  .imgs-tile img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;}
+  .imgs-tile.drag{opacity:.4;cursor:grabbing;}
+  .imgs-tile .imgs-n{position:absolute;left:6px;bottom:6px;font-family:var(--mono);font-size:10px;
+    background:rgba(0,0,0,.6);color:#fff;padding:1px 6px;border-radius:var(--r-pill);}
+  .imgs-del{position:absolute;top:5px;right:5px;width:22px;height:22px;line-height:1;border:0;border-radius:50%;
+    background:rgba(0,0,0,.6);color:#fff;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .imgs-del:hover{background:var(--danger,#c0392b);}
+  .imgs-bar{display:flex;align-items:center;gap:12px;}

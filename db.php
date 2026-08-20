@@ -64,6 +64,10 @@ $SCHEMA = [
     // Voqea muqovasi (2026-08-19): voqea sahifasi va "Markaz hayoti"
     // foto lentasi shu rasmga tayanadi. Nashrlardagi `cover` bilan bir xil.
     ['key' => 'cover'],
+    // Rasm to'plami (2026-08-20): voqea sahifasidagi slayder. 10 tagacha
+    // element, har biri {url, title:{uz,ru,en}} — `media.photos` bilan bir xil
+    // shakl, ya'ni ikkala joyda ham bitta ko'rinishdagi ma'lumot.
+    ['key' => 'photos', 'type' => 'json'],
   ]],
   'experts' => ['table' => 'experts', 'cols' => [
     ['key' => 'name', 'type' => 'json'], ['key' => 'role', 'type' => 'json'],
@@ -272,6 +276,7 @@ function provision_schema($pdo) {
     id VARCHAR(40) PRIMARY KEY,
     title LONGTEXT, date DATE NULL, time VARCHAR(20), location LONGTEXT,
     type VARCHAR(120), status VARCHAR(40), body LONGTEXT, cover VARCHAR(500),
+    photos LONGTEXT,
     $seq, INDEX(status), INDEX(date)
   )$tail");
 
@@ -468,6 +473,8 @@ function migrate($pdo) {
   // "Markaz hayoti" foto lentasi uchun muqova rasmi (2026-08-19)
   ensure_cols($pdo, 'events', [
     'cover' => 'VARCHAR(500)',
+    // Rasm to'plami — voqea sahifasidagi slayder (2026-08-20)
+    'photos' => 'LONGTEXT',
   ]);
   // hamkorlar.html — toifa bo'yicha guruhlash va karta matni (2026-08-17)
   ensure_cols($pdo, 'partners', [

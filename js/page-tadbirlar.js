@@ -11,9 +11,12 @@
                          muhimi sana, tomonlar va joy bir qarashda ko'rinsin.
      davra-suhbatlari -> `topics`   : muhokama kartalari. Bu yerda MAVZU asosiy,
                          shuning uchun sarlavha yirik va tavsif ko'rinadi.
-     konferensiyalar  -> `program`  : eng yaqin konferensiya afisha bo'lib
-                         chiqadi (sana, manzil, tavsif, taqvimga qo'shish),
-                         qolganlari karta, o'tganlari yil bo'yicha arxiv.
+     konferensiyalar  -> `posts`    : yangiliklar uslubidagi post kartalari,
+                         yangidan eskiga BITTA oqimda. Bu yerda "kelgusi /
+                         o'tgan" AJRATILMAYDI (2026-08-20): markaz bo'lajak
+                         yig'ilishlarni oldindan e'lon qilmaydi, shuning uchun
+                         afisha mantiqi ortiqcha edi va sahifa ko'pincha bo'sh
+                         "Kelgusi konferensiya yo'q" bloki bilan ochilardi.
      markaz-hayoti    -> `gallery`  : foto lenta. Ichki hayot — vizual janr;
                          muqova rasmi bo'lmasa karta matn ko'rinishida qoladi.
      tadbirlar.html   -> `mixed`    : butun bo'limning umumiy taqvimi.
@@ -98,30 +101,6 @@ Site.initPage({
     };
     const topics = (list) => `<div class="topic-grid">${list.map(topicCard).join('')}</div>`;
 
-    /* ---------- format 3: afisha + kartalar (konferensiyalar) ----------
-       Konferensiya oldindan e'lon qilinadigan yirik tadbir: eng yaqini
-       to'liq afisha bo'lib chiqadi, tashrifchi bir ekranda barcha kerakli
-       ma'lumotni oladi va taqvimiga qo'shib qo'yadi. */
-    const confLead = (e) => {
-      const d = clip(strip(ml(e.body)), 320);
-      const dd = Site.dayMonth(e.date), yy = year(e);
-      return `<article class="conf-lead rv">
-        <div class="cl-media">${e.cover
-          ? `<img src="${Site.safeUrl(e.cover)}" alt="" loading="lazy">`
-          : `<div class="cl-ph"><span class="cl-dd">${esc(dd.dd || '')}</span><span class="cl-mm">${esc(dd.mm || '')}</span><span class="cl-yy">${esc(yy)}</span></div>`}</div>
-        <div class="cl-body">
-          <div class="cl-top">${ml(e.type) ? `<span class="ev-type">${esc(ml(e.type))}</span>` : ''}${badge(e)}</div>
-          <h3>${esc(ml(e.title))}</h3>
-          ${d ? `<p>${esc(d)}</p>` : ''}
-          <dl class="cl-facts">
-            <div><dt>${esc(T('ev_when'))}</dt><dd>${esc(Site.fmtDate(e.date))}</dd></div>
-            ${e.time ? `<div><dt>${esc(T('ev_time_l'))}</dt><dd>${esc(e.time)}</dd></div>` : ''}
-            ${ml(e.location) ? `<div><dt>${esc(T('ev_where'))}</dt><dd>${esc(ml(e.location))}</dd></div>` : ''}
-          </dl>
-          <div class="cl-acts"><a class="btn" href="${href(e)}">${esc(T('ev_details'))} →</a></div>
-        </div>
-      </article>`;
-    };
     const evCard = (e) => {
       const d = Site.dayMonth(e.date), yy = year(e), desc = clip(strip(ml(e.body)), 150);
       return `<a class="ev-card rv" href="${href(e)}">
@@ -134,9 +113,30 @@ Site.initPage({
         </div>
       </a>`;
     };
-    const program = (list) => list.length
-      ? confLead(list[0]) + (list.length > 1 ? `<div class="ev-list mt-28">${list.slice(1).map(evCard).join('')}</div>` : '')
-      : '';
+    /* ---------- format 6: post kartalari (konferensiyalar) ----------
+       2026-08-20: konferensiyalar "kelgusi / o'tgan" deb AJRATILMAYDI —
+       markaz bo'lajak yig'ilishlarni oldindan e'lon qilmaydi, shuning uchun
+       afisha ("eng yaqini") mantiqi ortiqcha edi va sahifa ko'pincha bo'sh
+       "Kelgusi konferensiya yo'q" bloki bilan ochilardi. Endi bitta oqim:
+       yangidan eskiga, yangiliklar bilan bir xil karta (`.ncard`).
+       Rasm to'plami bo'lsa muqova ustida "N" belgisi chiqadi. */
+    const postCard = (e) => {
+      const ph = Array.isArray(e.photos) ? e.photos : [];
+      const cover = e.cover || (ph[0] && ph[0].url) || '';
+      const loc = ml(e.location);
+      return `<a class="ncard rv" href="${href(e)}">
+        <div class="img ph">${cover
+          ? `<img src="${Site.safeUrl(cover)}" alt="" loading="lazy">`
+          : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.8"/><path d="m3 17 5-4 4 3 3-3 6 5"/></svg>`}
+          ${ml(e.type) ? `<span class="tag">${esc(ml(e.type))}</span>` : ''}
+          ${ph.length > 1 ? `<span class="ph-count">${ICON.photo}${ph.length}</span>` : ''}
+          <div class="ovl"><h3>${esc(ml(e.title))}</h3></div>
+        </div>
+        <div class="body"><span class="dt">${esc(Site.fmtDate(e.date))}</span>${
+          loc ? `<span class="dt ev-loc">${ICON.pin}${esc(loc)}</span>` : ''}</div>
+      </a>`;
+    };
+    const posts = (list) => `<div class="cards">${list.map(postCard).join('')}</div>`;
 
     /* ---------- format 4: foto lenta (markaz hayoti) ----------
        Ichki hayot vizual janr. Muqova yuklanmagan bo'lsa karta buzilmaydi —
@@ -158,7 +158,8 @@ Site.initPage({
     const LAYOUT = {
       meet:  { up: register, ar: register, upTk: 'ev_up_meet',  arTk: 'ev_ar_meet',  noneTk: 'ev_none_meet'  },
       round: { up: topics,   ar: topics,   upTk: 'ev_up_round', arTk: 'ev_ar_round', noneTk: 'ev_none_round' },
-      conf:  { up: program,  ar: register, upTk: 'ev_up_conf',  arTk: 'ev_ar_conf',  noneTk: 'ev_none_conf'  },
+      // `single` — kelgusi/o'tgan ajratilmaydi, hammasi bitta oqimda
+      conf:  { single: posts, noneTk: 'ev_none_conf' },
       life:  { up: gallery,  ar: gallery,  upTk: 'ev_up_life',  arTk: 'ev_ar_life',  noneTk: 'ev_none_life'  },
       all:   { up: mixed,    ar: register, upTk: 'ev_upcoming', arTk: 'ev_past',     noneTk: 'ev_none'       }
     };
@@ -173,7 +174,12 @@ Site.initPage({
        bo'lganda (na kelgusi, na o'tgan) ko'rsatiladi. */
     const upEl = document.getElementById('upcoming');
     if (upEl) {
-      if (up.length) upEl.innerHTML = head(L.upTk, up.length) + L.up(up);
+      if (L.single) {
+        // Bitta oqim: yangidan eskiga. Sarlavha yozilmaydi — bo'lim nomi
+        // bannerda allaqachon turibdi, ikkinchi marta takrorlash ortiqcha.
+        const hammasi = all.slice().sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+        upEl.innerHTML = hammasi.length ? L.single(hammasi) : empty(L.noneTk);
+      } else if (up.length) upEl.innerHTML = head(L.upTk, up.length) + L.up(up);
       else if (past.length) upEl.innerHTML = '';
       else upEl.innerHTML = head(L.upTk, 0) + empty(L.noneTk);
     }
@@ -184,7 +190,8 @@ Site.initPage({
        bitta yilda u hech narsani filtrlamaydi va faqat halaqit berardi. */
     const arEl = document.getElementById('archive');
     if (arEl) {
-      if (!past.length) { arEl.innerHTML = ''; }
+      // `single` bo'limda arxiv YO'Q — hamma narsa yuqoridagi bitta oqimda
+      if (L.single || !past.length) { arEl.innerHTML = ''; }
       else {
         const years = [...new Set(past.map(year).filter(Boolean))];
         const groups = years.map(y => ({ y, items: past.filter(e => year(e) === y) }));

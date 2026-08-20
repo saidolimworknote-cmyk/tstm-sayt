@@ -146,7 +146,10 @@
         // Muqova "Markaz hayoti" sahifasida ASOSIY element (foto lenta), qolgan
         // bo'limlarda voqea sahifasini bezaydi. Bo'sh qolsa hech narsa buzilmaydi.
         { k: 'cover', label: 'Muqova (rasm)', type: 'image', side: 1 },
-        { k: 'status', label: 'Holat', type: 'status', side: 1 }
+        { k: 'status', label: 'Holat', type: 'status', side: 1 },
+        // Rasm to'plami (2026-08-20): voqea sahifasida slayder bo'lib chiqadi.
+        // Asosiy ustunda — chunki 10 tagacha plitka yon ustunga sig'maydi.
+        { k: 'photos', label: 'Rasmlar (slayder uchun, 10 tagacha)', type: 'images', max: 10 }
       ]
     },
     publications: {
@@ -920,6 +923,7 @@
     });
     // uploaders
     $$('#entForm [data-upload]').forEach(wireUploader);
+    $$('#entForm .field[data-type="images"]').forEach(wireImages);
     // submit
     $('#entForm').addEventListener('submit', (e) => { e.preventDefault(); if (pendingUploads > 0) { toast('Rasm yuklanmoqda, biroz kuting…', 1); return; } saveForm(cfg, item, isNew); });
     if (!isNew) $('#delBtn').onclick = () => confirmDelete(state.coll, item.id);
@@ -1063,6 +1067,15 @@
     btn.disabled = false; btn.innerHTML = orig;
   }
 
+  // Rasm to'plamidagi bitta plitka. `data-url` — saqlanadigan yagona qiymat.
+  function imgTile(p, i) {
+    const url = (p && p.url) || '';
+    return `<div class="imgs-tile" draggable="true" data-i="${i}" data-url="${esc(url)}">
+      <img src="${safeUrl(url)}" alt="">
+      <button type="button" class="imgs-del" data-del title="O'chirish">×</button>
+      <span class="imgs-n">${i + 1}</span></div>`;
+  }
+
   function fieldHTML(f, item) {
     const val = item[f.k];
     const lab = `<label>${esc(f.label)}${f.req ? ' <span class="req">*</span>' : ''}</label>`;
@@ -1071,6 +1084,25 @@
       const cur = val || opts[0];
       return `<div class="field" data-k="${f.k}" data-type="status">${lab}
         <select class="ctl">${opts.map(o => `<option value="${o}" ${o === cur ? 'selected' : ''}>${STLABEL[o]}</option>`).join('')}</select></div>`;
+    }
+    /* ---------- Rasm to'plami (2026-08-20) ----------
+       Voqea sahifasidagi slayder uchun. Bitta `cover` dan farqi: bu yerda
+       massiv saqlanadi ({url, title}), tartib esa ko'rsatilish tartibi.
+       Shakl `media.photos` bilan AYNAN bir xil — fotoalbom kodi bilan bir xil
+       ma'lumot, ya'ni kelajakda ikkalasini birlashtirish oson. */
+    if (f.type === 'images') {
+      const list = Array.isArray(val) ? val : [];
+      const max = f.max || 10;
+      return `<div class="field" data-k="${f.k}" data-type="images" data-max="${max}">${lab}
+        <div class="imgs" data-imgs>
+          <div class="imgs-grid" data-grid>${list.map((p, i) => imgTile(p, i)).join('')}</div>
+          <div class="imgs-bar">
+            <button type="button" class="btn sm" data-add>${ic('plus')} Rasm qo'shish</button>
+            <span class="hint" data-count>${list.length} / ${max}</span>
+          </div>
+          <div class="hint">Tartibni o'zgartirish uchun rasmni sudrab suring. Birinchisi slayderda birinchi ko'rinadi.</div>
+          <input type="file" accept="image/*" multiple hidden data-input>
+        </div></div>`;
     }
     if (f.type === 'image' || f.type === 'file') {
       const isImg = f.type === 'image';
@@ -1188,6 +1220,67 @@
       btn.innerHTML = pendingUploads > 0 ? (ic('upload') + ' Fayl yuklanmoqda…') : (ic('save') + ' Saqlash');
     }
   }
+  /* Rasm to'plami maydonining mantiqi: yuklash, o'chirish, sudrab tartiblash.
+     Tartib MUHIM — slayderda rasmlar shu ketma-ketlikda ko'rsatiladi. */
+  function wireImages(field) {
+    const grid = $('[data-grid]', field);
+    const input = $('[data-input]', field);
+    const max = parseInt(field.dataset.max, 10) || 10;
+    const countEl = $('[data-count]', field);
+
+    const renumber = () => {
+      const tiles = $$('.imgs-tile', grid);
+      tiles.forEach((t, i) => { t.dataset.i = i; $('.imgs-n', t).textContent = i + 1; });
+      if (countEl) countEl.textContent = tiles.length + ' / ' + max;
+    };
+    const wireTile = (t) => {
+      $('[data-del]', t).onclick = () => { t.remove(); renumber(); };
+      t.addEventListener('dragstart', (e) => { t.classList.add('drag'); e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', t.dataset.i); } catch {} });
+      t.addEventListener('dragend', () => t.classList.remove('drag'));
+    };
+    $$('.imgs-tile', grid).forEach(wireTile);
+
+    grid.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      const dragging = $('.imgs-tile.drag', grid); if (!dragging) return;
+      // Sichqoncha qaysi plitkaning chap yarmida turganini topamiz va
+      // sudralayotganini o'sha yerga qo'yamiz (oddiy, kutubxonasiz usul).
+      const after = $$('.imgs-tile:not(.drag)', grid).find(t => {
+        const r = t.getBoundingClientRect();
+        return e.clientY < r.bottom && e.clientX < r.left + r.width / 2;
+      });
+      if (after) grid.insertBefore(dragging, after); else grid.appendChild(dragging);
+    });
+    grid.addEventListener('drop', (e) => { e.preventDefault(); renumber(); });
+
+    $('[data-add]', field).onclick = () => {
+      if ($$('.imgs-tile', grid).length >= max) { toast(`Ko'pi bilan ${max} ta rasm`, 1); return; }
+      input.click();
+    };
+    input.onchange = () => {
+      const files = [...input.files];
+      input.value = '';
+      if (!files.length) return;
+      const bosh = $$('.imgs-tile', grid).length;
+      const joy = max - bosh;
+      if (joy <= 0) { toast(`Ko'pi bilan ${max} ta rasm`, 1); return; }
+      if (files.length > joy) toast(`Faqat ${joy} tasi qo'shildi — chegara ${max} ta`, 1);
+      files.slice(0, joy).forEach(fl => {
+        uploadBusy(1);
+        resizeImage(fl, 1600, (url) => {
+          Store.uploadImage(url, (saved) => {
+            uploadBusy(-1);
+            if (!saved) { toast('Rasm yuklanmadi', 1); return; }
+            const wrap = document.createElement('div');
+            wrap.innerHTML = imgTile({ url: saved }, $$('.imgs-tile', grid).length);
+            const tile = wrap.firstElementChild;
+            grid.appendChild(tile); wireTile(tile); renumber();
+          });
+        });
+      });
+    };
+  }
+
   function wireUploader(field) {
     const input = $('[data-input]', field), valEl = $('[data-val]', field), pick = $('[data-pick]', field);
     const type = field.dataset.type;
@@ -1242,7 +1335,10 @@
       const k = fl.dataset.k; if (!k) return;
       const f = cfg.fields.find(x => x.k === k);
       const type = fl.dataset.type;
-      if (type === 'image' || type === 'file' || type === 'status') {
+      if (type === 'images') {
+        // Tartib DOM dagi tartib — admin sudrab qo'ygani qanday bo'lsa shunday
+        obj[k] = $$('.imgs-tile', fl).map(t => ({ url: t.dataset.url }));
+      } else if (type === 'image' || type === 'file' || type === 'status') {
         const v = type === 'status' ? $('select.ctl', fl).value : $('[data-val]', fl).value;
         obj[k] = v;
       } else if (fl.hasAttribute('data-ml')) {
