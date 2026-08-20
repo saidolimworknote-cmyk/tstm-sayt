@@ -9,7 +9,11 @@
   /* Utility/komponent klasslar — inline style="" o'rniga (CSP style-src 'self').
      admin-ui.js render funksiyalari shulardan foydalanadi. */
   .btn-login-full{width:100%;justify-content:center;padding:12px;}
-  .sb-brand-h{height:70px;}
+  /* 2026-08-20: `height:70px` OLIB TASHLANDI. Markaz nomi endi sozlamadan
+     keladi va uzunligi oldindan noma'lum — to'liq nom 4 qatorga chiqadi va
+     qat'iy balandlikdan toshib, ajratuvchi chiziq bilan menyu ustiga
+     bosilardi. Balandlik endi mazmunga qarab o'sadi (min-height .sb-brand da). */
+  .sb-brand-h{height:auto;}
   /* padding / margin */
   .a-p6{padding:6px;} .a-p20{padding:20px;} .a-p22{padding:22px;} .a-p24{padding:24px;}
   .a-p24-mb20{padding:24px;margin-bottom:20px;} .a-p24-mt20{padding:24px;margin-top:20px;}
@@ -162,8 +166,10 @@
   .sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sb);background:var(--sidebar);border-right:1px solid var(--line);display:flex;flex-direction:column;z-index:40;transition:transform .25s;}
   .sb-brand{display:flex;align-items:center;gap:12px;padding:18px 18px;border-bottom:1px solid var(--line);min-height:78px;}
   .sb-brand img{height:46px;width:auto;flex:none;}
-  .sb-brand .divider{width:1.5px;height:38px;background:var(--line);flex:none;}
-  .sb-brand .bn{font-family:var(--serif);font-weight:600;font-size:13.5px;line-height:1.22;}
+  .sb-brand .divider{width:1.5px;align-self:stretch;min-height:38px;background:var(--line);flex:none;}
+  /* Nom sozlamadan keladi — uzun bo'lsa ham sig'sin: o'lcham biroz kichraytirildi
+     va so'z bo'yicha ko'chadi (min-width:0 busiz flex elementi qisqarmaydi). */
+  .sb-brand .bn{font-family:var(--serif);font-weight:600;font-size:12.5px;line-height:1.25;min-width:0;overflow-wrap:break-word;}
   .sb-brand .bn small{display:block;font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:2px;font-weight:400;}
   .sb-nav{flex:1;overflow-y:auto;padding:14px 12px 20px;}
   .sb-group{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:16px 12px 8px;}
@@ -172,6 +178,14 @@
   .sb-item.active{background:var(--sb-active);color:var(--accent-ink);font-weight:600;}
   .sb-item.active::before{content:"";position:absolute;left:-12px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--accent);}
   .sb-item svg{width:18px;height:18px;flex:none;stroke-width:1.7;}
+  /* Izohli band: bo'lim nomi ostida u saytda QAYSI sahifada ko'rinishi yoziladi
+     (2026-08-20). Ikona yuqoriga tekislanadi, aks holda ikki qatorli matnning
+     o'rtasida osilib qoladi. */
+  .sb-item .sb-txt{display:block;min-width:0;}
+  .sb-item .sb-note{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.02em;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .sb-item.has-note{align-items:flex-start;padding-top:8px;padding-bottom:8px;}
+  .sb-item.has-note svg{margin-top:1px;}
+  .sb-item.active .sb-note{color:var(--accent-ink);opacity:.75;}
   .sb-item .ct{margin-left:auto;font-size:11px;font-family:var(--mono);background:var(--line);color:var(--ink-2);padding:1px 7px;border-radius:var(--r-pill);}
   .sb-item.active .ct{background:var(--accent);color:#fff;}
   .sb-foot{padding:12px;border-top:1px solid var(--line);}
@@ -297,6 +311,16 @@
   .ctl.a-w110-none{width:110px;}
   select.ctl{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a909a' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:34px;cursor:pointer;}
   .field .hint{font-size:11.5px;color:var(--muted);margin-top:6px;}
+  /* "Saytda qayerda ko'rinadi" (2026-08-20) — voqea/nashr turi tanlanganda
+     yozuv qaysi sahifaga tushishini darhol aytadi. Ilgari buni faqat saytga
+     chiqib, sahifama-sahifa qidirib bilish mumkin edi. */
+  .field .kind-hint{border-left:2px solid var(--accent);padding:5px 0 5px 9px;line-height:1.5;}
+  .field .kind-hint b{color:var(--ink);}
+  .field .kind-hint .mono{font-family:var(--mono);font-size:10.5px;opacity:.8;}
+  .kind-tag{display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.03em;
+    padding:2px 8px;border-radius:var(--r-pill);border:1px solid var(--accent);color:var(--accent);white-space:nowrap;}
+  /* Turi biror bo'limga biriktirilmagan: yozuv faqat umumiy ro'yxatda chiqadi */
+  .kind-tag.weak{border-color:var(--line);color:var(--muted);}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
   .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;}
 

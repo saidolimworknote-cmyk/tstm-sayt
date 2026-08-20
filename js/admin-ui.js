@@ -135,14 +135,14 @@
     },
     events: {
       label: 'Tadbirlar', singular: 'tadbir', icon: 'events', status: true, search: 'title',
-      columns: [{ k: 'title', label: 'Tadbir', ml: 1, thumb: 'cover' }, { k: 'date', label: 'Sana', type: 'date' }, { k: 'time', label: 'Vaqt' }, { k: 'type', label: 'Turi' }, { k: 'status', label: 'Holat', type: 'status' }],
+      columns: [{ k: 'title', label: 'Tadbir', ml: 1, thumb: 'cover' }, { k: 'date', label: 'Sana', type: 'date' }, { k: 'time', label: 'Vaqt' }, { k: 'type', label: 'Turi' }, { k: 'type', label: 'Saytda', type: 'kind' }, { k: 'status', label: 'Holat', type: 'status' }],
       fields: [
         { k: 'title', label: 'Tadbir nomi', type: 'text', ml: 1, req: 1 },
         { k: 'body', label: 'Tavsif', type: 'rich', ml: 1 },
         { k: 'date', label: 'Sana', type: 'date', side: 1 },
         { k: 'time', label: 'Boshlanish vaqti', type: 'text', side: 1, ph: '10:00' },
         { k: 'location', label: 'Manzil', type: 'text', ml: 1, side: 1 },
-        { k: 'type', label: 'Turi', type: 'select', side: 1, opts: ['Uchrashuv', 'Davra suhbati', 'Konferensiya', 'Markaz hayoti', "Ta'lim dasturi", 'Brifing', 'Taqdimot', 'Forum'] },
+        { k: 'type', label: 'Turi', type: 'select', side: 1, kindHint: 1, opts: ['Uchrashuv', 'Davra suhbati', 'Konferensiya', 'Markaz hayoti', "Ta'lim dasturi", 'Brifing', 'Taqdimot', 'Forum'] },
         // Muqova "Markaz hayoti" sahifasida ASOSIY element (foto lenta), qolgan
         // bo'limlarda voqea sahifasini bezaydi. Bo'sh qolsa hech narsa buzilmaydi.
         { k: 'cover', label: 'Muqova (rasm)', type: 'image', side: 1 },
@@ -151,12 +151,12 @@
     },
     publications: {
       label: 'Nashrlar', singular: 'nashr', icon: 'pub', status: true, search: 'title',
-      columns: [{ k: 'title', label: 'Nashr', ml: 1, thumb: 'cover' }, { k: 'type', label: 'Turi' }, { k: 'year', label: 'Yil' }, { k: 'status', label: 'Holat', type: 'status' }],
+      columns: [{ k: 'title', label: 'Nashr', ml: 1, thumb: 'cover' }, { k: 'type', label: 'Turi' }, { k: 'type', label: 'Saytda', type: 'kind' }, { k: 'year', label: 'Yil' }, { k: 'status', label: 'Holat', type: 'status' }],
       fields: [
         { k: 'title', label: 'To\'liq sarlavha', type: 'text', ml: 1, req: 1 },
         { k: 'shortTitle', label: 'Qisqa sarlavha (ixtiyoriy)', type: 'text', ml: 1, ph: 'Banner va ro\'yxatda ko\'rinadi — bo\'sh qolsa to\'liq sarlavha ishlatiladi' },
         { k: 'desc', label: 'Tavsif / annotatsiya', type: 'rich', ml: 1 },
-        { k: 'type', label: 'Turi', type: 'select', side: 1, opts: ['Tahlil', 'Tahliliy sharh', 'Monografiya', 'Maqola', "Statistik to'plam", "Ma'ruza"] },
+        { k: 'type', label: 'Turi', type: 'select', side: 1, kindHint: 1, opts: ['Tahlil', 'Tahliliy sharh', 'Monografiya', 'Maqola', "Statistik to'plam", "Ma'ruza", 'Kitob'] },
         { k: 'category', label: 'Mavzu (yo\'nalish)', type: 'select', side: 1, opts: ['Tashqi siyosat', 'Iqtisodiyot', 'Xavfsizlik', 'Markaziy Osiyo', 'Diplomatiya', 'Energetika'] },
         { k: 'region', label: 'Hudud', type: 'select', side: 1, opts: ['', 'Markaziy Osiyo', 'Janubiy Osiyo', 'Yevropa', 'Yaqin Sharq', 'Global'] },
         { k: 'author', label: 'Muallif (ekspert)', type: 'text', side: 1 },
@@ -247,10 +247,41 @@
     }
   };
 
+  /* Yon menyu SAYT MENYUSINING nusxasi (2026-08-20).
+
+     ILGARI qanday edi: guruhlar "Kontent" / "Sayt elementlari" / "Tizim" deb
+     atalardi va saytdagi tartibga umuman mos kelmasdi — "Tadbirlar" saytda
+     "Voqealar", "Nashrlar" esa "Tadqiqotlar" deb ataladi; "Ekspertlar OAVda"
+     adminda Kontent'da, saytda esa Media ostida; "Ekspertlar" (odamlar) va
+     "Hamkorlar" adminda "Sayt elementlari"da, saytda esa "Markaz haqida"
+     ostida turardi. Natijada admin yozuvni qayerga qo'shishni topolmasdi.
+
+     Endi guruh nomlari ham, tartibi ham `site-common.js` dagi `NAV` bilan
+     bir xil. Saytdagi menyuni o'zgartirsangiz SHU YERNI ham yangilang.
+
+     `note` — bandning ostida chiqadigan kichik izoh: yozuv saytda qaysi
+     sahifa(lar)da ko'rinishini aytadi. */
   const NAV = [
     { group: 'Asosiy', items: [{ key: 'dashboard', label: 'Boshqaruv paneli', icon: 'dashboard', view: 'dashboard' }] },
-    { group: 'Kontent', items: ['news', 'mediaPosts', 'events', 'publications', 'pages'] },
-    { group: 'Sayt elementlari', items: ['heroSlides', 'experts', 'partners', { key: 'media', label: 'Media kutubxona', icon: 'media', view: 'media' }, { key: 'aboutPage', label: 'Markaz haqida', icon: 'pages', view: 'aboutPage' }] },
+    { group: 'Markaz haqida', items: [
+      { key: 'aboutPage', label: 'Markaz matnlari', icon: 'pages', view: 'aboutPage', note: 'biz-kimmiz.html' },
+      { key: 'experts', note: 'rahbariyat · ekspertlar' },
+      { key: 'partners', note: 'hamkorlar.html' }
+    ] },
+    { group: 'Voqealar', items: [
+      { key: 'news', note: 'yangiliklar.html' },
+      { key: 'events', note: '4 ta bo\'lim — turiga qarab' }
+    ] },
+    { group: 'Tadqiqotlar', items: [
+      { key: 'publications', note: '4 ta bo\'lim — turiga qarab' }
+    ] },
+    { group: 'Media', items: [
+      { key: 'mediaPosts', note: 'oav.html' },
+      { key: 'media', label: 'Media kutubxona', icon: 'media', view: 'media', note: 'media.html' }
+    ] },
+    { group: 'Bosh sahifa', items: [
+      { key: 'heroSlides', note: 'index.html' }
+    ] },
     { group: 'Tizim', items: [{ key: 'messages', label: 'Murojaatlar', icon: 'mail', view: 'messages' }, 'subscribers', 'users', { key: 'audit', label: 'Audit loglar', icon: 'audit', view: 'audit' }, { key: 'errors', label: 'Xatoliklar', icon: 'bug', view: 'errors' }, { key: 'push', label: 'Bildirishnoma', icon: 'bell', view: 'push' }, { key: 'settings', label: 'Sozlamalar', icon: 'settings', view: 'settings' }] }
   ];
 
@@ -270,6 +301,34 @@
     $('#themeLabel').textContent = t === 'dark' ? 'Yorug\' rejim' : 'Quyuq rejim';
     $('#sbLogo').src = logoSrc(); $('#loginLogo').src = (t === 'dark' ? 'img/logo-tstm-white.png' : 'img/logo-tstm.png');
     if (Store.settings().logo) { $('#sbLogo').src = Store.settings().logo; }
+  }
+
+  /* Yon paneldagi markaz nomi — SOZLAMADAN (2026-08-20).
+     Ilgari u `admin.html` da qotib yozilgan edi va nomning bir qismi tushib
+     qolgandi ("...tadqiqotlar markazi", "va xalqaro tashabbuslar" yo'q), qisqa
+     nom esa "TSTM" deb turardi — sozlamada esa "CFPS". Ya'ni admin nomni
+     almashtirsa ham o'z panelida eskisini ko'raverardi.
+     Saytdagi bilan bir xil qoida: nom ikki muvozanatli qatorga bo'linadi. */
+  function applyBrand() {
+    const s = Store.settings();
+    const nm = String(mlGet(s.siteName) || '').trim();
+    const el = $('#sbBrand'), sh = $('#sbShort');
+    if (sh) sh.textContent = String(s.shortName || 'TSTM');
+    if (!el || !nm) return;
+    const ws = nm.split(/\s+/);
+    let top = nm, bot = '';
+    if (ws.length > 1) {
+      let cut = 1, best = Infinity;
+      for (let i = 1; i < ws.length; i++) {
+        let d = Math.abs(ws.slice(0, i).join(' ').length - ws.slice(i).join(' ').length);
+        if (ws[i - 1].length <= 3) d += 12;   // qisqa bog'lovchi oxirida osilmasin
+        if (d < best) { best = d; cut = i; }
+      }
+      top = ws.slice(0, cut).join(' '); bot = ws.slice(cut).join(' ');
+    }
+    el.textContent = top;
+    if (bot) { el.appendChild(document.createElement('br')); el.appendChild(document.createTextNode(bot)); }
+    if (sh) el.appendChild(sh);
   }
 
   function boot() {
@@ -358,6 +417,7 @@
     $('#userChip .un').textContent = 'Administrator';
     $('#userChip .ur').textContent = name;
     $('#userChip .avatar').textContent = 'A';
+    applyBrand();
     renderSidebar();
     if (!location.hash) { try { history.replaceState(null, '', '#/dashboard'); } catch {} }
     route();
@@ -374,13 +434,24 @@
     NAV.forEach(g => {
       h += `<div class="sb-group">${g.group}</div>`;
       g.items.forEach(it => {
-        const o = typeof it === 'string' ? { key: it, label: C[it].label, icon: C[it].icon, view: 'list', coll: it } : it;
+        // Band uch shaklda yozilishi mumkin:
+        //   'news'                          -> kolleksiya, hammasi C dan
+        //   { key:'news', note:'...' }      -> kolleksiya + izoh
+        //   { key:'media', label, icon, view } -> alohida ko'rinish
+        const base = typeof it === 'string' ? { key: it } : it;
+        const isColl = !!C[base.key] && !base.view;
+        const o = isColl
+          ? Object.assign({ label: C[base.key].label, icon: C[base.key].icon, view: 'list', coll: base.key }, base)
+          : base;
         let ct = o.coll ? `<span class="ct">${counts[o.coll]}</span>` : '';
         if (o.key === 'messages') {
           const unread = Store.all('messages').filter(m => !m.read).length;
           ct = unread ? `<span class="ct a-accent-chip">${unread}</span>` : '';
         }
-        h += `<div class="sb-item" data-key="${o.key}" data-view="${o.view}" ${o.coll ? `data-coll="${o.coll}"` : ''}>${ic(o.icon)}<span>${o.label}</span>${ct}</div>`;
+        // `note` — yozuv saytda qayerda ko'rinishi. Admin yozuvni qayerga
+        // qo'shishni menyuning o'zidan ko'rsin degan maqsadda.
+        const note = o.note ? `<span class="sb-note">${esc(o.note)}</span>` : '';
+        h += `<div class="sb-item${note ? ' has-note' : ''}" data-key="${o.key}" data-view="${o.view}" ${o.coll ? `data-coll="${o.coll}"` : ''}>${ic(o.icon)}<span class="sb-txt">${esc(o.label)}${note}</span>${ct}</div>`;
       });
     });
     $('#sbNav').innerHTML = h;
@@ -627,6 +698,35 @@
     });
   }
 
+  /* ---------- "Saytda qayerda ko'rinadi" ----------
+     Voqea va nashr turi bitta satr sifatida saqlanadi, sayt esa uni 4 tadan
+     sahifaga taqsimlaydi. Moslik jadvali — `js/content-kinds.js` (sayt ham
+     shu fayldan o'qiydi, ya'ni ikkalasi hech qachon ajralib ketmaydi).
+     Tur bo'sh yoki notanish bo'lsa yozuv faqat umumiy sahifada ko'rinadi —
+     buni ham ochiq aytamiz, "yo'qolib qoldi" degan taassurot bo'lmasin. */
+  const CK = window.ContentKinds || null;
+  function kindInfo(coll, type) {
+    if (!CK) return null;
+    const k = CK.kindFor(coll, type);
+    const fb = CK.fallbackPage(coll);
+    if (!fb) return null;
+    return k ? { label: k.label, page: k.page, exact: true }
+             : { label: fb.label, page: fb.page, exact: false };
+  }
+  function kindCell(coll, type) {
+    const i = kindInfo(coll, type);
+    if (!i) return '—';
+    return `<span class="kind-tag${i.exact ? '' : ' weak'}" title="${esc(i.page)}">${esc(i.label)}</span>`;
+  }
+  // Forma ostidagi jonli izoh (`kindHint` maydonlari uchun)
+  function kindHintHTML(type) {
+    const i = kindInfo(state.coll, type);
+    if (!i) return '';
+    return i.exact
+      ? `Saytda: <b>${esc(i.label)}</b> <span class="mono">${esc(i.page)}</span>`
+      : `Bu tur biror bo'limga biriktirilmagan — yozuv faqat <b>${esc(i.label)}</b> ro'yxatida ko'rinadi (<span class="mono">${esc(i.page)}</span>).`;
+  }
+
   /* ==================== LIST ==================== */
   function viewList(c) {
     const cfg = C[state.coll]; setTitle(cfg.label);
@@ -649,6 +749,10 @@
         let val = x[col.k];
         if (col.type === 'status') return `<td><span class="badge ${val}">${STLABEL[val] || val}</span></td>`;
         if (col.type === 'date') return `<td class="mono a-t125-ink2">${fmtDate(val)}</td>`;
+        // "Saytda" ustuni: yozuv turiga qarab QAYSI sahifada chiqishini aytadi.
+        // Ilgari admin buni umuman ko'rmasdi — "Brifing" tanlagan odam voqeani
+        // `uchrashuvlar.html` da qidirmasdi. Moslik: js/content-kinds.js.
+        if (col.type === 'kind') return `<td>${kindCell(state.coll, val)}</td>`;
         let disp = col.ml ? mlGet(val) : (val || '—');
         if (col.thumb) {
           const img = x[col.thumb];
@@ -728,6 +832,12 @@
       const autoBtn = $('#autoTr');
       if (autoBtn) autoBtn.onclick = () => autoTranslateForm(autoBtn);
     }
+    // "Saytda qayerda ko'rinadi" izohi tur o'zgarganda darhol yangilansin
+    $$('#entForm .field[data-type="select"]').forEach(fld => {
+      const hint = fld.querySelector('[data-kind-hint]');
+      const sel = fld.querySelector('select[data-in]');
+      if (hint && sel) sel.addEventListener('change', () => { hint.innerHTML = kindHintHTML(sel.value); });
+    });
     // uploaders
     $$('#entForm [data-upload]').forEach(wireUploader);
     // submit
@@ -913,9 +1023,24 @@
       return `<div class="field" data-k="${f.k}" data-type="${f.type}" data-ml>${lab}
         ${['uz', 'ru', 'en'].map(l => `<div class="lang-pane ${l === 'uz' ? 'on' : ''}" data-lang="${l}">${render1(l)}</div>`).join('')}</div>`;
     }
+    // `kindHint` — tanlangan tur yozuvni saytning QAYSI sahifasiga olib
+    // borishini tanlagich ostida darhol ko'rsatadi (2026-08-20). Ilgari buni
+    // faqat saytga chiqib, sahifama-sahifa qidirib bilish mumkin edi.
+    const hint = f.kindHint ? `<div class="hint kind-hint" data-kind-hint>${kindHintHTML(val)}</div>` : '';
+    /* SAQLANGAN QIYMAT RO'YXATDA BO'LMASA — uni ro'yxatga qo'shamiz (2026-08-20).
+       Aks holda <select> birinchi variantni tanlab qo'yadi va yozuvni ochib
+       saqlagan odam turini BILMAGAN HOLDA o'zgartirib yuboradi. Bu haqiqiy
+       ma'lumotda bor: nashrlarning turi `Hisobot` (2026-08-12 gacha ishlatilgan
+       nom), ro'yxatda esa `Tahlil` turadi — yozuvni ochib saqlash yetardi.
+       Eski qiymat "(eski nom)" deb belgilanadi, lekin saqlangani o'zgarmaydi. */
+    let opts = f.opts || [];
+    if (f.type === 'select' && val && !opts.includes(val)) opts = [val].concat(opts);
     return `<div class="field" data-k="${f.k}" data-type="${f.type}">${lab}${
-      f.type === 'select' ? `<select class="ctl" data-in>${(f.opts || []).map(o => `<option ${o === val ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select>` : render1()
-    }</div>`;
+      f.type === 'select' ? `<select class="ctl" data-in>${opts.map(o => {
+        const legacy = (f.opts || []).includes(o) ? '' : ' (eski nom)';
+        return `<option value="${esc(o)}" ${o === val ? 'selected' : ''}>${esc(o)}${legacy}</option>`;
+      }).join('')}</select>` : render1()
+    }${hint}</div>`;
   }
 
   // Umumiy, kengaytirilgan matn muharriri asboblar paneli
@@ -1372,11 +1497,21 @@
     const DEF_INTRO = { uz: "Markaz dalillarga asoslangan mustaqil tahlil orqali davlat siyosati va jamoatchilik uchun ishonchli ekspert bilim manbai bo'lib xizmat qiladi.", ru: '', en: '' };
     ['uz','ru','en'].forEach(l => { if (!intro[l]) intro[l] = DEF_INTRO[l] || ''; });
 
+    /* `pages` jadvalidan sayt FAQAT uchta slugni chizadi (biz-kimmiz.html
+       dagi uchta blok — qarang: page-biz-kimmiz.js -> fill()). Shu uchtasi
+       shu yerda tahrirlanadi, boshqa slug esa saytda hech qayerda ko'rinmaydi.
+       2026-08-20: uchinchisi (`biz-kimmiz` — "Bizning yo'limiz") qo'shildi.
+       Ilgari u faqat xom "Sahifalar" ro'yxatidan tahrirlanardi va o'sha
+       ro'yxat yon menyudan olib tashlanganda tahrirlab bo'lmay qolardi. */
     let pages = Store.all('pages');
     let aboutPg = pages.find(p => p.slug === 'markaz-haqida');
     let goalPg = pages.find(p => p.slug === 'maqsad');
+    // Sayt `biz-kimmiz` ni ham, eski `tarix` ni ham qabul qiladi — birinchi
+    // TO'LDIRILGANI ishlatiladi. Shuning uchun mavjudini qidiramiz.
+    let wayPg = pages.find(p => p.slug === 'biz-kimmiz') || pages.find(p => p.slug === 'tarix');
     if (!aboutPg) aboutPg = { title: Store.ml('Markaz haqida','O centre','About'), slug: 'markaz-haqida', body: Store.ml('','',''), status: 'published' };
     if (!goalPg) goalPg = { title: Store.ml('Maqsad va vazifalar','Tseli i zadachi','Mission'), slug: 'maqsad', body: Store.ml('','',''), status: 'published' };
+    if (!wayPg) wayPg = { title: Store.ml('Bizning yo\'limiz','Nash put','Our path'), slug: 'biz-kimmiz', body: Store.ml('','',''), status: 'published' };
 
     aboutEditors = [];
     function richBlock(idPrefix, val) {
@@ -1409,8 +1544,13 @@
       </div>
       <div class="card a-p24-mb20">
         <b class="a-serif17-mb6">3) Maqsad va vazifalar</b>
-        <div class="a-muted13-mb14">"Markaz haqida" sahifasidagi "Maqsad va vazifalar" bo'limi matni.</div>
+        <div class="a-muted13-mb14">"Biz kimmiz" sahifasidagi "Maqsad va vazifalar" bo'limi matni.</div>
         ${richBlock('goalBody', goalPg.body)}
+      </div>
+      <div class="card a-p24-mb20">
+        <b class="a-serif17-mb6">4) Bizning yo'limiz</b>
+        <div class="a-muted13-mb14">"Biz kimmiz" sahifasidagi tarix / yo'l bo'limi matni. Bo'sh qolsa bo'lim saytda umuman chizilmaydi.</div>
+        ${richBlock('wayBody', wayPg.body)}
       </div>
       <div class="form-actions"><button class="btn primary" id="aboutSave">${ic('save')} Saqlash</button><div class="sp"></div></div>`;
 
@@ -1425,6 +1565,7 @@
       const grabRich = (prefix) => { const o = {}; ['uz','ru','en'].forEach(l => { const el = $(`[data-editor="${prefix}_${l}"] .editor-area`); o[l] = el ? el.innerHTML : ''; }); return o; };
       aboutPg.body = grabRich('aboutBody'); Store.upsert('pages', aboutPg);
       goalPg.body = grabRich('goalBody'); Store.upsert('pages', goalPg);
+      wayPg.body = grabRich('wayBody'); Store.upsert('pages', wayPg);
       renderSidebar();
       toast('Saqlandi');
     };
@@ -1853,7 +1994,8 @@
       if (logos.uz) upd.logo = logos.uz; // orqaga moslik
       upd.banners = banners;
       upd.stats = statsData;
-      Store.setSettings(upd); applyTheme(upd.theme); toast('Sozlamalar saqlandi');
+      // Markaz nomi shu yerdan o'zgaradi — yon paneldagi brend ham darhol yangilansin
+      Store.setSettings(upd); applyTheme(upd.theme); applyBrand(); toast('Sozlamalar saqlandi');
     };
     // ---- Parolni almashtirish ----
     // api.php'da `change_password` amali ancha vaqtdan beri bor edi, lekin uni

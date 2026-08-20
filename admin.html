@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="img/logo-mark.png">
 <link rel="stylesheet" href="css/fonts.css?v=1">
-<link rel="stylesheet" href="css/admin.css?v=6">
+<link rel="stylesheet" href="css/admin.css?v=8">
 </head>
 <body>
 
@@ -30,7 +30,9 @@
     <div class="sb-brand sb-brand-h">
       <img id="sbLogo" src="img/logo-mark.png" alt="TSTM">
       <span class="divider"></span>
-      <span class="bn">Tashqi siyosiy<br>tadqiqotlar markazi<small>TSTM</small></span>
+      <!-- Matn admin-ui.js -> applyBrand() da sozlamadan to'ldiriladi.
+           Bu yerdagisi JS yuklanguncha ko'rinadigan zaxira. -->
+      <span class="bn" id="sbBrand">Tashqi siyosiy<br>tadqiqotlar markazi<small id="sbShort">TSTM</small></span>
     </div>
     <nav class="sb-nav scroll" id="sbNav"></nav>
     <div class="sb-foot">
@@ -69,6 +71,7 @@
 
 <script src="js/diag.js?v=2"></script>
 <script src="js/admin-store.js?v=55"></script>
-<script src="js/admin-ui.js?v=94"></script>
+<script src="js/content-kinds.js?v=1"></script>
+<script src="js/admin-ui.js?v=97"></script>
 </body>
 </html>

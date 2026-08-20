@@ -83,7 +83,7 @@ Bular papkaga ko'chirilsa sayt buziladi — ko'chirmang:
   ruxsat bermagani uchun sozlama DOM orqali uzatiladi). Atributga turlar
   ro'yxati EMAS, bo'lim identifikatori beriladi — `articles`, `lectures`,
   `reports`, `books`. Qaysi `publications.type` qiymatlari qaysi bo'limga
-  tushishi `site-common.js` dagi `PUB_KINDS` jadvalida, ya'ni BITTA joyda
+  tushishi `js/content-kinds.js` dagi `PUB_KINDS` jadvalida, ya'ni BITTA joyda
   turadi (aniq nom bo'yicha moslik, topilmasa — regex bo'yicha).
 - `rahbariyat.html` va `ekspertlar.html` — ikkalasi `page-rahbariyat.js` ni
   ishlatadi. Kimni ko'rsatish `<div id="grid" data-kind="Rahbariyat">` orqali
@@ -102,7 +102,7 @@ Bular papkaga ko'chirilsa sayt buziladi — ko'chirmang:
   papka manzili to'g'ridan-to'g'ri `index.html` ni ochadi — alohida yo'naltiruvchi
   `index.php` YO'Q va kerak emas)
 - `robots.txt`, `sitemap.xml` — qidiruv tizimlari (SEO) uchun
-- `*.js`, `site.css`, `logo-*.png` — kod va resurslar
+- `js/`, `css/`, `img/` — kod va resurslar (qarang: yuqoridagi "Loyiha tuzilishi")
 
 > **Eslatma (SEO):** `robots.txt` va `sitemap.xml` ichida `SIZNING-DOMENINGIZ.uz`
 > placeholderi bor — hostingga chiqarganingizda uni haqiqiy domeningizga almashtiring.
@@ -129,7 +129,7 @@ Bular papkaga ko'chirilsa sayt buziladi — ko'chirmang:
 
 > Manzilning oxirgi qismi — htdocs ichidagi **papka nomi**. Yuqoridagi misolda u
 > `sayt`; boshqacha nomlasangiz manzil ham shunga qarab o'zgaradi.
-> `ISHGA_TUSHIRISH.bat` `/sayt/` ni ochadi.
+> `tools\ISHGA_TUSHIRISH.bat` `/sayt/` ni ochadi.
 
 ---
 
@@ -363,9 +363,10 @@ ko'rinmaydi**: format `<main data-ekind="...">` atributida e'lon qilinadi
 | `tadbirlar.html` | *(yo'q)* | umumiy taqvim | Butun bo'lim bir joyda |
 
 - Voqea turi (`events.type`) qaysi bo'limga tegishli ekani **bitta joyda**:
-  `site-common.js` → `EVENT_KINDS`. `admin-ui.js` dagi tur ro'yxatiga yangi
-  qiymat qo'shsangiz shu yerga ham kalit so'z qo'shing, aks holda voqea faqat
-  `tadbirlar.html` da ko'rinadi.
+  `js/content-kinds.js` → `EVENT_KINDS`. `admin-ui.js` dagi tur ro'yxatiga yangi
+  qiymat qo'shsangiz shu yerga ham qo'shing, aks holda voqea faqat
+  `tadbirlar.html` da ko'rinadi. Admin panel ham xuddi shu jadvaldan o'qiydi —
+  ro'yxatdagi «Saytda» ustuni va formadagi izoh shundan chiqadi.
 - O'tgan voqealar **yil bo'yicha arxiv**da. Yil filtri faqat bir nechta yil
   to'planganda chiqadi (bitta yilda u hech narsani filtrlamaydi).
 - Uslublar — `page-tadbirlar.css` (voqea sahifasi ham shu faylni ulaydi).
@@ -383,7 +384,7 @@ ishlatadi, format esa `<main data-pkind="...">` da e'lon qilinadi.
 | `kitoblar.html` | `books` | kitob javoni (tik 3:4 muqova, 4 tadan) | Muqova kitobning taniqlik belgisi |
 | `nashrlar.html` | *(yo'q)* | muqovali kartalar | Butun bo'limning umumiy ro'yxati |
 
-> ⚠️ **Tur → bo'lim mosligi `site-common.js` dagi `PUB_KINDS` da** — bitta joyda.
+> ⚠️ **Tur → bo'lim mosligi `js/content-kinds.js` dagi `PUB_KINDS` da** — bitta joyda.
 > `admin-ui.js` dagi nashr turlari ro'yxatiga yangi qiymat qo'shsangiz shu
 > yerga ham qo'shing.
 >
@@ -467,3 +468,46 @@ bilan chiqadi:
 - `print.css` HTML'ga `<link>` bilan ulanmaydi (uni `printDoc()` iframe ichida
   yuklaydi), shuning uchun uni o'zgartirsangiz **versiyani `site-common.js` dagi
   `print.css?v=N` da qo'lda oshiring**.
+
+### Admin panel — sayt menyusining nusxasi
+
+Yon menyu (`js/admin-ui.js` → `NAV`) **saytning menyusi bilan bir xil** tartibda
+va bir xil nomlar bilan guruhlangan. Har bandning ostida u saytda **qaysi
+sahifada** ko'rinishi yozilgan.
+
+| Admin guruhi | Saytdagi menyu | Ichida |
+|---|---|---|
+| Markaz haqida | Markaz haqida | Markaz matnlari · Ekspertlar · Hamkorlar |
+| Voqealar | Voqealar | Yangiliklar · Tadbirlar |
+| Tadqiqotlar | Tadqiqotlar | Nashrlar |
+| Media | Media | Ekspertlar OAVda · Media kutubxona |
+| Bosh sahifa | — | Hero slayder |
+| Tizim | — | Murojaatlar · Obunachilar · Foydalanuvchilar · Audit · Xatoliklar · Bildirishnoma · Sozlamalar |
+
+> ⚠️ Saytdagi menyuni (`js/site-common.js` → `NAV`) o'zgartirsangiz admindagi
+> guruhlarni ham yangilang — ular ataylab bir-birining ko'zgusi.
+
+**«Saytda» ustuni va tur izohi.** Voqea va nashrning turi bitta satr bo'lib
+saqlanadi, sayt esa uni 4 tadan sahifaga taqsimlaydi. Admin buni endi ko'radi:
+
+- ro'yxatda **«Saytda»** ustuni — yozuv qaysi bo'limda chiqishini aytadi;
+- formada tur tanlanganda ostida darhol `Saytda: Ma'ruzalar · maruzalar.html`
+  deb yoziladi.
+
+Moslik jadvali — **`js/content-kinds.js`**, bitta joyda. Uni sayt ham
+(`site-common.js` orqali), admin ham o'qiydi — shuning uchun ular hech qachon
+ajralib ketmaydi. **Yangi tur qo'shsangiz** `admin-ui.js` dagi `opts` ga ham,
+`content-kinds.js` dagi `types` ga ham qo'shing; aks holda yozuv faqat umumiy
+sahifada (`tadbirlar.html` / `nashrlar.html`) ko'rinadi.
+
+> **Eski qiymatlar yo'qolmaydi.** Yozuvning saqlangan turi ro'yxatda bo'lmasa
+> (masalan `Hisobot` — 2026-08-12 gacha ishlatilgan nom), u ro'yxatga
+> «(eski nom)» belgisi bilan qo'shiladi. Ilgari `<select>` birinchi variantni
+> tanlab qo'yardi va yozuvni ochib saqlagan odam turini bilmagan holda
+> o'zgartirib yuborardi.
+
+**«Sahifalar» kolleksiyasi yon menyudan olib tashlandi** (2026-08-20). Saytda
+undan faqat uchta yozuv chiziladi va uchalasi ham endi **Markaz matnlari**
+sahifasida tahrirlanadi (Markaz haqida · Maqsad va vazifalar · Bizning
+yo'limiz). Ro'yxatning o'zi `#/pages` manzilida qoladi, lekin u yerda yozilgan
+boshqa slug saytda hech qayerda ko'rinmaydi — shuning uchun menyuda yo'q.

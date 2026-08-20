@@ -463,81 +463,21 @@
     document.querySelectorAll('.rv').forEach(el=>io.observe(el));
   }
 
-  /* ---------- Voqea turlari (Voqealar bo'limi) ----------
-     Admin voqea turini BITTA satr sifatida tanlaydi (`events.type`), sayt esa
-     uni 4 ta sahifaga taqsimlaydi. Moslik shu yerda — bitta joyda: ilgari bu
-     uzun if-zanjiri sifatida page-tadbirlar.js ichida turardi va voqeaning
-     o'z sahifasi (tadbir.html) uni takrorlashga majbur bo'lardi.
+  /* ---------- Kontent turlari: "qaysi sahifada ko'rinadi" ----------
+     Jadvalning O'ZI `content-kinds.js` da (2026-08-20 da shu yerdan ko'chirildi)
+     Sabab: admin panel ham xuddi shu moslikka muhtoj, lekin u site-common.js
+     ni yuklamaydi. Bu yerda faqat qayta e'lon: mavjud `Site.eventKind(...)`
+     chaqiruvlari o'zgarmasin.
 
-     Tur uch tilda ham yozilishi mumkin (admin ro'yxati o'zbekcha, lekin eski
-     yozuvlarda ruscha/inglizcha qiymat uchraydi), shuning uchun kalit so'zlar
-     uch tilda sanaladi. admin-ui.js dagi `events` -> `type` ro'yxatiga yangi
-     tur qo'shsangiz shu yerga ham kalit so'z qo'shing — aks holda voqea faqat
-     "Tadbirlar" (barchasi) sahifasida ko'rinadi. */
-  const EVENT_KINDS = [
-    { id: 'meet',  page: 'uchrashuvlar.html',      tk: 'nav_ev_meetings',
-      re: /uchrashuv|muzokara|brifing|meeting|talks|briefing|встреч|переговор|брифинг/ },
-    { id: 'round', page: 'davra-suhbatlari.html',  tk: 'nav_ev_roundtables',
-      re: /davra|muhokama|roundtable|round table|discussion|круглый стол|обсужден|дискусс/ },
-    { id: 'conf',  page: 'konferensiyalar.html',   tk: 'nav_ev_conferences',
-      re: /konferensiy|simpozium|forum|taqdimot|conference|symposium|presentation|конференц|симпозиум|форум|презентац/ },
-    { id: 'life',  page: 'markaz-hayoti.html',     tk: 'nav_ev_life',
-      re: /markaz hayoti|ta'lim|maktab|seminar|trening|center life|training|school|workshop|жизнь центр|образовательн|семинар|тренинг|школ/ }
-  ];
-  // Ko'p tilli qiymat ham, oddiy satr ham qabul qilinadi. Apostrofning turli
-  // shakllari (' ’ ʻ ʼ `) bir xil hisoblanadi — "Ta'lim" va "Ta’lim" bir tur.
-  function eventKind(type){
-    const v = (type && typeof type === 'object')
-      ? Object.keys(type).map(k => type[k]).join(' ')
-      : String(type || '');
-    const t = v.toLowerCase().replace(/[‘’ʻʼ`]/g, "'");
-    if (!t.trim()) return null;
-    return EVENT_KINDS.find(k => k.re.test(t)) || null;
-  }
-  // Sahifa fayli -> tur (data-ekind bo'lmagan holat uchun zaxira)
-  function eventKindById(id){ return EVENT_KINDS.find(k => k.id === id) || null; }
-
-  /* ---------- Nashr turlari (Tadqiqotlar bo'limi) ----------
-     `publications.type` bitta satr; sayt uni 4 ta sahifaga taqsimlaydi.
-     EVENT_KINDS bilan bir xil naqsh — moslik BITTA joyda.
-
-     NEGA KERAK BO'LDI: 2026-08-12 da menyudagi "Hisobotlar" bandi "Tahlillar"
-     deb qayta nomlangan va sahifa `Tahlil` turini filtrlaydigan qilingan,
-     lekin BAZADAGI yozuvlar `Hisobot` turida qolgan. Natijada tahlillar.html
-     butunlay bo'sh turardi va 7 ta nashrdan 4 tasi hech bir kichik sahifada
-     ko'rinmasdi (faqat nashrlar.html da). Endi eski nom ham `reports` ga
-     olib keladi.
-
-     Moslik ikki bosqichda: avval ANIQ qiymat (admin ro'yxatidagilar), keyin
-     kalit so'z (qo'lda kiritilgan yoki eskirgan qiymatlar uchun). Aniq
-     moslik birinchi bo'lgani muhim: "Tahliliy sharh" -> maqolalar,
-     "Tahlil" -> tahlillar, garchi ikkalasida ham "tahlil" bo'lsa ham. */
-  const PUB_KINDS = [
-    { id: 'articles', page: 'maqolalar.html', tk: 'nav_an_articles',
-      types: ['Maqola', 'Tahliliy sharh'],
-      re: /maqola|sharh|article|commentary|стать|обзор|коммент/ },
-    { id: 'lectures', page: 'maruzalar.html', tk: 'nav_an_lectures',
-      types: ["Ma'ruza", 'Taqdimot'],
-      re: /ma'ruza|taqdimot|ma'ruzasi|lecture|presentation|доклад|лекц|презентац/ },
-    { id: 'reports',  page: 'tahlillar.html', tk: 'nav_an_reports',
-      // `Hisobot` — 2026-08-12 gacha ishlatilgan nom, bazada hamon uchraydi.
-      types: ['Tahlil', 'Hisobot', "Statistik to'plam"],
-      re: /tahlil|hisobot|report|analys|analit|отчёт|отчет|анализ|аналит|статистич/ },
-    { id: 'books',    page: 'kitoblar.html',  tk: 'nav_an_books',
-      types: ['Monografiya', 'Kitob'],
-      re: /monografi|kitob|book|monograph|монограф|книг/ }
-  ];
-  function pubKind(type){
-    const v = (type && typeof type === 'object')
-      ? Object.keys(type).map(k => type[k]).join(' ')
-      : String(type || '');
-    const t = v.toLowerCase().replace(/[‘’ʻʼ`]/g, "'").trim();
-    if (!t) return null;
-    return PUB_KINDS.find(k => k.types.some(x => x.toLowerCase().replace(/[‘’ʻʼ`]/g, "'") === t))
-        || PUB_KINDS.find(k => k.re.test(t))
-        || null;
-  }
-  function pubKindById(id){ return PUB_KINDS.find(k => k.id === id) || null; }
+     Fayl yuklanmagan bo'lsa sayt YIQILMAYDI: barcha voqea/nashr o'zining
+     umumiy sahifasida (tadbirlar.html / nashrlar.html) ko'rinaveradi. */
+  const CK = w.ContentKinds || {};
+  const EVENT_KINDS = CK.EVENT_KINDS || [];
+  const PUB_KINDS   = CK.PUB_KINDS   || [];
+  const eventKind     = CK.eventKind     || (() => null);
+  const eventKindById = CK.eventKindById || (() => null);
+  const pubKind       = CK.pubKind       || (() => null);
+  const pubKindById   = CK.pubKindById   || (() => null);
 
   // ---------- Bo'lim ichi navigatsiyasi (section rail) ----------
   // "Markaz haqida" menyusi endi sahifasiz GURUH (NAV[].group) — bo'limning
