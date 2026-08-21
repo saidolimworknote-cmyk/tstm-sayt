@@ -102,6 +102,7 @@
   const C = {
     news: {
       label: 'Yangiliklar', singular: 'yangilik', icon: 'news', status: true, search: 'title',
+      page: 'yangiliklar.html',
       columns: [{ k: 'title', label: 'Sarlavha', ml: 1, thumb: 'cover' }, { k: 'category', label: 'Kategoriya' }, { k: 'date', label: 'Sana', type: 'date' }, { k: 'status', label: 'Holat', type: 'status' }],
       fields: [
         { k: 'title', label: 'Sarlavha', type: 'text', ml: 1, req: 1 },
@@ -118,7 +119,8 @@
     // "Bizning ekspertlar OAVlarda" — sayt tomonida oav.html / sharh.html.
     // Yangilikka o'xshaydi, farqi: ekspert / OAV nomi / asl manba havolasi.
     mediaPosts: {
-      label: 'Ekspertlar OAVda', singular: 'sharh', icon: 'mic', status: true, search: 'title',
+      label: 'Bizning ekspertlar OAVlarda', singular: 'sharh', icon: 'mic', status: true, search: 'title',
+      page: 'oav.html',
       columns: [{ k: 'title', label: 'Sarlavha', ml: 1, thumb: 'cover' }, { k: 'expert', label: 'Ekspert' }, { k: 'outlet', label: 'OAV' }, { k: 'date', label: 'Sana', type: 'date' }, { k: 'status', label: 'Holat', type: 'status' }],
       fields: [
         { k: 'title', label: 'Sarlavha', type: 'text', ml: 1, req: 1 },
@@ -171,6 +173,7 @@
     },
     pages: {
       label: 'Sahifalar', singular: 'sahifa', icon: 'pages', status: true, search: 'title',
+      page: 'biz-kimmiz.html',
       columns: [{ k: 'title', label: 'Sahifa', ml: 1 }, { k: 'slug', label: 'Manzil (slug)' }, { k: 'status', label: 'Holat', type: 'status' }],
       fields: [
         { k: 'title', label: 'Sahifa nomi', type: 'text', ml: 1, req: 1 },
@@ -181,6 +184,7 @@
     },
     heroSlides: {
       label: 'Hero slayder', singular: 'slayd', icon: 'hero', status: true, sort: 'order',
+      page: 'index.html',
       columns: [{ k: 'order', label: '#' }, { k: 'headline', label: 'Sarlavha', ml: 1, thumb: 'image' }, { k: 'category', label: 'Yorliq', ml: 1 }, { k: 'status', label: 'Holat', type: 'status' }],
       fields: [
         { k: 'headline', label: 'Sarlavha', type: 'text', ml: 1, req: 1 },
@@ -214,6 +218,7 @@
     },
     partners: {
       label: 'Hamkorlar', singular: 'hamkor', icon: 'partners', search: 'name',
+      page: 'hamkorlar.html',
       columns: [{ k: 'name', label: 'Tashkilot', thumb: 'logo' }, { k: 'category', label: 'Toifa' }, { k: 'country', label: 'Mamlakat' }, { k: 'url', label: 'Veb-sayt' }],
       fields: [
         { k: 'name', label: 'Tashkilot nomi', type: 'text', req: 1 },
@@ -265,28 +270,64 @@
      Bandlar ostida fayl nomi (`tahlillar.html` va h.k.) YOZILMAYDI — bo'lim
      nomining o'zi saytdagi sahifa nomi, ya'ni izoh ortiqcha bo'lardi. Sayt
      sahifasiga havola ro'yxat sarlavhasi ostida ("saytda ko'rish"). */
+  /* Yon menyu SAYT MENYUSINING NUSXASI (2026-08-22).
+
+     QOIDA: guruhlar ham, ularning ichidagi bandlar ham, tartib ham saytdagi
+     menyu bilan AYNAN bir xil. Sabab: admin "Konferensiya" qo'shsa, u
+     saytning "Voqealar -> Konferensiyalar" sahifasiga tushishini menyuning
+     O'ZIDAN ko'rib tursin — qaysi bo'lim nimaga aylanishini yodlab yurmasin.
+
+     Manba: js/site-common.js -> NAV. O'sha yerga band qo'shsangiz, bu yerga
+     ham qo'shing (va aksincha). Sayt sahifasining manzili esa uchinchi joyda
+     TAKRORLANMAYDI: bo'limniki `js/content-kinds.js` da, kolleksiyaniki esa
+     quyidagi `C` dagi `page` maydonida turadi.
+
+     Oxirgi ikki guruh saytda YO'Q va shuning uchun ataylab pastda, alohida
+     sarlavha ostida turadi — ular boshqaruv vositalari, kontent emas. */
   const NAV = [
     { group: 'Asosiy', items: [{ key: 'dashboard', label: 'Boshqaruv paneli', icon: 'dashboard', view: 'dashboard' }] },
+    // Saytda: Markaz haqida -> Biz kimmiz · Rahbariyat · Ekspertlar · Hamkorlar
     { group: 'Markaz haqida', items: [
-      { key: 'aboutPage', label: 'Markaz matnlari', icon: 'pages', view: 'aboutPage' },
+      { key: 'aboutPage', label: 'Biz kimmiz', icon: 'pages', view: 'aboutPage', page: 'biz-kimmiz.html' },
       { kindsOf: 'experts' },
       'partners'
     ] },
+    // Saytda: Voqealar -> Yangiliklar · Uchrashuvlar · Davra suhbatlari ·
+    //         Konferensiyalar · Markaz hayoti
     { group: 'Voqealar', items: [
       'news',
       { kindsOf: 'events' }
     ] },
+    // Saytda: Tadqiqotlar -> Maqolalar · Ma'ruzalar · Tahlillar · Kitoblar
     { group: 'Tadqiqotlar', items: [
       { kindsOf: 'publications' }
     ] },
+    /* Saytda: Media -> Bizning ekspertlar OAVlarda · Fotogalereya ·
+       Videomateriallar · Infografika.
+       Oxirgi uchtasi bitta ko'rinish (`viewMedia`) ning uchta ichki varag'i,
+       lekin menyuda saytdagidek UCHTA alohida band bo'lib turadi. */
     { group: 'Media', items: [
       'mediaPosts',
-      { key: 'media', label: 'Media kutubxona', icon: 'media', view: 'media' }
+      { key: 'media:photo', label: 'Fotogalereya',     icon: 'media', view: 'media', tab: 'photo', sub: 1 },
+      { key: 'media:video', label: 'Videomateriallar', icon: 'media', view: 'media', tab: 'video', sub: 1 },
+      { key: 'media:info',  label: 'Infografika',      icon: 'media', view: 'media', tab: 'info',  sub: 1 }
     ] },
+    // Saytda: Aloqa. Sahifadagi manzil/telefon "Sozlamalar" da, undan kelgan
+    // xabarlar esa shu yerda — ikkalasi ham aloqa.html ga tegishli.
+    { group: 'Aloqa', items: [
+      { key: 'messages', label: 'Murojaatlar', icon: 'mail', view: 'messages', page: 'aloqa.html' }
+    ] },
+    // Saytda: bosh sahifaning yuqorisidagi slayder (index.html)
     { group: 'Bosh sahifa', items: [
       'heroSlides'
     ] },
-    { group: 'Tizim', items: [{ key: 'messages', label: 'Murojaatlar', icon: 'mail', view: 'messages' }, 'subscribers', 'users', { key: 'audit', label: 'Audit loglar', icon: 'audit', view: 'audit' }, { key: 'errors', label: 'Xatoliklar', icon: 'bug', view: 'errors' }, { key: 'push', label: 'Bildirishnoma', icon: 'bell', view: 'push' }, { key: 'settings', label: 'Sozlamalar', icon: 'settings', view: 'settings' }] }
+    { group: 'Boshqaruv (saytda ko\'rinmaydi)', items: [
+      'subscribers', 'users',
+      { key: 'audit', label: 'Audit loglar', icon: 'audit', view: 'audit' },
+      { key: 'errors', label: 'Xatoliklar', icon: 'bug', view: 'errors' },
+      { key: 'push', label: 'Bildirishnoma', icon: 'bell', view: 'push' },
+      { key: 'settings', label: 'Sozlamalar', icon: 'settings', view: 'settings' }
+    ] }
   ];
 
   /* -------------------- State / boot -------------------- */
@@ -454,8 +495,13 @@
           // "Barchasi" faqat umumiy sayt sahifasi BOR kolleksiyada ma'noli.
           // Xodimlarda bunday sahifa yo'q: har bir xodim ikki bo'limdan birida
           // albatta ko'rinadi, ya'ni "hech qayerga tushmadi" holati bo'lmaydi.
-          if (CK && CK.fallbackPage(coll)) {
-            items.push({ key: coll, label: 'Barchasi', icon: C[coll].icon,
+          //
+          // Bandning nomi `fallbackPage().label` dan olinadi — "Barchasi" emas,
+          // "Tadbirlar (umumiy)". Shunda menyuning o'zidanoq bu band saytning
+          // QAYSI sahifasi ekani ko'rinadi (tadbirlar.html / nashrlar.html).
+          const fb = CK && CK.fallbackPage(coll);
+          if (fb) {
+            items.push({ key: coll, label: fb.label, icon: C[coll].icon,
               view: 'list', coll: coll });
           }
           return;
@@ -479,13 +525,17 @@
           const unread = Store.all('messages').filter(m => !m.read).length;
           ct = unread ? `<span class="ct a-accent-chip">${unread}</span>` : '';
         }
-        h += `<div class="sb-item${o.kind ? ' is-sub' : ''}" data-key="${o.key}" data-view="${o.view}" ${o.coll ? `data-coll="${o.coll}"` : ''} ${o.kind ? `data-kind="${o.kind}"` : ''}>${ic(o.icon)}<span>${esc(o.label)}</span>${ct}</div>`;
+        h += `<div class="sb-item${o.kind || o.sub ? ' is-sub' : ''}" data-key="${o.key}" data-view="${o.view}" ${o.coll ? `data-coll="${o.coll}"` : ''} ${o.kind ? `data-kind="${o.kind}"` : ''} ${o.tab ? `data-tab="${o.tab}"` : ''}>${ic(o.icon)}<span>${esc(o.label)}</span>${ct}</div>`;
       });
     });
     $('#sbNav').innerHTML = h;
     $$('#sbNav .sb-item').forEach(el => el.addEventListener('click', () => {
-      const coll = el.dataset.coll, kind = el.dataset.kind;
-      location.hash = coll ? (kind ? `#/${coll}/k/${kind}` : `#/${coll}`) : `#/${el.dataset.key}`;
+      const coll = el.dataset.coll, kind = el.dataset.kind, tab = el.dataset.tab;
+      // `data-tab` — media kutubxonaning ichki varag'i (`#/media/t/photo`).
+      // Manzilga yozamiz, holatga emas: varaq yangilanganda ham saqlanadi va
+      // yon menyudagi faol band shu manzildan aniqlanadi.
+      location.hash = coll ? (kind ? `#/${coll}/k/${kind}` : `#/${coll}`)
+        : (tab ? `#/media/t/${tab}` : `#/${el.dataset.key}`);
       $('#sidebar').classList.remove('open');
     }));
     updateNotifBadge();
@@ -604,6 +654,14 @@
       state.view = rest[0] === 'new' ? 'new' : rest[0] === 'edit' ? 'edit' : 'list';
       state.coll = v; state.kind = kind; state.editId = rest[1] || null; state.statusFilter = '';
       setActive(kind ? v + ':' + kind : v);
+    } else if (v === 'media' && parts[1] === 't' && MEDIA_TABS[parts[2]]) {
+      /* `#/media/t/photo|video|info` — media kutubxonaning ichki varag'i.
+         Saytdagi `media.html?tab=...` ning aynan nusxasi: yon menyuda ham
+         uchta alohida band ko'rinadi, ya'ni admin "Videomateriallar"ni
+         menyudan to'g'ridan-to'g'ri ochadi. */
+      mediaTab = parts[2];
+      state.view = 'media'; state.coll = null; state.kind = null;
+      setActive('media:' + mediaTab);
     } else {
       state.view = v; state.coll = null; state.kind = null; setActive(v);
     }
@@ -751,6 +809,26 @@
     const fb = CK.fallbackPage(coll);
     return fb ? { label: fb.label, page: fb.page, exact: false } : null;
   }
+  /* "Saytda: <sahifa> ↗" — bo'lim sarlavhasi ostidagi havola. BITTA joyda,
+     chunki u ro'yxat, media kutubxona, murojaatlar va "Biz kimmiz" sahifasida
+     bir xil ko'rinishi kerak. Havola yangi oynada ochiladi: admin ish
+     jarayonini yo'qotmasin. */
+  function siteLinkHTML(page, label) {
+    if (!page) return '';
+    return ` · Saytda: <a class="site-link" href="${esc(page)}" target="_blank" rel="noopener">`
+      + `${esc(label || page)} ↗</a>`;
+  }
+  /* Kolleksiyasiz ko'rinishlar (Biz kimmiz, Murojaatlar) uchun sayt sahifasi
+     NAV bandidan olinadi — manzil kodda ikkinchi marta yozilmasin. */
+  function navPageOf(key) {
+    for (const g of NAV) {
+      for (const it of g.items) {
+        if (it && typeof it === 'object' && it.key === key) return it.page || '';
+      }
+    }
+    return '';
+  }
+
   function kindCell(coll, type) {
     const i = kindInfo(coll, type);
     if (!i) return '—';
@@ -836,10 +914,18 @@
     const singular = kd ? kd.singular : cfg.singular;
     // Bo'lim sarlavhasi ostida uning sayt sahifasiga havola — "qo'shdim, endi
     // qayerda ko'ray?" degan savol umuman tug'ilmasin.
-    const sitePage = kd ? kd.page : (CK && CK.fallbackPage(state.coll) || {}).page;
-    const siteLink = sitePage
-      ? ` · <a class="site-link" href="${esc(sitePage)}" target="_blank" rel="noopener">saytda ko'rish ↗</a>`
-      : '';
+    //
+    // Manba UCHTA, shu tartibda (2026-08-22 da uchinchisi qo'shildi):
+    //   1) bo'lim (`kd.page`)        — "Konferensiyalar" -> konferensiyalar.html
+    //   2) umumiy sahifa (fallback)  — "Barchasi"        -> tadbirlar.html
+    //   3) kolleksiyaning o'z sahifasi (`cfg.page`)      -> yangiliklar.html
+    // Uchinchisisiz "Yangiliklar", "Hamkorlar", "Ekspertlar OAVda" va "Hero
+    // slayder" bo'limlarida havola UMUMAN chiqmasdi — aynan shu bo'limlarda
+    // admin yozuv qayerga tushishini bilmasdi.
+    const sitePage = (kd && kd.page)
+      || ((CK && CK.fallbackPage(state.coll) || {}).page)
+      || cfg.page;
+    const siteLink = sitePage ? siteLinkHTML(sitePage) : '';
     c.innerHTML = `
       <div class="page-head"><div><div class="h">${esc(kd ? kd.label : cfg.label)}</div><div class="d">${items.length} ta yozuv${siteLink}</div></div><div class="sp"></div>
         <button class="btn primary" id="addBtn">${ic('plus')} Yangi ${esc(singular)}</button></div>
@@ -1396,7 +1482,7 @@
     let items = Store.all('messages').slice().reverse();
     const unread = items.filter(m => !m.read).length;
     c.innerHTML = `
-      <div class="page-head"><div><div class="h">Murojaatlar</div><div class="d">${items.length} ta xabar${unread ? ` · ${unread} ta yangi` : ''}</div></div><div class="sp"></div>
+      <div class="page-head"><div><div class="h">Murojaatlar</div><div class="d">${items.length} ta xabar${unread ? ` · ${unread} ta yangi` : ''}${siteLinkHTML(navPageOf('messages'))}</div></div><div class="sp"></div>
         ${items.length ? `<button class="btn ghost" id="markAll">Hammasini o'qilgan deb belgilash</button>` : ''}</div>
       <div class="card">
         ${items.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr>
@@ -1698,7 +1784,7 @@
 
   /* ==================== MARKAZ HAQIDA (bosh sahifa intro + Markaz haqida/Maqsad sahifalari) ==================== */
   function viewAboutPage(c) {
-    setTitle('Markaz haqida');
+    setTitle('Biz kimmiz');
     const s = Store.settings();
     const intro = Object.assign({ uz: '', ru: '', en: '' }, s.aboutIntro || {});
     const DEF_INTRO = { uz: "Markaz dalillarga asoslangan mustaqil tahlil orqali davlat siyosati va jamoatchilik uchun ishonchli ekspert bilim manbai bo'lib xizmat qiladi.", ru: '', en: '' };
@@ -1737,7 +1823,7 @@
     }
 
     c.innerHTML = `
-      <div class="page-head"><div><div class="h">Markaz haqida</div><div class="d">Bosh sahifa kirish jumlasi va "Markaz haqida" sahifasidagi matnlar</div></div><div class="sp"></div>
+      <div class="page-head"><div><div class="h">Biz kimmiz</div><div class="d">Bosh sahifa kirish jumlasi va "Biz kimmiz" sahifasidagi uchta blok${siteLinkHTML(navPageOf('aboutPage'))}</div></div><div class="sp"></div>
         <div class="langtabs" id="setLang"><button type="button" data-l="uz" class="on">UZ</button><button type="button" data-l="ru">RU</button><button type="button" data-l="en">EN</button></div>${autoTrButton('aboutAutoTr')}</div>
       <div class="card a-p24-mb20">
         <b class="a-serif17-mb6">1) Kirish jumlasi (bosh sahifa)</b>
@@ -1780,7 +1866,11 @@
   let aboutEditors = [];
 
   /* ==================== MEDIA ==================== */
+  /* Nomlar saytdagi menyu bandlari bilan AYNAN bir xil (i18n.js -> nav_media_*).
+     O'zgartirsangiz ikkalasini birga o'zgartiring. */
   const MEDIA_TABS = { photo: 'Fotogalereya', video: 'Videomateriallar', info: 'Infografika' };
+  // Varaqning sayt manzili — saytda ham xuddi shu uchta band `?tab=` bilan ochiladi.
+  function mediaPageOf(tab) { return 'media.html?tab=' + tab; }
   function ytId(url) {
     const m = String(url || '').match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/);
     return m ? m[1] : '';
@@ -1831,7 +1921,7 @@
     }
 
     c.innerHTML = `
-      <div class="page-head"><div><div class="h">Media kutubxona</div><div class="d">${items.length} ta ${mediaTab==='video'?'video':'infografika'}</div></div><div class="sp"></div>
+      <div class="page-head"><div><div class="h">${esc(MEDIA_TABS[mediaTab])}</div><div class="d">${items.length} ta ${mediaTab==='video'?'video':'infografika'}${siteLinkHTML(mediaPageOf(mediaTab))}</div></div><div class="sp"></div>
         <button class="btn primary" id="addBtn">${ic(mediaTab==='video'?'plus':'upload')} ${addLabel}</button>
         <input type="file" accept=".html,.htm,text/html" hidden id="htmlInput"></div>
       <div class="toolbar-row"><div class="filterbar">
@@ -1842,7 +1932,7 @@
         : `<div class="empty">${ic('media')}<div class="t">Bu bo'limda fayl yo'q</div><div>${mediaTab==='video'?'Video havolasini qo\'shish':'Fayl yuklash'} uchun yuqoridagi tugmani bosing</div></div>`}
       </div>`;
 
-    $$('.chip[data-mt]').forEach(b => b.onclick = () => { mediaTab = b.dataset.mt; render(); });
+    $$('.chip[data-mt]').forEach(b => b.onclick = () => { location.hash = '#/media/t/' + b.dataset.mt; });
     $('#addBtn').onclick = () => { if (mediaTab === 'video') videoModal(); else $('#htmlInput').click(); };
     const htmlInput = $('#htmlInput');
     if (htmlInput) htmlInput.onchange = (e) => {
@@ -1885,12 +1975,12 @@
       if (al && al.type === 'album') return albumEditor(c, al);
       albumEditId = null;
     }
-    setTitle('Media kutubxona');
+    setTitle(MEDIA_TABS.photo);
     const all = Store.all('media');
     const counts = mediaCounts(all);
     const albums = all.filter(m => m.type === 'album');
     c.innerHTML = `
-      <div class="page-head"><div><div class="h">Media kutubxona</div><div class="d">${albums.length} ta albom</div></div><div class="sp"></div>
+      <div class="page-head"><div><div class="h">${esc(MEDIA_TABS.photo)}</div><div class="d">${albums.length} ta albom${siteLinkHTML(mediaPageOf('photo'))}</div></div><div class="sp"></div>
         <button class="btn primary" id="newAlbumBtn">${ic('plus')} Albom yaratish</button></div>
       <div class="toolbar-row"><div class="filterbar">
         ${Object.keys(MEDIA_TABS).map(k => `<button class="chip ${k===mediaTab?'on':''}" data-mt="${k}">${MEDIA_TABS[k]} <span class="a-op6">${counts[k]||0}</span></button>`).join('')}
@@ -1899,7 +1989,7 @@
         ${albums.length ? `<div class="media-grid">${albums.map(albumTile).join('')}</div>`
         : `<div class="empty">${ic('media')}<div class="t">Hali albom yo'q</div><div>Birinchi albomni yaratish uchun yuqoridagi tugmani bosing</div></div>`}
       </div>`;
-    $$('.chip[data-mt]').forEach(b => b.onclick = () => { mediaTab = b.dataset.mt; render(); });
+    $$('.chip[data-mt]').forEach(b => b.onclick = () => { location.hash = '#/media/t/' + b.dataset.mt; });
     $('#newAlbumBtn').onclick = () => albumModal();
     $$('.media-item').forEach(el => {
       const id = el.dataset.id;

@@ -398,6 +398,24 @@ Menyu 4 ta ochiluvchi band + «Aloqa» dan iborat. Manba — `site-common.js` da
 alohida nusxa (bosh sahifa `site-common.js` ni yuklamaydi) — **ikkalasini birga
 yangilang**.
 
+> ⚠️ **Menyu UCH joyda yashaydi va ular ayrilib ketishi mumkin:**
+> `site-common.js` → `NAV`, `index.html` (qo'lda yozilgan nusxa) va
+> `admin-ui.js` → `NAV` (admin yon menyusi). Ayrilib ketganda **hech qanday
+> xato chiqmaydi** — sayt ham, admin ham bemalol ishlayveradi.
+>
+> 2026-08-22 gacha aynan shunday bo'lgan: admin panelda «Yangiliklar» bo'limi
+> bor edi, `yangiliklar.html` sahifasi ham bor edi, lekin band sayt menyusiga
+> yozilmagan edi. Admin yangilik qo'shsa, uni saytdan topib bo'lmasdi.
+> (`site-common.js` dagi `PAGE_KEY` va `keys:['news',…]` esa bandni allaqachon
+> kutayotgan edi — ya'ni faqat bandning O'ZI tushib qolgan.)
+>
+> Endi ikkita tekshiruv qo'riqlaydi:
+> `smoke.ps1` → **[9]** (NAV ↔ index.html) va `tests\menyu-mos.js` →
+> **admin NAV ↔ sayt NAV** (smoke `[10]` da avtomatik chaqiriladi).
+
+Admin yon menyusi bilan mosligi — pastdagi «Admin panel — sayt menyusining
+nusxasi» bo'limida.
+
 - **«Markaz haqida» bandi sahifa emas** (`NAV[].group === true`): bosilganda
   hech qayerga o'tmaydi, faqat ostidagi 4 bo'lim ochiladi. HTML'da u `<a>` emas,
   `<span role="button">` bo'lib chiziladi va `.item.is-group` sinfini oladi.
@@ -551,17 +569,33 @@ Yon menyu (`js/admin-ui.js` → `NAV`) **saytning menyusi bilan bir xil** tartib
 va bir xil nomlar bilan guruhlangan. Har bandning ostida u saytda **qaysi
 sahifada** ko'rinishi yozilgan.
 
-| Admin guruhi | Saytdagi menyu | Ichida |
+| Admin guruhi | Ichida | Saytda qayerga tushadi |
 |---|---|---|
-| Markaz haqida | Markaz haqida | Markaz matnlari · Rahbariyat · Ekspertlar · Hamkorlar |
-| Voqealar | Voqealar | Yangiliklar · Uchrashuvlar · Davra suhbatlari · Konferensiyalar · Markaz hayoti · Barchasi |
-| Tadqiqotlar | Tadqiqotlar | Maqolalar · Ma'ruzalar · Tahlillar · Kitoblar · Barchasi |
-| Media | Media | Ekspertlar OAVda · Media kutubxona |
-| Bosh sahifa | — | Hero slayder |
-| Tizim | — | Murojaatlar · Obunachilar · Foydalanuvchilar · Audit · Xatoliklar · Bildirishnoma · Sozlamalar |
+| Markaz haqida | Biz kimmiz · Rahbariyat · Ekspertlar · Hamkorlar | `biz-kimmiz` · `rahbariyat` · `ekspertlar` · `hamkorlar` |
+| Voqealar | Yangiliklar · Uchrashuvlar · Davra suhbatlari · Konferensiyalar · Markaz hayoti · Tadbirlar (umumiy) | `yangiliklar` · `uchrashuvlar` · `davra-suhbatlari` · `konferensiyalar` · `markaz-hayoti` · `tadbirlar` |
+| Tadqiqotlar | Maqolalar · Ma'ruzalar · Tahlillar · Kitoblar · Nashrlar (umumiy) | `maqolalar` · `maruzalar` · `tahlillar` · `kitoblar` · `nashrlar` |
+| Media | Bizning ekspertlar OAVlarda · Fotogalereya · Videomateriallar · Infografika | `oav` · `media?tab=photo` · `media?tab=video` · `media?tab=info` |
+| Aloqa | Murojaatlar | `aloqa` (sahifadagi formadan kelgan xabarlar) |
+| Bosh sahifa | Hero slayder | `index.html` |
+| Boshqaruv | Obunachilar · Foydalanuvchilar · Audit · Xatoliklar · Bildirishnoma · Sozlamalar | **saytda yo'q** — shuning uchun ataylab pastda, alohida sarlavha ostida |
+
+2026-08-22 da uchta nomuvofiqlik tuzatildi:
+«Markaz matnlari» → **«Biz kimmiz»**, «Media kutubxona» → saytdagidek **uchta
+alohida band** (Fotogalereya / Videomateriallar / Infografika, manzili
+`#/media/t/photo`), «Barchasi» → **«Tadbirlar (umumiy)»** va «Nashrlar
+(umumiy)» — menyuning o'zidanoq bu band qaysi sahifa ekani ko'rinsin.
 
 > ⚠️ Saytdagi menyuni (`js/site-common.js` → `NAV`) o'zgartirsangiz admindagi
 > guruhlarni ham yangilang — ular ataylab bir-birining ko'zgusi.
+> `node tests\menyu-mos.js` mosligini tekshiradi (`smoke.ps1` → **[10]**).
+
+Sahifa manzili KODDA takrorlanmaydi — har biri BITTA joyda:
+
+| Nima | Qayerda |
+|---|---|
+| Bo'lim sahifasi (Konferensiyalar → `konferensiyalar.html`) | `js/content-kinds.js` → `page` |
+| Kolleksiya sahifasi (Yangiliklar → `yangiliklar.html`) | `js/admin-ui.js` → `C[...].page` |
+| Kolleksiyasiz ko'rinish (Murojaatlar → `aloqa.html`) | `js/admin-ui.js` → `NAV[].items[].page` |
 
 **Bo'limlar saytdagi sahifalarning o'zi.** «Voqealar» va «Tadqiqotlar» adminda
 bitta ro'yxat emas — saytdagi sahifalarning har biri alohida bo'lim:
@@ -569,11 +603,15 @@ bitta ro'yxat emas — saytdagi sahifalarning har biri alohida bo'lim:
 - «Tahlillar» ni bosasiz → faqat tahlillar chiqadi, tugma «Yangi tahlil»
   bo'ladi va yangi yozuvning **turi oldindan qo'yiladi**. Ya'ni qayerga
   qo'shayotganingiz va u qayerda chiqishi bir xil nom bilan ataladi.
-- Sarlavha ostida **«saytda ko'rish ↗»** havolasi — qo'shgan narsangizni
-  darhol o'z ko'zingiz bilan tekshirasiz.
+- Sarlavha ostida **«Saytda: … ↗»** havolasi — qo'shgan narsangizni darhol
+  o'z ko'zingiz bilan tekshirasiz. 2026-08-22 dan bu havola **hamma bo'limda**
+  bor: ilgari u faqat Voqealar va Tadqiqotlarda chiqardi, Yangiliklar,
+  Hamkorlar, Ekspertlar OAVda va Hero slayderda esa **umuman yo'q edi** —
+  aynan o'sha bo'limlarda "qayerga tushdi?" degan savol tug'ilardi.
 - Yon menyudagi raqam ham o'sha bo'limniki (Tahlillar 3, Kitoblar 2 …).
-- **«Barchasi»** bandi bitta jadvalning to'liq ro'yxati — umumiy ko'rish va
-  qidiruv uchun. Faqat shu yerda «Saytda» ustuni ko'rinadi.
+- **«Tadbirlar (umumiy)» / «Nashrlar (umumiy)»** bandi bitta jadvalning to'liq
+  ro'yxati — umumiy ko'rish va qidiruv uchun. Faqat shu yerda «Saytda» ustuni
+  ko'rinadi (bo'lim ichida u ortiqcha: barcha qatorda bir xil qiymat).
 - Xuddi shu naqsh **Rahbariyat / Ekspertlar** uchun ham: bitta `experts`
   jadvali, bo'limni `kind` maydoni belgilaydi (`Rahbariyat` bo'lmagan har bir
   xodim ekspert hisoblanadi — maydon bo'sh qolsa ham). Bu ikkisida

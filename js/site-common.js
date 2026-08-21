@@ -146,7 +146,15 @@
       { tk: 'nav_about_experts',  href: 'ekspertlar.html' },
       { tk: 'nav_about_partners', href: 'hamkorlar.html' }
     ]},
+    /* 2026-08-22: "Yangiliklar" menyuga QAYTARILDI. U shu ro'yxatning birinchi
+       bandi bo'lishi kerak edi — `keys` da `'news'` allaqachon turgan va
+       `PAGE_KEY` da `yangiliklar.html -> 'news'` yozilgan, ya'ni sahifa ochilsa
+       "Voqealar" bandi yonib turardi. Lekin bandning O'ZI yozilmagan edi:
+       `yangiliklar.html` ga butun saytda faqat bosh sahifadagi kichkina
+       "Barcha yangiliklar →" havolasi olib borardi. Natijada admin panelda
+       "Yangiliklar" bo'limi bor edi, saytda esa uni menyudan topib bo'lmasdi. */
     { tk: 'nav_happenings', href: 'tadbirlar.html', keys: ['news','events','meetings','roundtables','conferences','life'], children: [
+      { tk: 'nav_news', href: 'yangiliklar.html' },
       { tk: 'nav_ev_meetings', href: 'uchrashuvlar.html' },
       { tk: 'nav_ev_roundtables', href: 'davra-suhbatlari.html' },
       { tk: 'nav_ev_conferences', href: 'konferensiyalar.html' },

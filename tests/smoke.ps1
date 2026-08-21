@@ -124,6 +124,7 @@ Check "maxfiy kolleksiya item rad (401/404)" ((Code $rg) -in 401,404) "status=$(
 # shunday bo'lgan). Shu ro'yxat ikkala nusxadagi BARCHA ichki havolani qamraydi.
 Write-Host "`n[8] Menyu havolalari 200 qaytaradi"
 $navLinks = 'biz-kimmiz.html','rahbariyat.html','ekspertlar.html','hamkorlar.html',
+            'yangiliklar.html',
             'uchrashuvlar.html','davra-suhbatlari.html','konferensiyalar.html','markaz-hayoti.html',
             'maqolalar.html','maruzalar.html','tahlillar.html','kitoblar.html',
             'oav.html','media.html?tab=photo','media.html?tab=video','media.html?tab=info',
@@ -131,6 +132,48 @@ $navLinks = 'biz-kimmiz.html','rahbariyat.html','ekspertlar.html','hamkorlar.htm
 foreach ($l in $navLinks) {
   $r = Get2 "$Base/$l"
   Check "menyu havolasi: $l" ((Code $r) -eq 200) "status=$(Code $r)"
+}
+
+# ---- 9. Menyuning IKKI nusxasi bir xilmi ----
+# NEGA KERAK: menyu ikki joyda yoziladi va ular AYRILIB ketdi. `nav_news`
+# bandi `site-common.js` dagi NAV ga ham, `index.html` ga ham yozilmagan edi,
+# holbuki `yangiliklar.html` sahifasi bor va admin panelda "Yangiliklar"
+# bo'limi ishlar edi. Natijada admin yangilik qo'shsa, uni saytning menyusidan
+# topib bo'lmasdi. Yuqoridagi [8] buni TUTA OLMAYDI — u faqat havola tirikmi
+# deb qaraydi, havolaning menyuda BOR-YO'QLIGINI emas.
+Write-Host "`n[9] Menyuning ikki nusxasi mos keladi"
+$root = Split-Path $PSScriptRoot -Parent
+$sc = Get-Content (Join-Path $root 'js\site-common.js') -Raw
+$ix = Get-Content (Join-Path $root 'index.html') -Raw
+# `const NAV = [ ... ];` blokidagi barcha href
+$navBlock = [regex]::Match($sc, '(?s)const NAV = \[.*?\n  \];')
+if (-not $navBlock.Success) {
+  Check "site-common.js dagi NAV topildi" $false "regex mos kelmadi"
+} else {
+  $hrefs = [regex]::Matches($navBlock.Value, "href:\s*'([^']+)'") |
+           ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique
+  Check "NAV bo'sh emas" ($hrefs.Count -gt 0) "topilgan: $($hrefs.Count)"
+  foreach ($h in $hrefs) {
+    Check "index.html menyusida ham bor: $h" ($ix -match [regex]::Escape("href=`"$h`"")) 'index.html dagi qo''lda yozilgan menyuga qo''shing'
+  }
+}
+
+# ---- 10. Admin menyusi sayt menyusiga mos keladimi ----
+# Alohida skript (`tests\menyu-mos.js`), chunki u HTTP emas — MANBA fayllarni
+# o'qiydi. Node bo'lmasa o'tkazib yuboriladi: smoke.ps1 hech qanday tashqi
+# vositaga bog'liq bo'lmasligi kerak.
+Write-Host "`n[10] Admin menyusi sayt menyusiga mos"
+$nodeCmd = Get-Command node -ErrorAction SilentlyContinue
+$navTest = Join-Path $PSScriptRoot 'menyu-mos.js'
+if (-not $nodeCmd) {
+  Write-Host "  [O'TKAZILDI] node topilmadi — qo'lda: node tests\menyu-mos.js" -ForegroundColor DarkGray
+} elseif (-not (Test-Path $navTest)) {
+  Check "menyu-mos.js mavjud" $false 'fayl yo''q'
+} else {
+  $out = & $nodeCmd.Source $navTest 2>&1
+  $code = $LASTEXITCODE
+  Check "admin va sayt menyusi mos" ($code -eq 0) 'batafsili: node tests\menyu-mos.js'
+  if ($code -ne 0) { $out | Where-Object { $_ -match '\[XATO\]' } | ForEach-Object { Write-Host "         $_" -ForegroundColor Red } }
 }
 
 # ---- Xulosa ----
