@@ -133,7 +133,7 @@
   // "index.html" dagi qo'lda yozilgan menyu bilan BIR XIL bo'lishi
   // shart — u alohida nusxa, o'zgartirsangiz ikkalasini ham yangilang).
   // `keys` — qaysi sahifalarda bu band "active" bo'lib yonishi. Bir band bir
-  // nechta sahifaga javob beradi (masalan Voqealar = yangiliklar + tadbirlar),
+  // nechta sahifaga javob beradi (masalan Voqealar = tadbirlar + uchrashuvlar),
   // chunki alohida menyu bandlari olib tashlandi, sahifalar esa qoldi.
   const NAV = [
     // `group: true` — bu band SAHIFA EMAS, faqat ochiluvchi ro'yxat sarlavhasi
@@ -146,15 +146,7 @@
       { tk: 'nav_about_experts',  href: 'ekspertlar.html' },
       { tk: 'nav_about_partners', href: 'hamkorlar.html' }
     ]},
-    /* 2026-08-22: "Yangiliklar" menyuga QAYTARILDI. U shu ro'yxatning birinchi
-       bandi bo'lishi kerak edi — `keys` da `'news'` allaqachon turgan va
-       `PAGE_KEY` da `yangiliklar.html -> 'news'` yozilgan, ya'ni sahifa ochilsa
-       "Voqealar" bandi yonib turardi. Lekin bandning O'ZI yozilmagan edi:
-       `yangiliklar.html` ga butun saytda faqat bosh sahifadagi kichkina
-       "Barcha yangiliklar →" havolasi olib borardi. Natijada admin panelda
-       "Yangiliklar" bo'limi bor edi, saytda esa uni menyudan topib bo'lmasdi. */
-    { tk: 'nav_happenings', href: 'tadbirlar.html', keys: ['news','events','meetings','roundtables','conferences','life'], children: [
-      { tk: 'nav_news', href: 'yangiliklar.html' },
+    { tk: 'nav_happenings', href: 'tadbirlar.html', keys: ['events','meetings','roundtables','conferences','life'], children: [
       { tk: 'nav_ev_meetings', href: 'uchrashuvlar.html' },
       { tk: 'nav_ev_roundtables', href: 'davra-suhbatlari.html' },
       { tk: 'nav_ev_conferences', href: 'konferensiyalar.html' },
@@ -522,7 +514,7 @@
   // ---------- banner background ----------
   // sahifa fayli -> banner kaliti
   const BANNER_MAP = {
-    'yangiliklar.html':'news','yangilik.html':'news','tadbirlar.html':'events',
+    'tadbirlar.html':'events',
     'uchrashuvlar.html':'events','davra-suhbatlari.html':'events','konferensiyalar.html':'events','markaz-hayoti.html':'events',
     'nashrlar.html':'pubs','nashr.html':'pubs','tadqiqotlar.html':'research','yonalish.html':'research',
     // "Tahlillar" bo'limining uch sahifasi nashrlar bilan bir xil bannerni oladi

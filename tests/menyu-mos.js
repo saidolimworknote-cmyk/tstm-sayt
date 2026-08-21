@@ -8,9 +8,14 @@
        3) js/admin-ui.js -> NAV           (admin panelning yon menyusi)
      Ular ayrilib ketganda hech qanday xato chiqmaydi — sayt ham, admin ham
      bemalol ishlayveradi. 2026-08-22 gacha aynan shunday bo'lgan: admin
-     panelda "Yangiliklar" bo'limi bor edi, `yangiliklar.html` sahifasi ham
-     bor edi, lekin u sayt MENYUSIDA yo'q edi. Natijada admin yangilik
-     qo'shsa, uni saytdan topib bo'lmasdi.
+     panelda "Yangiliklar" bo'limi bor edi, saytning menyusida esa unday band
+     yo'q edi. Kontent qo'ygan odam uni saytdan topa olmasdi. O'sha bo'lim
+     saytdan ham, admin'dan ham butunlay olib tashlandi; bu skript endi
+     shunday nomuvofiqlik QAYTA paydo bo'lishining oldini oladi.
+
+     QOIDA: sayt — etalon. Admin panelda saytda muqobili YO'Q kontent bo'limi
+     bo'lmasligi kerak. Yangi bo'lim kerak bo'lsa, avval saytda sahifa va
+     menyu bandi paydo bo'ladi, keyin admin'da.
 
      (1) va (2) ning mosligini `tests\smoke.ps1` -> [9] tekshiradi.
      Bu skript esa (3) ni (1) ga solishtiradi.

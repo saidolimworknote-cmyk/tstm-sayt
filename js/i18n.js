@@ -2,12 +2,12 @@
    TSTM — i18n (UZ / RU / EN) tarjima tizimi
    Lug'at + tarjima dvigateli. Boshqa skriptlardan oldin yuklanadi.
    Ishlatish:
-     t('nav_news')                -> joriy tildagi matn
+     t('nav_about')               -> joriy tildagi matn
      I18N.lang                    -> 'uz' | 'ru' | 'en'
      I18N.setLang('ru')           -> tilni o'zgartiradi + sahifani yangilaydi
      I18N.translate(root)         -> [data-i18n] elementlarini tarjima qiladi
    HTML:
-     <h1 data-i18n="p_news_title"></h1>
+     <h1 data-i18n="p_events_title"></h1>
      <input data-i18n-ph="search_ph">
    ============================================================ */
 (function (w) {
@@ -37,7 +37,6 @@
     nav_about_partners:   { uz: 'Hamkorlar', ru: 'Партнёры', en: 'Partners' },
     nav_research:         { uz: 'Tadqiqotlar', ru: 'Исследования', en: 'Research' },
     nav_pubs:             { uz: 'Nashrlar', ru: 'Публикации', en: 'Publications' },
-    nav_news:             { uz: 'Yangiliklar', ru: 'Новости', en: 'News' },
     nav_events:           { uz: 'Tadbirlar', ru: 'Мероприятия', en: 'Events' },
     nav_media:            { uz: 'Media', ru: 'Медиа', en: 'Media' },
     nav_media_photo:      { uz: 'Fotogalereya', ru: 'Фотогалерея', en: 'Photo gallery' },
@@ -133,7 +132,6 @@
     about_sec_exp_d:      { uz: "Tahlilchilar va ilmiy xodimlar, ekspertiza yo’nalishlari bo’yicha.", ru: 'Аналитики и научные сотрудники по направлениям экспертизы.', en: 'Analysts and research staff, by area of expertise.' },
     about_sec_part_d:     { uz: "Xalqaro tashkilotlar, ilmiy markazlar va universitetlar.", ru: 'Международные организации, научные центры и университеты.', en: 'International organizations, research centers and universities.' },
     nav_happenings:       { uz: 'Voqealar', ru: 'События', en: 'Happenings' },
-    nav_hap_news:         { uz: 'Yangiliklar TSTM', ru: 'Новости ЦВПИ', en: 'CFPS news' },
     nav_hap_experts:      { uz: 'Bizning ekspertlar OAVlarda', ru: 'Наши эксперты в СМИ', en: 'Our experts in the media' },
     nav_hap_events:       { uz: 'Tadbirlar TSTM', ru: 'Мероприятия ЦВПИ', en: 'CFPS events' },
     /* Voqealar (Events) bo'limi 4 sub-kategoriyasi: Uchrashuvlar, Davra suhbatlari, Konferensiyalar, Markaz hayoti */
@@ -164,7 +162,6 @@
     more:         { uz: 'Batafsil', ru: 'Подробнее', en: 'More' },
     view_all:     { uz: 'Barchasi', ru: 'Все', en: 'View all' },
     all:          { uz: 'Hammasi', ru: 'Все', en: 'All' },
-    all_news:     { uz: 'Barcha yangiliklar', ru: 'Все новости', en: 'All news' },
     /* ---- "Bizning ekspertlar OAVlarda" (oav.html / sharh.html) ---- */
     all_oav:      { uz: 'Barcha sharhlar', ru: 'Все комментарии', en: 'All commentary' },
     related_oav:  { uz: 'Boshqa sharhlar', ru: 'Другие комментарии', en: 'More commentary' },
@@ -179,7 +176,6 @@
     download_pdf: { uz: 'Faylni yuklab olish', ru: 'Скачать файл', en: 'Download file' },
     soon:         { uz: 'Tez orada', ru: 'Скоро', en: 'Coming soon' },
     read_again:   { uz: "Yana o'qing", ru: 'Читайте также', en: 'Read also' },
-    related_news: { uz: 'Tegishli yangiliklar', ru: 'Похожие новости', en: 'Related news' },
     related_pubs: { uz: 'Tegishli nashrlar', ru: 'Похожие публикации', en: 'Related publications' },
     pub_about:    { uz: 'Nashr haqida', ru: 'О публикации', en: 'About publication' },
     pub_fulltitle:{ uz: "To'liq nomi", ru: 'Полное название', en: 'Full title' },
@@ -225,8 +221,6 @@
     /* ---- homepage: section heads ---- */
     dir_kicker:   { uz: "Faoliyat yo'nalishlari", ru: 'Направления деятельности', en: 'Areas of activity' },
     dir_title:    { uz: "Tadqiqot yo'nalishlarimiz", ru: 'Наши направления исследований', en: 'Our research areas' },
-    news_kicker:  { uz: "Yangiliklar va e'lonlar", ru: 'Новости и анонсы', en: 'News & announcements' },
-    news_title:   { uz: "So'nggi yangiliklar", ru: 'Последние новости', en: 'Latest news' },
     pubs_kicker:  { uz: 'Tadqiqotlar va nashrlar', ru: 'Исследования и публикации', en: 'Research & publications' },
     pubs_title:   { uz: 'Asosiy hisobotlar', ru: 'Основные доклады', en: 'Key reports' },
     team_kicker:  { uz: 'Jamoa', ru: 'Команда', en: 'Team' },
@@ -278,8 +272,6 @@
     org_name:        { uz: 'TASHQI SIYOSIY TADQIQOTLAR', ru: 'ЦЕНТР ВНЕШНЕПОЛИТИЧЕСКИХ ИССЛЕДОВАНИЙ', en: 'CENTER FOR FOREIGN POLICY RESEARCH' },
 
     /* ---- page banners ---- */
-    p_news_title:  { uz: "Yangiliklar va e'lonlar", ru: 'Новости и анонсы', en: 'News & announcements' },
-    p_news_lead:   { uz: "Markaz faoliyati, tadqiqotlar, tadbirlar va xalqaro hamkorlik bo'yicha so'nggi yangiliklar.", ru: 'Последние новости о деятельности центра, исследованиях, мероприятиях и международном сотрудничестве.', en: 'Latest news on the center\u2019s activities, research, events and international cooperation.' },
     p_oav_title:   { uz: 'Bizning ekspertlar OAVlarda', ru: 'Наши эксперты в СМИ', en: 'Our experts in the media' },
     p_oav_lead:    { uz: "Markaz ekspertlarining ommaviy axborot vositalaridagi sharhlari, intervyulari va chiqishlari.", ru: 'Комментарии, интервью и выступления экспертов центра в средствах массовой информации.', en: 'Commentary, interviews and appearances by the center’s experts in the media.' },
     p_events_title:{ uz: 'Tadbirlar taqvimi', ru: 'Календарь мероприятий', en: 'Events calendar' },
@@ -380,7 +372,6 @@
 
     /* ---- search page ---- */
     search_ph:   { uz: "Kalit so'z kiriting...", ru: 'Введите ключевое слово...', en: 'Enter a keyword...' },
-    search_k_news:{ uz: 'Yangilik', ru: 'Новость', en: 'News' },
     search_k_oav: { uz: 'Ekspert sharhi', ru: 'Комментарий эксперта', en: 'Expert commentary' },
     search_k_pub: { uz: 'Nashr', ru: 'Публикация', en: 'Publication' },
     search_k_event:{ uz: 'Tadbir', ru: 'Мероприятие', en: 'Event' },
@@ -441,14 +432,12 @@
     /* ---- about page sidenav fallback / misc ---- */
     soon_text:   { uz: "Matn tez orada qo'shiladi.", ru: 'Текст скоро будет добавлен.', en: 'Text coming soon.' },
     none_data:   { uz: "Ma'lumot yo'q", ru: 'Нет данных', en: 'No data' },
-    no_news_cat: { uz: "Bu kategoriyada yangilik yo'q", ru: 'В этой категории нет новостей', en: 'No news in this category' },
     no_pubs:     { uz: 'Nashr topilmadi', ru: 'Публикации не найдены', en: 'No publications found' },
 
     /* ---- bosh sahifa: bo'lim bo'sh bo'lgandagi holat ----
        Ilgari bu bo'limlarda namuna uchun yozilgan to'qima kontent (soxta
        yangilik sarlavhalari, o'ylab topilgan ekspert ismlari) turardi va
        baza bo'sh bo'lsa u haqiqiy ma'lumotdek ko'rinardi. */
-    home_no_news:    { uz: "Hozircha yangilik yo'q", ru: 'Новостей пока нет', en: 'No news yet' },
     home_no_pubs:    { uz: "Hozircha nashr yo'q", ru: 'Публикаций пока нет', en: 'No publications yet' },
     home_no_experts: { uz: "Ma'lumot hozircha kiritilmagan", ru: 'Данные пока не добавлены', en: 'No information added yet' }
   };
@@ -472,7 +461,6 @@
     'Markaziy Osiyo':         { ru: 'Центральная Азия', en: 'Central Asia' },
     'Hamkorlik':              { ru: 'Сотрудничество', en: 'Cooperation' },
     'Tahlil':                 { ru: 'Аналитика', en: 'Analysis' },
-    'Yangilik':               { ru: 'Новость', en: 'News' },
     'Tadbir':                 { ru: 'Мероприятие', en: 'Event' },
     'Hisobot':                { ru: 'Отчёт', en: 'Report' },
     'Tahliliy sharh':         { ru: 'Аналитический обзор', en: 'Analytical review' },

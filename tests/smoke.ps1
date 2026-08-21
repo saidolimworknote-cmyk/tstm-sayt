@@ -33,7 +33,7 @@ Write-Host ("=" * 60)
 
 # ---- 1. Sahifalar yuklanadi (200) ----
 Write-Host "`n[1] Sahifalar 200 qaytaradi"
-$pages = 'index.html','nashrlar.html','yangiliklar.html','aloqa.html',
+$pages = 'index.html','nashrlar.html','aloqa.html',
          'media.html','rahbariyat.html','markaz-haqida.html','tadqiqotlar.html',
          'tadbirlar.html','yonalish.html','oav.html','sharh.html',
          'ekspertlar.html','tahlillar.html','maruzalar.html','maqolalar.html','kitoblar.html',
@@ -124,7 +124,6 @@ Check "maxfiy kolleksiya item rad (401/404)" ((Code $rg) -in 401,404) "status=$(
 # shunday bo'lgan). Shu ro'yxat ikkala nusxadagi BARCHA ichki havolani qamraydi.
 Write-Host "`n[8] Menyu havolalari 200 qaytaradi"
 $navLinks = 'biz-kimmiz.html','rahbariyat.html','ekspertlar.html','hamkorlar.html',
-            'yangiliklar.html',
             'uchrashuvlar.html','davra-suhbatlari.html','konferensiyalar.html','markaz-hayoti.html',
             'maqolalar.html','maruzalar.html','tahlillar.html','kitoblar.html',
             'oav.html','media.html?tab=photo','media.html?tab=video','media.html?tab=info',

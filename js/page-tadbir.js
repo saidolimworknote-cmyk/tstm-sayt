@@ -6,7 +6,7 @@
    qilinadigan va chop etiladigan sahifa bo'lishi kerak: sana, boshlanish
    vaqti, manzil, turi va to'liq bayon bir joyda tursin.
 
-   Tuzilishi yangilik.html (page-yangilik.js) bilan ataylab bir xil: bir xil
+   Tuzilishi sharh.html (page-sharh.js) bilan ataylab bir xil: bir xil
    `.article`, `.act-row`, chop etish sarlavhasi va "ko'rishlar" hisoblagichi —
    tashrifchi uchun sayt bo'ylab bitta o'qish tajribasi. */
 Site.initPage({ active: 'events', render(){

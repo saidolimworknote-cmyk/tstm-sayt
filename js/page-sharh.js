@@ -1,5 +1,5 @@
 /* sharh.html — bitta ekspert sharhi (to'liq matn).
-   Tuzilishi page-yangilik.js bilan bir xil. Farqi: ekspert/nashr qatori
+   Tuzilishi page-tadbir.js bilan bir xil. Farqi: ekspert/nashr qatori
    (.oav-byline) va matndan keyin "Asl manbaga o'tish" tashqi havolasi. */
   Site.initPage({ active:'oav', render(){
     const id = Site.qs('id');
@@ -16,7 +16,7 @@
     const bodyRaw = Site.mlGet(p.body);
     const excerpt = Site.mlGet(p.excerpt);
     const standfirst = excerpt ? `<p class="art-lead">${Site.esc(excerpt)}</p>` : '';
-    // Asosiy matn to'liq anonsning nusxasi bo'lsa takrorlamaymiz (page-yangilik.js dagidek)
+    // Asosiy matn to'liq anonsning nusxasi bo'lsa takrorlamaymiz (page-tadbir.js dagidek)
     const bodyText = (bodyRaw||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
     const exNorm = (excerpt||'').replace(/\s+/g,' ').trim();
     const body = (bodyRaw && !(exNorm && bodyText === exNorm)) ? bodyRaw

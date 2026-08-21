@@ -55,9 +55,9 @@
   function buildIndex(){
     var items=[]; if(!w.Store) return items;
     try{
-      Store.all('news').filter(function(n){return n.status==='published';}).forEach(function(n){
-        items.push({kind:'news',kl:T('search_k_news'),title:n.title,text:n.excerpt||n.body,href:'yangilik.html?id='+n.id,cover:n.cover||'',date:n.date||'',cat:n.category||''});
-      });
+      // Yangiliklar indeksdan 2026-08-22 da chiqarildi: bo'lim saytdan
+      // butunlay olib tashlandi, ya'ni natija havolasi ochilmaydigan
+      // `yangilik.html` ga olib borardi.
       // "Bizning ekspertlar OAVlarda". Nashr nomi `cat` ga tushadi (natija
       // kartasida ham ko'rinadi), ekspert ismi esa `extra` ga — u faqat
       // qidiruv maydoniga qo'shiladi, snippetni ifloslantirmaydi.
@@ -110,7 +110,6 @@
 
   // kategoriyalar (yuqoridagi qatorda chip sifatida chiqadi)
   var KINDS=[
-    {k:'news',   t:'search_k_news'},
     {k:'oav',    t:'search_k_oav'},
     {k:'pub',    t:'search_k_pub'},
     {k:'event',  t:'search_k_event'},

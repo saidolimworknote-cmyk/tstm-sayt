@@ -85,7 +85,7 @@ Bular papkaga ko'chirilsa sayt buziladi — ko'chirmang:
 ## 📦 Tarkibi
 - **index.html** — saytning bosh sahifasi (2026-08-10 gacha `Bosh sahifa - Hi-Fi.html`
   deb atalardi; eski nom va uni yo'naltiruvchi `index.php` olib tashlangan)
-- Ichki sahifalar: `yangiliklar.html`, `yangilik.html`, `tadbirlar.html`, `nashrlar.html`,
+- Ichki sahifalar: `tadbirlar.html`, `nashrlar.html`,
   `tadqiqotlar.html`, `biz-kimmiz.html`, `rahbariyat.html`, `ekspertlar.html`, `hamkorlar.html`,
   `media.html`, `aloqa.html`,
   `oav.html` + `sharh.html` — «Bizning ekspertlar OAVlarda» (ro'yxat va bitta sharh;
@@ -257,7 +257,7 @@ Sayt 3 tilli: **UZ / RU / EN**. Har bir kontent admin panelda 3 tilda tahrirlana
 ---
 
 ## 🗄️ Ma'lumotlar bazasi (MySQL)
-- Baza nomi: **`tstm`** (avtomatik yaratiladi). Jadvallar: `news`, `media_posts`, `events`,
+- Baza nomi: **`tstm`** (avtomatik yaratiladi). Jadvallar: `media_posts`, `events`,
   `experts`, `publications`, `hero_slides`, `partners`, `pages`, `media`, `users`, `messages`,
   `settings`, `auth`, `views`, `login_attempts`, `audit_log`.
 - **Yangi bo'lim qo'shish** (naqsh — `media_posts` shu tarzda qo'shilgan): `db.php` da
@@ -318,11 +318,11 @@ beradi. Serverda shaxsiy ma'lumot saqlanmaydi.
 3. Ruxsat berilsa, `sw.js` (Service Worker) ro'yxatdan o'tadi va obuna
    `push_subs` jadvaliga yoziladi.
 4. Admin panel → **Bildirishnoma** → «Yuborish». Server barcha obunachilarga
-   "turtki" yuboradi, `sw.js` esa **eng so'nggi e'lon qilingan yangilikni**
+   "turtki" yuboradi, `sw.js` esa **eng so'nggi e'lon qilingan nashrni**
    API'dan olib, tashrifchining tilida ko'rsatadi.
 
 > Xabar matni yuborishdan oldin yozilmaydi — u yuborilgan paytda aniqlanadi.
-> Shuning uchun tartib: avval yangilikni «e'lon qilingan» holatida saqlang,
+> Shuning uchun tartib: avval nashrni «e'lon qilingan» holatida saqlang,
 > keyin yuboring.
 
 **Taklif oynasi nega darhol chiqmaydi:** brauzer ruxsatini foydalanuvchi bir
@@ -404,14 +404,53 @@ yangilang**.
 > xato chiqmaydi** — sayt ham, admin ham bemalol ishlayveradi.
 >
 > 2026-08-22 gacha aynan shunday bo'lgan: admin panelda «Yangiliklar» bo'limi
-> bor edi, `yangiliklar.html` sahifasi ham bor edi, lekin band sayt menyusiga
-> yozilmagan edi. Admin yangilik qo'shsa, uni saytdan topib bo'lmasdi.
-> (`site-common.js` dagi `PAGE_KEY` va `keys:['news',…]` esa bandni allaqachon
-> kutayotgan edi — ya'ni faqat bandning O'ZI tushib qolgan.)
+> bor edi, saytning menyusida esa unday band yo'q edi. Kontent qo'ygan odam
+> uni saytdan topa olmasdi va bo'lim nimaga xizmat qilishini bilmasdi.
+> O'sha bo'lim **butunlay olib tashlandi** (pastdagi «Yangiliklar bo'limi
+> nega yo'q» ga qarang).
+>
+> **QOIDA: sayt — etalon.** Admin panelda saytda muqobili YO'Q kontent
+> bo'limi bo'lmasligi kerak. Yangi bo'lim kerak bo'lsa tartib shunday: avval
+> saytda sahifa va menyu bandi paydo bo'ladi, keyin admin'da bo'lim.
 >
 > Endi ikkita tekshiruv qo'riqlaydi:
 > `smoke.ps1` → **[9]** (NAV ↔ index.html) va `tests\menyu-mos.js` →
 > **admin NAV ↔ sayt NAV** (smoke `[10]` da avtomatik chaqiriladi).
+
+### Yangiliklar bo'limi nega yo'q
+
+2026-08-22 da «Yangiliklar» **saytdan ham, admin paneldan ham** butunlay olib
+tashlandi. Sabab: u saytning menyusida hech qachon bo'lmagan — sahifasi bor
+edi, lekin unga faqat bosh sahifadagi kichkina «Barcha yangiliklar →» havolasi
+olib borardi. Ya'ni bo'lim amalda faqat admin panelda yashardi.
+
+Nima o'chirildi:
+
+| Nima | Qayerda edi |
+|---|---|
+| `yangiliklar.html`, `yangilik.html` | ro'yxat va bitta yangilik sahifasi |
+| `js/page-yangiliklar.js`, `js/page-yangilik.js` | ularning skriptlari |
+| «So'nggi yangiliklar» bloki | `index.html` → NEWS bo'limi |
+| `.news-grid` / `.feat` / `.nitem` uslublari | `css/home.css` |
+| Qidiruv indeksi va «Yangilik» filtri | `js/search.js` |
+| Admin'dagi «Yangiliklar» bo'limi | `js/admin-ui.js` → `NAV` va `C` |
+| i18n kalitlari (`nav_news`, `news_title`, `all_news` …) | `js/i18n.js` |
+
+Ikkita mexanizm **yangiliklarga tayangan edi** — ikkalasi ham nashrlarga
+o'tkazildi:
+
+1. **Hero slayder zaxirasi** (`page-home.js` → `heroItems`). Admin «Hero
+   slayder» bo'limi bo'sh bo'lsa, bosh sahifaning yuqorisi so'nggi 5 nashrdan
+   to'ldiriladi. Ilgari yangiliklardan olinardi; almashtirilmaganda hero
+   matnsiz gradient bo'lib qolardi (hozir bazada 0 ta hero slayd bor).
+2. **Push-bildirishnoma** (`sw.js` va admin → Bildirishnoma). Endi so'nggi
+   e'lon qilingan NASHR yuboriladi. Bu obuna oynasidagi va'daga ham mos:
+   «Markaz yangi tahlil yoki nashr e'lon qilganda brauzeringiz sizga xabar
+   beradi» (`i18n.js` → `sub_text`).
+
+> **Baza tegilmadi.** `news` jadvali va undagi yozuvlar joyida turibdi —
+> arxiv sifatida. Zaxira: `backups\news_2026-08-22_olib-tashlashdan-oldin.sql`.
+> Bo'limni qaytarish kerak bo'lsa, ma'lumot yo'qolmagan.
 
 Admin yon menyusi bilan mosligi — pastdagi «Admin panel — sayt menyusining
 nusxasi» bo'limida.
@@ -551,7 +590,7 @@ bilan chiqadi:
   > nomni almashtirsa ham qog'ozda **eski** nom chiqaverardi, ruschada esa
   > nomning faqat yarmi («ЦЕНТР ВНЕШНЕПОЛИТИЧЕСКИХ / Исследований»).
 - Blank barcha ichki sahifaga `initPage()` → `injectPrintFrame()` orqali
-  qo'yiladi. Batafsil sahifalar (`yangilik`, `tadbir`, `nashr`, `sharh`) uni
+  qo'yiladi. Batafsil sahifalar (`tadbir`, `nashr`, `sharh`) uni
   o'zi qo'yadi — o'sha yerda funksiya ikkinchi nusxa yasamaydi.
   > Ro'yxat sahifalari o'z CSS'ida chop etishda `header, footer, .page-banner`
   > ni yashiradi. Ilgari ular blanksiz chiqar, ya'ni qog'ozda na idora nomi,
@@ -572,7 +611,7 @@ sahifada** ko'rinishi yozilgan.
 | Admin guruhi | Ichida | Saytda qayerga tushadi |
 |---|---|---|
 | Markaz haqida | Biz kimmiz · Rahbariyat · Ekspertlar · Hamkorlar | `biz-kimmiz` · `rahbariyat` · `ekspertlar` · `hamkorlar` |
-| Voqealar | Yangiliklar · Uchrashuvlar · Davra suhbatlari · Konferensiyalar · Markaz hayoti · Tadbirlar (umumiy) | `yangiliklar` · `uchrashuvlar` · `davra-suhbatlari` · `konferensiyalar` · `markaz-hayoti` · `tadbirlar` |
+| Voqealar | Uchrashuvlar · Davra suhbatlari · Konferensiyalar · Markaz hayoti · Tadbirlar (umumiy) | `uchrashuvlar` · `davra-suhbatlari` · `konferensiyalar` · `markaz-hayoti` · `tadbirlar` |
 | Tadqiqotlar | Maqolalar · Ma'ruzalar · Tahlillar · Kitoblar · Nashrlar (umumiy) | `maqolalar` · `maruzalar` · `tahlillar` · `kitoblar` · `nashrlar` |
 | Media | Bizning ekspertlar OAVlarda · Fotogalereya · Videomateriallar · Infografika | `oav` · `media?tab=photo` · `media?tab=video` · `media?tab=info` |
 | Aloqa | Murojaatlar | `aloqa` (sahifadagi formadan kelgan xabarlar) |
@@ -594,7 +633,7 @@ Sahifa manzili KODDA takrorlanmaydi — har biri BITTA joyda:
 | Nima | Qayerda |
 |---|---|
 | Bo'lim sahifasi (Konferensiyalar → `konferensiyalar.html`) | `js/content-kinds.js` → `page` |
-| Kolleksiya sahifasi (Yangiliklar → `yangiliklar.html`) | `js/admin-ui.js` → `C[...].page` |
+| Kolleksiya sahifasi (Hamkorlar → `hamkorlar.html`) | `js/admin-ui.js` → `C[...].page` |
 | Kolleksiyasiz ko'rinish (Murojaatlar → `aloqa.html`) | `js/admin-ui.js` → `NAV[].items[].page` |
 
 **Bo'limlar saytdagi sahifalarning o'zi.** «Voqealar» va «Tadqiqotlar» adminda
@@ -605,9 +644,9 @@ bitta ro'yxat emas — saytdagi sahifalarning har biri alohida bo'lim:
   qo'shayotganingiz va u qayerda chiqishi bir xil nom bilan ataladi.
 - Sarlavha ostida **«Saytda: … ↗»** havolasi — qo'shgan narsangizni darhol
   o'z ko'zingiz bilan tekshirasiz. 2026-08-22 dan bu havola **hamma bo'limda**
-  bor: ilgari u faqat Voqealar va Tadqiqotlarda chiqardi, Yangiliklar,
-  Hamkorlar, Ekspertlar OAVda va Hero slayderda esa **umuman yo'q edi** —
-  aynan o'sha bo'limlarda "qayerga tushdi?" degan savol tug'ilardi.
+  bor: ilgari u faqat Voqealar va Tadqiqotlarda chiqardi, Hamkorlar,
+  Ekspertlar OAVda va Hero slayderda esa **umuman yo'q edi** — aynan o'sha
+  bo'limlarda "qayerga tushdi?" degan savol tug'ilardi.
 - Yon menyudagi raqam ham o'sha bo'limniki (Tahlillar 3, Kitoblar 2 …).
 - **«Tadbirlar (umumiy)» / «Nashrlar (umumiy)»** bandi bitta jadvalning to'liq
   ro'yxati — umumiy ko'rish va qidiruv uchun. Faqat shu yerda «Saytda» ustuni

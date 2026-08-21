@@ -1,5 +1,5 @@
 /* oav.html — "Bizning ekspertlar OAVlarda" ro'yxati.
-   Tuzilishi page-yangiliklar.js bilan bir xil; farqi: filtr kategoriya emas,
+   Tuzilishi page-tadbirlar.js bilan bir xil; farqi: filtr kategoriya emas,
    OAV NOMI (outlet) bo'yicha, va kartada ekspert ismi ko'rsatiladi. */
   Site.initPage({ active:'oav', render(){
     const wrap = document.getElementById('list');

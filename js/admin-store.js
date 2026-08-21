@@ -53,14 +53,6 @@
         { id: uid(), name: 'Dilnoza Karimova', login: 'd.karimova', email: 'd.karimova@markaz.uz', role: 'Muharrir', status: 'active', last: '2026-06-12' },
         { id: uid(), name: 'Akmal Tursunov', login: 'a.tursunov', email: 'a.tursunov@markaz.uz', role: 'Moderator', status: 'inactive', last: '2026-05-30' }
       ],
-      news: [
-        { id: uid(), title: ml('Markaz ekspertlari Markaziy Osiyo bo\'yicha xalqaro forumda ma\'ruza qildi', 'Эксперты центра выступили на международном форуме по Центральной Азии', ''), category: 'Diplomatiya', date: '2026-06-13', status: 'published', cover: '', excerpt: ml('Forum doirasida mintaqaviy hamkorlik, transport yo\'laklari va umumiy xavfsizlik masalalari muhokama qilindi.', '', ''), body: ml(p('Forum doirasida mintaqaviy hamkorlik, transport yo\'laklari va umumiy xavfsizlik masalalari muhokama qilindi.'), '', '') },
-        { id: uid(), title: ml('Yangi hisobot: mintaqaviy savdo-iqtisodiy aloqalar dinamikasi', '', ''), category: 'Tahlil', date: '2026-06-12', status: 'published', cover: '', excerpt: ml('', '', ''), body: ml(p('Mintaqaviy savdo-iqtisodiy aloqalar dinamikasi tahlili.'), '', '') },
-        { id: uid(), title: ml('Markazda yosh tadqiqotchilar uchun ekspert maktabi ochildi', '', ''), category: 'Tadbir', date: '2026-06-10', status: 'published', cover: '', excerpt: ml('', '', ''), body: ml(p('Yosh tadqiqotchilar uchun ekspert maktabi.'), '', '') },
-        { id: uid(), title: ml('Xalqaro tadqiqot institutlari bilan memorandum imzolandi', '', ''), category: 'Hamkorlik', date: '2026-06-08', status: 'published', cover: '', excerpt: ml('', '', ''), body: ml(p('Memorandum imzolandi.'), '', '') },
-        { id: uid(), title: ml('Markaz Markaziy Osiyo bo\'yicha yangi tahliliy axborotnoma chiqardi', 'Центр выпустил новый аналитический бюллетень по Центральной Азии', ''), category: 'Tahlil', date: '2026-06-11', status: 'published', cover: '', excerpt: ml('Mintaqadagi so\'nggi siyosiy va iqtisodiy jarayonlar tahlili jamlangan navbatdagi axborotnoma e\'lon qilindi.', '', ''), body: ml(p('Mintaqadagi so\'nggi siyosiy va iqtisodiy jarayonlar tahlili jamlangan navbatdagi axborotnoma e\'lon qilindi.'), '', '') },
-        { id: uid(), title: ml('"Tashqi siyosat sharhi" jurnalining navbatdagi soni chop etildi', '', ''), category: 'Nashr', date: '2026-06-05', status: 'published', cover: '', excerpt: ml('', '', ''), body: ml(p('Jurnalning navbatdagi soni.'), '', '') }
-      ],
       events: [
         { id: uid(), title: ml('Markaziy Osiyo xavfsizligi bo\'yicha xalqaro konferensiya', '', ''), date: '2026-06-24', time: '10:00', location: ml('Toshkent', '', ''), type: 'Konferensiya', status: 'published', body: ml(p('Xalqaro konferensiya.'), '', '') },
         { id: uid(), title: ml('Ekspert muhokamasi: yangi geosiyosiy haqiqatlar', '', ''), date: '2026-07-02', time: '15:00', location: ml('Markaz binosi', '', ''), type: 'Davra suhbati', status: 'published', body: ml('', '', '') },

@@ -49,7 +49,6 @@
 
   const ICON = {
     dashboard: '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
-    news: '<path d="M5 3h11l3 3v15H5z"/><path d="M9 8h7M9 12h7M9 16h4"/>',
     mic: '<rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/>',
     events: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/>',
     pub: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/>',
@@ -100,24 +99,9 @@
 
   /* -------------------- Collection configs -------------------- */
   const C = {
-    news: {
-      label: 'Yangiliklar', singular: 'yangilik', icon: 'news', status: true, search: 'title',
-      page: 'yangiliklar.html',
-      columns: [{ k: 'title', label: 'Sarlavha', ml: 1, thumb: 'cover' }, { k: 'category', label: 'Kategoriya' }, { k: 'date', label: 'Sana', type: 'date' }, { k: 'status', label: 'Holat', type: 'status' }],
-      fields: [
-        { k: 'title', label: 'Sarlavha', type: 'text', ml: 1, req: 1 },
-        { k: 'excerpt', label: 'Qisqa anons', type: 'textarea', ml: 1 },
-        { k: 'body', label: 'Maqola matni', type: 'rich', ml: 1 },
-        { k: 'category', label: 'Mavzu (kategoriya)', type: 'select', side: 1, opts: ['Diplomatiya', 'Tahlil', 'Tadbir', 'Hamkorlik', 'Nashr', 'Iqtisodiyot', 'Xavfsizlik', 'Energetika'] },
-        { k: 'region', label: 'Hudud', type: 'select', side: 1, opts: ['', 'Markaziy Osiyo', 'Janubiy Osiyo', 'Yevropa', 'Yaqin Sharq', 'Global'] },
-        { k: 'author', label: 'Muallif (ekspert)', type: 'text', side: 1 },
-        { k: 'date', label: 'Sana', type: 'date', side: 1 },
-        { k: 'cover', label: 'Muqova rasmi', type: 'image', side: 1 },
-        { k: 'status', label: 'Holat', type: 'status', side: 1 }
-      ]
-    },
     // "Bizning ekspertlar OAVlarda" — sayt tomonida oav.html / sharh.html.
-    // Yangilikka o'xshaydi, farqi: ekspert / OAV nomi / asl manba havolasi.
+    // Post ko'rinishidagi yozuv; o'ziga xos maydonlari: ekspert, OAV nomi,
+    // asl manba havolasi.
     mediaPosts: {
       label: 'Bizning ekspertlar OAVlarda', singular: 'sharh', icon: 'mic', status: true, search: 'title',
       page: 'oav.html',
@@ -292,10 +276,9 @@
       { kindsOf: 'experts' },
       'partners'
     ] },
-    // Saytda: Voqealar -> Yangiliklar · Uchrashuvlar · Davra suhbatlari ·
+    // Saytda: Voqealar -> Uchrashuvlar · Davra suhbatlari ·
     //         Konferensiyalar · Markaz hayoti
     { group: 'Voqealar', items: [
-      'news',
       { kindsOf: 'events' }
     ] },
     // Saytda: Tadqiqotlar -> Maqolalar · Ma'ruzalar · Tahlillar · Kitoblar
@@ -510,7 +493,7 @@
       });
       items.forEach(it => {
         // Band ikki shaklda yozilishi mumkin:
-        //   'news'                             -> kolleksiya, hammasi C dan
+        //   'partners'                         -> kolleksiya, hammasi C dan
         //   { key:'media', label, icon, view } -> alohida ko'rinish
         const base = typeof it === 'string' ? { key: it } : it;
         const isColl = !!C[base.key] && !base.view;
@@ -607,7 +590,7 @@
       list.push({ icon: 'events', dot: true, title: 'Yaqin tadbir', sub: (mlGet(e.title) || '(nomsiz)') + ' · ' + fmtDate(e.date), href: '#/events/edit/' + e.id });
     });
     // e'lon qilinmagan qoralamalar (eslatma)
-    [['news', Store.all('news')], ['mediaPosts', Store.all('mediaPosts')], ['publications', Store.all('publications')], ['pages', Store.all('pages')], ['events', Store.all('events')]].forEach(([coll, arr]) => {
+    [['mediaPosts', Store.all('mediaPosts')], ['publications', Store.all('publications')], ['pages', Store.all('pages')], ['events', Store.all('events')]].forEach(([coll, arr]) => {
       arr.filter(x => x.status === 'draft').slice(0, 4).forEach(x => {
         list.push({ icon: 'draft', title: 'Qoralama', sub: (mlGet(x[C[coll].columns[0].k]) || '(nomsiz)') + ' — ' + C[coll].singular, href: '#/' + coll + '/edit/' + x.id });
       });
@@ -700,36 +683,37 @@
   }
   function viewDashboard(c) {
     setTitle('Boshqaruv paneli');
-    const n = Store.all('news'), ev = Store.all('events'), ex = Store.all('experts'), pb = Store.all('publications'),
+    const ev = Store.all('events'), ex = Store.all('experts'), pb = Store.all('publications'),
       pg = Store.all('pages'), pt = Store.all('partners'), msgs = Store.all('messages'), mp = Store.all('mediaPosts');
     const today = new Date().toISOString().slice(0, 10);
     const upcoming = ev.filter(e => e.date >= today);
     const unread = msgs.filter(m => !m.read).length;
     const cards = [
-      { ic: 'news', v: n.length, l: 'Yangiliklar', tr: n.filter(x => x.status === 'published').length + ' ta nashr etilgan' },
-      { ic: 'mic', v: mp.length, l: 'Ekspertlar OAVda', tr: mp.filter(x => x.status === 'published').length + ' ta nashr etilgan', href: '#/mediaPosts' },
+      { ic: 'mic', v: mp.length, l: 'Bizning ekspertlar OAVlarda', tr: mp.filter(x => x.status === 'published').length + ' ta nashr etilgan', href: '#/mediaPosts' },
       { ic: 'events', v: upcoming.length, l: 'Kelgusi tadbirlar', tr: ev.length + ' ta jami' },
       { ic: 'pub', v: pb.length, l: 'Nashrlar', tr: pb.filter(x => x.status === 'published').length + ' ta ochiq' },
       { ic: 'experts', v: ex.length, l: 'Ekspertlar', tr: pt.length + ' ta hamkor' },
       { ic: 'mail', v: msgs.length, l: 'Murojaatlar', tr: unread ? unread + ' ta yangi xabar' : 'Yangi xabar yo\'q', accent: unread > 0, href: '#/messages' },
       { ic: 'views', v: '<span id="statViewsV">…</span>', l: 'Jami ko\'rishlar', tr: 'Saytdagi barcha sahifalar' }
     ];
-    // chart — news by category
-    const cats = {}; n.forEach(x => cats[x.category] = (cats[x.category] || 0) + 1);
+    /* Diagramma — NASHRLAR turi bo'yicha. 2026-08-22 gacha "yangiliklar
+       kategoriya bo'yicha" edi; yangiliklar bo'limi olib tashlangach, panelning
+       markaziy ko'rsatkichi saytning asosiy kontentiga — nashrlarga o'tdi. */
+    const cats = {}; pb.forEach(x => cats[x.type || '—'] = (cats[x.type || '—'] || 0) + 1);
     const centries = Object.entries(cats).sort((a, b) => b[1] - a[1]); const max = Math.max(1, ...centries.map(e => e[1]));
     let chart = centries.map(([k, v]) => `<div class="bar"><div class="fill" data-h="${(v / max) * 100}" title="${v}"></div><div class="lb">${esc(k)}</div></div>`).join('');
     if (!chart) chart = '<div class="empty">Ma\'lumot yo\'q</div>';
-    const recent = n.slice(0, 5);
+    const recent = pb.slice(0, 5);
     const recentMsgs = msgs.slice(0, 5);
 
     // id -> {coll,title} indeks (eng ko'p ko'rilganlarni aniqlash uchun)
     const idx = {};
-    [['news', n], ['mediaPosts', mp], ['publications', pb], ['events', ev], ['experts', ex], ['pages', pg]].forEach(([coll, arr]) =>
+    [['mediaPosts', mp], ['publications', pb], ['events', ev], ['experts', ex], ['pages', pg]].forEach(([coll, arr]) =>
       arr.forEach(it => { idx[it.id] = { coll, title: mlGet(it[C[coll].columns[0].k]) || '(nomsiz)' }; }));
 
     c.innerHTML = `
       <div class="page-head"><div><div class="h">Xush kelibsiz 👋</div><div class="d">TSTM sayti kontentini shu yerdan boshqaring</div></div><div class="sp"></div>
-        <button class="btn primary" data-go="#/news/new">${ic('plus')} Yangi yangilik</button></div>
+        <button class="btn primary" data-go="#/publications/new">${ic('plus')} Yangi nashr</button></div>
       <div class="stat-grid">${cards.map(s => {
         const inner = `<div class="ico">${ic(s.ic)}</div><div class="v">${s.v}</div><div class="l">${s.l}</div><div class="tr">${s.tr}</div>`;
         return s.href ? `<a class="stat-card${s.accent ? ' accent' : ''} a-nodec" href="${s.href}">${inner}</a>`
@@ -737,15 +721,15 @@
       }).join('')}</div>
       <div class="two-col">
         <div class="card a-p22">
-          <div class="a-fac-mb6"><b class="a-serif17">Yangiliklar — kategoriya bo'yicha</b></div>
+          <div class="a-fac-mb6"><b class="a-serif17">Nashrlar — turi bo'yicha</b></div>
           <div class="chart">${chart}</div>
         </div>
         <div class="card a-p6">
-          <div class="a-cardhead"><b class="a-serif17">So'nggi yangiliklar</b><a class="btn ghost sm" href="#/news">Barchasi</a></div>
-          ${recent.map(r => `<a href="#/news/edit/${r.id}" class="a-listrow">
-            <div class="a-flex1"><div class="t-title a-t135-ellip">${esc(mlGet(r.title))}</div>
-            <div class="t-sub">${esc(r.category)} · ${fmtDate(r.date)}</div></div>
-            <span class="badge ${r.status}">${STLABEL[r.status]}</span></a>`).join('') || '<div class="empty">Yangilik yo\'q</div>'}
+          <div class="a-cardhead"><b class="a-serif17">So'nggi nashrlar</b><a class="btn ghost sm" href="#/publications">Barchasi</a></div>
+          ${recent.map(r => `<a href="#/publications/edit/${r.id}" class="a-listrow">
+            <div class="a-flex1"><div class="t-title a-t135-ellip">${esc(mlGet(r.shortTitle) || mlGet(r.title))}</div>
+            <div class="t-sub">${esc(r.type || '—')}${r.year ? ' · ' + esc(r.year) : ''}</div></div>
+            <span class="badge ${r.status}">${STLABEL[r.status]}</span></a>`).join('') || '<div class="empty">Nashr yo\'q</div>'}
         </div>
       </div>
       <div class="two-col a-mt20">
@@ -918,7 +902,7 @@
     // Manba UCHTA, shu tartibda (2026-08-22 da uchinchisi qo'shildi):
     //   1) bo'lim (`kd.page`)        — "Konferensiyalar" -> konferensiyalar.html
     //   2) umumiy sahifa (fallback)  — "Barchasi"        -> tadbirlar.html
-    //   3) kolleksiyaning o'z sahifasi (`cfg.page`)      -> yangiliklar.html
+    //   3) kolleksiyaning o'z sahifasi (`cfg.page`)      -> hamkorlar.html
     // Uchinchisisiz "Yangiliklar", "Hamkorlar", "Ekspertlar OAVda" va "Hero
     // slayder" bo'limlarida havola UMUMAN chiqmasdi — aynan shu bo'limlarda
     // admin yozuv qayerga tushishini bilmasdi.
@@ -1120,7 +1104,7 @@
   // Mavjud tarjimalarga tegmaydi (idempotent — qayta ishga tushirsa xavfsiz).
   async function bulkFillTranslations(btn, log) {
     const SKIP = new Set(['name']); // shaxs ismi tarjima qilinmaydi
-    const cols = ['news', 'mediaPosts', 'events', 'experts', 'publications', 'pages', 'media', 'heroSlides'];
+    const cols = ['mediaPosts', 'events', 'experts', 'publications', 'pages', 'media', 'heroSlides'];
     const data = {}; let total = 0;
     cols.forEach(c => { try { data[c] = Store.all(c); } catch { data[c] = []; } total += data[c].length; });
     if (!total) { toast('Tarjima uchun kontent topilmadi', 1); return; }
@@ -1698,26 +1682,35 @@
   /* ==================== BILDIRISHNOMA (push) ====================
      Saytga obuna bo'lgan brauzerlarga "turtki" yuboradi. Xabar matni bu yerda
      yozilmaydi — service worker (sw.js) uni yuborilgan paytda API'dan oladi va
-     ENG SO'NGGI e'lon qilingan yangilikni ko'rsatadi.
+     ENG SO'NGGI e'lon qilingan NASHRNI ko'rsatadi (2026-08-22 gacha yangilik
+     edi — o'sha bo'lim saytdan butunlay olib tashlandi).
 
-     Ya'ni tartib: avval yangilikni "e'lon qilingan" holatida saqlang, keyin shu
+     Ya'ni tartib: avval nashrni "e'lon qilingan" holatida saqlang, keyin shu
      yerdan yuboring. */
   function viewPush(c) {
     setTitle('Bildirishnoma');
     c.innerHTML = `
       <div class="page-head"><div><div class="h">Bildirishnoma</div>
-        <div class="d">Obuna bo'lgan tashrifchilarga so'nggi yangilik haqida xabar yuborish</div></div><div class="sp"></div></div>
+        <div class="d">Obuna bo'lgan tashrifchilarga so'nggi nashr haqida xabar yuborish</div></div><div class="sp"></div></div>
       <div class="card"><div class="empty">${ic('bell')}<div class="t">Yuklanmoqda…</div></div></div>`;
 
     Store.pushStats().then(function (st) {
       const n = (st && st.count) || 0;
-      const latest = Store.all('news')
-        .filter(x => x.status === 'published')
-        .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))[0];
+      /* Yuboriladigan material — so'nggi e'lon qilingan NASHR.
+         2026-08-22 gacha yangilik edi; yangiliklar bo'limi saytdan butunlay
+         olib tashlangach, manba nashrlarga o'tdi. Bu obuna oynasidagi
+         VA'DAGA ham mos: "Markaz yangi tahlil yoki nashr e'lon qilganda...".
+         Nashrda `date` yo'q — faqat `year`; teng yillar ichida ro'yxatdagi
+         keyingi yozuv yangiroq. AYNI tartib `sw.js` da ham takrorlanadi. */
+      const latest = Store.all('publications')
+        .map((x, i) => ({ x: x, i: i }))
+        .filter(o => o.x.status === 'published')
+        .sort((a, b) => String(b.x.year || '').localeCompare(String(a.x.year || '')) || (b.i - a.i))
+        .map(o => o.x)[0];
 
       c.innerHTML = `
         <div class="page-head"><div><div class="h">Bildirishnoma</div>
-          <div class="d">Obuna bo'lgan tashrifchilarga so'nggi yangilik haqida xabar yuborish</div></div><div class="sp"></div></div>
+          <div class="d">Obuna bo'lgan tashrifchilarga so'nggi nashr haqida xabar yuborish</div></div><div class="sp"></div></div>
 
         <div class="two-col a-g14-start">
           <div class="card a-p20">
@@ -1731,11 +1724,11 @@
           <div class="card a-p20">
             <div class="mono a-kicker">Nima yuboriladi</div>
             ${latest ? `
-              <div class="a-cardtitle">${esc(mlGet(latest.title))}</div>
-              <div class="mono a-t12-muted">${latest.date ? fmtDate(latest.date) : ''}${latest.category ? ' · ' + esc(mlGet(latest.category)) : ''}</div>
-            ` : `<div class="a-mt8-muted13">E'lon qilingan yangilik yo'q — avval yangilik qo'shing.</div>`}
+              <div class="a-cardtitle">${esc(mlGet(latest.shortTitle) || mlGet(latest.title))}</div>
+              <div class="mono a-t12-muted">${latest.year ? esc(latest.year) : ''}${latest.type ? ' · ' + esc(mlGet(latest.type)) : ''}</div>
+            ` : `<div class="a-mt8-muted13">E'lon qilingan nashr yo'q — avval nashr qo'shing.</div>`}
             <div class="a-mt12-note">
-              Matn yuborish paytida aniqlanadi: tashrifchi eng so'nggi e'lon qilingan yangilikni o'z tilida oladi.
+              Matn yuborish paytida aniqlanadi: tashrifchi eng so'nggi e'lon qilingan nashrni o'z tilida oladi.
             </div>
           </div>
         </div>
@@ -1747,7 +1740,7 @@
           </div>
           <div id="pushRes" class="a-mt12"></div>
           ${!n ? `<div class="a-mt10-muted13">Hali obunachi yo'q. Saytga kirib, taklif oynasida «Obuna bo'lish»ni bosib sinab ko'rishingiz mumkin.</div>` : ''}
-          ${n && !latest ? `<div class="a-mt10-muted13">Yuborish uchun kamida bitta e'lon qilingan yangilik bo'lishi kerak.</div>` : ''}
+          ${n && !latest ? `<div class="a-mt10-muted13">Yuborish uchun kamida bitta e'lon qilingan nashr bo'lishi kerak.</div>` : ''}
         </div>
 
         <div class="card a-mt14-p1820">
@@ -2184,7 +2177,7 @@
         <div id="statsGrid"></div>
       </div>
       <div class="card a-p24-mt20"><b class="a-serif17-mb6">Kontent tarjimasi (EN / RU)</b>
-        <div class="a-muted13-mb16">Barcha yangilik, tadbir, nashr, ekspert va sahifalardagi <b>bo'sh</b> ingliz/rus maydonlarini o'zbek matnidan avtomatik to'ldiradi (Google). Mavjud tarjimalar o'zgarmaydi. Yakunida saytda tekshirib chiqing.</div>
+        <div class="a-muted13-mb16">Barcha tadbir, nashr, ekspert va sahifalardagi <b>bo'sh</b> ingliz/rus maydonlarini o'zbek matnidan avtomatik to'ldiradi (Google). Mavjud tarjimalar o'zgarmaydi. Yakunida saytda tekshirib chiqing.</div>
         <div class="a-fac-g14-wrap">
           <button type="button" class="btn" id="bulkTr">⇄ Bo'sh tarjimalarni to'ldirish</button>
           <span id="bulkTrLog" class="a-t13-muted"></span>
@@ -2206,7 +2199,7 @@
         <button class="btn danger" id="setReset">${ic('trash')} Barcha ma'lumotlarni tiklash</button></div>`;
 
     // banners
-    const BSEC = { news:'Yangiliklar', oav:'Ekspertlar OAVda', events:'Tadbirlar', pubs:'Nashrlar', research:'Tadqiqotlar', about:'Markaz haqida', leadership:'Rahbariyat', experts:'Ekspertlar', media:'Media', contact:'Aloqa', search:'Qidiruv' };
+    const BSEC = { oav:'Bizning ekspertlar OAVlarda', events:'Tadbirlar', pubs:'Nashrlar', research:'Tadqiqotlar', about:'Markaz haqida', leadership:'Rahbariyat', experts:'Ekspertlar', media:'Media', contact:'Aloqa', search:'Qidiruv' };
     const banners = Object.assign({}, s.banners || {});
     $('#bannerGrid').innerHTML = Object.keys(BSEC).map(k => `
       <div class="banner-cell" data-bk="${k}">

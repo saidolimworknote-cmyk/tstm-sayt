@@ -208,7 +208,7 @@
     applySiteTheme(siteTheme);
   }));
 
-  // ---- build hero from latest 4 published news (CMS-connected) ----
+  // ---- hero slayder (admin bilan bog'langan) ----
   const mlGet = (v) => { if (v && typeof v === 'object') { const L = (window.I18N ? I18N.lang : 'uz'); return v[L] || v.uz || v.ru || v.en || ''; } return (window.I18N ? I18N.tl(v || '') : (v || '')); };
   const fmtDate = (d) => { if(!d) return ''; const p = d.split('-'); return p[2]+'.'+p[1]+'.'+p[0]; };
   const ctaMore = (window.I18N ? I18N.t('read_more') : "Batafsil o'qish");
@@ -222,7 +222,14 @@
   ];
   /* Hero manbasi \u2014 ikki bosqichli:
      1) Admin "Hero slayder" bo'limidagi published slaydlar (muharrir nazorati)
-     2) Ular bo'lmasa \u2014 so'nggi 5 published yangilik (avtomatik zaxira)
+     2) Ular bo'lmasa \u2014 so'nggi 5 published NASHR (avtomatik zaxira)
+
+     2026-08-22 gacha 2-bosqich YANGILIKLARdan olinardi. Yangiliklar bo'limi
+     saytdan butunlay olib tashlangach, zaxira nashrlarga o'tkazildi \u2014 aks
+     holda hero_slides bo'sh bo'lganda bosh sahifaning yuqorisi matnsiz
+     gradient bo'lib qolardi (hozir bazada 0 ta hero slayd bor).
+     Nashrlar buning uchun mos: ular menyuda ("Tadqiqotlar"), muqovasi va
+     o'z sahifasi bor (`nashr.html?id=...`).
 
      RASM SHART EMAS. Ilgari filtr `&& s.image` ham talab qilardi \u2014 "rasmsiz
      slayd hero'ni gradient fonga tushirib yuboradi" degan mulohaza bilan. Amalda
@@ -243,14 +250,26 @@
       }));
     } catch{}
     try {
-      return Store.all('news')
-        .filter(n => n.status === 'published')
-        .sort((a,b) => String(b.date||'').localeCompare(String(a.date||'')))
+      // Nashrda `date` yo'q — faqat `year`. Teng yillar ichida ro'yxatdagi
+      // KEYINGI yozuv yangiroq hisoblanadi (indeks bo'yicha teskari).
+      return Store.all('publications')
+        .map((p, i) => ({ p: p, i: i }))
+        .filter(x => x.p.status === 'published')
+        .sort((a,b) => (String(b.p.year||'').localeCompare(String(a.p.year||''))) || (b.i - a.i))
         .slice(0,5)
-        .map(n => ({
-          cat: n.category || 'Yangilik', title: n.title, href: 'yangilik.html?id='+n.id,
-          img: n.cover || '', date: n.date || ''
-        }));
+        .map(x => {
+          /* Qisqa sarlavha BO'SH bo'lishi mumkin (`{uz:"",ru:"",en:""}`) — u
+             obyekt sifatida "truthy", shuning uchun `||` bilan tekshirib
+             bo'lmaydi: hero sarlavhasiz qolardi. Mantiq `dispT()` bilan bir
+             xil, faqat natija SATR emas, ko'p tilli obyekt bo'lib qaytadi —
+             buildHero() uni o'zi tashrifchi tiliga o'giradi. */
+          const st = mlGet(x.p.shortTitle);
+          return {
+            cat: x.p.type || x.p.category || '',
+            title: (st && st.trim()) ? x.p.shortTitle : x.p.title,
+            href: 'nashr.html?id='+x.p.id, img: x.p.cover || '', date: ''
+          };
+        });
     } catch{ return []; }
   }
   function buildHero(){
@@ -335,9 +354,8 @@
   function renderHome(){
     // Tadbirlar bu yerda o'qilmaydi — bosh sahifada tadbirlar bo'limi yo'q
     // (pastdagi izohga qarang). Ular `tadbirlar.html` sahifasida ko'rsatiladi.
-    let news=[],pubs=[],exps=[];
+    let pubs=[],exps=[];
     try{
-      news = Store.all('news').filter(n=>n.status==='published').sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
       pubs = Store.all('publications').filter(p=>p.status==='published').slice(0,3);
       exps = Store.all('experts').sort((a,b)=>(a.order||0)-(b.order||0)).slice(0,4);
     }catch{ return; }
@@ -366,26 +384,13 @@
       }
     }catch{}
 
-    // NEWS: featured + list
-    const ng = document.querySelector('.news-grid');
-    if(ng && !news.length){ ng.innerHTML = emptyState('home_no_news'); }
-    else if(ng){
-      const f = news[0]; const rest = news.slice(1,6);
-      ng.innerHTML =
-        '<a class="feat rv" href="yangilik.html?id='+f.id+'">'
-        + (f.cover?'<div class="ph ph-flush">'+imgTag(f.cover)+'</div>':'<div class="ph" data-l="asosiy yangilik"></div>')
-        + '<div class="fbody">'
-        + '<div class="meta">'+(f.category?'<span class="tag">'+esc(mlg(f.category))+'</span>':'')+'<span class="d mono muted">'+fmtDate(f.date)+'</span></div>'
-        + '<h3>'+esc(mlg(f.title))+'</h3>'
-        + (mlg(f.excerpt)?'<p>'+esc(mlg(f.excerpt))+'</p>':'')
-        + '</div>'
-        + '</a>'
-        + '<div class="nlist rv">'
-        + rest.map(n=>'<a class="nitem" href="yangilik.html?id='+n.id+'">'
-            + (n.cover?'<div class="ph ph-flush">'+imgTag(n.cover)+'</div>':'<div class="ph" data-l="foto"></div>')
-            + '<div class="nbody"><div class="d">'+fmtDate(n.date)+(n.category?' · '+esc(mlg(n.category)):'')+'</div><h4>'+esc(mlg(n.title))+'</h4></div></a>').join('')
-        + '</div>';
-    }
+    /* NEWS bo'limi 2026-08-22 da butun saytdan olib tashlandi (admin panelda
+       ham). Bosh sahifadagi `.news-grid` bloki, `yangiliklar.html` va
+       `yangilik.html` sahifalari, qidiruv indeksi va push manbasi bilan birga.
+       Sabab: saytning menyusida "Yangiliklar" bandi yo'q edi, ya'ni bo'lim
+       amalda faqat adminda yashardi va kontent qayerga tushishi tushunarsiz
+       edi. Yangiliklar bazadan O'CHIRILMADI — `news` jadvali arxiv sifatida
+       joyida turibdi (zaxira: backups\news_2026-08-22_olib-tashlashdan-oldin.sql). */
 
     // PUBLICATIONS
     const pg = document.querySelector('.pub-grid');

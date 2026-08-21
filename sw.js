@@ -15,9 +15,9 @@
 
 const API = 'api.php';
 const FALLBACK = {
-  uz: { title: 'Markazda yangilik', body: 'Yangi materialni o‘qish uchun bosing' },
-  ru: { title: 'Новость центра', body: 'Нажмите, чтобы прочитать' },
-  en: { title: 'Center update', body: 'Tap to read the latest' }
+  uz: { title: 'Markazda yangi nashr', body: 'Yangi materialni o‘qish uchun bosing' },
+  ru: { title: 'Новое издание центра', body: 'Нажмите, чтобы прочитать' },
+  en: { title: 'New publication', body: 'Tap to read the latest' }
 };
 
 self.addEventListener('install', (e) => {
@@ -50,14 +50,22 @@ async function showLatest() {
     const res = await fetch(API + '?action=load', { credentials: 'omit' });
     if (res.ok) {
       const data = await res.json();
-      const news = (data.news || [])
-        .filter(n => n && n.status === 'published')
-        .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
-      const n = news[0];
+      /* Manba: so'nggi e'lon qilingan NASHR.
+         2026-08-22 gacha yangilik olinardi, lekin "Yangiliklar" bo'limi
+         saytdan butunlay olib tashlandi. Nashrga o'tish obuna oynasidagi
+         VA'DAGA ham mos: "Markaz yangi tahlil yoki nashr e'lon qilganda
+         brauzeringiz sizga xabar beradi" (i18n.js -> sub_text).
+         Nashrda `date` yo'q — faqat `year`; teng yillar ichida ro'yxatdagi
+         keyingi yozuv yangiroq hisoblanadi. */
+      const pubs = (data.publications || [])
+        .map((p, i) => ({ p: p, i: i }))
+        .filter(x => x.p && x.p.status === 'published')
+        .sort((a, b) => String(b.p.year || '').localeCompare(String(a.p.year || '')) || (b.i - a.i));
+      const n = pubs.length ? pubs[0].p : null;
       if (n) {
-        title = pick(n.title, lang);
-        body = pick(n.excerpt, lang) || pick(n.category, lang) || '';
-        url = 'yangilik.html?id=' + encodeURIComponent(n.id);
+        title = pick(n.shortTitle, lang) || pick(n.title, lang);
+        body = pick(n.desc, lang) || pick(n.type, lang) || '';
+        url = 'nashr.html?id=' + encodeURIComponent(n.id);
       }
     }
   } catch { /* tarmoq muammosi — quyida zaxira matn ishlatiladi */ }
