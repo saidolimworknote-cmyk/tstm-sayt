@@ -72,7 +72,7 @@
     if (status === 404) {
       if (/^uploads\//.test(u) || /\/uploads\//.test(u)) {
         return { cause: 'Yuklangan fayl serverda topilmadi (404).',
-                 hint: 'Fayl o\'chirilgan yoki loyiha htdocs\'ga sinxronlanmagan. uploads/ papkasini tekshiring.' };
+                 hint: 'Fayl uploads/ papkasida yo\'q. Havola bazada, fayl esa diskda - ikkisini tools/rasm-tekshir.php solishtiradi.' };
       }
       if (/\.js(\?|$)/.test(u) || /\.css(\?|$)/.test(u)) {
         return { cause: 'Skript/uslub fayli topilmadi (404).',

@@ -1,7 +1,8 @@
 /* ============================================================
    TSTM Admin — ma'lumotlar ombori
-   XAMPP/PHP rejimi: api.php orqali serverdagi MySQL bazasi bilan ishlaydi.
-   PHP bo'lmasa (oddiy/file:// ochilganda): localStorage'ga qaytadi.
+   Server rejimi: api.php orqali MySQL bazasi bilan ishlaydi (saytni
+   tools/ISHGA_TUSHIRISH.bat ochadi - PHP loyihaning o'zida keladi).
+   PHP bo'lmasa (fayl file:// bilan ochilganda): localStorage'ga qaytadi.
    ============================================================ */
 (function (w) {
   const DB_KEY = 'tstm_admin_db_v1';
@@ -107,7 +108,7 @@
   // ---------- Core (PHP API + localStorage fallback) ----------
   let _db = null;
 
-  // sync GET (faqat dastlabki yuklash uchun) — XAMPP'da api.php ishlaydi
+  // sync GET (faqat dastlabki yuklash uchun) — server rejimida api.php ishlaydi
   function apiLoadSync() {
     try {
       const x = new XMLHttpRequest();
@@ -303,7 +304,7 @@
   function checkLogin(u, pw) {
     load();
     _loginErr = null;
-    // XAMPP rejimi: serverda tekshirib, PHP sessiyasini ochamiz
+    // Server rejimi: parolni serverda tekshirib, PHP sessiyasini ochamiz
     if (API_OK) {
       return fetch(API + '?action=login', {
         method: 'POST',

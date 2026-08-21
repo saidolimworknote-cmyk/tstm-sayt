@@ -20,6 +20,17 @@ $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)   #
 # 'C:\xampp\mysql\bin\mysql.exe' turardi.
 $mysql = Join-Path $root 'runtime\mysql\bin\mariadb.exe'
 if (-not (Test-Path $mysql)) { $mysql = 'mariadb.exe' }   # PATH dan
+
+# PS 5.1 tuzog'i: native buyruqning stderr'ini PowerShell ichida
+# yo'naltirsak, har bir qator NativeCommandError ga o'raladi va yuqoridagi
+# $ErrorActionPreference = 'Stop' tufayli skript uzilib qoladi. mariadb.exe
+# esa oddiy ogohlantirishni ham stderr ga yozadi. Shu chaqiruv davomida
+# 'Continue' ga o'tamiz - xato $LASTEXITCODE orqali baribir ushlanadi.
+function Mdb {
+  $eski = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  try { & $mysql @args 2>$null } finally { $ErrorActionPreference = $eski }
+}
 $dbHost = '127.0.0.1'; $dbPort = '3307'; $dbName = 'tstm'; $dbUser = 'tstm'; $dbPass = ''
 
 $cfg = Join-Path $root 'config.php'
@@ -51,23 +62,53 @@ if (-not $Force) {
 }
 
 # --- 1. Baza tiklash ---
-$mysqlArgs = @('-h', $dbHost, '-P', $dbPort, '-u', $dbUser)
-if ($dbPass -ne '') { $mysqlArgs += "-p$dbPass" }
+# Kim bilan ulanamiz. Odatdagi tiklash (o'sha bazaga) config.php dagi
+# cheklangan foydalanuvchi bilan bo'ladi. -Db bilan BOSHQA bazaga
+# tiklaganda esa u yaramaydi: `tstm` foydalanuvchisiga faqat `tstm`
+# bazasiga huquq berilgan (bu ATAYLAB shunday), ya'ni yangi baza yaratib
+# ham bo'lmaydi. Bunday holda mahalliy `root` bilan ulanamiz - baza
+# yaratish ma'muriy amal va MariaDB faqat 127.0.0.1 ni tinglaydi.
+$cfgDb = $dbName
+if (Test-Path $cfg) { if ((Get-Content $cfg -Raw) -match "'db_name'\s*=>\s*'([^']*)'") { $cfgDb = $Matches[1] } }
+if ($dbName -ne $cfgDb) {
+  $mysqlArgs = @('-h', $dbHost, '-P', $dbPort, '-u', 'root')
+  Write-Host "  (boshqa bazaga tiklash - mahalliy 'root' bilan ulanadi)" -ForegroundColor DarkGray
+} else {
+  $mysqlArgs = @('-h', $dbHost, '-P', $dbPort, '-u', $dbUser)
+  if ($dbPass -ne '') { $mysqlArgs += "-p$dbPass" }
+}
+
+Mdb @mysqlArgs -e "CREATE DATABASE IF NOT EXISTS ``$dbName`` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" | Out-Null
+if ($LASTEXITCODE -ne 0) { throw "'$dbName' bazasini yaratib bo'lmadi (huquq yetarli emasmi?)" }
 
 # Dump `--databases` bilan olingan, ya'ni ichida `CREATE DATABASE tstm` va
-# `USE tstm` bor. Standart tiklashda (o'sha nomga) buni to'g'ridan-to'g'ri
-# yuboramiz. Boshqa nomga (-Db, sinov) tiklaganda esa bu qatorlar dumpni asl
-# bazaga yo'naltirib yuboradi — shuning uchun ularni olib tashlab, maqsad
-# bazani o'zimiz yaratamiz va aniq ko'rsatamiz.
-& $mysql @mysqlArgs -e "CREATE DATABASE IF NOT EXISTS ``$dbName`` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+# `USE tstm` bor. Ularni olib tashlaymiz va maqsad bazani o'zimiz aniq
+# ko'rsatamiz - aks holda -Db bilan sinov tiklashi ASL bazaga tushib ketardi.
 $sqlText = Get-Content $sqlFile -Raw
-# `CREATE DATABASE ...` va `USE \`...\`;` qatorlarini olib tashlaymiz (maqsad bazaga aniq yo'naltirish uchun)
 $sqlText = ($sqlText -split "`n" | Where-Object { $_ -notmatch '^\s*(CREATE DATABASE|USE `)' }) -join "`n"
 $tmp = Join-Path $env:TEMP "tstm-restore-$PID.sql"
-Set-Content -Path $tmp -Value $sqlText -Encoding utf8 -NoNewline
-Get-Content $tmp | & $mysql @mysqlArgs $dbName
+# BOM SIZ yozamiz: Set-Content -Encoding utf8 PS 5.1 da BOM qo'shadi va u
+# faylning birinchi buyrug'iga yopishib, importni yiqitishi mumkin.
+[System.IO.File]::WriteAllText($tmp, $sqlText, (New-Object System.Text.UTF8Encoding($false)))
+
+# SOURCE bilan yuboramiz (`Get-Content | exe` EMAS): quvur PowerShell orqali
+# o'tganda 1.5 MB matn qayta kodlanadi va o'zbekcha/kirillcha belgilar
+# buzilishi mumkin. --abort-source-on-error birinchi xatoda to'xtatadi va
+# nolga teng bo'lmagan chiqish kodi qaytaradi.
+$src = $tmp.Replace('\', '/')
+Mdb @mysqlArgs --default-character-set=utf8mb4 --abort-source-on-error $dbName `
+  -e "SET NAMES utf8mb4; SOURCE $src;" | Out-Null
+$importOk = ($LASTEXITCODE -eq 0)
 Remove-Item $tmp -Force -ErrorAction SilentlyContinue
-Write-Host "  [1/2] Baza tiklandi -> $dbName"
+
+# Chiqish kodining o'zi yetarli emas - jadval SONI haqiqiy dalil.
+# Ilgari bu tekshiruv YO'Q edi: tiklash butunlay yiqilsa ham skript
+# "TAYYOR" deb yozardi, ya'ni ofat paytida soxta xotirjamlik berardi.
+$jadval = Mdb @mysqlArgs -N -B -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='$dbName';"
+if (-not $importOk -or [int]$jadval -eq 0) {
+  throw "Tiklash BAJARILMADI ('$dbName' da $jadval jadval). Asl baza o'zgarmagan bo'lishi mumkin - zaxira faylini tekshiring."
+}
+Write-Host "  [1/2] Baza tiklandi -> $dbName ($jadval jadval)"
 
 # --- 2. uploads tiklash ---
 # IKKALA joyga ham tiklaymiz: loyiha papkasi VA XAMPP deploy (jonli sayt shundan
@@ -94,4 +135,4 @@ if ((Test-Path $zipFile) -and $Db -eq '') {
 }
 
 Write-Host ""
-Write-Host "TAYYOR. Baza '$dbName' tiklandi."
+Write-Host "TAYYOR. Baza '$dbName' tiklandi ($jadval jadval)."

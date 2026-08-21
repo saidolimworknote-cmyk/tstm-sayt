@@ -62,6 +62,23 @@ function CfgOqi($matn, $kalit, $standart) {
   return $standart
 }
 
+# --- MariaDB mijozini chaqirish -----------------------------------
+# PS 5.1 TUZOG'I: native buyruqning stderr'ini PowerShell ICHIDA
+# yo'naltirsak ("2>$null"), har bir qator NativeCommandError ga
+# o'raladi. Yuqorida $ErrorActionPreference = 'Stop' turgani uchun
+# bu TERMINATING xato bo'ladi va skript o'rtada uzilib qoladi.
+# mariadb.exe esa oddiy OGOHLANTIRISHNI ham stderr ga yozadi
+# (masalan parolsiz kirishda "--ssl-verify-server-cert is disabled")
+# - ya'ni hech qanday xato bo'lmasa ham skript yiqilardi. Aynan shu
+# sabab toza klonda birinchi ishga tushirish bajarilmasdan to'xtardi.
+# Yechim: faqat shu chaqiruv davomida 'Continue' ga o'tamiz. Xatoni
+# baribir yo'qotmaymiz - chaqiruvchi $LASTEXITCODE ni tekshiradi.
+function Mdb {
+  $eski = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  try { & $mdb @args 2>$null } finally { $ErrorActionPreference = $eski }
+}
+
 # DIQQAT: bu uchtasi `try` dan OLDIN e'lon qilinadi. Aks holda try ning
 # boshida xato chiqsa, `finally` ularni ko'rmaydi va o'zining "null"
 # xatosi bilan ASL xatoni yashirib qo'yadi.
@@ -187,6 +204,20 @@ if ($birinchi) {
   [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bayt)
   $yangiPass = -join ($bayt | ForEach-Object { $_.ToString('x2') })
 
+  # Admin panelga BIRINCHI kirish paroli. U ham shu yerda yasaladi va
+  # config.php ga yoziladi (git'ga tushmaydi, har kompyuterda o'ziniki).
+  # Alifboda chalkashadigan belgilar YO'Q (0/O, 1/l/I) - parol ekranda
+  # o'qilib, qo'lda kiritiladi. Bu parol FAQAT auth jadvali bo'sh
+  # ekan ishlaydi: admin o'z parolini qo'ygan zahoti api.php dagi
+  # bootstrap shoxi butunlay o'lik bo'ladi (api.php:415).
+  $alifbo = '23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz'
+  $bayt2 = New-Object byte[] 16
+  [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bayt2)
+  $adminPass = -join (0..15 | ForEach-Object {
+    $ch = $alifbo[$bayt2[$_] % $alifbo.Length]
+    if ($_ -gt 0 -and $_ % 4 -eq 0) { "-$ch" } else { "$ch" }
+  })
+
   $vaqtSql = Join-Path $env:TEMP ("tstm-sozla-" + [guid]::NewGuid().ToString('N').Substring(0,8) + ".sql")
   @"
 CREATE DATABASE IF NOT EXISTS ``$dbName`` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -199,7 +230,7 @@ FLUSH PRIVILEGES;
 "@ | Set-Content $vaqtSql -Encoding ascii
 
   $src = $vaqtSql.Replace('\', '/')
-  & $mdb -h $dbHost -P $dbPort -u root -e "SOURCE $src;" 2>$null | Out-Null
+  Mdb -h $dbHost -P $dbPort -u root -e "SOURCE $src;" | Out-Null
   if ($LASTEXITCODE -ne 0) { Xato "bazani sozlab bo'lmadi"; exit 1 }
   Remove-Item $vaqtSql -Force -ErrorAction SilentlyContinue; $vaqtSql = ''
 
@@ -220,7 +251,7 @@ return [
   'db_pass' => '$yangiPass',
 
   'admin_user' => 'markaz_admini',
-  'admin_bootstrap_password' => '',
+  'admin_bootstrap_password' => '$adminPass',
 ];
 "@
   [System.IO.File]::WriteAllText($cfgYol, $matn, (New-Object System.Text.UTF8Encoding($false)))
@@ -233,21 +264,62 @@ return [
 # rasm havolalari va sozlamalar tiklanadi. Aynan shu qadam yangi
 # kompyuterda saytni "bo'm-bo'sh" emas, TO'LIQ qilib ochadi.
 $sqlYol = Join-Path $sayt 'data\baza.sql'
-$jadval = & $mdb -h $dbHost -P $dbPort -u $dbUser "-p$dbPass" -N -B -e `
-  "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='$dbName';" 2>$null
+$jadval = Mdb -h $dbHost -P $dbPort -u $dbUser "-p$dbPass" -N -B -e `
+  "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='$dbName';"
 if ($LASTEXITCODE -eq 0 -and [int]$jadval -eq 0 -and (Test-Path $sqlYol)) {
   Write-Host "  baza bo'sh - kontent import qilinmoqda..."
   $src = (Resolve-Path $sqlYol).Path.Replace('\', '/')
-  & $mdb -h $dbHost -P $dbPort -u $dbUser "-p$dbPass" --default-character-set=utf8mb4 `
-    -e "SET NAMES utf8mb4; SOURCE $src;" 2>$null | Out-Null
-  if ($LASTEXITCODE -ne 0) { Ogoh "kontent importi to'liq bajarilmadi" }
-  else {
-    $n = & $mdb -h $dbHost -P $dbPort -u $dbUser "-p$dbPass" -N -B -e `
-      "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='$dbName';" 2>$null
-    Ok "kontent import qilindi ($n jadval)"
+  # $dbName POZITSIYALI argument sifatida beriladi - "USE tstm" ni
+  # o'rniga o'tadi. Usiz mariadb "No database selected" deb HAR BIR
+  # buyruqni rad etardi (dump ichida USE yo'q, chunki u ko'chma
+  # bo'lishi kerak). --abort-source-on-error esa xatoda darhol
+  # to'xtatadi va nolga teng bo'lmagan chiqish kodi qaytaradi:
+  # usiz mariadb xatolarga qaramay 0 qaytarib, import "muvaffaqiyatli"
+  # ko'rinardi.
+  Mdb -h $dbHost -P $dbPort -u $dbUser "-p$dbPass" --default-character-set=utf8mb4 `
+    --abort-source-on-error $dbName -e "SET NAMES utf8mb4; SOURCE $src;" | Out-Null
+  $importOk = ($LASTEXITCODE -eq 0)
+  $n = Mdb -h $dbHost -P $dbPort -u $dbUser "-p$dbPass" -N -B -e `
+    "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='$dbName';"
+  # Faqat chiqish kodiga ishonmaymiz - jadval SONI haqiqiy dalil.
+  if (-not $importOk -or [int]$n -eq 0) {
+    Xato "kontent importi bajarilmadi (jadval: $n)"
+    Write-Host "     data\baza.sql ni tekshiring yoki qo'lda import qiling" -ForegroundColor Yellow
+    exit 1
   }
+  Ok "kontent import qilindi ($n jadval)"
 } elseif ([int]$jadval -gt 0) {
   Ok "baza joyida ($jadval jadval)"
+}
+
+# ---- 5b. Admin panelga birinchi kirish -----------------------------
+# Sayt ochilishi bilan admin panel HAM ochilishi kerak. Yangi
+# kompyuterda auth jadvali bo'sh bo'ladi - ya'ni hech kim parol
+# qo'ymagan - va kirishning yagona yo'li config.php dagi bootstrap
+# parol. U tasodifiy yasalgani uchun foydalanuvchi uni BILMAYDI,
+# shuning uchun shu yerda bir marta ekranda ko'rsatamiz. Aks holda
+# sayt ishlaydi-yu, admin panel qulflangan bo'lib qolardi.
+$bootPass = ''
+$cfgMatn = ''
+if (Test-Path $cfgYol) {
+  $cfgMatn = [System.IO.File]::ReadAllText($cfgYol, [System.Text.Encoding]::UTF8)
+  $bootPass = CfgOqi $cfgMatn 'admin_bootstrap_password' ''
+}
+if ($bootPass -ne '') {
+  # auth jadvali bu bosqichda hali YO'Q bo'lishi mumkin: uni db.php
+  # birinchi API chaqiruvida yaratadi. U holda so'rov xato beradi -
+  # buni ham "parol hali qo'yilmagan" deb qabul qilamiz.
+  $hash = Mdb -h $dbHost -P $dbPort -u $dbUser "-p$dbPass" -N -B $dbName -e `
+    "SELECT COALESCE(MAX(password_hash),'') FROM auth;"
+  if ($LASTEXITCODE -ne 0 -or "$hash".Trim() -eq '') {
+    $adminLogin = CfgOqi $cfgMatn 'admin_user' 'markaz_admini'
+    Write-Host ""
+    Write-Host "  ADMIN PANELGA BIRINCHI KIRISH" -ForegroundColor Yellow
+    Write-Host "     login:  $adminLogin" -ForegroundColor Yellow
+    Write-Host "     parol:  $bootPass" -ForegroundColor Yellow
+    Write-Host "     Kirgach parolni DARHOL o'zgartiring - shundan keyin" -ForegroundColor DarkYellow
+    Write-Host "     bu parol ishlamay qoladi (config.php da qoladi, xolos)." -ForegroundColor DarkYellow
+  }
 }
 
 # ---- 6. Sayt porti ------------------------------------------------
@@ -300,7 +372,7 @@ Wait-Process -Id $phpProc.Id
     # Avval muloyim: SHUTDOWN buyrug'i InnoDB ni to'g'ri yopadi va
     # keyingi ishga tushirishda "crash recovery" bo'lmaydi.
     try {
-      & $mdb -h $dbHost -P $dbPort -u root -e 'SHUTDOWN;' 2>$null | Out-Null
+      Mdb -h $dbHost -P $dbPort -u root -e 'SHUTDOWN;' | Out-Null
       $dbProc.WaitForExit(10000) | Out-Null
     } catch { }
     if (-not $dbProc.HasExited) { Stop-Process -Id $dbProc.Id -Force -ErrorAction SilentlyContinue }

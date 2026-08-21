@@ -50,12 +50,16 @@ return [
      standart parol kod ichida saqlanmaydi: repoga kirgan har bir odam uni
      ko'rib, yangi o'rnatilgan saytga kira olardi.
 
-     Birinchi o'rnatishda shu yerga vaqtinchalik kuchli parol yozing, tizimga
-     kiring, admin panelidan parolni almashtiring va bu qatorni bo'shating.
+     ODATDA BU QATORNI QO'LDA TO'LDIRISH SHART EMAS: `tools\ISHGA_TUSHIRISH.bat`
+     birinchi ishga tushirishda config.php ni o'zi yaratadi, bu yerga tasodifiy
+     parol yozadi va uni oynada bir marta KO'RSATADI. Shu parol bilan kiring va
+     darhol o'zgartiring.
 
-     ESLATMA: `data\baza.sql` dan tiklangan saytda parol ALLAQACHON bor
-     (u `auth` jadvalida, eksportga tushmaydi) — demak yangi kompyuterda
-     ham eski parolingiz bilan kirasiz.
+     ESLATMA: `auth` jadvali `data\baza.sql` eksportiga ATAYLAB tushmaydi —
+     parol xeshi git orqali tarqalmasligi kerak. Ya'ni yangi kompyuterda eski
+     parolingiz ISHLAMAYDI, u yerda kirish faqat shu bootstrap parol bilan
+     boshlanadi. Parolni yo'qotsangiz: `auth` jadvalidagi qatorni o'chiring,
+     shundan keyin bu qiymat yana ishlay boshlaydi.
   ------------------------------------------------------------------------------ */
   'admin_user' => 'markaz_admini',
   'admin_bootstrap_password' => '',

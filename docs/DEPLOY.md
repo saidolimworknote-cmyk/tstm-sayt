@@ -97,8 +97,9 @@ emas.
       (`u12345_tstm`) va import xato beradi. Alohida dump kerak:
 
       ```powershell
-      & 'C:\xampp\mysql\bin\mysqldump.exe' -u root --single-transaction `
-        --default-character-set=utf8mb4 tstm --result-file=hosting-import.sql
+      & '.\runtime\mysql\bin\mariadb-dump.exe' -h 127.0.0.1 -P 3307 `
+        -u root --single-transaction --default-character-set=utf8mb4 `
+        tstm --result-file=hosting-import.sql
       ```
 
       `--databases` YO'Q - shuning uchun dump istalgan nomdagi bazaga tushadi.
@@ -228,7 +229,7 @@ Xavfsizlik sarlavhalari (brauzer DevTools → Network → Response Headers):
 ## 4c. Infratuzilma va tarmoq (hosting muhitida)
 
 > Bu bandlar **serverdan tashqarida** — domen, tarmoq, DNS provayder darajasida
-> hal qilinadi va mahalliy (XAMPP) muhitda sinab bo'lmaydi. Sayt hostingga
+> hal qilinadi va mahalliy muhitda sinab bo'lmaydi. Sayt hostingga
 > chiqarilganda bajariladi. UzInfocom infratuzilmasida joylashtirilsa,
 > ularning ko'pi platforma darajasida ta'minlanadi — u holda «kim javobgar»
 > ustunini ular bilan aniqlashtiring.
@@ -294,12 +295,12 @@ powershell -ExecutionPolicy Bypass -File tools\backup.ps1
 **Har bir zaxirada nima bor** — `backups\tstm-YYYYMMDD-HHmmss\`:
 `database.sql` + `uploads.zip` + `meta.txt`.
 
-**Yuklamalar IKKI joydan yig'iladi** — loyiha `uploads\` va **`C:\xampp\htdocs\
-tstm-sayt\uploads\`**. Bu muhim: admin panel orqali yuklangan fayllar faqat
-htdocs'da paydo bo'ladi va loyihaga qaytmaydi. Skript ilgari faqat loyihani
-arxivlagani uchun **2026-08-07 da htdocs'dan o'chgan 80 ta fayl zaxirasiz
-qolgan edi**. `meta.txt` va `backup.log` da `faqat-htdocs=N` — o'sha bo'shliqni
-ko'rsatadigan hisoblagich.
+**Yuklamalar bitta joydan yig'iladi** — loyiha papkasidagi `uploads\`. 2026-08-21
+gacha ikkinchi manba ham bor edi (`C:\xampp\htdocs\tstm-sayt\uploads\`): sayt
+Apache orqali htdocs'dan uzatilar, admin yuklagan fayl esa faqat o'sha yerda
+qolardi va **2026-08-07 da o'sha papkadan o'chgan 80 ta fayl zaxirasiz qolgan
+edi**. Endi sayt loyiha papkasining o'zidan ishlaydi, ya'ni bunday ikkilanish
+yo'q va `backup.log` dagi `faqat-htdocs` hisoblagichi ham olib tashlandi.
 
 **Ikkinchi nusxa boshqa diskda:** har zaxira `D:\linuxserver2026\tstm-backups\`
 ga ham ko'chiriladi (`-MirrorTo` bilan o'zgartiriladi). C: bilan bir narsa
@@ -326,7 +327,7 @@ Server buzilsa yoki ma'lumot yo'qolsa, eng oxirgi zaxiradan tiklang:
 
 ```powershell
 # Eng oxirgi zaxirani asl bazaga tiklaydi (uploads bilan). Tasdiqlash so'raydi.
-# uploads IKKALA joyga tiklanadi: loyiha va C:\xampp\htdocs\tstm-sayt\uploads.
+# uploads loyiha papkasiga tiklanadi (yagona joy).
 powershell -ExecutionPolicy Bypass -File tools\restore.ps1
 
 # Aniq bir zaxiradan:

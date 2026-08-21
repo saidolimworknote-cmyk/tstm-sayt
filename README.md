@@ -116,8 +116,10 @@ Bular papkaga ko'chirilsa sayt buziladi — ko'chirmang:
 
 **`tools\ISHGA_TUSHIRISH.bat` ni ikki marta bosing.** Tamom.
 
-Skript o'zi: `php.exe` ni topadi, MySQL ishlayotganini tekshiradi (kerak bo'lsa
-xizmatni yoqadi), serverni ko'taradi va brauzerni ochadi.
+Skript o'zi: loyihaning `runtime\php` va `runtime\mysql` ini ishga tushiradi,
+birinchi marta bo'lsa bazani yaratadi va `data\baza.sql` dan kontentni import
+qiladi, so'ng saytni ko'tarib brauzerni ochadi. Hech narsa o'rnatilishi shart
+emas.
 
 - **Sayt:** `http://localhost:8000/`
 - **Admin panel:** `http://localhost:8000/admin.html`
@@ -174,9 +176,21 @@ so'rang.
 **Parolni almashtirish:** Admin panel → Sozlamalar → «Xavfsizlik — kirish
 paroli». Kamida 12 belgi.
 
-**Butunlay yangi (bo'sh) bazani birinchi marta ochish:** `config.php` dagi
-`admin_bootstrap_password` ga vaqtincha kuchli parol yozing, tizimga kiring
-(parol avtomatik xeshlanib saqlanadi), so'ng bu qatorni qaytib bo'shating.
+**Yangi kompyuterda birinchi kirish:** `ISHGA_TUSHIRISH.bat` birinchi ishga
+tushirishda tasodifiy parol yasaydi, uni `config.php` ga yozadi va **oynada
+ko'rsatadi**:
+
+```
+  ADMIN PANELGA BIRINCHI KIRISH
+     login:  markaz_admini
+     parol:  3eu2-XZYQ-DibZ-PZdR
+```
+
+Shu parol bilan kiring va **darhol o'zgartiring** (Sozlamalar → «Xavfsizlik —
+kirish paroli»). Almashtirilgan zahoti bcrypt xeshi `auth` jadvaliga tushadi va
+bootstrap parol ishlamay qoladi — `config.php` da qolgani zarar qilmaydi.
+Parolni yo'qotsangiz: `auth` jadvalidagi qatorni o'chiring, keyin `config.php`
+dagi `admin_bootstrap_password` yana ishlaydi.
 
 ---
 

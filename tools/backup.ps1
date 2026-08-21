@@ -8,12 +8,10 @@
 #
 # Tiklash uchun: restore.ps1 ni ishga tushiring.
 #
-# MUHIM — uploads IKKI joydan yig'iladi:
-#   1) loyiha papkasi        C:\Users\...\Desktop\tstm-sayt\uploads
-#   2) XAMPP deploy (JONLI)  C:\xampp\htdocs\tstm-sayt\uploads
-# Admin panel orqali yuklangan fayllar FAQAT (2) da paydo bo'ladi va loyihaga
-# qaytmaydi. Ilgari bu skript faqat (1) ni arxivlagani uchun 2026-08-07 da
-# htdocs'dan o'chgan 80 ta fayl zaxirasiz qolgan edi. Ikkalasini ham oling.
+# Yuklamalar uchun YAGONA joy bor: loyiha papkasidagi uploads\. 2026-08-21
+# gacha sayt Apache orqali C:\xampp\htdocs\ dan uzatilar va admin yuklagan
+# fayl faqat o'sha yerda paydo bo'lardi - shuning uchun skript ikkita manbani
+# birlashtirardi. Endi bunday ikkilanish yo'q.
 # ------------------------------------------------------------------
 param(
   [switch]$Quiet,
@@ -57,43 +55,30 @@ $sqlKB = [math]::Round((Get-Item $sqlFile).Length/1KB, 1)
 Say "  [1/4] Baza dump: $sqlKB KB" 'Green'
 
 # --- 2. uploads/ arxivi ---
-# Ilgari bu yerda IKKI manba birlashtirilardi: loyiha va
-# 'C:\xampp\htdocs\tstm-sayt\uploads'. Sabab - sayt Apache orqali htdocs
-# dan uzatilar va admin yuklagan fayl FAQAT o'sha yerda paydo bo'lardi.
-# 2026-08-21 dan sayt to'g'ridan-to'g'ri loyiha papkasidan ishlaydi, ya'ni
-# yuklamalar uchun YAGONA joy bor va ikkinchi manba keraksiz (o'sha yo'l
-# allaqachon mavjud emas ham edi).
+# Ro'yxat ko'rinishida qoldirilgan: kelajakda yana bir manba qo'shilsa
+# (masalan hostingdan tushirilgan nusxa) shu yerga qo'shiladi.
 $sources = @(
   (Join-Path $root 'uploads')
 ) | Where-Object { Test-Path $_ } | Select-Object -Unique
 
 $zipFile = Join-Path $dir 'uploads.zip'
-$fileCount = 0; $onlyLive = 0
+$fileCount = 0
 if ($sources.Count) {
   $staging = Join-Path $env:TEMP "tstm-bk-$PID"
   Remove-Item $staging -Recurse -Force -ErrorAction SilentlyContinue
   New-Item -ItemType Directory -Force $staging | Out-Null
 
-  $seen = @{}
   foreach ($s in $sources) {
     foreach ($f in Get-ChildItem $s -File -Force -ErrorAction SilentlyContinue) {
-      # Bir xil nomli fayl ikkala joyda ham bo'lsa — jonli (htdocs) nusxa ustun,
-      # chunki manbalar ro'yxatida u oxirgi turadi.
-      if (-not $seen.ContainsKey($f.Name)) { $seen[$f.Name] = $s } else { $seen[$f.Name] = $s }
       Copy-Item $f.FullName (Join-Path $staging $f.Name) -Force
     }
   }
   $fileCount = (Get-ChildItem $staging -File -Force).Count
-  # Faqat jonli (htdocs) da bor — ya'ni loyihada zaxirasiz turgan fayllar
-  if ($sources.Count -gt 1) {
-    $projNames = @(Get-ChildItem $sources[0] -File -Force -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name)
-    $onlyLive = @(Get-ChildItem $staging -File -Force | Where-Object { $projNames -notcontains $_.Name }).Count
-  }
 
   Compress-Archive -Path "$staging\*" -DestinationPath $zipFile -Force
   Remove-Item $staging -Recurse -Force -ErrorAction SilentlyContinue
   $zipKB = if (Test-Path $zipFile) { [math]::Round((Get-Item $zipFile).Length/1KB, 1) } else { 0 }
-  Say "  [2/4] uploads.zip: $fileCount fayl, $zipKB KB (shundan $onlyLive tasi faqat htdocs'da)" 'Green'
+  Say "  [2/4] uploads.zip: $fileCount fayl, $zipKB KB" 'Green'
 } else {
   Say "  [2/4] uploads/ topilmadi - o'tkazib yuborildi" 'Yellow'
 }
@@ -104,7 +89,7 @@ TSTM zaxira nusxasi
 Sana:     $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')
 Baza:     $dbName @ $dbHost`:$dbPort
 SQL:      database.sql ($sqlKB KB)
-Uploads:  uploads.zip ($fileCount fayl; $onlyLive tasi faqat htdocs'da edi)
+Uploads:  uploads.zip ($fileCount fayl)
 Manbalar: $($sources -join ' + ')
 Tiklash:  powershell -ExecutionPolicy Bypass -File tools\restore.ps1 -From "$dir"
 "@
@@ -164,7 +149,7 @@ Invoke-Prune (Join-Path $root 'backups')
 if ($mirrorOk) { Invoke-Prune $MirrorTo }
 
 # --- Jurnal (jadval bo'yicha ishlaganda natijani ko'rish uchun) ---
-$logLine = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')  OK  sql=${sqlKB}KB  fayl=$fileCount  faqat-htdocs=$onlyLive  nusxa=$(if($mirrorOk){'ha'}else{'yoq'})"
+$logLine = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')  OK  sql=${sqlKB}KB  fayl=$fileCount  nusxa=$(if($mirrorOk){'ha'}else{'yoq'})"
 Add-Content -Path (Join-Path $root 'backups\backup.log') -Value $logLine -Encoding utf8
 
 Say ""

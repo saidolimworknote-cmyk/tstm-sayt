@@ -21,7 +21,7 @@ Qisqartma: **TSTM veb-tizimi**.
 - **Nazorat qiluvchi organ:** UzInfocom (davlat axborot texnologiyalari kompaniyasi) — xavfsizlik va sifat auditi.
 
 ### 1.3. Tizimning ishlash asoslari
-Tizim mahalliy server muhitida (XAMPP — Apache + PHP + MariaDB) ishlaydi. Hostingga chiqarish uchun barcha talablar `.htaccess` va `DEPLOY.md` da tayyorlangan (HTTPS/HSTS bloklari izohli holatda).
+Tizim mahalliy server muhitida ishlaydi: PHP 8.3 va MariaDB 11.4 LTS loyihaning o'zida (`runtime\`) keladi, `tools\ISHGA_TUSHIRISH.bat` ikkalasini ko'taradi. Hech narsa o'rnatish talab qilinmaydi (2026-08-21 gacha XAMPP — Apache + PHP + MariaDB — talab qilinardi). Hostingga chiqarish uchun barcha talablar `.htaccess` va `DEPLOY.md` da tayyorlangan (HTTPS/HSTS bloklari izohli holatda).
 
 ### 1.4. Ishlarni bajarish rejasi
 Tizim to'liq ishlab chiqilgan. Ushbu TZ mavjud tizimni rasmiylashtiradi va keyingi rivojlantirish/qabul qilish uchun asos bo'ladi.
@@ -291,7 +291,7 @@ hosting tarifida **kamida 50 GB/oy** bo'lishi tavsiya etiladi.
 
 ##### 4.3.4.5. Bir vaqtda xizmat ko'rsatiladigan foydalanuvchilar soni
 
-O'lchov mahalliy muhitda (Windows/XAMPP, 4 yadro) `ab` (Apache Bench) bilan
+O'lchov mahalliy muhitda (Windows, 4 yadro; o'sha paytda XAMPP/Apache) `ab` (Apache Bench) bilan
 o'tkazilgan. **Haqiqiy Linux serverda ko'rsatkichlar 2–3 barobar yuqori bo'ladi**
 — Windows'dagi Apache MPM sezilarli sekinroq ishlaydi.
 
