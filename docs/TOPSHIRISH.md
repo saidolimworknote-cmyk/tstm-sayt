@@ -59,7 +59,7 @@ display_errors = Off
 ### 2.4. Veb-server — ⚠️ ENG MUHIM BAND
 
 Saytning **butun xavfsizlik konfiguratsiyasi** `.htaccess` faylida:
-Content-Security-Policy va boshqa himoya sarlavhalari, `config.php`/`db.php`
+Content-Security-Policy va boshqa himoya sarlavhalari, `backend/config.php`/`backend/db.php`
 kabi ichki fayllarni tashqaridan ochishni taqiqlash, `uploads/` ichida PHP
 bajarilishining oldini olish, gzip siqish va brauzer keshi.
 
@@ -99,7 +99,7 @@ FLUSH PRIVILEGES;
 ```
 
 > **`CREATE` va `ALTER` ni olib tashlamang.** Ilova jadval sxemasini o'zi
-> boshqaradi: birinchi ishga tushishda yaratadi, `db.php` yangilanganda
+> boshqaradi: birinchi ishga tushishda yaratadi, `backend/db.php` yangilanganda
 > migratsiya qiladi. Kundalik ishda bu huquqlar **ishlatilmaydi** — sxema
 > dolzarbligi bitta `SELECT` bilan aniqlanadi (`schema_meta` jadvali), DDL
 > umuman bajarilmaydi.
@@ -128,9 +128,9 @@ Arxivni domen ildiziga (`public_html/` yoki `www/`) oching.
 > joyida ekanini alohida tekshiring** (`uploads/` haqiqiy papka bo'lishi
 > kerak, `uploads\.htaccess` nomli yagona fayl emas).
 
-### 3.4. `config.php` yaratish
+### 3.4. `backend/config.php` yaratish
 
-Sayt ildizida `config.php` fayli yarating (arxivda **yo'q** — har bir muhitda
+Sayt ildizidagi `backend/` papkasida `config.php` fayli yarating (arxivda **yo'q** — har bir muhitda
 o'ziniki bo'ladi):
 
 ```php
@@ -151,13 +151,13 @@ return [
 `auth` jadvali bilan birga import qilinadi, ya'ni mavjud parol ishlayveradi.
 (Bu qiymat faqat butunlay bo'sh bazani birinchi marta ochish uchun.)
 
-Namuna: arxivdagi `config.sample.php`.
+Namuna: arxivdagi `backend/config.sample.php`.
 
 ### 3.5. Fayl huquqlari
 
 | Yo'l | Huquq | Nima uchun |
 |---|---|---|
-| `config.php` | `640` | Baza paroli — faqat veb-server o'qisin |
+| `backend/config.php` | `640` | Baza paroli — faqat veb-server o'qisin |
 | `uploads/` | `755`, veb-server **yoza oladi** | Admin panel orqali yuklanadigan rasm/hujjatlar |
 | sayt ildizi | veb-server **yoza oladi** | `cache_public.json` keshi shu yerda yasaladi |
 
@@ -197,7 +197,8 @@ massiv**, `passwordHash` esa **umuman bo'lmasligi** kerak.
 **403 yoki 404 qaytarishi SHART** (ochilib qolmasin):
 
 ```
-/config.php   /config.sample.php   /db.php   /seed.php
+/backend/config.php   /backend/config.sample.php
+/backend/db.php       /backend/seed.php
 /.htaccess    /.git/config         /uploads/  (papka ro'yxati ko'rinmasin)
 ```
 

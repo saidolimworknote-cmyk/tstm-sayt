@@ -28,7 +28,7 @@
 error_reporting(E_ALL);
 @ini_set('display_errors', '0');
 
-require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/backend/db.php';
 
 // ---- Sessiya cookie (xavfsiz) ----
 $__https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
@@ -375,7 +375,7 @@ switch ($action) {
 
   case 'reset': {
     require_auth(); require_csrf();
-    require_once __DIR__ . '/seed.php';
+    require_once __DIR__ . '/backend/seed.php';
     $seed = default_seed();
     $seed['auth'] = auth_load($pdo); // parol saqlanadi
     try {

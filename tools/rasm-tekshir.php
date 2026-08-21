@@ -31,7 +31,7 @@
 if (PHP_SAPI !== 'cli') { http_response_code(403); exit('CLI only'); }
 
 $ildiz = dirname(__DIR__);
-require $ildiz . '/db.php';
+require $ildiz . '/backend/db.php';
 
 $nomla = in_array('--nomla', $argv, true);
 

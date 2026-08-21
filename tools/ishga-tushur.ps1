@@ -142,7 +142,7 @@ if ($mods -notcontains 'pdo_mysql') {
 }
 
 # ---- 2. Sozlamalar ------------------------------------------------
-$cfgYol  = Join-Path $sayt 'config.php'
+$cfgYol  = Join-Path $sayt 'backend\config.php'
 $birinchi = -not (Test-Path $cfgYol)
 $dbPort = 3307; $dbHost = '127.0.0.1'; $dbName = 'tstm'; $dbUser = 'tstm'; $dbPass = ''
 if (-not $birinchi) {
@@ -234,14 +234,14 @@ FLUSH PRIVILEGES;
   if ($LASTEXITCODE -ne 0) { Xato "bazani sozlab bo'lmadi"; exit 1 }
   Remove-Item $vaqtSql -Force -ErrorAction SilentlyContinue; $vaqtSql = ''
 
-  # config.php - parol SHU YERDA, git'ga tushmaydi (.gitignore).
-  $namuna = Join-Path $sayt 'config.sample.php'
+  # backend\config.php - parol SHU YERDA, git'ga tushmaydi (.gitignore).
+  $namuna = Join-Path $sayt 'backend\config.sample.php'
   $matn = @"
 <?php
 /* TSTM - mahalliy sozlamalar. Git'ga TUSHMAYDI.
    Bu faylni tools\ishga-tushur.ps1 birinchi ishga tushirishda
    AVTOMATIK yaratdi. Baza paroli tasodifiy generatsiya qilingan,
-   ya'ni har kompyuterda o'ziniki. Izohlar: config.sample.php */
+   ya'ni har kompyuterda o'ziniki. Izohlar: backend\config.sample.php */
 
 return [
   'db_host' => '$dbHost',
@@ -256,7 +256,7 @@ return [
 "@
   [System.IO.File]::WriteAllText($cfgYol, $matn, (New-Object System.Text.UTF8Encoding($false)))
   $dbPass = $yangiPass
-  Ok "baza va config.php yaratildi (parol tasodifiy)"
+  Ok "baza va backend\config.php yaratildi (parol tasodifiy)"
 }
 
 # ---- 5. Kontent importi -------------------------------------------
@@ -318,7 +318,7 @@ if ($bootPass -ne '') {
     Write-Host "     login:  $adminLogin" -ForegroundColor Yellow
     Write-Host "     parol:  $bootPass" -ForegroundColor Yellow
     Write-Host "     Kirgach parolni DARHOL o'zgartiring - shundan keyin" -ForegroundColor DarkYellow
-    Write-Host "     bu parol ishlamay qoladi (config.php da qoladi, xolos)." -ForegroundColor DarkYellow
+    Write-Host "     bu parol ishlamay qoladi (backend\config.php da qoladi, xolos)." -ForegroundColor DarkYellow
   }
 }
 

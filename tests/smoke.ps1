@@ -82,7 +82,14 @@ Check "admin noindex (X-Robots-Tag)" ($ha -match 'X-Robots-Tag:.*noindex')
 Write-Host "`n[4] Maxfiy fayllar bloklangan (403/404)"
 # 2026-08-20: hujjatlar `docs\` ga ko'chdi. `.htaccess` dagi to'siq FAYL NOMIGA
 # qaraydi (FilesMatch), ya'ni papka ichida ham ishlaydi — shuni tekshiramiz.
-foreach ($f in 'config.php','db.php','seed.php','data.json','.htaccess','.gitignore','docs/SECURITY.md','views.json') {
+#
+# 2026-08-22: `db.php`, `seed.php`, `config.php` ildizdan `backend\` ga ko'chdi.
+# Ikkala manzil ham sinaladi: YANGI yo'l (papka to'sig'i ishlayaptimi) va ESKI
+# ildiz yo'li (fayl nomi bo'yicha to'siq saqlanib qolganmi — kimdir fayllarni
+# ildizga qaytarsa himoya o'z-o'zidan yo'qolmasligi kerak).
+foreach ($f in 'backend/config.php','backend/db.php','backend/seed.php','backend/config.sample.php',
+               'config.php','db.php','seed.php',
+               'data.json','.htaccess','.gitignore','docs/SECURITY.md') {
   $r = Get2 "$Base/$f"
   Check "bloklangan: $f" ((Code $r) -in 403,404) "status=$(Code $r)"
 }

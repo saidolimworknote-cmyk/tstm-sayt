@@ -79,14 +79,24 @@ if (preg_match('~^[/\\\\](tools|tests|backups|data)([/\\\\]|$)~i', substr($full,
   javob(404, 'Topilmadi');
 }
 
+// RedirectMatch 404 (?i)^/backend(/|$)
+// `backend\` — baza qatlami, seed va config (ichida parol). 2026-08-22 da
+// ildizdan shu papkaga ko'chirildi. Butun papka "yo'q" ko'rinadi; quyidagi
+// fayl nomi bo'yicha taqiq esa ikkinchi qatlam bo'lib qoladi.
+if (preg_match('~^[/\\\\]backend([/\\\\]|$)~i', substr($full, strlen($root)))) {
+  javob(404, 'Topilmadi');
+}
+
 // <FilesMatch "^(db|seed|config|config\.sample)\.php$">
 // Baza qatlami va sozlamalar — ichida parol bor, hech qachon berilmaydi.
 // `router.php` .htaccess'da yo'q edi (u faqat shu yerda mavjud), lekin
 // o'zini o'zi uzatib yubormasligi uchun shu ro'yxatga qo'shildi.
 if (preg_match('~^(db|seed|config|config\.sample|router)\.php$~i', $nom)) javob(403, 'Yopiq');
 
-// <FilesMatch "\.(json)$">  — cache_public.json, views.json, login_attempts.json
-// (oxirgi ikkitasida IP va hisoblagichlar bor).
+// <FilesMatch "\.(json)$">  — cache_public.json (ommaviy javob keshi).
+// Ilgari ildizda `views.json` va `login_attempts.json` ham bo'lgan; ular
+// MySQL'ga ko'chgach o'lik qolgan edi va 2026-08-22 da o'chirildi
+// (hisoblagich `views`, brute-force holati `login_attempts` jadvalida).
 // <FilesMatch "\.(md|log|bak|sql|ini)$"> — hujjatlar va baza dumplari.
 // .ps1/.bat — .htaccess'da yo'q, chunki hostingda `tools\` umuman bo'lmaydi.
 // Mahalliy serverda esa loyiha ildizidan uzatiladi, shuning uchun yopamiz.

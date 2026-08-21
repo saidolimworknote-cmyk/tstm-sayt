@@ -68,9 +68,9 @@ $KONTENT = @(
 #   error_log      - xatolar jurnali
 #   views          - ko'rishlar hisoblagichi
 
-# ---- Baza sozlamalari config.php dan ------------------------------
-$cfg = Join-Path $sayt 'config.php'
-if (-not (Test-Path $cfg)) { Xato "config.php topilmadi. Avval saytni bir marta ishga tushiring."; exit 1 }
+# ---- Baza sozlamalari backend\config.php dan ----------------------
+$cfg = Join-Path $sayt 'backend\config.php'
+if (-not (Test-Path $cfg)) { Xato "backend\config.php topilmadi. Avval saytni bir marta ishga tushiring."; exit 1 }
 $t = [System.IO.File]::ReadAllText($cfg, [System.Text.Encoding]::UTF8)
 function Cfg($k, $def) { if ($t -match "'$k'\s*=>\s*'([^']*)'") { return $Matches[1] } else { return $def } }
 $dbHost = Cfg 'db_host' '127.0.0.1'

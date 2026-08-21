@@ -10,7 +10,7 @@ Loyihaning texnik xavfsizlik holati: [SECURITY.md](SECURITY.md)
 ## 0. Yuklash paketini yig'ish (mahalliy)
 
 Serverga loyihaning HAMMASI ketmaydi: `backups\` 114 MB va ichida parol xeshi
-bor, `config.php` da mahalliy baza paroli, `.git\`/`tests\`/`*.ps1` esa veb
+bor, `backend/config.php` da mahalliy baza paroli, `.git\`/`tests\`/`*.ps1` esa veb
 papkada umuman keraksiz. Buni qo'lda ajratish xatoga olib keladi, shuning uchun
 skript bor:
 
@@ -29,7 +29,7 @@ Skript oxirida O'ZI tekshiradi:
 - `.htaccess` va `uploads\.htaccess` paketda BORmi (ular nuqta bilan boshlanadi
   va FTP mijozlari ko'pincha yashiradi - ular ko'chmasa saytning BUTUN himoya
   qatlami yo'qoladi);
-- `config.php`, `data.json`, `backups\`, `.git\` paketga TUSHMAGANmi;
+- `backend/config.php`, `data.json`, `backups\`, `.git\` paketga TUSHMAGANmi;
 - zip ichidagi yo'llar to'g'ri slash (`/`) bilan yozilganmi.
 
 > Oxirgi band bejiz emas: PowerShell 5.1 dagi `Compress-Archive` yo'llarni
@@ -40,8 +40,8 @@ Skript oxirida O'ZI tekshiradi:
 
 ## 1. Serverga qo'yishdan oldin
 
-- [ ] **`config.php` yaratilgan.** `config.sample.php` dan nusxalang:
-      `cp config.sample.php config.php`
+- [ ] **`backend/config.php` yaratilgan.** `backend/config.sample.php` dan nusxalang:
+      `cp backend/config.sample.php backend/config.php`
       Bu fayl git'ga tushmaydi va veb orqali ochilmaydi — baza paroli shu yerda.
 
 - [ ] **Baza uchun alohida foydalanuvchi yaratilgan** (`root` ISHLATILMAYDI).
@@ -61,7 +61,7 @@ Skript oxirida O'ZI tekshiradi:
       FLUSH PRIVILEGES;
       ```
 
-      Keyin `config.php` da: `'db_user' => 'tstm_app'`, `'db_pass' => '...'`.
+      Keyin `backend/config.php` da: `'db_user' => 'tstm_app'`, `'db_pass' => '...'`.
 
       > `CREATE`/`ALTER` kerak, chunki `db.php` jadvallarni birinchi ishga
       > tushishda o'zi yaratadi va migratsiya qiladi.
@@ -79,7 +79,7 @@ Skript oxirida O'ZI tekshiradi:
 - [ ] **Admin paroli almashtirilgan.** Kamida 12 belgi.
       Admin panel → Sozlamalar → «Xavfsizlik — kirish paroli».
 
-- [ ] **`config.php` dagi `admin_bootstrap_password` bo'sh.**
+- [ ] **`backend/config.php` dagi `admin_bootstrap_password` bo'sh.**
       U faqat butunlay yangi (bo'sh) bazani birinchi marta ochish uchun kerak.
       Kirgandan keyin darhol bo'shatiladi.
 
@@ -120,7 +120,7 @@ emas.
 
 ## 2. Fayl huquqlari
 
-- [ ] `config.php` — faqat veb-server o'qiy oladi (`chmod 640`, egasi veb-server).
+- [ ] `backend/config.php` — faqat veb-server o'qiy oladi (`chmod 640`, egasi veb-server).
 - [ ] `uploads/` — veb-server yoza oladi (`chmod 755`), lekin ichida PHP
       ishlamaydi (buni `uploads/.htaccess` ta'minlaydi — u ham ko'chirilsin!).
 - [ ] `.htaccess` fayllari serverga ko'chirilgan (FTP ba'zan nuqta bilan
@@ -201,10 +201,10 @@ Bu ikki blok `.htaccess` ga qo'shilmasa sayt **ishlaydi, lekin sezilarli sekin**
 
 Quyidagi manzillar **403 yoki 404** qaytarishi shart (ochilib qolmasin):
 
-- [ ] `/config.php`
-- [ ] `/config.sample.php`
-- [ ] `/db.php`
-- [ ] `/seed.php`
+- [ ] `/backend/config.php`
+- [ ] `/backend/config.sample.php`
+- [ ] `/backend/db.php`
+- [ ] `/backend/seed.php`
 - [ ] `/data.json`
 - [ ] `/.htaccess`
 - [ ] `/.git/config`

@@ -42,11 +42,12 @@ Write-Host ""
 $skipDirs = @('backups', '.git', '.idea', '.claude', '.vscode',
               'tests', 'tools', 'docs', 'node_modules')
 # Aniq fayl nomlari
+# DIQQAT: bu ro'yxat fayl NOMI bo'yicha solishtiriladi (yo'l bo'yicha emas),
+# shuning uchun `backend\config.php` ham shu yerdagi 'config.php' bilan
+# ushlanadi - papka o'zgarsa ham qoida ishlayveradi.
 $skipFiles = @(
   'config.php',              # serverda o'ziniki yaratiladi (baza paroli)
   'data.json',               # eskirgan ombor, ichida parol xeshi
-  'login_attempts.json',     # brute-force holati
-  'views.json',              # ko'rishlar hisoblagichi
   'cache_public.json',       # avtomatik yasaladi
   'router.php',              # faqat mahalliy `php -S` uchun; hostingda .htaccess ishlaydi
   'eslint.config.mjs', '.stylelintrc.json',  # ishlab chiqish vositalari
@@ -104,10 +105,11 @@ $must = @(
   '.htaccess',            # butun xavfsizlik qatlami
   'uploads\.htaccess',    # uploads ichida PHP ishlamasligi
   'index.html',           # bosh sahifa
-  'api.php', 'db.php', 'seed.php',
+  'api.php',              # yagona kirish nuqtasi - ildizda turishi shart
+  'backend\db.php', 'backend\seed.php',
   'sw.js',                # ildizda turishi shart (push scope)
   'robots.txt', 'sitemap.xml',
-  'config.sample.php'     # serverda config.php uchun namuna
+  'backend\config.sample.php'  # serverda backend\config.php uchun namuna
 )
 $missing = @()
 foreach ($m in $must) {
@@ -115,7 +117,7 @@ foreach ($m in $must) {
 }
 
 # ---- TEKSHIRUV: bo'lMASLIGI shart bo'lgan fayllar -----------------
-$forbidden = @('config.php', 'data.json', 'backups', '.git')
+$forbidden = @('backend\config.php', 'config.php', 'data.json', 'backups', '.git')
 $leaked = @()
 foreach ($f in $forbidden) {
   if (Test-Path (Join-Path $pkg $f)) { $leaked += $f }

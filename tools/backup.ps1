@@ -29,7 +29,7 @@ $mysqldump = Join-Path $root 'runtime\mysql\bin\mariadb-dump.exe'
 if (-not (Test-Path $mysqldump)) { $mysqldump = 'mariadb-dump.exe' }   # PATH dan
 $dbHost = '127.0.0.1'; $dbPort = '3307'; $dbName = 'tstm'; $dbUser = 'tstm'; $dbPass = ''
 
-$cfg = Join-Path $root 'config.php'
+$cfg = Join-Path $root 'backend\config.php'
 if (Test-Path $cfg) {
   $txt = Get-Content $cfg -Raw
   if ($txt -match "'db_name'\s*=>\s*'([^']*)'") { $dbName = $Matches[1] }

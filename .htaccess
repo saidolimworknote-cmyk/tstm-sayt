@@ -149,11 +149,18 @@ DirectoryIndex index.html index.php
 # .xml ni umuman bloklab bo'lmaydi — sitemap.xml ochiq qolishi kerak.
 RedirectMatch 404 (?i)/\.(idea|claude|git|vscode|env)(/|$)
 
-# Backend ichki fayllari (DB config + seed + maxfiy sozlamalar) — ular faqat
+# Backend ichki fayllari (DB qatlami + seed + maxfiy sozlamalar) — ular faqat
 # api.php ichidan (server tomonda) chaqiriladi, tashqaridan to'g'ridan-to'g'ri
 # ochib bo'lmaydi (baza login/parolini himoya qilish uchun).
 # config.php — baza paroli shu yerda; config.sample.php ham yopiladi, chunki u
 # tuzilmani (qaysi kalitlar borligini) oshkor qiladi.
+#
+# IKKI QATLAM (2026-08-22 da bu fayllar `backend\` papkasiga ko'chirildi):
+#   1) Butun papka "yo'q" ko'rinadi — RedirectMatch to'liq YO'Lni tekshiradi.
+#   2) Fayl nomi bo'yicha taqiq SAQLANIB QOLDI — agar kimdir fayllarni
+#      ildizga qaytarib qo'ysa yoki eski nusxadan deploy qilsa, himoya
+#      o'z-o'zidan yo'qolib qolmasin.
+RedirectMatch 404 (?i)^/?backend(/|$)
 <FilesMatch "^(db|seed|config|config\.sample)\.php$">
   Require all denied
 </FilesMatch>

@@ -15,14 +15,14 @@ Apache. Server tomonda shablon dvigateli yo'q — sahifalar statik HTML, kontent
 |---|---|
 | Parol saqlash | `password_hash(PASSWORD_DEFAULT)` — bcrypt. Ochiq parol hech qayerda saqlanmaydi |
 | Parol tekshirish | `password_verify()` — vaqt bo'yicha barqaror taqqoslash |
-| Parol koddami? | **Yo'q.** Barcha maxfiy qiymatlar `config.php` da, u git'ga tushmaydi (`.gitignore`) va veb orqali ochilmaydi (`.htaccess`) |
+| Parol koddami? | **Yo'q.** Barcha maxfiy qiymatlar `backend/config.php` da, u git'ga tushmaydi (`.gitignore`) va veb orqali ochilmaydi (`.htaccess`) |
 | Minimal uzunlik | 12 belgi, tekshiruv **serverda** (`api.php` → `change_password`) |
 | Brute-force himoyasi | IP bo'yicha 5 xato urinishdan keyin 10 daqiqa blok (`login_attempts` jadvali) |
 | Sessiya | PHP sessiyasi; kirishda `session_regenerate_id(true)` — sessiya fiksatsiyasiga qarshi |
 | Cookie | `HttpOnly`, `SameSite=Lax`, HTTPS'da avtomatik `Secure` |
 
 Parol xeshi va admin login nomi **hech qachon** klientga yuborilmaydi —
-`db.php` → `db_load_all()` ga qarang.
+`backend/db.php` → `db_load_all()` ga qarang.
 
 ## 2. Ruxsatlar va maxfiylik
 
@@ -37,7 +37,7 @@ faqat tizimga kirgan adminga to'liq qaytadi, boshqalarga **bo'sh massiv**:
 - `subscribers` — obunachilar e-pochtasi
 - `users` — admin foydalanuvchilar
 
-Ro'yxat: `db.php` → `$PRIVATE_COLLS`. Yangi shaxsiy bo'lim qo'shilsa,
+Ro'yxat: `backend/db.php` → `$PRIVATE_COLLS`. Yangi shaxsiy bo'lim qo'shilsa,
 u ham shu ro'yxatga kiritilishi shart.
 
 ## 3. SQL in'yeksiya
@@ -215,7 +215,7 @@ ro'yxat berib qo'yadi. Buni pentestchilar birinchi navbatda o'qiydi.
 
 | Nima himoyalangan | Qanday | Tekshiruv |
 |-------------------|--------|-----------|
-| `config.php`, `db.php`, `seed.php` | `.htaccess` → **403** | `curl -I .../config.php` |
+| `backend/` (config.php, db.php, seed.php) | `.htaccess` → **404** (butun papka) va qo'shimcha ravishda fayl nomi bo'yicha **403** | `curl -I .../backend/config.php` |
 | `*.json` (kesh, ma'lumot), `*.md`, `*.log`, `*.bak` | `.htaccess` → **403** | `curl -I .../cache_public.json` |
 | Admin amallari (audit, xatoliklar, CRUD) | Sessiya + CSRF → **401/403** | `curl .../api.php?action=audit_log` |
 | Fuqaro murojaatlari, obunachilar, foydalanuvchilar | `$PRIVATE_COLLS` — ommaviy API'da **bo'sh** | 2-bo'limga qarang |

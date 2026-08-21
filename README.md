@@ -5,34 +5,53 @@ Sayt + boshqaruv paneli (admin). PHP + MySQL backend bilan.
 ## 🗂️ Loyiha tuzilishi
 
 2026-08-20 da fayllar papkalarga ajratildi (ilgari 104 tasi ham ildizda yotardi).
+2026-08-22 da baza qatlami `backend\` ga chiqarildi — ildizda endi faqat
+tashqaridan OCHILADIGAN fayllar qoldi.
 
 ```
 sayt/
 ├── index.html            bosh sahifa
 ├── *.html                ichki sahifalar (28 ta) — bularning nomi = sayt MANZILI
-│
 ├── api.php               yagona backend kirish nuqtasi (?action=...)
-├── db.php                MySQL qatlami: $SCHEMA, jadvallar, kesh
-├── seed.php              bo'sh bazaning boshlang'ich kontenti
-├── config.php            baza logini/paroli (git'ga TUSHMAYDI)
 │
-├── css/                  barcha uslublar (19 fayl)
-├── js/                   barcha skriptlar (26 fayl)
-├── img/                  logotiplar (6 fayl)
-├── fonts/                Montserrat (woff2)
+├── backend/              SERVER TOMONI — tashqaridan umuman ochilmaydi
+│   ├── db.php            MySQL qatlami: $SCHEMA, jadvallar, kesh
+│   ├── seed.php          bo'sh bazaning boshlang'ich kontenti
+│   ├── config.php        baza logini/paroli (git'ga TUSHMAYDI)
+│   └── config.sample.php config.php uchun namuna (git'da BOR)
+│
+├── css/                  barcha uslublar (19 fayl)      ─┐
+├── js/                   barcha skriptlar (26 fayl)      │ frontend
+├── img/                  logotiplar (6 fayl)             │
+├── fonts/                Montserrat (woff2)             ─┘
 ├── uploads/              admin yuklagan rasm va hujjatlar
 │
+├── tools/                ishga tushirish va deploy skriptlari
 ├── docs/                 SECURITY.md · DEPLOY.md · TZ.md · TOPSHIRISH.md
-├── tools/                deploy.ps1 · backup.ps1 · restore.ps1 · koch.ps1 · ORNAT.*
 ├── tests/                smoke.ps1 (avtomatik tekshiruv)
+├── data/                 baza.sql (kontent) + mysql-data (jonli baza)
+├── runtime/              portativ PHP + MariaDB (XAMPP kerak emas)
 ├── backups/              SQL zaxiralar (git'ga TUSHMAYDI)
 │
 ├── .htaccess             butun xavfsizlik qatlami (CSP, to'siqlar, gzip, kesh)
 ├── router.php            MAHALLIY server uchun .htaccess ning ayni qoidalari
 ├── sw.js                 Service Worker
 ├── robots.txt  sitemap.xml
+├── .gitignore            nima repoga TUSHMAYDI (sabablari izohlar bilan)
 └── README.md             shu fayl
 ```
+
+### Nega `backend\` alohida
+
+`db.php`, `seed.php` va `config.php` ni brauzer HECH QACHON so'ramaydi — ular
+faqat `api.php` ichidan, server tomonda chaqiriladi. Ildizda turganda ularni
+tashqaridan ochishning oldini FAQAT fayl nomi bo'yicha to'siq olardi; endi esa
+butun papka yopiq (`.htaccess` va `router.php` da bittadan qoida).
+
+To'siq **ikki qatlamli**: papka bo'yicha qoida ham, eski fayl nomi bo'yicha
+qoida ham saqlanib qoldi. Ya'ni kimdir fayllarni ildizga qaytarib qo'ysa yoki
+eski nusxadan deploy qilsa, himoya o'z-o'zidan yo'qolmaydi. `tests\smoke.ps1`
+ikkala manzilni ham sinaydi.
 
 ### Nega ayrim fayllar ildizda QOLDI
 
@@ -43,7 +62,7 @@ Bular papkaga ko'chirilsa sayt buziladi — ko'chirmang:
 | `index.html` | `.htaccess` dagi `DirectoryIndex` uni ildizdan qidiradi |
 | `*.html` (sahifalar) | Fayl nomi = sayt manzili. Ko'chirilsa barcha havola, `sitemap.xml` va qidiruv indeksi buziladi |
 | `sw.js` | Service Worker faqat O'ZI turgan papka va undan pastini boshqara oladi. `js/` ga ko'chsa push-bildirishnoma butun sayt uchun ishlamay qoladi |
-| `api.php`, `db.php`, `seed.php`, `config.php` | Butun frontend `api.php?action=...` ga murojaat qiladi |
+| `api.php` | Butun frontend `api.php?action=...` ga murojaat qiladi. Qolgan uchtasi (`db.php`, `seed.php`, `config.php`) unga ERGASHMAYDI — ular `backend\` da, chunki brauzer ularni hech qachon so'ramaydi |
 | `robots.txt`, `sitemap.xml` | Standart bo'yicha faqat ildizda o'qiladi |
 | `.htaccess` | Apache uni papka bo'yicha qo'llaydi |
 | `router.php` | `php -S` uni sayt ildizidan chaqiradi (faqat mahalliy; hostingga ketmaydi) |
@@ -58,7 +77,8 @@ Bular papkaga ko'chirilsa sayt buziladi — ko'chirmang:
 | `js/site-common.js` → `NAV` | Bosh sahifa menyusi `index.html` ichida QO'LDA yozilgan — ikkalasini birga yangilang |
 | `js/i18n.js` | Bosh sahifa ham, ichki sahifalar ham shu fayldan matn oladi |
 | `css/site.css` | Faqat ichki sahifalar. Bosh sahifa — `css/home.css` (mustaqil nusxa) |
-| `db.php` → `$SCHEMA` | Yangi ustun qo'shsangiz `CREATE TABLE` va `migrate()` ni ham yangilang |
+| `backend/db.php` → `$SCHEMA` | Yangi ustun qo'shsangiz `CREATE TABLE` va `migrate()` ni ham yangilang |
+| `backend/` ichidagi fayl nomi | `api.php` dagi `require` yo'llarini ham yangilang (`__DIR__ . '/backend/...'`) |
 | `tools/` yoki `docs/` | Bu papkalar serverga CHIQMAYDI (`deploy.ps1` ularni chetlab o'tadi) |
 | `.htaccess` (taqiq yoki sarlavha) | `router.php` ni HAM yangilang — u mahalliy serverda ayni qoidalarni bajaradi, aks holda himoya faqat hostingda qoladi |
 
@@ -94,13 +114,13 @@ Bular papkaga ko'chirilsa sayt buziladi — ko'chirmang:
   belgilanadi (`experts.kind` ustuni; bo'sh qolsa — ekspert).
 - **admin.html** — boshqaruv paneli (login bilan)
 - `api.php` — PHP backend (ma'lumotlarni **MySQL/MariaDB**'da saqlaydi)
-- `db.php` — MySQL qatlami (PDO, jadval sxemasi, avtomatik yaratish)
-- `config.sample.php` — maxfiy sozlamalar namunasi (baza logini/paroli).
-  Undan `config.php` yasaladi; `config.php` git'ga **tushmaydi**
+- `backend/db.php` — MySQL qatlami (PDO, jadval sxemasi, avtomatik yaratish)
+- `backend/config.sample.php` — maxfiy sozlamalar namunasi (baza logini/paroli).
+  Undan `backend/config.php` yasaladi; `backend/config.php` git'ga **tushmaydi**
 - `page-*.js` — har bir sahifaning skripti (CSP talabi bilan HTML'dan ajratilgan)
 - `subscribe.js` + `subscribe.css` — obuna (push-bildirishnoma) oynasi; **barcha**
   sahifaga ulanadi, jumladan bosh sahifaga ham
-- `seed.php` — bo'sh bazani to'ldiruvchi standart boshlang'ich kontent
+- `backend/seed.php` — bo'sh bazani to'ldiruvchi standart boshlang'ich kontent
 - `.htaccess` — Apache sozlamalari (`DirectoryIndex index.html index.php`, ya'ni
   papka manzili to'g'ridan-to'g'ri `index.html` ni ochadi — alohida yo'naltiruvchi
   `index.php` YO'Q va kerak emas)
@@ -177,7 +197,7 @@ so'rang.
 paroli». Kamida 12 belgi.
 
 **Yangi kompyuterda birinchi kirish:** `ISHGA_TUSHIRISH.bat` birinchi ishga
-tushirishda tasodifiy parol yasaydi, uni `config.php` ga yozadi va **oynada
+tushirishda tasodifiy parol yasaydi, uni `backend/config.php` ga yozadi va **oynada
 ko'rsatadi**:
 
 ```
@@ -188,8 +208,8 @@ ko'rsatadi**:
 
 Shu parol bilan kiring va **darhol o'zgartiring** (Sozlamalar → «Xavfsizlik —
 kirish paroli»). Almashtirilgan zahoti bcrypt xeshi `auth` jadvaliga tushadi va
-bootstrap parol ishlamay qoladi — `config.php` da qolgani zarar qilmaydi.
-Parolni yo'qotsangiz: `auth` jadvalidagi qatorni o'chiring, keyin `config.php`
+bootstrap parol ishlamay qoladi — `backend/config.php` da qolgani zarar qilmaydi.
+Parolni yo'qotsangiz: `auth` jadvalidagi qatorni o'chiring, keyin `backend/config.php`
 dagi `admin_bootstrap_password` yana ishlaydi.
 
 ---
@@ -200,7 +220,7 @@ dagi `admin_bootstrap_password` yana ishlaydi.
   Admin'da qilingan har qanday o'zgarish **barcha tashrifchilarga** ko'rinadi.
 - Baza va jadvallar **birinchi ochilishda avtomatik yaratiladi** (`db.php`) va
   `seed.php`dagi standart kontent bilan to'ldiriladi. Parol xeshi **bo'sh** qoladi —
-  birinchi kirish `config.php` dagi `admin_bootstrap_password` orqali bo'ladi.
+  birinchi kirish `backend/config.php` dagi `admin_bootstrap_password` orqali bo'ladi.
   > Ilgari bu yerda `data.json` dan import bo'lardi (MySQL'ga ko'chish yo'li).
   > 2026-08-07 da olib tashlandi: migratsiya 2026-07-29 da tugagan, fayl esa
   > 8-iyulda muzlab qolib, eskirgan kontentni va **almashtirilgan parolni**
@@ -208,7 +228,7 @@ dagi `admin_bootstrap_password` yana ishlaydi.
   > `restore.ps1` (SQL zaxirasidan). Eski fayl `backups\legacy\` da arxivda.
 - Ma'lumot bazasidan tashqari **hech qanday sozlash shart emas** — MySQL
   ishlab tursa kifoya (u Windows xizmati sifatida o'zi ko'tariladi). Baza
-  login/parolini `config.php` dan o'zgartiring (namunasi: `config.sample.php`).
+  login/parolini `backend/config.php` dan o'zgartiring (namunasi: `backend/config.sample.php`).
 - Agar fayllar PHP'siz (`file://`) ochilsa — ma'lumotlar brauzerning
   o'zida (localStorage) saqlanadi (faqat sinov uchun).
 
@@ -248,10 +268,10 @@ Sayt 3 tilli: **UZ / RU / EN**. Har bir kontent admin panelda 3 tilda tahrirlana
   filtrlaydi.
 - Ko'p tilli maydonlar (`title`, `body`, …) `LONGTEXT`da JSON sifatida, filtrlanadigan
   maydonlar (`status`, `date`, `category`, …) alohida ustunlarda **indeks** bilan saqlanadi.
-- Baza login/parolini o'zgartirish: **`config.php`** (`db_host`, `db_name`, `db_user`,
-  `db_pass`). Bu fayl git'ga tushmaydi; namunasi — `config.sample.php`.
+- Baza login/parolini o'zgartirish: **`backend/config.php`** (`db_host`, `db_name`, `db_user`,
+  `db_pass`). Bu fayl git'ga tushmaydi; namunasi — `backend/config.sample.php`.
 - Jadvallar ro'yxatiga `subscribers` va `msg_throttle` ham kiradi.
-- **Ustun qo'shish:** `db.php` da uchta joy — `$SCHEMA`, `CREATE TABLE` va
+- **Ustun qo'shish:** `backend/db.php` da uchta joy — `$SCHEMA`, `CREATE TABLE` va
   `migrate()` ichidagi `ensure_cols()`. Uchinchisi mavjud bazalarni yangilaydi.
   Naqsh: `events.cover` (2026-08-19).
 
@@ -280,7 +300,7 @@ Qisqacha:
 - Fuqarolar murojaatlari, obunachilar va foydalanuvchilar ommaviy API'da **bo'sh** qaytadi
 - Login urinishlari cheklangan (5 xato → 10 daqiqa blok); aloqa formasi spamdan himoyalangan
 - Rasm yuklash faqat PNG/JPG/WEBP/GIF (SVG ataylab o'chirilgan); hujjatlar **fayl imzosi** bo'yicha tekshiriladi
-- `config.php`, `db.php`, `seed.php`, `*.json` — `.htaccess` orqali tashqaridan yopiq
+- `backend/` (config.php, db.php, seed.php), `*.json` — `.htaccess` orqali tashqaridan yopiq
 - Admin amallari (kirish/chiqish, tahrir, o'chirish, **fayl yuklash**, parol almashtirish) `audit_log` jadvalida qayd etiladi
 
 ---

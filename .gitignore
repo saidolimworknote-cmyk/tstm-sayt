@@ -12,16 +12,21 @@ _*.html
 
 # --- Maxfiy / ish jarayoni ma'lumotlari (repoga TUSHMASIN) ---
 # config.php — baza logini/paroli va birinchi kirish paroli. Har bir muhitda
-#   (mahalliy, hosting) o'ziniki bo'ladi. Namunasi: config.sample.php (u repoda).
+#   (mahalliy, hosting) o'ziniki bo'ladi. Namunasi: backend/config.sample.php
+#   (u repoda). 2026-08-22 da fayl `backend/` ga ko'chdi; qoida YO'LSIZ
+#   yozilgan, ya'ni ildizda ham, backend/ ichida ham ushlaydi.
 config.php
 # data.json — MySQL'ga ko'chishdan oldingi eski ombor. 2026-08-07 da loyihadan
 #   BUTUNLAY olib tashlandi (db.php endi uni o'qimaydi, arxivi: backups\legacy\).
 #   Qoida saqlanib qolyapti: ichida admin parolining XESHI bo'lgani uchun, agar
 #   bunday fayl yana paydo bo'lsa, u versiya nazoratiga TUSHMASLIGI kerak.
 data.json
-# login_attempts.json — brute-force himoyasi holati, IP manzillarni saqlaydi
+# login_attempts.json / views.json — MySQL'ga ko'chishdan qolgan o'lik fayllar.
+#   Kod ularni O'QIMAYDI: brute-force holati `login_attempts`, hisoblagich esa
+#   `views` jadvalida. Fayllarning o'zi 2026-08-22 da o'chirildi, lekin qoida
+#   qoldi — ichida IP manzillar bo'lgani uchun, qaytadan paydo bo'lsa ham
+#   repoga tushmasin.
 login_attempts.json
-# views.json — ko'rishlar hisoblagichi, server ish jarayonida o'zgaradi
 views.json
 
 # --- Zaxira nusxalar (backup.ps1 yaratadi) ---

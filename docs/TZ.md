@@ -131,10 +131,10 @@ Tizim quyidagilar uchun mo'ljallangan:
 | **SQL-injection** | Barcha so'rovlar PDO **prepared statement**; foydalanuvchi kiritmasi hech qachon SQL'ga to'g'ridan-to'g'ri qo'shilmaydi | ✅ Sinovdan o'tgan |
 | **XSS (Cross-Site Scripting)** | Barcha chiqish `esc()` bilan kodlanadi; `src`/`href` `safeUrl()` filtridan o'tadi (`javascript:` bloklanadi); **CSP** `script-src 'self'` (`unsafe-inline`/`unsafe-eval` YO'Q) | ✅ Sinovdan o'tgan |
 | **CSRF (Cross-Site Request Forgery)** | Yozuv amallari `X-CSRF-Token` sarlavhasini talab qiladi (sessiyaga bog'langan, `hash_equals`) | ✅ Sinovdan o'tgan |
-| **Parolning ochiq saqlanishi** | Parol **bcrypt** (`$2y$`, cost 10) xesh holida; koddа va hujjatда yo'q; `config.php` git'ga tushmaydi | ✅ Sinovdan o'tgan |
+| **Parolning ochiq saqlanishi** | Parol **bcrypt** (`$2y$`, cost 10) xesh holida; koddа va hujjatда yo'q; `backend/config.php` git'ga tushmaydi | ✅ Sinovdan o'tgan |
 | **Sessiya himoyasi** | Cookie `HttpOnly` + `SameSite=Lax` (+ `Secure` HTTPS'da); kirishda `session_regenerate_id` (fiksatsiyaga qarshi) | ✅ Sinovdan o'tgan |
 | **Brute-force** | IP bo'yicha 5 xato urinish → 10 daqiqa blok (`login_attempts` jadvali) | ✅ |
-| **Maxfiy fayllarга kirish** | `config.php`, `db.php`, `seed.php`, `*.json` — `.htaccess` orqali **403** | ✅ Sinovdan o'tgan |
+| **Maxfiy fayllarга kirish** | `backend/` (config.php, db.php, seed.php), `*.json` — `.htaccess` orqali **403** | ✅ Sinovdan o'tgan |
 | **Yuklangan fayl orqali hujum** | Faqat rasm (magic-byte tekshiruvi), SVG taqiqlangan; hujjatlar fayl imzosi bo'yicha; `uploads/` da PHP o'chirilgan; yuklangan HTML **CSP sandbox** (opaque origin) | ✅ Sinovdan o'tgan |
 | **Shaxsiy ma'lumot oqishi** | Fuqaro murojaatlari, obunachilar, foydalanuvchilar ommaviy API'da **bo'sh** qaytadi (`$PRIVATE_COLLS`) | ✅ Sinovdan o'tgan |
 | **Amallarni kuzatish (audit)** | Har bir admin amali (`login`/`upsert`/`remove`/`settings`/`change_password`) `audit_log` jadvaliga action+bo'lim+ID+IP+vaqt bilan yoziladi | ✅ Sinovdan o'tgan |
@@ -357,7 +357,7 @@ o'zgarish kiritildi:
 | Ma'lumotlar bazasi (`mysqldump`) | Kunlik | 7 kun + 12 oy | ~5 MB/nusxa |
 | `uploads/` papkasi | Haftalik (inkremental) | 3 oy | ~100–500 MB |
 | Dastur kodi | Har o'zgarishda (git) | Cheksiz | ~2 MB |
-| `config.php` (maxfiy) | Qo'lda, alohida saqlanadi | — | < 1 KB |
+| `backend/config.php` (maxfiy) | Qo'lda, alohida saqlanadi | — | < 1 KB |
 
 Tiklash vaqti (RTO): baza ~2 daqiqa, to'liq tizim ~30 daqiqa.
 
@@ -440,7 +440,7 @@ Loyiha bilan birga quyidagi hujjatlar mavjud:
 - **SECURITY.md** — xavfsizlik arxitekturasi, himoya choralari, ma'lum cheklovlar;
 - **DEPLOY.md** — hostingga chiqarish cheklisti (baza, HTTPS/HSTS, fayl huquqlari);
 - **TZ.md** — ushbu texnik topshiriq;
-- **config.sample.php** — maxfiy sozlamalar namunasi.
+- **backend/config.sample.php** — maxfiy sozlamalar namunasi.
 
 ---
 
@@ -457,8 +457,10 @@ Loyiha bilan birga quyidagi hujjatlar mavjud:
 
 ```
 ILDIZ:     index.html (bosh sahifa) + 28 ta ichki HTML sahifa
-           api.php, db.php, seed.php, config.php (git'da yo'q)
-           .htaccess, sw.js, robots.txt, sitemap.xml
+           api.php (yagona kirish nuqtasi)
+           .htaccess, router.php, sw.js, robots.txt, sitemap.xml
+backend/   db.php, seed.php, config.sample.php
+           config.php (git'da yo'q) — tashqaridan OCHILMAYDI
 css/       site.css (ichki sahifalar), home.css (bosh sahifa),
            print.css (chop etish), admin.css, page-*.css
 js/        site-common.js, i18n.js, a11y.js, search.js, subscribe.js,
