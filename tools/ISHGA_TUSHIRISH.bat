@@ -1,30 +1,17 @@
 @echo off
+REM ==================================================================
+REM TSTM saytini mahalliy ishga tushirish.
+REM Bu faylni ikki marta bosing. ishga-tushur.ps1 yonida turishi shart.
+REM
+REM XAMPP Control Panel, Apache va htdocs junction'i endi KERAK EMAS —
+REM sayt shu papkadan to'g'ridan-to'g'ri uzatiladi.
+REM
+REM To'xtatish: shu oynada Ctrl+C yoki oynani yopish.
+REM ==================================================================
 chcp 65001 >nul
-title TSTM Saytini Ishga Tushirish
-echo ======================================================
-echo    TSTM Saytini XAMPP orqali ishga tushirish
-echo ======================================================
+title TSTM - mahalliy server
+cd /d "%~dp0"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0ishga-tushur.ps1" %*
 echo.
-
-REM XAMPP MySQL va Apache xizmatlarini tekshirish / ishga tushirish
-if exist "C:\xampp\mysql_start.bat" (
-    echo [1/3] MySQL ishga tushirilmoqda...
-    start /min "" "C:\xampp\mysql_start.bat"
-)
-
-if exist "C:\xampp\apache_start.bat" (
-    echo [2/3] Apache ishga tushirilmoqda...
-    start /min "" "C:\xampp\apache_start.bat"
-)
-
-timeout /t 2 /nobreak >nul
-
-echo [3/3] Brauzerda sayt ochilmoqda: http://localhost/sayt/
-start "" "http://localhost/sayt/"
-
-echo.
-echo Sayt muvaffaqiyatli ochildi!
-echo Boshqaruv paneli: http://localhost/sayt/admin.html
-echo.
-timeout /t 3 >nul
-exit
+echo Yopish uchun istalgan tugmani bosing...
+pause >nul

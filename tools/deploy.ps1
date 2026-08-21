@@ -48,6 +48,7 @@ $skipFiles = @(
   'login_attempts.json',     # brute-force holati
   'views.json',              # ko'rishlar hisoblagichi
   'cache_public.json',       # avtomatik yasaladi
+  'router.php',              # faqat mahalliy `php -S` uchun; hostingda .htaccess ishlaydi
   'eslint.config.mjs', '.stylelintrc.json',  # ishlab chiqish vositalari
   '.gitignore'
 )

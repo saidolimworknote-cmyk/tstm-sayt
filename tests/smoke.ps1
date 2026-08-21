@@ -5,7 +5,7 @@
 #
 # Ishlatish:
 #   powershell -ExecutionPolicy Bypass -File tests\smoke.ps1
-#   powershell -ExecutionPolicy Bypass -File tests\smoke.ps1 -Base http://localhost/tstm-sayt
+#   powershell -ExecutionPolicy Bypass -File tests\smoke.ps1 -Base http://localhost:8080
 #
 # Chiqish kodi: 0 = hammasi o'tdi, 1 = kamida bitta test yiqildi (CI uchun).
 #
@@ -13,7 +13,10 @@
 # admin paroli talab qilinmaydi, shuning uchun xavfsiz va istalgan vaqtda
 # ishga tushirsa bo'ladi. Admin CRUD testlari alohida (qo'lda parol bilan).
 # ==================================================================
-param([string]$Base = 'http://localhost/tstm-sayt')
+# Standart manzil - `tools\ISHGA_TUSHIRISH.bat` ochadigan port.
+# (2026-08-21 gacha `http://localhost/tstm-sayt` edi: sayt Apache va htdocs
+#  orqali ochilardi. Endi PHP'ning o'z serveri loyiha papkasidan uzatadi.)
+param([string]$Base = 'http://localhost:8000')
 
 $pass = 0; $fail = 0; $failed = @()
 function Check($name, $cond, $detail='') {

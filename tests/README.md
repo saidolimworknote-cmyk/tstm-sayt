@@ -9,11 +9,11 @@ Ommaviy (autentifikatsiyasiz) yuzani tekshiradi — parol talab qilmaydi, shunin
 uchun istalgan vaqtda xavfsiz ishga tushirsa bo'ladi.
 
 ```powershell
-# XAMPP ishlab turishi kerak (Apache + MySQL)
+# Avval saytni ishga tushiring: tools\ISHGA_TUSHIRISH.bat
 powershell -ExecutionPolicy Bypass -File tests\smoke.ps1
 
-# boshqa manzil bilan:
-powershell -ExecutionPolicy Bypass -File tests\smoke.ps1 -Base http://localhost/tstm-sayt
+# boshqa manzil bilan (masalan 8000 band bo'lib, sayt 8001 da ochilgan bo'lsa):
+powershell -ExecutionPolicy Bypass -File tests\smoke.ps1 -Base http://localhost:8001
 ```
 
 **Nimani tekshiradi (43 ta test):**

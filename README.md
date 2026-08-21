@@ -1,6 +1,6 @@
 # TSTM — Tashqi siyosiy tadqiqotlar va xalqaro tashabbuslar markazi sayti
 
-Sayt + boshqaruv paneli (admin). XAMPP'da ishlash uchun PHP backend bilan.
+Sayt + boshqaruv paneli (admin). PHP + MySQL backend bilan.
 
 ## 🗂️ Loyiha tuzilishi
 
@@ -28,6 +28,7 @@ sayt/
 ├── backups/              SQL zaxiralar (git'ga TUSHMAYDI)
 │
 ├── .htaccess             butun xavfsizlik qatlami (CSP, to'siqlar, gzip, kesh)
+├── router.php            MAHALLIY server uchun .htaccess ning ayni qoidalari
 ├── sw.js                 Service Worker
 ├── robots.txt  sitemap.xml
 └── README.md             shu fayl
@@ -45,6 +46,7 @@ Bular papkaga ko'chirilsa sayt buziladi — ko'chirmang:
 | `api.php`, `db.php`, `seed.php`, `config.php` | Butun frontend `api.php?action=...` ga murojaat qiladi |
 | `robots.txt`, `sitemap.xml` | Standart bo'yicha faqat ildizda o'qiladi |
 | `.htaccess` | Apache uni papka bo'yicha qo'llaydi |
+| `router.php` | `php -S` uni sayt ildizidan chaqiradi (faqat mahalliy; hostingga ketmaydi) |
 | `uploads/` | Yuklangan fayl yo'llari BAZADA `uploads/...` ko'rinishida saqlangan |
 
 ### Qayerni o'zgartirsam nima buziladi
@@ -58,6 +60,7 @@ Bular papkaga ko'chirilsa sayt buziladi — ko'chirmang:
 | `css/site.css` | Faqat ichki sahifalar. Bosh sahifa — `css/home.css` (mustaqil nusxa) |
 | `db.php` → `$SCHEMA` | Yangi ustun qo'shsangiz `CREATE TABLE` va `migrate()` ni ham yangilang |
 | `tools/` yoki `docs/` | Bu papkalar serverga CHIQMAYDI (`deploy.ps1` ularni chetlab o'tadi) |
+| `.htaccess` (taqiq yoki sarlavha) | `router.php` ni HAM yangilang — u mahalliy serverda ayni qoidalarni bajaradi, aks holda himoya faqat hostingda qoladi |
 
 ## 📦 Tarkibi
 - **index.html** — saytning bosh sahifasi (2026-08-10 gacha `Bosh sahifa - Hi-Fi.html`
@@ -109,33 +112,60 @@ Bular papkaga ko'chirilsa sayt buziladi — ko'chirmang:
 
 ---
 
-## 🚀 XAMPP'da ishga tushirish
+## 🚀 Mahalliy ishga tushirish
 
-1. **XAMPP**'ni o'rnating, **Apache** va **MySQL**'ni ishga tushiring (Start).
-2. Loyiha papkasini XAMPP'ning **`htdocs`** papkasiga qo'ying. Ikki yo'l bor:
-   - **ko'chirish:** `C:\xampp\htdocs\sayt`;
-   - **junction (tavsiya etiladi):** papka ish stolida qolib, htdocs'da unga
-     ishorat turadi — bitta nusxa bo'lgani uchun tahrir darhol saytda ko'rinadi:
-     ```
-     mklink /J C:\xampp\htdocs\sayt C:\Users\<siz>\Desktop\sayt
-     ```
-     (`mklink /J` uchun administrator huquqi shart emas.)
-3. *(Ixtiyoriy)* `config.sample.php` ni `config.php` deb nusxalang. Mahalliy
-   XAMPP uchun shart emas — `config.php` bo'lmasa standart qiymatlar
-   (`root`, parolsiz) ishlatiladi.
-4. Brauzerda oching:
-   - **Sayt:** `http://localhost/sayt/`
-   - **Admin panel:** `http://localhost/sayt/admin.html`
+**`tools\ISHGA_TUSHIRISH.bat` ni ikki marta bosing.** Tamom.
 
-> Manzilning oxirgi qismi — htdocs ichidagi **papka nomi**. Yuqoridagi misolda u
-> `sayt`; boshqacha nomlasangiz manzil ham shunga qarab o'zgaradi.
-> `tools\ISHGA_TUSHIRISH.bat` `/sayt/` ni ochadi.
+Skript o'zi: `php.exe` ni topadi, MySQL ishlayotganini tekshiradi (kerak bo'lsa
+xizmatni yoqadi), serverni ko'taradi va brauzerni ochadi.
+
+- **Sayt:** `http://localhost:8000/`
+- **Admin panel:** `http://localhost:8000/admin.html`
+- **To'xtatish:** o'sha oynada `Ctrl+C` yoki oynani yopish
+
+Qo'lda ishga tushirish ham mumkin:
+```
+php -S localhost:8000 router.php
+```
+
+### XAMPP Control Panel, Apache va htdocs endi KERAK EMAS
+
+Ilgari sayt `htdocs\sayt` junction'i orqali Apache'da ochilardi va har safar
+XAMPP Control Panel'dan Apache'ni qo'lda yoqish kerak edi. **Bu bekor qilindi**
+(2026-08-21) — sayt endi loyiha papkasidan to'g'ridan-to'g'ri uzatiladi:
+
+| Ilgari | Endi |
+|---|---|
+| XAMPP Control Panel → Apache Start | kerak emas |
+| `htdocs\sayt` junction | kerak emas |
+| `http://localhost/sayt/` | `http://localhost:8000/` |
+| himoya: `.htaccess` | himoya: `router.php` (ayni qoidalar) |
+
+XAMPP'dan faqat ikki narsa qoladi va **ikkalasi ham o'zi ishlaydi**:
+- `C:\xampp\php\php.exe` — sayt PHP'da yozilgan, usiz ishlamaydi
+  (istasangiz [alohida PHP](https://windows.php.net/download) o'rnatib
+  PATH ga qo'ying — skript avval PATH dan qidiradi va XAMPP butunlay chiqadi);
+- **MySQL** — Windows xizmati sifatida `Automatic` rejimda, kompyuter
+  yoqilganda o'zi ko'tariladi.
+
+> **`router.php` nima?** Hostingda himoyani `.htaccess` bajaradi, lekin PHP'ning
+> o'z serveri `.htaccess` ni **umuman o'qimaydi** — usiz `config.php` (baza
+> paroli), `backups\*.sql` va `db.php` brauzerdan ochilib ketardi. `router.php`
+> aynan o'sha qoidalarni takrorlaydi: taqiqlar, CSP va boshqa xavfsizlik
+> sarlavhalari. **`.htaccess` o'zgarsa — `router.php` ni ham yangilang.**
+> Hostingga u ketmaydi (`deploy.ps1` chetlab o'tadi).
+
+> **Kesh:** mahalliy serverda css/js/rasm **keshlanmaydi** (hostingda esa bir
+> yilga keshlanadi). Bu ataylab: tahrir qilingan fayl brauzerda darhol ko'rinadi.
+
+> **Port band bo'lsa** skript o'zi keyingisiga o'tadi (8001, 8002…). Boshqa
+> portni ochiq belgilash: `tools\ishga-tushur.ps1 -Port 8080`.
 
 ---
 
 ## 🔐 Admin panelga kirish
 
-**Manzil:** `http://localhost/sayt/admin.html` · **Login:** `markaz_admini`
+**Manzil:** `http://localhost:8000/admin.html` · **Login:** `markaz_admini`
 
 Parol **kodda saqlanmaydi** va bu hujjatda ham yozilmaydi — u serverda faqat
 bcrypt xesh holida (`auth` jadvali) turadi. Parolni saytga mas'ul shaxsdan
@@ -152,7 +182,7 @@ paroli». Kamida 12 belgi.
 
 ## 💾 Ma'lumotlar qanday saqlanadi?
 
-- PHP + MySQL (XAMPP) ishlaganda — barcha kontent **`tstm` MySQL bazasi**ga yoziladi.
+- PHP + MySQL ishlaganda — barcha kontent **`tstm` MySQL bazasi**ga yoziladi.
   Admin'da qilingan har qanday o'zgarish **barcha tashrifchilarga** ko'rinadi.
 - Baza va jadvallar **birinchi ochilishda avtomatik yaratiladi** (`db.php`) va
   `seed.php`dagi standart kontent bilan to'ldiriladi. Parol xeshi **bo'sh** qoladi —
@@ -162,9 +192,9 @@ paroli». Kamida 12 belgi.
   > 8-iyulda muzlab qolib, eskirgan kontentni va **almashtirilgan parolni**
   > tiklab yuborishi mumkin edi. Ma'lumotni tiklashning yagona to'g'ri yo'li —
   > `restore.ps1` (SQL zaxirasidan). Eski fayl `backups\legacy\` da arxivda.
-- Ma'lumot bazasidan tashqari **hech qanday sozlash shart emas** — XAMPP'da MySQL
-  ishlab tursa kifoya. Baza login/parolini `config.php` dan o'zgartiring
-  (namunasi: `config.sample.php`).
+- Ma'lumot bazasidan tashqari **hech qanday sozlash shart emas** — MySQL
+  ishlab tursa kifoya (u Windows xizmati sifatida o'zi ko'tariladi). Baza
+  login/parolini `config.php` dan o'zgartiring (namunasi: `config.sample.php`).
 - Agar fayllar PHP'siz (`file://`) ochilsa — ma'lumotlar brauzerning
   o'zida (localStorage) saqlanadi (faqat sinov uchun).
 
