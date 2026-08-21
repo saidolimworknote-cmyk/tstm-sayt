@@ -16,8 +16,11 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)   # tools dan ildizga
-$mysql = 'C:\xampp\mysql\bin\mysql.exe'
-$dbHost = '127.0.0.1'; $dbPort = '3306'; $dbName = 'tstm'; $dbUser = 'root'; $dbPass = ''
+# Loyihaning O'Z MariaDB klienti (runtime\mysql). 2026-08-21 gacha bu yerda
+# 'C:\xampp\mysql\bin\mysql.exe' turardi.
+$mysql = Join-Path $root 'runtime\mysql\bin\mariadb.exe'
+if (-not (Test-Path $mysql)) { $mysql = 'mariadb.exe' }   # PATH dan
+$dbHost = '127.0.0.1'; $dbPort = '3307'; $dbName = 'tstm'; $dbUser = 'tstm'; $dbPass = ''
 
 $cfg = Join-Path $root 'config.php'
 if (Test-Path $cfg) {
@@ -71,7 +74,10 @@ Write-Host "  [1/2] Baza tiklandi -> $dbName"
 # o'qiydi). Faqat bittasiga tiklansa sayt hamon singan rasmlarni ko'rsatadi.
 $zipFile = Join-Path $From 'uploads.zip'
 if ((Test-Path $zipFile) -and $Db -eq '') {
-  $targets = @( (Join-Path $root 'uploads'), 'C:\xampp\htdocs\tstm-sayt\uploads' ) | Select-Object -Unique
+  # Yuklamalar uchun YAGONA joy - loyiha papkasi. Ilgari ikkinchi manzil
+  # 'C:\xampp\htdocs\tstm-sayt\uploads' ham bor edi (Apache o'sha yerdan
+  # uzatardi); 2026-08-21 dan sayt loyiha papkasidan ishlaydi.
+  $targets = @( (Join-Path $root 'uploads') ) | Select-Object -Unique
   foreach ($t in $targets) {
     try {
       New-Item -ItemType Directory -Force $t -ErrorAction Stop | Out-Null

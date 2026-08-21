@@ -125,6 +125,26 @@ function body_json() {
 }
 function client_ip() { return isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'unknown'; }
 
+/* -------------------- Yuklanadigan fayl nomi --------------------
+   Nom MAZMUNLI bo'lishi kerak: `uploads\` papkasini ochgan odam qaysi
+   rasm qayerga tegishli ekanini fayl nomidan ko'rishi shart. Ilgari
+   hamma fayl `img_20260727_083521_c98afb9b.jpg` ko'rinishida edi va
+   ularni bir-biridan ajratib bo'lmasdi.
+
+   $hint — admin panel yuboradigan kontekst ("ekspert-bobur-rahimov",
+   "yangilik", "banner"). U FOYDALANUVCHI MA'LUMOTI, shuning uchun
+   qat'iy oq ro'yxat bilan tozalanadi: faqat kichik lotin harflari,
+   raqam va bitta tire. Ya'ni `../`, bo'sh joy, nuqta va boshqa hech
+   narsa fayl nomiga o'ta olmaydi.
+
+   Tasodifiy qism SAQLANADI: bir xil nomli ikki fayl bir-birini
+   yozib yubormasligi uchun. Sana esa tartiblashda yordam beradi.  */
+function upload_nomi($hint, $standart, $bin, $ext) {
+  $slug = slugla($hint);
+  if ($slug === '') $slug = $standart;
+  return $slug . '_' . date('Ymd_His') . '_' . substr(md5($bin . random_bytes(8)), 0, 8) . '.' . $ext;
+}
+
 function require_auth() {
   if (empty($_SESSION['tstm_admin'])) jexit(['ok' => false, 'error' => 'unauthorized'], 401);
 }
@@ -474,7 +494,11 @@ switch ($action) {
     if ($info === false || !isset($allowed[$ext]) || $info['mime'] !== $allowed[$ext]) jexit(['ok' => false, 'error' => 'not a valid image'], 400);
     $dir = __DIR__ . '/uploads';
     if (!is_dir($dir)) @mkdir($dir, 0775, true);
-    $name = 'img_' . date('Ymd_His') . '_' . substr(md5($bin . mt_rand()), 0, 8) . '.' . $ext;
+    // Fayl nomi MAZMUNLI bo'lsin: admin panel qaysi bo'limdan yuklanayotganini
+    // `hint` bilan yuboradi (ekspert, yangilik, nashr, banner, logo...).
+    // Ilgari hamma fayl `img_...` deb atalardi va `uploads\` ichida qaysi rasm
+    // qayerga tegishli ekanini bilib bo'lmasdi.
+    $name = upload_nomi(isset($b['hint']) ? $b['hint'] : '', 'img', $bin, $ext);
     if (file_put_contents($dir . '/' . $name, $bin, LOCK_EX) === false) jexit(['ok' => false, 'error' => 'write'], 500);
     // Audit: fayl serverга yozilgandan keyin, jexit'dan OLDIN (jexit darhol to'xtatadi).
     audit($pdo, 'upload', 'image', $name);
@@ -501,7 +525,7 @@ switch ($action) {
     else { jexit(['ok' => false, 'error' => 'not a valid pdf or word file'], 400); }
     $dir = __DIR__ . '/uploads';
     if (!is_dir($dir)) @mkdir($dir, 0775, true);
-    $name = 'doc_' . date('Ymd_His') . '_' . substr(md5($bin . mt_rand()), 0, 8) . '.' . $ext;
+    $name = upload_nomi(isset($b['hint']) ? $b['hint'] : '', 'doc', $bin, $ext);
     if (file_put_contents($dir . '/' . $name, $bin, LOCK_EX) === false) jexit(['ok' => false, 'error' => 'write'], 500);
     audit($pdo, 'upload', 'document', $name);
     jexit(['ok' => true, 'path' => 'uploads/' . $name]);

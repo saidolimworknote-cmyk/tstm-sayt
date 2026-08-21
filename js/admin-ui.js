@@ -1220,6 +1220,21 @@
       btn.innerHTML = pendingUploads > 0 ? (ic('upload') + ' Fayl yuklanmoqda…') : (ic('save') + ' Saqlash');
     }
   }
+  /* Yuklanadigan fayl nomi uchun kontekst.
+     Serverga shu matn yuboriladi va u tozalanib FAYL NOMIGA aylanadi:
+     "Parlament diplomatiyasi" -> parlament-diplomatiyasi_20260821_...jpg
+     Ilgari hamma fayl `img_...` deb atalardi va `uploads\` papkasida
+     qaysi rasm qayerga tegishli ekanini aniqlab bo'lmasdi.
+     Tahrirlanayotgan yozuvning sarlavhasi (yoki ismi) eng aniq belgi;
+     u bo'sh bo'lsa maydon nomiga (cover/photo/logo) qaytamiz. */
+  function nomIpuchi(field) {
+    for (const k of ['title', 'name']) {
+      const el = $(`#entForm [data-k="${k}"] [data-in]`);
+      if (el && el.value && el.value.trim()) return el.value.trim();
+    }
+    return (field && field.dataset && field.dataset.k) ? field.dataset.k : 'img';
+  }
+
   /* Rasm to'plami maydonining mantiqi: yuklash, o'chirish, sudrab tartiblash.
      Tartib MUHIM — slayderda rasmlar shu ketma-ketlikda ko'rsatiladi. */
   function wireImages(field) {
@@ -1271,11 +1286,12 @@
           Store.uploadImage(url, (saved) => {
             uploadBusy(-1);
             if (!saved) { toast('Rasm yuklanmadi', 1); return; }
+            // (xato holati yuqorida ushlandi - bazaga hech narsa yozilmaydi)
             const wrap = document.createElement('div');
             wrap.innerHTML = imgTile({ url: saved }, $$('.imgs-tile', grid).length);
             const tile = wrap.firstElementChild;
             grid.appendChild(tile); wireTile(tile); renumber();
-          });
+          }, nomIpuchi(field));
         });
       });
     };
@@ -1318,12 +1334,20 @@
       if (prev.tagName !== 'IMG') { prev.innerHTML = ic('upload'); prev.style.opacity = '.5'; }
       resizeImage(f, 1400, (url) => {
         Store.uploadImage(url, (saved) => {
+          uploadBusy(-1);
+          // Yuklanmasa - eski qiymat SAQLANADI. Ilgari bu yerda base64
+          // dataURL yozilardi (bazani shishirardi), keyin bo'sh qiymat
+          // yozib mavjud rasmni ham o'chirib yuborish xavfi bor edi.
+          if (!saved) {
+            toast('Rasm yuklanmadi', 1);
+            const p = $('.prev', field); if (p) p.style.opacity = '';
+            return;
+          }
           valEl.value = saved;
           let prev2 = $('.prev', field);
           if (prev2.tagName === 'IMG') { prev2.src = saved; prev2.style.opacity = ''; }
           else { prev2.outerHTML = `<img class="prev" src="${safeUrl(saved)}">`; }
-          uploadBusy(-1);
-        });
+        }, nomIpuchi(field));
       });
     };
   }
@@ -1957,11 +1981,19 @@
       const cur = Store.find('media', al.id); if (!cur) return;
       if (!Array.isArray(cur.photos)) cur.photos = [];
       let done = 0;
+      let xato = 0;
       files.forEach(f => resizeImage(f, 1600, (url) => Store.uploadImage(url, (saved) => {
-        cur.photos.push({ url: saved, title: Store.ml('', '', '') });
+        // Yuklanmagan rasm albomga QO'SHILMAYDI - aks holda bo'sh (yoki
+        // base64) havola bazaga tushib, albom buzilgan ko'rinardi.
+        if (saved) cur.photos.push({ url: saved, title: Store.ml('', '', '') });
+        else xato++;
         done++;
-        if (done === files.length) { Store.upsert('media', cur); render(); toast(files.length + ' ta rasm qo\'shildi'); }
-      })));
+        if (done === files.length) {
+          Store.upsert('media', cur); render();
+          if (xato) toast(xato + ' ta rasm yuklanmadi', 1);
+          else toast(files.length + ' ta rasm qo\'shildi');
+        }
+      }, (al.title && (al.title.uz || al.title.ru)) || 'albom')));
     };
     $$('.media-item[data-idx]').forEach(el => {
       const idx = +el.dataset.idx;
@@ -2098,7 +2130,7 @@
       // dastlabki fon rasmi (inline style o'rniga .style — CSP)
       if (banners[k]) prev.style.backgroundImage = `url(${banners[k]})`;
       $('[data-bpick]', cell).onclick = () => inp.click();
-      inp.onchange = (e) => { const f = e.target.files[0]; if (!f) return; resizeImage(f, 1800, (url) => { Store.uploadImage(url, (saved) => { banners[k] = saved; prev.style.backgroundImage = `url(${saved})`; prev.innerHTML = ''; }); }); };
+      inp.onchange = (e) => { const f = e.target.files[0]; if (!f) return; resizeImage(f, 1800, (url) => { Store.uploadImage(url, (saved) => { if (!saved) { toast('Banner yuklanmadi', 1); return; } banners[k] = saved; prev.style.backgroundImage = `url(${saved})`; prev.innerHTML = ''; }, 'banner-' + k); }); };
       const clr = $('[data-bclear]', cell); if (clr) clr.onclick = () => { delete banners[k]; prev.style.backgroundImage = ''; prev.innerHTML = ic('image'); clr.remove(); };
     });
 
@@ -2145,7 +2177,7 @@
     $$('#logoGrid .uploader').forEach(cell => {
       const l = cell.dataset.lk, inp = $('[data-linput]', cell), prev = $('.prev', cell);
       $('[data-lpick]', cell).onclick = () => inp.click();
-      inp.onchange = (e) => { const f = e.target.files[0]; if (!f) return; resizeImage(f, 700, (url) => { Store.uploadImage(url, (saved) => { logos[l] = saved; prev.src = saved; }); }); };
+      inp.onchange = (e) => { const f = e.target.files[0]; if (!f) return; resizeImage(f, 700, (url) => { Store.uploadImage(url, (saved) => { if (!saved) { toast('Logotip yuklanmadi', 1); return; } logos[l] = saved; prev.src = saved; }, 'logo-' + l); }); };
       const clr = $('[data-lclear]', cell); if (clr) clr.onclick = () => { logos[l] = ''; prev.src = DEF_LOGO[l]; clr.remove(); };
     });
     // theme live preview

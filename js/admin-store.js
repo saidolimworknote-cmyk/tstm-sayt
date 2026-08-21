@@ -467,8 +467,19 @@
   // ---------- Rasm yuklash (server fayli) ----------
   // dataURL beriladi; PHP bor bo'lsa serverga fayl qilib yozadi va yo'l qaytaradi.
   // PHP yo'q bo'lsa dataURL'ning o'zini qaytaradi (localStorage rejimi).
-  function uploadImage(dataURL, cb) {
-    if (!dataURL) { cb(''); return; }
+  //
+  // hint — fayl nomi MAZMUNLI bo'lishi uchun kontekst ("ekspert", "banner",
+  //   "yangilik" va h.k.). Server uni tozalab fayl nomiga qo'shadi, ya'ni
+  //   `uploads\` ichida qaysi rasm qayerga tegishli ekani ko'rinib turadi.
+  //
+  // MUHIM (2026-08-21 da tuzatilgan): ilgari yuklash MUVAFFAQIYATSIZ bo'lsa
+  //   `cb(dataURL)` chaqirilardi — ya'ni butun rasm base64 holida BAZAGA
+  //   yozilib ketardi. Natijada baza shishardi, rasm `uploads\` da bo'lmagani
+  //   uchun zaxira va ko'chirishda yo'qolardi. Endi xatoda BO'SH qaytadi va
+  //   chaqiruvchi foydalanuvchiga xabar beradi (uploadPdf shunday ishlagan).
+  function uploadImage(dataURL, cb, hint) {
+    if (!dataURL) { cb('', 'no data'); return; }
+    // localStorage rejimi: server yo'q, dataURL'ning o'zi saqlanadi.
     if (!API_OK || dataURL.indexOf('data:') !== 0) { cb(dataURL); return; }
     try {
       const x = new XMLHttpRequest();
@@ -479,12 +490,13 @@
         if (x.readyState === 4) {
           try {
             const r = JSON.parse(x.responseText || '{}');
-            cb(r && r.ok && r.path ? r.path : dataURL);
-          } catch { cb(dataURL); }
+            if (r && r.ok && r.path) cb(r.path, null);
+            else cb('', (r && r.error) || 'upload_failed');
+          } catch { cb('', 'upload_failed'); }
         }
       };
-      x.send(JSON.stringify({ data: dataURL }));
-    } catch { cb(dataURL); }
+      x.send(JSON.stringify({ data: dataURL, hint: hint || '' }));
+    } catch { cb('', 'upload_failed'); }
   }
 
   // ---------- Hujjat yuklash: PDF yoki Word (server fayli) ----------

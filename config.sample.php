@@ -2,25 +2,43 @@
 /* ============================================================
    TSTM — mahalliy sozlamalar NAMUNASI
    ------------------------------------------------------------
-   Bu faylni `config.php` nomi bilan NUSXALANG va o'z qiymatlaringizni
-   yozing. `config.php` git'ga TUSHMAYDI (.gitignore) va veb orqali
-   ochilmaydi (.htaccess) — baza paroli shu tarzda koddan ajratilgan.
+   ODATDA BU FAYL SIZGA KERAK EMAS.
+
+   `tools\ISHGA_TUSHIRISH.bat` birinchi ishga tushirishda `config.php`
+   ni O'ZI yaratadi va baza parolini tasodifiy generatsiya qiladi.
+   Ya'ni har kompyuterda o'z paroli bo'ladi va hech qanday parol
+   repoga tushmaydi.
+
+   Bu namuna ikki holat uchun:
+     1) sozlamalarni QO'LDA o'zgartirmoqchi bo'lsangiz;
+     2) HOSTINGGA chiqarganda — u yerda baza boshqacha bo'ladi.
+
+   `config.php` git'ga TUSHMAYDI (.gitignore) va veb orqali
+   ochilmaydi (.htaccess + router.php) — baza paroli shu tarzda
+   koddan ajratilgan.
 
        cp config.sample.php config.php
-
-   config.php bo'lmasa, quyidagi standart XAMPP qiymatlari ishlatiladi,
-   ya'ni mahalliy ishlab chiqish hech narsa sozlamasdan ishlayveradi.
    ============================================================ */
 
 return [
   /* -------------------- Ma'lumotlar bazasi -------------------- */
   'db_host' => '127.0.0.1',
-  'db_port' => '3306',
+
+  /* Port 3307 — loyihaning O'Z MariaDB'si (`runtime\mysql`) shu portda
+     ishlaydi. ATAYLAB 3306 EMAS: kompyuterda boshqa MySQL o'rnatilgan
+     bo'lsa (yoki XAMPP qolgan bo'lsa) ular bir-biriga xalaqit bermaydi.
+     Hostingda odatda 3306 bo'ladi. */
+  'db_port' => '3307',
+
   'db_name' => 'tstm',
-  'db_user' => 'root',
-  // XAMPP'da odatda bo'sh. HOSTINGDA albatta o'zingizning kuchli
-  // parolingizni qo'ying va `root` emas, faqat shu bazaga huquqi bor
-  // alohida foydalanuvchi yarating.
+
+  /* `root` EMAS: faqat `tstm` bazasiga huquqi bor alohida foydalanuvchi.
+     Shu tufayli sayt buzilgan taqdirda ham hujumchi boshqa bazalarga
+     yoki server sozlamalariga tega olmaydi. */
+  'db_user' => 'tstm',
+
+  /* Parol. Mahalliyda uni ishga tushiruvchi tasodifiy yaratadi.
+     HOSTINGDA albatta o'zingizning kuchli parolingizni qo'ying. */
   'db_pass' => '',
 
   /* -------------------- Admin (faqat BIRINCHI ishga tushirish) --------------------
@@ -34,6 +52,10 @@ return [
 
      Birinchi o'rnatishda shu yerga vaqtinchalik kuchli parol yozing, tizimga
      kiring, admin panelidan parolni almashtiring va bu qatorni bo'shating.
+
+     ESLATMA: `data\baza.sql` dan tiklangan saytda parol ALLAQACHON bor
+     (u `auth` jadvalida, eksportga tushmaydi) — demak yangi kompyuterda
+     ham eski parolingiz bilan kirasiz.
   ------------------------------------------------------------------------------ */
   'admin_user' => 'markaz_admini',
   'admin_bootstrap_password' => '',

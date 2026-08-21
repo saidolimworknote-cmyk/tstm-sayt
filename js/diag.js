@@ -45,7 +45,7 @@
       hint: 'Inline <script> yoki tashqi manba ishlatilgan. Kodni alohida .js faylga chiqaring — loyihada script-src \'self\'.' },
     { re: /failed to fetch|networkerror|load failed/i,
       cause: 'Serverga ulanib bo\'lmadi.',
-      hint: 'Apache ishlayaptimi? XAMPP Control Panel → Apache → Start. Manzil to\'g\'rimi?' },
+      hint: 'Sayt serveri ishlayaptimi? tools\\ISHGA_TUSHIRISH.bat ni bosing. Manzil to\'g\'rimi?' },
     { re: /quota|storage/i,
       cause: 'Brauzer xotirasi (localStorage) to\'lgan.',
       hint: 'Brauzer sozlamalaridan shu sayt ma\'lumotlarini tozalang.' },

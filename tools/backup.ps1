@@ -22,10 +22,14 @@ param(
 $ErrorActionPreference = 'Stop'
 function Say($m, $c = 'Gray') { if (-not $Quiet) { Write-Host $m -ForegroundColor $c } }
 
-# --- Sozlamalar (config.php dan o'qiladi, bo'lmasa XAMPP standarti) ---
+# --- Sozlamalar (config.php dan o'qiladi) ---
 $root   = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)   # tools dan ildizga
-$mysqldump = 'C:\xampp\mysql\bin\mysqldump.exe'
-$dbHost = '127.0.0.1'; $dbPort = '3306'; $dbName = 'tstm'; $dbUser = 'root'; $dbPass = ''
+# Loyihaning O'Z MariaDB'si (runtime\mysql). 2026-08-21 gacha bu yerda
+# 'C:\xampp\mysql\bin\mysqldump.exe' turardi - XAMPP olib tashlanganda
+# zaxira olish jimgina ishlamay qolardi.
+$mysqldump = Join-Path $root 'runtime\mysql\bin\mariadb-dump.exe'
+if (-not (Test-Path $mysqldump)) { $mysqldump = 'mariadb-dump.exe' }   # PATH dan
+$dbHost = '127.0.0.1'; $dbPort = '3307'; $dbName = 'tstm'; $dbUser = 'tstm'; $dbPass = ''
 
 $cfg = Join-Path $root 'config.php'
 if (Test-Path $cfg) {
@@ -52,10 +56,15 @@ if (-not (Test-Path $sqlFile) -or (Get-Item $sqlFile).Length -lt 100) { throw "B
 $sqlKB = [math]::Round((Get-Item $sqlFile).Length/1KB, 1)
 Say "  [1/4] Baza dump: $sqlKB KB" 'Green'
 
-# --- 2. uploads/ arxivi (loyiha + htdocs birlashtirilgan) ---
+# --- 2. uploads/ arxivi ---
+# Ilgari bu yerda IKKI manba birlashtirilardi: loyiha va
+# 'C:\xampp\htdocs\tstm-sayt\uploads'. Sabab - sayt Apache orqali htdocs
+# dan uzatilar va admin yuklagan fayl FAQAT o'sha yerda paydo bo'lardi.
+# 2026-08-21 dan sayt to'g'ridan-to'g'ri loyiha papkasidan ishlaydi, ya'ni
+# yuklamalar uchun YAGONA joy bor va ikkinchi manba keraksiz (o'sha yo'l
+# allaqachon mavjud emas ham edi).
 $sources = @(
-  (Join-Path $root 'uploads'),
-  'C:\xampp\htdocs\tstm-sayt\uploads'
+  (Join-Path $root 'uploads')
 ) | Where-Object { Test-Path $_ } | Select-Object -Unique
 
 $zipFile = Join-Path $dir 'uploads.zip'

@@ -70,6 +70,15 @@ if (preg_match('~[/\\\\]\.(idea|claude|git|vscode|env)([/\\\\]|$)~i', substr($fu
 // <FilesMatch "^\.(htaccess|htpasswd|git)">
 if (preg_match('~^\.(htaccess|htpasswd|git)~i', $nom)) javob(403, 'Yopiq');
 
+// `tools\` va `tests\` - ishlab chiqish vositalari. Hostingga umuman
+// ketmaydi (deploy.ps1 chetlab o'tadi), lekin mahalliy serverda loyiha
+// ildizidan uzatilardi. Ichida .php skriptlar bor (rasm-tekshir.php),
+// ular veb orqali ISHGA TUSHIB, baza tarkibini oshkor qilishi mumkin edi.
+// (Skriptlarning o'zida ham `PHP_SAPI !== 'cli'` himoyasi bor - ikki qatlam.)
+if (preg_match('~^[/\\\\](tools|tests|backups|data)([/\\\\]|$)~i', substr($full, strlen($root)))) {
+  javob(404, 'Topilmadi');
+}
+
 // <FilesMatch "^(db|seed|config|config\.sample)\.php$">
 // Baza qatlami va sozlamalar — ichida parol bor, hech qachon berilmaydi.
 // `router.php` .htaccess'da yo'q edi (u faqat shu yerda mavjud), lekin

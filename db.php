@@ -14,8 +14,9 @@
    ular git'ga tushmaydigan `config.php` faylidan o'qiladi. Namuna uchun:
    `config.sample.php` ni `config.php` deb nusxalang.
 
-   config.php bo'lmasa — quyidagi XAMPP standartlariga qaytamiz, ya'ni
-   mahalliy ishlab chiqish hech qanday sozlashsiz ishlayveradi.
+   config.php bo'lmasa — quyidagi standart qiymatlarga qaytamiz. Odatda bu
+   holat bo'lmaydi: `tools\ishga-tushur.ps1` birinchi ishga tushirishda
+   config.php ni tasodifiy parol bilan O'ZI yaratadi.
 -------------------------------------------------------------------------- */
 $CFG = [];
 if (is_file(__DIR__ . '/config.php')) {
@@ -25,11 +26,40 @@ if (is_file(__DIR__ . '/config.php')) {
 function cfg($k, $def = '') { global $CFG; return array_key_exists($k, $CFG) ? $CFG[$k] : $def; }
 
 $DB_HOST = cfg('db_host', '127.0.0.1');
-$DB_PORT = cfg('db_port', '3306');
+$DB_PORT = cfg('db_port', '3307');   // portativ MariaDB (runtime\mysql)
 $DB_NAME = cfg('db_name', 'tstm');
-$DB_USER = cfg('db_user', 'root');
+$DB_USER = cfg('db_user', 'tstm');    // root EMAS: faqat shu bazaga huquqi bor
 $DB_PASS = cfg('db_pass', '');
 $DB_CHARSET = 'utf8mb4';
+
+/* -------------------- Matndan fayl nomi (slug) --------------------
+   Ixtiyoriy matnni fayl nomiga yaroqli, o'qiladigan ko'rinishga keltiradi:
+   "Эксперты центра" -> "eksperty-tsentra".
+
+   NEGA SHU YERDA: ikki joy ishlatadi — `api.php` (yangi yuklanayotgan fayl
+   nomi) va `tools\rasm-tekshir.php` (mavjud fayllarni qayta nomlash). Bir xil
+   qoida ikkala joyda AYNAN bir xil bo'lishi shart, aks holda qayta nomlangan
+   fayl bilan yangi yuklangani boshqa uslubda atalib ketardi.
+
+   XAVFSIZLIK: matn foydalanuvchidan keladi, shuning uchun QAT'IY OQ RO'YXAT —
+   faqat [a-z0-9] va tire qoladi. `../`, bo'sh joy, nuqta, boshqaruv belgilari
+   va boshqa hech narsa fayl nomiga o'ta olmaydi.                            */
+function slugla($s, $maxUzunlik = 40) {
+  $s = (string)$s;
+  // O'zbek apostroflari (o' g') va turli tirnoq belgilari olib tashlanadi.
+  $s = strtr($s, ['\'' => '', '`' => '', "\u{2018}" => '', "\u{2019}" => '', "\u{2032}" => '']);
+  $s = mb_strtolower($s, 'UTF-8');
+  // Kirill -> lotin: kontent uch tilli, sarlavha ruscha bo'lishi mumkin.
+  $kir = ['а'=>'a','б'=>'b','в'=>'v','г'=>'g','д'=>'d','е'=>'e','ё'=>'yo','ж'=>'j','з'=>'z',
+          'и'=>'i','й'=>'y','к'=>'k','л'=>'l','м'=>'m','н'=>'n','о'=>'o','п'=>'p','р'=>'r',
+          'с'=>'s','т'=>'t','у'=>'u','ф'=>'f','х'=>'h','ц'=>'ts','ч'=>'ch','ш'=>'sh',
+          'щ'=>'sch','ъ'=>'','ы'=>'y','ь'=>'','э'=>'e','ю'=>'yu','я'=>'ya'];
+  $s = strtr($s, $kir);
+  $s = preg_replace('/[^a-z0-9]+/', '-', $s);
+  $s = trim($s, '-');
+  if (strlen($s) > $maxUzunlik) { $s = rtrim(substr($s, 0, $maxUzunlik), '-'); }
+  return $s;
+}
 
 /* -------------------- Collection -> jadval xaritasi --------------------
    type: 'str' | 'date' | 'int' | 'bool' | 'json'
@@ -419,10 +449,15 @@ function vapid_keys($pdo) {
   $r = $pdo->query("SELECT public_key, private_pem FROM push_vapid WHERE id=1")->fetch();
   if ($r) return ['public' => $r['public_key'], 'pem' => $r['private_pem']];
 
-  // XAMPP'da openssl.cnf yo'li sozlanmagan bo'lishi mumkin — mavjudini topamiz.
+  /* Windows'da openssl.cnf yo'li ko'pincha sozlanmagan bo'ladi va usiz
+     `openssl_pkey_new` jimgina yiqiladi. Mavjudini o'zimiz qidiramiz.
+     Tartib MUHIM: avval loyihaning O'Z runtime'i (u har kompyuterda bir
+     xil), keyin tizimdagi standart joylar. XAMPP yo'llari oxirida qoldi -
+     u endi talab qilinmaydi, lekin o'rnatilgan bo'lsa ishlatilaveradi. */
   $conf = null;
-  foreach (['C:/xampp/apache/conf/openssl.cnf', 'C:/xampp/php/extras/openssl/openssl.cnf',
-            '/etc/ssl/openssl.cnf', '/usr/lib/ssl/openssl.cnf'] as $c) {
+  foreach ([__DIR__ . '/runtime/php/extras/ssl/openssl.cnf',
+            '/etc/ssl/openssl.cnf', '/usr/lib/ssl/openssl.cnf',
+            'C:/xampp/apache/conf/openssl.cnf', 'C:/xampp/php/extras/openssl/openssl.cnf'] as $c) {
     if (@is_file($c)) { $conf = $c; break; }
   }
   $args = ['curve_name' => 'prime256v1', 'private_key_type' => OPENSSL_KEYTYPE_EC];

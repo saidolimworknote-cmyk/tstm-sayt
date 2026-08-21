@@ -28,6 +28,17 @@ views.json
 # Baza dump + uploads arxivi. Katta va maxfiy (parol xeshi bor) — repoga tushmaydi.
 backups/
 
+# --- Ishlayotgan baza va sessiyalar ---
+# data/mysql-data — MariaDB'ning JONLI fayllari. Har yozuvda o'zgaradi,
+#   ikkilik (binary) va shu kompyuterga bog'liq. Kontent bu yerdan EMAS,
+#   `data/baza.sql` dan ko'chadi (uni tools/kontent-eksport.ps1 yasaydi).
+data/mysql-data/
+# data/sessions — PHP sessiya fayllari (kirgan admin'ning tokeni).
+data/sessions/
+# ESLATMA: `data/baza.sql` ATAYLAB kuzatiladi — sayt kontenti o'sha
+# fayl orqali boshqa kompyuterga ko'chadi. Ichida parol/shaxsiy
+# ma'lumot YO'Q (qarang: tools/kontent-eksport.ps1).
+
 # --- OS artefaktlari ---
 Thumbs.db
 desktop.ini

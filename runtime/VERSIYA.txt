@@ -1,0 +1,13 @@
+﻿TSTM - portativ runtime
+=======================
+Bu papka 	ools\runtime-tayyorla.ps1 tomonidan RASMIY manbalardan
+yig'ilgan. Qo'lda tahrir qilmang - versiyani yangilash uchun skriptni
+qayta ishga tushiring.
+
+PHP       8.3.33   https://windows.php.net/downloads/releases/php-8.3.33-Win32-vs16-x64.zip
+MariaDB   11.4.12   https://archive.mariadb.org/mariadb-11.4.12/winx64-packages/mariadb-11.4.12-winx64.zip
+
+Yig'ilgan: 2026-08-21 10:10
+Hajmi:     52.7 MB
+
+Litsenziyalar: php\LITSENZIYA.txt (PHP License), mysql\LITSENZIYA.txt (GPLv2)
