@@ -15,7 +15,7 @@
 <link rel="stylesheet" href="css/fonts.css?v=1">
 <link rel="stylesheet" href="css/site.css?v=99">
 <link rel="stylesheet" href="css/subscribe.css?v=4">
-<link rel="stylesheet" href="css/page-hamkorlar.css?v=5">
+<link rel="stylesheet" href="css/page-hamkorlar.css?v=7">
 </head>
 <body>
 <main>
@@ -25,44 +25,26 @@
     <p class="lead" data-i18n="p_partners_lead">Xalqaro hamkor tashkilotlar, ilmiy muassasalar va diplomatik hamkorlar.</p>
   </div></div>
 
-  <!-- 1) Kirish matni + hamkorlik raqamlari (ro'yxatdan hisoblanadi) -->
+  <!-- Bo'lim sarlavhasi va hamkorlar to'ri.
+       2026-08-23: toifa filtri, qidiruv maydoni, toifa guruhlari, natija
+       hisoblagichi va "barcha hamkorlarni ko'rish" tugmasi OLIB TASHLANDI.
+       Endi sarlavhadan keyin darhol kartalar boshlanadi: hamma hamkor bitta
+       to'rda, alifbo tartibida. Ro'yxat uzaysa sahifa pastga davom etadi —
+       sahifalash ham, qisqartirish ham yo'q. -->
   <section class="block"><div class="wrap">
-    <div class="pt-intro rv">
-      <div>
-        <div class="kicker" data-i18n="partners_all_kicker">Hamkorlik tarmog'i</div>
-        <h2 data-i18n="partners_intro_title">Birgalikda ishlaymiz</h2>
-        <p data-i18n="partners_intro_text"></p>
-      </div>
-      <div class="pt-stats" id="ptStats"></div>
-    </div>
-  </div></section>
-
-  <!-- 2) Boshqaruv qatori (toifa filtri + qidiruv) va hamkorlar ro'yxati.
-       Qatorning har bir qismi FAQAT kerak bo'lganda ko'rinadi: toifa chiplari —
-       kamida ikkita toifa bo'lganda, qidiruv — hamkor ko'payganda. Ma'lumot
-       kam bo'lsa sahifa ishlatilmaydigan boshqaruv elementlari bilan
-       to'lib ketmaydi (matn va tugmalarni page-hamkorlar.js to'ldiradi). -->
-  <section class="block pt0"><div class="wrap">
-    <div class="pt-bar is-hidden" id="ptBar">
-      <div class="mfilter" id="ptFilter"></div>
-      <div class="pt-search is-hidden" id="ptSearchBox">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3" stroke-linecap="round"/></svg>
-        <input type="search" id="ptSearch" autocomplete="off">
-      </div>
-    </div>
-    <div class="pt-count is-hidden" id="ptCount" role="status" aria-live="polite"></div>
-    <div id="ptGroups"></div>
+    <h2 class="pt-head rv" data-i18n="partners_intro_title">Bizning xalqaro maydondagi hamkorlarimiz</h2>
+    <div class="pt-grid rv" id="ptGrid"></div>
   </div></section>
 </main>
 
 <script src="js/diag.js?v=2"></script>
-<script src="js/i18n.js?v=70"></script>
-<script src="js/admin-store.js?v=56"></script>
+<script src="js/i18n.js?v=74"></script>
+<script src="js/admin-store.js?v=57"></script>
 <script src="js/content-kinds.js?v=4"></script>
 <script src="js/site-common.js?v=90"></script>
 <script src="js/subscribe.js?v=2"></script>
-<script src="js/search.js?v=51"></script>
+<script src="js/search.js?v=53"></script>
 <script src="js/a11y.js?v=56"></script>
-<script src="js/page-hamkorlar.js?v=5"></script>
+<script src="js/page-hamkorlar.js?v=7"></script>
 </body>
 </html>

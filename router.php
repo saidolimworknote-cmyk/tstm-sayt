@@ -136,7 +136,7 @@ function sarlavhalar($nom) {
   header('X-Frame-Options: SAMEORIGIN');
   header('Referrer-Policy: strict-origin-when-cross-origin');
   header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
-  header("Content-Security-Policy: default-src 'self'; script-src 'self' https://translate.google.com https://translate.googleapis.com https://www.gstatic.com; style-src 'self' https://www.gstatic.com; font-src 'self' data:; img-src 'self' data: blob: https://img.youtube.com https://i.ytimg.com https://www.google.com https://www.gstatic.com https://translate.googleapis.com; frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://www.google.com; connect-src 'self' https://translate.googleapis.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'");
+  header("Content-Security-Policy: default-src 'self'; script-src 'self' https://translate.google.com https://translate.googleapis.com https://www.gstatic.com; style-src 'self' https://www.gstatic.com; font-src 'self' data:; img-src 'self' data: blob: https://www.google.com https://www.gstatic.com https://translate.googleapis.com; frame-src 'self' https://www.youtube-nocookie.com https://www.google.com; connect-src 'self' https://translate.googleapis.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'");
 
   // admin.html — qidiruv tizimlariga tushmasin.
   if (strcasecmp($nom, 'admin.html') === 0) {

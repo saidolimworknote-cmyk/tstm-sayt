@@ -492,6 +492,31 @@
     } catch { cb('', 'upload_failed'); }
   }
 
+  // ---------- Video muqovasi: YouTube'dan SERVER orqali olinadi ----------
+  // Brauzer YouTube'ga o'zi murojaat qilmaydi — so'rovni server bajaradi va
+  // rasmni `uploads/` ga saqlaydi. Shu sababli Media sahifasini ochgan
+  // tashrifchi YouTube'ga ko'rinmaydi (batafsil: backend/thumbs.php).
+  // Muqova topilmasa bu XATO EMAS — video baribir saqlanadi, shuning uchun
+  // cb('') chaqiriladi va chaqiruvchi davom etaveradi.
+  function videoThumb(vid, cb) {
+    if (!API_OK || !vid) { cb(''); return; }
+    try {
+      const x = new XMLHttpRequest();
+      x.open('POST', API + '?action=video_thumb', true);
+      x.setRequestHeader('Content-Type', 'application/json');
+      const t = getCsrf(); if (t) x.setRequestHeader('X-CSRF-Token', t);
+      x.onreadystatechange = () => {
+        if (x.readyState === 4) {
+          try {
+            const r = JSON.parse(x.responseText || '{}');
+            cb(r && r.ok && r.path ? r.path : '');
+          } catch { cb(''); }
+        }
+      };
+      x.send(JSON.stringify({ id: vid }));
+    } catch { cb(''); }
+  }
+
   // ---------- Hujjat yuklash: PDF yoki Word (server fayli) ----------
   // dataURL (data:<mime>;base64,...) beriladi, serverga fayl qilib yozadi, yo'lini qaytaradi.
   // Haqiqiy tur serverda fayl imzosi (magic bytes) bilan aniqlanadi — mime'ga ishonilmaydi.
@@ -619,6 +644,6 @@
 
   w.Store = {
     uid, ml, all, find, upsert, remove, settings, setSettings,
-    checkLogin, loginError, changePassword, login, logout, isAuthed, verifySession, auditLog, errorLog, errorResolve, item, pushStats, pushSend, addMessage, subscribe, uploadImage, uploadPdf, uploadHtml, bumpView, getView, reset, raw: load
+    checkLogin, loginError, changePassword, login, logout, isAuthed, verifySession, auditLog, errorLog, errorResolve, item, pushStats, pushSend, addMessage, subscribe, uploadImage, uploadPdf, uploadHtml, videoThumb, bumpView, getView, reset, raw: load
   };
 })(window);

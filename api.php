@@ -29,6 +29,7 @@ error_reporting(E_ALL);
 @ini_set('display_errors', '0');
 
 require_once __DIR__ . '/backend/db.php';
+require_once __DIR__ . '/backend/thumbs.php';
 
 // ---- Sessiya cookie (xavfsiz) ----
 $__https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
@@ -503,6 +504,27 @@ switch ($action) {
     // Audit: fayl serverга yozilgandan keyin, jexit'dan OLDIN (jexit darhol to'xtatadi).
     audit($pdo, 'upload', 'image', $name);
     jexit(['ok' => true, 'path' => 'uploads/' . $name]);
+    break;
+  }
+
+  /* Video muqovasini YouTube'dan SERVER TOMONDA olib, `uploads/` ga saqlaydi.
+     Admin video qo'shganda bir marta chaqiriladi (admin-ui.js -> videoModal).
+     Shundan keyin muqova saytning o'zidan uzatiladi va Media sahifasi
+     YouTube'ga birorta so'rov yubormaydi. Batafsil: backend/thumbs.php. */
+  case 'video_thumb': {
+    require_auth(); require_csrf();
+    $b = body_json();
+    $vid = isset($b['id']) ? trim((string)$b['id']) : '';
+    if (!yt_thumb_valid_id($vid)) jexit(['ok' => false, 'error' => 'bad id'], 400);
+    $got = yt_thumb_fetch($vid);
+    // Muqova topilmasligi XATO EMAS: video yangi bo'lishi yoki YouTube
+    // vaqtincha javob bermasligi mumkin. Admin baribir videoni saqlaydi,
+    // muqovasiz karta esa saytda o'rinbosar bilan chiziladi.
+    if ($got === null) jexit(['ok' => false, 'error' => 'fetch'], 502);
+    $path = yt_thumb_save($got['bin'], $vid);
+    if ($path === '') jexit(['ok' => false, 'error' => 'write'], 500);
+    audit($pdo, 'upload', 'video-thumb', basename($path));
+    jexit(['ok' => true, 'path' => $path, 'quality' => $got['quality']]);
     break;
   }
 

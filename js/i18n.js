@@ -31,7 +31,6 @@
 
     /* ---- navigation ---- */
     nav_about:            { uz: 'Markaz haqida', ru: 'О центре', en: 'About' },
-    nav_about_goal:       { uz: 'Maqsad va vazifalar', ru: 'Цели и задачи', en: 'Goals & objectives' },
     nav_about_who:        { uz: 'Biz kimmiz', ru: 'Кто мы', en: 'Who we are' },
     nav_about_leadership: { uz: 'Rahbariyat', ru: 'Руководство', en: 'Leadership' },
     nav_about_partners:   { uz: 'Hamkorlar', ru: 'Партнёры', en: 'Partners' },
@@ -51,78 +50,67 @@
     nav_about_experts:    { uz: 'Ekspertlar', ru: 'Эксперты', en: 'Experts' },
     /* Markaz haqida bo'limining 4 sahifasi uchun sarlavha/lead kalitlari */
     p_who_title:          { uz: 'Biz kimmiz', ru: 'Кто мы', en: 'Who we are' },
-    p_who_lead:           { uz: "Mustaqil tahliliy markaz — missiya, qadriyatlar va faoliyat yo'nalishlari.", ru: 'Независимый аналитический центр — миссия, ценности и направления деятельности.', en: 'Independent think tank — mission, values and research areas.' },
+    /* 2026-08-23: banner ostidagi qator qayta yozildi. Ilgari "Mustaqil
+       tahliliy markaz — missiya, qadriyatlar va faoliyat yo'nalishlari" deb
+       turardi, lekin (1) sanab o'tilgan bo'limlar sahifadan olib tashlandi va
+       (2) markazning rasmiy ta'rifi "MUSTAQIL" emas — u davlat ilmiy-tadqiqot
+       va tahliliy markazi. Shu sabab matn sahifadagi rasmiy ta'rifga
+       moslandi. Ru/En shu yerda tarjima qilindi (qisqa xizmat matni). */
+    p_who_lead:           { uz: "O'zbekiston Respublikasi tashqi siyosati bo'yicha davlat ilmiy-tadqiqot va tahliliy markazi.", ru: 'Государственный научно-исследовательский и аналитический центр по внешней политике Республики Узбекистан.', en: 'State research and analytical center for the foreign policy of the Republic of Uzbekistan.' },
     p_partners_title:     { uz: 'Hamkorlar', ru: 'Партнёры', en: 'Partners' },
     p_partners_lead:      { uz: "Xalqaro hamkor tashkilotlar, ilmiy muassasalar va diplomatik hamkorlar.", ru: 'Международные партнёрские организации, научные учреждения и дипломатические партнёры.', en: 'International partner organizations, research institutions and diplomatic partners.' },
     partners_empty:       { uz: "Hamkorlar hozircha kiritilmagan.", ru: 'Партнёры пока не добавлены.', en: 'No partners have been added yet.' },
     partners_visit:       { uz: 'Saytga o\'tish', ru: 'Перейти на сайт', en: 'Visit website' },
-    partners_all_kicker:  { uz: 'Hamkorlik tarmog\'i', ru: 'Сеть партнёров', en: 'Partner network' },
+    /* Bosh sahifadagi "Xalqaro hamkorlar" bo'limining havola matni. */
     partners_all_title:   { uz: 'Xalqaro hamkorlar to\'liq ro\'yxati', ru: 'Полный список международных партнёров', en: 'Full list of international partners' },
+    /* Nomi "partners_" bilan boshlansa ham, bu kalit endi FAQAT tadbirlar
+       sahifasida ishlatiladi (page-tadbirlar.js — o'tgan voqealar yil filtri,
+       "Barchasi" chipi). Hamkorlar sahifasidagi filtr 2026-08-23 da olib
+       tashlangan; kalit nomini o'zgartirmadim, chunki u ikkinchi bir joyda
+       ham paydo bo'lib qolsa qidirib topish qiyinlashardi — o'chirmang. */
+    partners_filter_all:  { uz: 'Barchasi', ru: 'Все', en: 'All' },
+    /* hamkorlar.html dagi YAGONA sarlavha. Kalit nomi tarixiy ("intro" —
+       ilgari ostida kirish matni va raqamlar bloki turardi), matni esa
+       2026-08-23 da ikki marta o'zgardi: "Birgalikda ishlaymiz" ->
+       "Birgalikda xalqaro maydonda" -> hozirgisi. */
+    partners_intro_title: { uz: 'Bizning xalqaro maydondagi hamkorlarimiz', ru: 'Наши партнёры на международной арене', en: 'Our partners on the international stage' },
     /* 2026-08-20: `partners_cta_*` (ochiq "Hamkorlik qilishni istaysizmi?"
        taklifi) olib tashlandi — markaz hamma bilan hamkorlik qilavermaydi va
-       saytda ochiq chaqiriq qoldirish noto'g'ri kutish uyg'otardi. */
+       saytda ochiq chaqiriq qoldirish noto'g'ri kutish uyg'otardi.
 
-    /* ---- hamkorlar.html: toifalar ----
-       Bazada toifa O'ZBEKCHA satr sifatida saqlanadi (admin: Hamkorlar -> Toifa).
-       `page-hamkorlar.js` dagi CAT_KEY xaritasi o'sha satrni shu kalitlarga
-       bog'laydi. Admin'dagi PARTNER_CATS ro'yxatiga toifa qo'shsangiz — bu
-       yerga kalit, u yerga xaritaga qator qo'shing (aks holda "Boshqa"ga tushadi). */
-    pcat_intl:            { uz: 'Xalqaro tashkilotlar', ru: 'Международные организации', en: 'International organizations' },
-    pcat_think:           { uz: 'Ilmiy-tadqiqot markazlari', ru: 'Научно-исследовательские центры', en: 'Research centers' },
-    pcat_uni:             { uz: 'Universitetlar', ru: 'Университеты', en: 'Universities' },
-    pcat_gov:             { uz: 'Davlat organlari', ru: 'Государственные органы', en: 'Government bodies' },
-    pcat_diplo:           { uz: 'Diplomatik vakolatxonalar', ru: 'Дипломатические представительства', en: 'Diplomatic missions' },
-    pcat_other:           { uz: 'Boshqa hamkorlar', ru: 'Другие партнёры', en: 'Other partners' },
-    partners_filter_all:  { uz: 'Barchasi', ru: 'Все', en: 'All' },
-    /* Hamkorlar sahifasidagi qidiruv va natija matnlari. `partners_found`
-       raqamdan KEYIN qo'yiladi ("6 ta hamkor" / "6 партнёров" / "6 partners"),
-       shuning uchun uch tilda ham raqamga ergashadigan shaklda yozilgan —
-       t() da o'rin almashtirish ({n} kabi) yo'q. */
-    partners_search_ph:   { uz: "Nomi yoki davlat bo’yicha qidirish", ru: 'Поиск по названию или стране', en: 'Search by name or country' },
-    partners_found:       { uz: 'ta hamkor', ru: 'партнёров', en: 'partners' },
-    partners_none:        { uz: "So’rovingizga mos hamkor topilmadi.", ru: 'По вашему запросу партнёров не найдено.', en: 'No partners match your query.' },
-    partners_reset:       { uz: 'Filtrni tozalash', ru: 'Сбросить фильтр', en: 'Clear filters' },
-    partners_stat_orgs:   { uz: 'Hamkor tashkilot', ru: 'Организаций-партнёров', en: 'Partner organizations' },
-    partners_stat_geo:    { uz: 'Davlat va mintaqa', ru: 'Стран и регионов', en: 'Countries & regions' },
-    partners_stat_cats:   { uz: 'Hamkorlik yo’nalishi', ru: 'Направлений сотрудничества', en: 'Areas of cooperation' },
-    partners_intro_title: { uz: 'Birgalikda ishlaymiz', ru: 'Работаем вместе', en: 'We work together' },
-    partners_intro_text:  { uz: "Markaz tadqiqotlarini xalqaro tashkilotlar, ilmiy markazlar, universitetlar va davlat muassasalari bilan hamkorlikda olib boradi. Qo’shma tadqiqotlar, konferensiyalar va ekspert almashinuvi — hamkorligimizning asosiy shakllari.", ru: 'Центр ведёт исследования совместно с международными организациями, научными центрами, университетами и государственными учреждениями. Совместные исследования, конференции и обмен экспертами — основные формы нашего сотрудничества.', en: 'The center conducts its research together with international organizations, research centers, universities and government institutions. Joint studies, conferences and expert exchange are the main forms of our cooperation.' },
+       2026-08-23: hamkorlar sahifasidan toifa filtri, qidiruv maydoni, toifa
+       guruhlari, raqamlar bloki va kirish matni olib tashlandi — sarlavhadan
+       keyin darhol kartalar boshlanadi. Ular bilan ishlagan kalitlar ham
+       o'chirildi: `partners_all_kicker`, `partners_intro_text`,
+       `partners_search_ph`, `partners_found`, `partners_none`,
+       `partners_reset`, `partners_stat_orgs|geo|cats`, `partners_show_all`
+       va `pcat_*` (6 ta toifa nomi). `partners_filter_all` esa QOLDI —
+       uni tadbirlar sahifasi ishlatadi (yuqoriga qarang).
+       DIQQAT: toifa maydoni admin panelda QOLDI (`PARTNER_CATS`, admin-ui.js)
+       va bazaga yozilaveradi — u endi saytda ko'rsatilmaydi, xolos. Guruhlash
+       qaytarilsa `pcat_*` kalitlarini ham qaytarish kerak bo'ladi. */
+
 
     /* ---- biz-kimmiz.html ----
-       Sahifada ATAYLAB aniq sana/tarix yozilmagan: institutsional tarix
-       admin panel -> Sahifalar -> slug `biz-kimmiz` matnidan keladi (bo'lim
-       matn bo'lmasa yashiriladi). Bu yerdagi matnlar markaz faoliyatining
-       doimiy tavsifi. */
-    who_kicker:           { uz: 'Biz kimmiz', ru: 'Кто мы', en: 'Who we are' },
-    who_statement:        { uz: "Biz — tashqi siyosat va xalqaro munosabatlar bo’yicha <span class=\"accent\">mustaqil tadqiqot markazimiz</span>: dalillarni yig’amiz, tahlil qilamiz va qaror qabul qiluvchilar uchun aniq tavsiyaga aylantiramiz.", ru: 'Мы — <span class="accent">независимый исследовательский центр</span> в сфере внешней политики и международных отношений: собираем факты, анализируем их и превращаем в конкретные рекомендации для тех, кто принимает решения.', en: 'We are an <span class="accent">independent research center</span> in foreign policy and international relations: we gather evidence, analyze it and turn it into clear recommendations for decision-makers.' },
-    who_p1:               { uz: "Markaz mintaqaviy xavfsizlik, diplomatiya, iqtisodiy hamkorlik va energetika masalalarini o’rganadi. Ishimiz natijasi — tahliliy hisobotlar, ekspert xulosalari, ilmiy nashrlar va ochiq muhokama maydonlari.", ru: 'Центр изучает вопросы региональной безопасности, дипломатии, экономического сотрудничества и энергетики. Результат нашей работы — аналитические доклады, экспертные заключения, научные публикации и открытые дискуссионные площадки.', en: 'The center studies regional security, diplomacy, economic cooperation and energy. Our work results in analytical reports, expert opinions, academic publications and open discussion platforms.' },
-    who_p2:               { uz: "Biz siyosiy manfaatlarga emas, dalilga tayanamiz. Har bir xulosa ochiq manbalar, statistika va sohaviy ekspertlar bilan suhbatlarga asoslanadi — shuning uchun tahlillarimizdan davlat idoralari ham, jamoatchilik ham foydalanadi.", ru: 'Мы опираемся на факты, а не на политические интересы. Каждый вывод основан на открытых источниках, статистике и беседах с отраслевыми экспертами — поэтому нашей аналитикой пользуются и государственные органы, и общество.', en: 'We rely on evidence, not political interests. Every conclusion rests on open sources, statistics and conversations with domain experts — which is why our analysis serves both government institutions and the wider public.' },
-    who_do_kicker:        { uz: 'Faoliyatimiz', ru: 'Наша деятельность', en: 'What we do' },
-    who_do_title:         { uz: "Nima bilan shug’ullanamiz", ru: 'Чем мы занимаемся', en: 'What we work on' },
-    who_do1_t:            { uz: 'Tadqiqot va tahlil', ru: 'Исследования и анализ', en: 'Research & analysis' },
-    who_do1_d:            { uz: "Tashqi siyosat, xavfsizlik va iqtisodiyot bo’yicha chuqur tadqiqotlar hamda vaziyat tahlillari.", ru: 'Глубокие исследования и ситуационная аналитика по внешней политике, безопасности и экономике.', en: 'In-depth research and situational analysis on foreign policy, security and economics.' },
-    who_do2_t:            { uz: 'Ekspert xulosalari', ru: 'Экспертные заключения', en: 'Expert opinion' },
-    who_do2_d:            { uz: "Davlat idoralari va jamoatchilik so’rovlari bo’yicha mustaqil ekspert baholari va tavsiyalar.", ru: 'Независимые экспертные оценки и рекомендации по запросам госорганов и общества.', en: 'Independent expert assessments and recommendations for government bodies and the public.' },
-    who_do3_t:            { uz: 'Muloqot maydoni', ru: 'Площадка для диалога', en: 'Platform for dialogue' },
-    who_do3_d:            { uz: "Konferensiyalar, davra suhbatlari va xalqaro uchrashuvlar — fikr almashish uchun ochiq maydon.", ru: 'Конференции, круглые столы и международные встречи — открытая площадка для обмена мнениями.', en: 'Conferences, roundtables and international meetings — an open space for exchanging views.' },
-    who_do4_t:            { uz: 'Bilim almashish', ru: 'Обмен знаниями', en: 'Knowledge sharing' },
-    who_do4_d:            { uz: "Nashrlar, ma’ruzalar va ta’lim dasturlari orqali bilimni keng doiraga yetkazish.", ru: 'Распространение знаний через публикации, лекции и образовательные программы.', en: 'Sharing knowledge through publications, lectures and educational programs.' },
-    who_how_kicker:       { uz: 'Uslubiyat', ru: 'Методология', en: 'Methodology' },
-    who_how_title:        { uz: 'Qanday ishlaymiz', ru: 'Как мы работаем', en: 'How we work' },
-    who_how1_t:           { uz: 'Savolni aniqlaymiz', ru: 'Формулируем вопрос', en: 'We define the question' },
-    who_how1_d:           { uz: "Har bir tadqiqot aniq siyosiy yoki amaliy savoldan boshlanadi — nimani, kim uchun va nima maqsadda aniqlaymiz.", ru: 'Каждое исследование начинается с конкретного политического или практического вопроса — что, для кого и зачем мы выясняем.', en: 'Every study begins with a concrete policy or practical question — what we are establishing, for whom and why.' },
-    who_how2_t:           { uz: 'Dalil yig’amiz', ru: 'Собираем данные', en: 'We gather evidence' },
-    who_how2_d:           { uz: "Ochiq manbalar, rasmiy statistika, hujjatlar va sohaviy mutaxassislar bilan suhbatlar — barchasi tekshiriladi.", ru: 'Открытые источники, официальная статистика, документы и интервью с профильными специалистами — всё проверяется.', en: 'Open sources, official statistics, documents and interviews with domain specialists — all of it verified.' },
-    who_how3_t:           { uz: 'Tahlil va muhokama', ru: 'Анализ и обсуждение', en: 'Analysis and review' },
-    who_how3_d:           { uz: "Xulosalar ichki ekspert muhokamasidan o’tadi: qarama-qarshi qarashlar ataylab qidiriladi va sinovdan o’tkaziladi.", ru: 'Выводы проходят внутреннее экспертное обсуждение: противоположные точки зрения ищутся намеренно и проверяются.', en: 'Findings go through internal expert review: opposing views are deliberately sought out and tested.' },
-    who_how4_t:           { uz: 'Tavsiya va nashr', ru: 'Рекомендации и публикация', en: 'Recommendations and publication' },
-    who_how4_d:           { uz: "Natija amaliy tavsiyaga aylanadi va ochiq nashr etiladi — tahlilimiz hamma uchun ochiq bo’lishi kerak.", ru: 'Результат превращается в практические рекомендации и публикуется открыто — наша аналитика должна быть доступна всем.', en: 'The result becomes practical recommendations and is published openly — our analysis should be available to everyone.' },
-    who_story_kicker:     { uz: 'Markaz haqida', ru: 'О центре', en: 'About the center' },
-    who_story_title:      { uz: 'Bizning yo’limiz', ru: 'Наш путь', en: 'Our story' },
-    who_facts_kicker:     { uz: 'Raqamlarda', ru: 'В цифрах', en: 'By the numbers' },
-    who_facts_title:      { uz: 'Markaz raqamlarda', ru: 'Центр в цифрах', en: 'The center in numbers' },
-    who_cta_title:        { uz: 'Jamoamiz bilan tanishing', ru: 'Познакомьтесь с нашей командой', en: 'Meet our team' },
-    who_cta_text:         { uz: "Tadqiqotlarimiz ortida rahbariyat va ekspertlar jamoasi turadi — ular bilan tanishing yoki bevosita bog’laning.", ru: 'За нашими исследованиями стоит команда руководства и экспертов — познакомьтесь с ними или свяжитесь напрямую.', en: 'Behind our research stands a team of leadership and experts — get to know them or reach out directly.' },
+       2026-08-23: sahifa butunlay qayta yozildi — o'nta bo'lim o'rniga bitta
+       matn bloki qoldi. O'chirilgan kalitlar: `who_kicker`, `who_statement`,
+       `who_p1|p2`, `who_do_kicker|title`, `who_do1..4_t|d`,
+       `who_how_kicker|title`, `who_how1..4_t|d`, `who_story_kicker|title`,
+       `who_facts_kicker|title`, `who_cta_title|text`, `val1..3_t|d`,
+       `about_values_kicker|title`, `about_dir_all`, `about_goal_kicker`,
+       `about_intro_kicker`, `p_about_title`, `nav_about_goal`.
+       `dir*` va `stat_*` kalitlariga TEGILMADI — ularni bosh sahifa
+       (index.html) va tadqiqotlar sahifasi ishlatadi.
+
+       MATN BU YERDA EMAS. Sahifaning sarlavhasi ham, matni ham BAZADA:
+       admin panel -> Markaz haqida -> "Biz kimmiz" (`pages`, slug
+       `biz-kimmiz`). Bir muddat matn shu faylda `who_org_title` /
+       `who_body1..5` kalitlarida turgan edi — ular o'chirildi, chunki ikkita
+       manba (kod + baza) muqarrar ravishda bir-biridan chetga chiqadi.
+       Uch tilga tarjima ham o'sha yerda, admin muharririda (avto-tarjima
+       tugmasi bilan) qilinadi. Quyidagi yagona kalit — matn umuman
+       kiritilmagan holat uchun. */
+    who_empty:            { uz: 'Sahifa matni hozircha kiritilmagan.', ru: 'Текст страницы пока не добавлен.', en: 'The page text has not been added yet.' },
 
     /* ---- markaz-haqida.html: bo'lim kartalari (4 sahifaga yo'l) ---- */
     about_secs_kicker:    { uz: 'Bo’limlar', ru: 'Разделы', en: 'Sections' },
@@ -282,7 +270,6 @@
     p_research_lead:{ uz: 'Markaz olib boradigan asosiy tahliliy va ilmiy tadqiqot yo\'nalishlari.', ru: 'Основные аналитические и научно-исследовательские направления центра.', en: 'Core analytical and academic research areas of the center.' },
     p_research_recent:{ uz: "So'nggi tadqiqotlar", ru: 'Последние исследования', en: 'Recent research' },
     p_research_recent_t:{ uz: 'Yangi hisobotlar', ru: 'Новые доклады', en: 'New reports' },
-    p_about_title: { uz: 'Markaz haqida', ru: 'О центре', en: 'About the center' },
     p_leadership_title:{ uz: 'Rahbariyat', ru: 'Руководство', en: 'Leadership' },
     p_experts_title:{ uz: 'Ekspertlar', ru: 'Эксперты', en: 'Experts' },
     p_experts_lead:{ uz: 'Markaz ekspertlari — tahlilchilar va ilmiy xodimlar.', ru: 'Эксперты центра — аналитики и научные сотрудники.', en: 'The center experts — analysts and research staff.' },
@@ -415,17 +402,6 @@
     sub_badge:     { uz: 'Axborot xizmati', ru: 'Информационная служба', en: 'Information service' },
 
     /* ---- about page: sections ---- */
-    about_intro_kicker: { uz: 'Markaz haqida', ru: 'О центре', en: 'About the center' },
-    about_dir_all:      { uz: "Barcha yo'nalishlar", ru: 'Все направления', en: 'All areas' },
-    about_values_kicker:{ uz: 'Tamoyillarimiz', ru: 'Наши принципы', en: 'Our principles' },
-    about_values_title: { uz: 'Faoliyatimiz asosidagi qadriyatlar', ru: 'Ценности в основе нашей работы', en: 'Values at the core of our work' },
-    val1_t: { uz: 'Xolislik', ru: 'Объективность', en: 'Objectivity' },
-    val1_d: { uz: "Har bir tahlil siyosiy ta'sirdan xoli — faqat dalil, fakt va tekshirilgan ma'lumotlarga tayanadi.", ru: 'Каждый анализ свободен от политического влияния и опирается только на данные, факты и проверенную информацию.', en: 'Every analysis is free from political influence and rests only on data, facts and verified information.' },
-    val2_t: { uz: 'Ilmiy asoslanganlik', ru: 'Научная обоснованность', en: 'Scientific rigor' },
-    val2_d: { uz: 'Tadqiqotlar zamonaviy akademik metodologiya va xalqaro tan olingan tahlil usullariga tayanadi.', ru: 'Исследования опираются на современную академическую методологию и международно признанные методы анализа.', en: 'Research relies on modern academic methodology and internationally recognized analytical methods.' },
-    val3_t: { uz: 'Xalqaro hamkorlik', ru: 'Международное сотрудничество', en: 'International cooperation' },
-    val3_d: { uz: "Yetakchi xorijiy institut va ekspertlar bilan bilim almashish hamda qo'shma loyihalar amalga oshirish.", ru: 'Обмен знаниями и совместные проекты с ведущими зарубежными институтами и экспертами.', en: 'Knowledge exchange and joint projects with leading foreign institutions and experts.' },
-    about_goal_kicker:  { uz: 'Vazifamiz', ru: 'Наша задача', en: 'Our mission' },
     about_cta_title:    { uz: 'Markaz jamoasi va hamkorlik', ru: 'Команда центра и сотрудничество', en: 'Our team & cooperation' },
     about_cta_text:     { uz: "Ekspertlarimiz bilan tanishing yoki hamkorlik va murojaatlar bo'yicha biz bilan bog'laning.", ru: 'Познакомьтесь с нашими экспертами или свяжитесь с нами по вопросам сотрудничества и обращений.', en: 'Meet our experts, or get in touch with us about cooperation and inquiries.' },
 

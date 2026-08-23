@@ -1,113 +1,109 @@
-  /* hamkorlar.html — kirish bloki, toifa guruhlari va hamkor kartalari.
-     Filtr chiplari (.mfilter/.fchip), .about-cta va .empty site.css dan keladi. */
+  /* hamkorlar.html — bo'lim sarlavhasi va hamkor kartalari.
+     Bo'sh ro'yxat holati (.empty) site.css dan keladi.
 
-  /* --- Kirish: matn chapda, raqamlar o'ngda --- */
-  .pt-intro{display:grid;grid-template-columns:1.25fr 1fr;gap:64px;align-items:center;}
-  .pt-intro h2{font-family:var(--serif);font-weight:500;font-size:clamp(24px,2.7vw,34px);line-height:1.2;margin:16px 0 16px;color:var(--ink);max-width:18ch;}
-  .pt-intro p{color:var(--ink-2);font-size:1rem;line-height:1.75;margin:0;max-width:58ch;}
-  /* Ustunlar soni MA'LUMOTGA qarab (--n ni page-hamkorlar.js yozadi):
-     davlat yoki toifa kiritilmagan bo'lsa qolgan ustunlar kenglikni teng
-     bo'lishadi, bo'sh katak qolmaydi. */
-  .pt-stats{display:grid;grid-template-columns:repeat(var(--n,3),1fr);border:1px solid var(--line);border-radius:var(--r-card);background:var(--surface);overflow:hidden;}
-  .pt-stats .s{padding:30px 22px;border-right:1px solid var(--line);text-align:center;}
-  .pt-stats .s:last-child{border-right:0;}
-  .pt-stats .s .n{font-family:var(--serif);font-weight:600;font-size:2.5rem;line-height:1;color:var(--accent);}
-  .pt-stats .s .c{font-family:var(--mono);font-size:0.65625rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:11px;line-height:1.5;}
+     2026-08-23 (1) — karta dizayni yangilandi: oq yuza, oltiburchak logotip
+     hoshiyasi, o'ng pastki burchakda dumaloq strelka.
+     2026-08-23 (2) — sahifa soddalashtirildi: toifa filtri, qidiruv, toifa
+     guruhlari va "hammasini ko'rsatish" tugmasi olib tashlandi. Sarlavhadan
+     keyin darhol kartalar boshlanadi, hamma hamkor bitta to'rda.
 
-  /* --- Boshqaruv qatori: toifa chiplari + qidiruv ---
-     `.is-hidden` (site.css) bu fayldan OLDIN yuklanadi, shuning uchun bu
-     yerdagi `display` uni bosib ketardi — har bir qism uchun yashirish
-     qoidasi ATAYLAB takrorlanadi (.pt-ghead.is-hidden bilan bir xil sabab). */
-  .pt-bar{display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin-bottom:44px;}
-  .pt-bar.is-hidden{display:none;}
-  .mfilter{display:flex;flex-wrap:wrap;gap:10px;}
-  .mfilter.is-hidden{display:none;}
-  .pt-bar .mfilter{flex:1 1 320px;margin-bottom:0;}
+     Ranglar site.css dagi tokenlardan olinadi — bu faylda HEX yozilmaydi
+     (yagona istisno: logotip zamini #fff, sababi pastda `.pt-hex-in` da). */
 
-  .pt-search{position:relative;flex:0 1 300px;}
-  .pt-search.is-hidden{display:none;}
-  .pt-search>svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted);pointer-events:none;}
-  .pt-search input{width:100%;font:inherit;font-size:0.9375rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-ctl);padding:11px 14px 11px 40px;transition:border-color .18s, box-shadow .18s;}
-  .pt-search input::placeholder{color:var(--muted);}
-  .pt-search input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
+  /* --- Bo'lim sarlavhasi --- */
+  .pt-head{font-family:var(--serif);font-weight:600;font-size:clamp(26px,3.2vw,42px);line-height:1.18;letter-spacing:-.01em;
+    text-align:center;color:var(--accent);max-width:24ch;margin:0 auto clamp(36px,4vw,56px);}
 
-  /* Natija soni — filtr faol bo'lgandagina. Yuqoridagi .mfilter ning 44px
-     pastki bo'shlig'i ichiga joylashadi, qo'shimcha bo'shliq ochilmaydi. */
-  .pt-count{font-family:var(--mono);font-size:0.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:-30px 0 30px;}
-  .pt-count.is-hidden{display:none;}
+  /* --- Kartalar to'ri --- */
+  .pt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(24px,2vw,32px);}
+  /* Bo'sh holat to'rning bitta katagida emas, butun kenglikda turadi. */
+  .pt-grid .empty{grid-column:1/-1;}
 
-  /* --- Toifa guruhi --- */
-  .pt-group{margin-bottom:56px;}
-  .pt-group:last-child{margin-bottom:0;}
-  .pt-ghead{display:flex;align-items:center;gap:14px;padding-bottom:16px;margin-bottom:28px;border-bottom:1px solid var(--line);}
-  /* `.is-hidden` (site.css) — bu fayl site.css dan KEYIN yuklanadi, shuning uchun
-     `display:flex` uni bosib ketardi. Yagona toifasiz guruhda sarlavha ortiqcha
-     bo'lgani uchun yashirish shu qatorga tayanadi — olib tashlamang. */
-  .pt-ghead.is-hidden{display:none;}
-  .pt-ghead h2{font-family:var(--serif);font-weight:500;font-size:clamp(19px,1.9vw,24px);line-height:1.2;margin:0;color:var(--ink);}
-  .pt-ghead .cnt{font-family:var(--mono);font-size:0.6875rem;letter-spacing:.06em;padding:4px 11px;border-radius:var(--r-pill);background:var(--accent-soft);color:var(--accent);}
+  /* --- Hamkor kartasi ---
+     Ustun yo'nalishli flex: tepada logotip+matn qatori, pastda strelka.
+     Strelka `margin-top:auto` bilan pastga tushadi va `align-self:flex-end`
+     bilan o'ng burchakka boradi — absolyut joylashuv va uning uchun
+     zaxiralanadigan bo'sh padding KERAK EMAS, qator balandligi esa to'r
+     tomonidan baribir tenglashtiriladi. */
+  .pt-card{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-card);
+    padding:26px 26px 22px;box-shadow:var(--card-shadow);
+    transition:transform .28s cubic-bezier(.2,.7,.2,1), box-shadow .28s, border-color .28s;}
+  .pt-card.is-link:hover{transform:translateY(-6px);box-shadow:var(--lift);border-color:color-mix(in srgb,var(--accent) 26%,var(--line));}
+  .pt-card.is-link:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
+  .pt-main{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center;}
 
-  /* --- Hamkor kartasi --- */
-  .pt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
-  .pt-card.is-hidden,.pt-group.is-hidden{display:none;}
+  /* --- Oltiburchak logotip hoshiyasi ---
+     Ikki qatlam: tashqi oltiburchak — hoshiya RANGI, ichkisi 2px ichkarida va
+     oq. `border` ishlatib bo'lmaydi: clip-path elementni ramkasi bilan birga
+     kesib tashlaydi, ya'ni ramka ko'rinmay qoladi. Ikkala qatlam bir xil
+     ko'pburchakni ishlatadi (--hex) — shakl bitta joyda yoziladi. */
+  .pt-hex{--hex:polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    position:relative;flex:none;width:96px;height:111px;background:var(--line);
+    -webkit-clip-path:var(--hex);clip-path:var(--hex);}
+  /* Zamin OQ (token emas): hamkor logotiplarining ko'pi shaffof PNG va quyuq
+     temada ko'rinmay qolardi. */
+  .pt-hex-in{position:absolute;inset:2px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;
+    -webkit-clip-path:var(--hex);clip-path:var(--hex);}
+  .pt-hex img{max-width:62%;max-height:52%;object-fit:contain;}
+  .pt-hex .mono{font-family:var(--serif);font-weight:700;font-size:1.5rem;letter-spacing:.02em;color:var(--accent);}
+  .pt-card.is-link:hover .pt-hex{background:color-mix(in srgb,var(--accent) 34%,var(--line));}
+
+  /* --- Matnlar --- */
+  .pt-body{min-width:0;}
+  .pt-body h3{font-family:var(--serif);font-weight:700;font-size:1.125rem;line-height:1.3;margin:0 0 7px;color:var(--ink);overflow-wrap:anywhere;}
+  /* --accent2 (#1492e6) oq fonda 3.4:1 — 10px matn uchun WCAG AA (4.5:1) dan
+     past. --accent2-d (#0b6fb8) 5.2:1 beradi va sarlavhaning to'q ko'kidan
+     baribir yorqinroq ko'rinadi. */
+  .pt-geo{display:block;font-family:var(--mono);font-size:0.625rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent2-d);margin-bottom:10px;}
+  /* Ta'rif ikki qatordan oshmaydi — kartalar bir xil "og'irlikda" ko'rinadi
+     (bazadagi tavsiflar 74 dan 475 belgigacha, cheklovsiz karta cho'zilardi). */
+  .pt-body p{color:var(--ink-2);font-size:0.875rem;line-height:1.6;margin:0;
+    display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+
+  /* --- Burchakdagi strelka --- */
+  .pt-arrow{margin-top:20px;align-self:flex-end;flex:none;width:40px;height:40px;border-radius:50%;
+    background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;
+    transition:background .22s, color .22s, transform .22s;}
+  .pt-arrow svg{width:17px;height:17px;}
+  .pt-card.is-link:hover .pt-arrow{background:var(--accent);color:#fff;transform:translateX(4px);}
 
   /* --- "Logotip devori": ma'lumot kam bo'lgandagi ixcham ko'rinish ---
      page-hamkorlar.js `.pt-wall` ni FAQAT hech bir hamkorda davlat, tavsif va
-     havola bo'lmaganda qo'yadi. Logotip tepaga chiqadi, nom ostiga tushadi va
-     qatorga ko'proq karta sig'adi — yarim bo'sh keng qatorlar qolmaydi. */
-  .pt-wall .pt-grid{grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:16px;}
-  .pt-wall .pt-card{grid-template-columns:1fr;justify-items:center;text-align:center;gap:16px;padding:26px 18px 24px;}
-  .pt-wall .pt-logo{width:88px;height:88px;}
+     havola bo'lmaganda qo'yadi. Oltiburchak tepaga chiqadi, nom ostiga tushadi
+     va qatorga ko'proq karta sig'adi — yarim bo'sh keng qatorlar qolmaydi. */
+  .pt-grid.pt-wall{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px;}
+  .pt-wall .pt-card{padding:26px 18px 24px;}
+  .pt-wall .pt-main{grid-template-columns:1fr;justify-items:center;text-align:center;gap:16px;}
+  .pt-wall .pt-hex{width:84px;height:97px;}
   .pt-wall .pt-body{width:100%;}
-  .pt-wall .pt-body h3{font-size:1.0625rem;margin:0;}
-  /* align-items:center — tavsif/mamlakat kiritilmagan hamkorda matn logotip
-     yonida "osilib" qolmasin (ma'lumot to'lgach logotip o'zi markazlashadi). */
-  .pt-card{display:grid;grid-template-columns:96px 1fr;gap:22px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:26px 26px 24px;transition:transform .25s, box-shadow .25s, border-color .25s;}
-  .pt-card.is-link:hover{transform:translateY(-5px);box-shadow:var(--lift);border-color:color-mix(in srgb,var(--accent) 26%,var(--line));}
-  /* Logotip qutisi: oq fon logotiplar uchun eng ishonchli zamin (ko'p logotip
-     shaffof PNG va quyuq temada ko'rinmay qolardi). */
-  .pt-logo{width:96px;height:96px;border:1px solid var(--line);border-radius:var(--r-ctl);background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;}
-  .pt-logo img{max-width:76%;max-height:76%;object-fit:contain;}
-  .pt-logo .mono{font-family:var(--serif);font-weight:600;font-size:1.75rem;letter-spacing:.02em;color:var(--accent);}
-  .pt-body{min-width:0;}
-  .pt-body h3{font-family:var(--serif);font-weight:500;font-size:1.1875rem;line-height:1.28;margin:0 0 7px;color:var(--ink);overflow-wrap:anywhere;}
-  .pt-geo{display:inline-flex;align-items:center;font-family:var(--mono);font-size:0.65625rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:11px;}
-  .pt-body p{color:var(--ink-2);font-size:0.90625rem;line-height:1.62;margin:0 0 14px;}
-  .pt-go{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:0.6875rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent2-d);transition:gap .2s;}
-  .pt-go svg{width:14px;height:14px;flex:none;}
-  .pt-card.is-link:hover .pt-go{gap:13px;}
+  .pt-wall .pt-body h3{font-size:1rem;margin:0;}
 
   @media(max-width:1180px){
-    .pt-intro{grid-template-columns:1fr;gap:34px;}
-    .pt-intro h2{max-width:none;}
     .pt-grid{grid-template-columns:repeat(2,1fr);}
   }
   @media(max-width:760px){
-    .pt-bar{gap:14px;margin-bottom:30px;}
-    .pt-search{flex:1 1 100%;}
-    .pt-count{margin:-18px 0 18px;}
-    .mfilter{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none;}
-    .mfilter::-webkit-scrollbar{display:none;}
-    .mfilter .fchip{flex:none;white-space:nowrap;}
-    .pt-stats{grid-template-columns:1fr;}
-    .pt-stats .s{border-right:0;border-bottom:1px solid var(--line);padding:22px 18px;}
-    .pt-stats .s:last-child{border-bottom:0;}
-    .pt-stats .s .n{font-size:2rem;}
-    .pt-group{margin-bottom:40px;}
-    .pt-ghead{margin-bottom:20px;}
-    .pt-grid{grid-template-columns:1fr;gap:14px;}
-    .pt-card{grid-template-columns:64px 1fr;gap:16px;padding:18px;}
-    .pt-logo{width:64px;height:64px;}
-    .pt-logo .mono{font-size:1.25rem;}
-    .pt-body h3{font-size:1.0625rem;}
+    .pt-grid{grid-template-columns:1fr;gap:16px;}
+    .pt-card{padding:20px 20px 18px;}
+    .pt-main{grid-template-columns:auto 1fr;gap:16px;}
+    .pt-hex{width:66px;height:76px;}
+    .pt-hex .mono{font-size:1.0625rem;}
+    .pt-body h3{font-size:1.03125rem;}
     .pt-body p{font-size:0.84375rem;}
+    .pt-arrow{width:36px;height:36px;margin-top:16px;}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .pt-card,.pt-arrow{transition:none;}
+    .pt-card.is-link:hover{transform:none;}
+    .pt-card.is-link:hover .pt-arrow{transform:none;}
   }
   @media print{
-    header,footer,.page-banner,.secnav,.pt-bar,.pt-count{display:none !important;}
+    header,footer,.page-banner,.secnav,.pt-arrow{display:none !important;}
     /* Banner (sarlavha) chop etishda yashirildi -> uning o'rniga zaxira
        sarlavha yoqiladi. Uslubi site.css -> @media print .print-title;
        matnini site-common.js -> injectPrintFrame() yozadi. */
     .print-title{display:block !important;}
     body.inner{padding-top:0 !important;}
-    .pt-card,.pt-stats,.pt-stats .s{break-inside:avoid;box-shadow:none !important;background:#fff !important;border-color:#ccc !important;}
+    .pt-card{break-inside:avoid;box-shadow:none !important;background:#fff !important;border-color:#ccc !important;}
+    /* Chop etishda ta'rif to'liq chiqsin — qog'ozda kesish ma'nosiz. */
+    .pt-body p{-webkit-line-clamp:none;line-clamp:none;display:block;overflow:visible;}
   }

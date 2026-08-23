@@ -78,22 +78,22 @@
         items.push({kind:'event',kl:T('search_k_event'),title:e.title,text:e.body,
           href:'tadbir.html?id='+encodeURIComponent(e.id),cover:e.cover||'',date:e.date||'',cat:e.type||''});
       });
-      // "Sahifalar" kolleksiyasidagi yozuvlarning HAMMASI ham saytda
-      // chizilmaydi — faqat `biz-kimmiz.html` dagi uchta matn bloki
-      // (page-biz-kimmiz.js -> fill). Qolganlari (masalan `rahbariyat`) eski
-      // importdan qolgan: ularni indeksga qo'shish tashrifchini hech narsa
-      // ko'rsatmaydigan sahifaga olib borardi. Shuning uchun ikki shart bor:
-      // slug shu jadvalda bo'lsin VA matni bo'sh bo'lmasin. Havola esa aynan
-      // o'sha bo'limning langariga boradi — ilgari `?slug=` uzatilardi, lekin
-      // uni hech kim o'qimasdi va tashrifchi sahifa boshiga tushardi.
-      var PAGE_ANCHORS = { 'maqsad':'goalSec', 'markaz-haqida':'aboutBodySec',
-                           'biz-kimmiz':'whoStorySec', 'tarix':'whoStorySec' };
+      // "Sahifalar" kolleksiyasidan saytda FAQAT bittasi chiziladi:
+      // `biz-kimmiz` (eski nomi `tarix`) — u `biz-kimmiz.html` sahifasining
+      // butun mazmuni. Qolgan slug'lar (`maqsad`, `markaz-haqida`,
+      // `rahbariyat` va h.k.) eski importdan qolgan va hech qayerda
+      // ko'rinmaydi — ularni indeksga qo'shish tashrifchini hech narsa
+      // ko'rsatmaydigan sahifaga olib borardi. Shuning uchun ikki shart:
+      // slug shu ro'yxatda bo'lsin VA matni bo'sh bo'lmasin.
+      // (2026-08-23 gacha bu yerda PAGE_ANCHORS jadvali bor edi — matn
+      // bloklari sahifa ichidagi langarlarga bo'lingani uchun. Endi sahifa
+      // bitta matndan iborat, langar kerak emas.)
+      var PAGE_SLUGS = ['biz-kimmiz', 'tarix'];
       Store.all('pages').filter(function(p){return p.status==='published';}).forEach(function(p){
-        var anchor = PAGE_ANCHORS[p.slug];
-        if(!anchor) return;
+        if(PAGE_SLUGS.indexOf(p.slug) < 0) return;
         if(!String(mlGet(p.body)||'').replace(/<[^>]*>/g,'').trim()) return;
         items.push({kind:'page',kl:T('search_k_page'),title:p.title,text:p.body,
-          href:'biz-kimmiz.html#'+anchor,cover:'',date:'',cat:''});
+          href:'biz-kimmiz.html',cover:'',date:'',cat:''});
       });
       Store.all('experts').forEach(function(e){
         items.push({kind:'expert',kl:T('search_k_expert'),title:e.name,text:e.role,href:'expert.html?id='+e.id,cover:e.photo||'',date:'',cat:''});

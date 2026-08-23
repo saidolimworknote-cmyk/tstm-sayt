@@ -162,7 +162,7 @@
       fields: [
         { k: 'title', label: 'Sahifa nomi', type: 'text', ml: 1, req: 1 },
         { k: 'body', label: 'Matn', type: 'rich', ml: 1 },
-        { k: 'slug', label: 'Manzil (slug)', type: 'text', side: 1, ph: 'markaz-haqida' },
+        { k: 'slug', label: 'Manzil (slug)', type: 'text', side: 1, ph: 'biz-kimmiz' },
         { k: 'status', label: 'Holat', type: 'status', side: 1 }
       ]
     },
@@ -1775,68 +1775,57 @@
     });
   }
 
-  /* ==================== MARKAZ HAQIDA (bosh sahifa intro + Markaz haqida/Maqsad sahifalari) ==================== */
+  /* ==================== BIZ KIMMIZ ====================
+     Saytdagi `biz-kimmiz.html` — bitta matn sahifasi. Shu ko'rinish o'sha
+     sahifaning sarlavhasi va matnini uch tilda tahrirlaydi; ular `pages`
+     jadvalida, slug `biz-kimmiz` yozuvida saqlanadi.
+
+     2026-08-23 da bu ko'rinish soddalashtirildi. Ilgari to'rtta blok bor edi:
+       1) "Kirish jumlasi" (settings.aboutIntro) — uni chizadigan bo'lim
+          saytdan olib tashlandi, ya'ni sozlama hech qayerda ko'rinmasdi;
+       2) "Markaz haqida — batafsil" (slug `markaz-haqida`)  ─┐ ikkala bo'lim
+       3) "Maqsad va vazifalar" (slug `maqsad`)               ─┘ ham o'chdi;
+       4) "Bizning yo'limiz" (slug `biz-kimmiz`) — mana shu qoldi va endi
+          sahifaning O'ZI bo'lgani uchun oddiygina "matn" deb ataladi.
+     Eski `markaz-haqida` / `maqsad` yozuvlari bazada qolsa ham saytda
+     chizilmaydi va bu yerdan tahrirlanmaydi. */
   function viewAboutPage(c) {
     setTitle('Biz kimmiz');
-    const s = Store.settings();
-    const intro = Object.assign({ uz: '', ru: '', en: '' }, s.aboutIntro || {});
-    const DEF_INTRO = { uz: "Markaz dalillarga asoslangan mustaqil tahlil orqali davlat siyosati va jamoatchilik uchun ishonchli ekspert bilim manbai bo'lib xizmat qiladi.", ru: '', en: '' };
-    ['uz','ru','en'].forEach(l => { if (!intro[l]) intro[l] = DEF_INTRO[l] || ''; });
 
-    /* `pages` jadvalidan sayt FAQAT uchta slugni chizadi (biz-kimmiz.html
-       dagi uchta blok — qarang: page-biz-kimmiz.js -> fill()). Shu uchtasi
-       shu yerda tahrirlanadi, boshqa slug esa saytda hech qayerda ko'rinmaydi.
-       2026-08-20: uchinchisi (`biz-kimmiz` — "Bizning yo'limiz") qo'shildi.
-       Ilgari u faqat xom "Sahifalar" ro'yxatidan tahrirlanardi va o'sha
-       ro'yxat yon menyudan olib tashlanganda tahrirlab bo'lmay qolardi. */
-    let pages = Store.all('pages');
-    let aboutPg = pages.find(p => p.slug === 'markaz-haqida');
-    let goalPg = pages.find(p => p.slug === 'maqsad');
-    // Sayt `biz-kimmiz` ni ham, eski `tarix` ni ham qabul qiladi — birinchi
-    // TO'LDIRILGANI ishlatiladi. Shuning uchun mavjudini qidiramiz.
-    let wayPg = pages.find(p => p.slug === 'biz-kimmiz') || pages.find(p => p.slug === 'tarix');
-    if (!aboutPg) aboutPg = { title: Store.ml('Markaz haqida','O centre','About'), slug: 'markaz-haqida', body: Store.ml('','',''), status: 'published' };
-    if (!goalPg) goalPg = { title: Store.ml('Maqsad va vazifalar','Tseli i zadachi','Mission'), slug: 'maqsad', body: Store.ml('','',''), status: 'published' };
-    if (!wayPg) wayPg = { title: Store.ml('Bizning yo\'limiz','Nash put','Our path'), slug: 'biz-kimmiz', body: Store.ml('','',''), status: 'published' };
+    // Sayt `biz-kimmiz` ni ham, eski `tarix` ni ham o'qiydi (page-biz-kimmiz.js)
+    // — shuning uchun mavjudini o'sha tartibda qidiramiz va o'sha yozuv
+    // ustiga yozamiz, aks holda ikkita nusxa paydo bo'lardi.
+    const pages = Store.all('pages');
+    let pg = pages.find(p => p.slug === 'biz-kimmiz') || pages.find(p => p.slug === 'tarix');
+    if (!pg) pg = { title: Store.ml('', '', ''), slug: 'biz-kimmiz', body: Store.ml('', '', ''), status: 'published' };
 
     aboutEditors = [];
-    function richBlock(idPrefix, val) {
-      return ['uz','ru','en'].map(l => {
-        const id = idPrefix + '_' + l;
-        aboutEditors.push(id);
-        const v = (val && val[l]) || '';
-        return `<div class="lang-pane ${l==='uz'?'on':''}" data-lang="${l}">
-          <div class="editor" data-editor="${id}">${editorTB()}
-            <div class="editor-area" contenteditable="true" data-in data-ph="Matn kiriting...">${v}</div>
-          </div></div>`;
-      }).join('');
-    }
-    function textBlock(idPrefix, val) {
-      return ['uz','ru','en'].map(l => `<div class="lang-pane ${l==='uz'?'on':''}" data-lang="${l}"><textarea class="ctl a-mh70" id="${idPrefix}_${l}">${esc((val&&val[l])||'')}</textarea></div>`).join('');
-    }
+    const langPanes = (fn) => ['uz', 'ru', 'en'].map(l =>
+      `<div class="lang-pane ${l === 'uz' ? 'on' : ''}" data-lang="${l}">${fn(l)}</div>`).join('');
+
+    const titleBlock = langPanes(l =>
+      `<input class="ctl" type="text" id="whoTitle_${l}" value="${esc((pg.title && pg.title[l]) || '')}" placeholder="Sahifa sarlavhasi">`);
+
+    const bodyBlock = langPanes(l => {
+      const id = 'whoBody_' + l;
+      aboutEditors.push(id);
+      return `<div class="editor" data-editor="${id}">${editorTB()}
+        <div class="editor-area" contenteditable="true" data-in data-ph="Matn kiriting...">${(pg.body && pg.body[l]) || ''}</div>
+      </div>`;
+    });
 
     c.innerHTML = `
-      <div class="page-head"><div><div class="h">Biz kimmiz</div><div class="d">Bosh sahifa kirish jumlasi va "Biz kimmiz" sahifasidagi uchta blok${siteLinkHTML(navPageOf('aboutPage'))}</div></div><div class="sp"></div>
+      <div class="page-head"><div><div class="h">Biz kimmiz</div><div class="d">Saytdagi "Biz kimmiz" sahifasining sarlavhasi va matni${siteLinkHTML(navPageOf('aboutPage'))}</div></div><div class="sp"></div>
         <div class="langtabs" id="setLang"><button type="button" data-l="uz" class="on">UZ</button><button type="button" data-l="ru">RU</button><button type="button" data-l="en">EN</button></div>${autoTrButton('aboutAutoTr')}</div>
       <div class="card a-p24-mb20">
-        <b class="a-serif17-mb6">1) Kirish jumlasi (bosh sahifa)</b>
-        <div class="a-muted13-mb14">Bosh sahifadagi "Markaz haqida" bo'limining katta sarlavhasi.</div>
-        ${textBlock('introTxt', intro)}
+        <b class="a-serif17-mb6">Sahifa sarlavhasi</b>
+        <div class="a-muted13-mb14">Matn ustida chiqadigan katta sarlavha. Bo'sh qoldirilsa sarlavha umuman chizilmaydi.</div>
+        ${titleBlock}
       </div>
       <div class="card a-p24-mb20">
-        <b class="a-serif17-mb6">2) Markaz haqida — batafsil ma'lumot</b>
-        <div class="a-muted13-mb14">"Markaz haqida" sahifasidagi asosiy matn.</div>
-        ${richBlock('aboutBody', aboutPg.body)}
-      </div>
-      <div class="card a-p24-mb20">
-        <b class="a-serif17-mb6">3) Maqsad va vazifalar</b>
-        <div class="a-muted13-mb14">"Biz kimmiz" sahifasidagi "Maqsad va vazifalar" bo'limi matni.</div>
-        ${richBlock('goalBody', goalPg.body)}
-      </div>
-      <div class="card a-p24-mb20">
-        <b class="a-serif17-mb6">4) Bizning yo'limiz</b>
-        <div class="a-muted13-mb14">"Biz kimmiz" sahifasidagi tarix / yo'l bo'limi matni. Bo'sh qolsa bo'lim saytda umuman chizilmaydi.</div>
-        ${richBlock('wayBody', wayPg.body)}
+        <b class="a-serif17-mb6">Sahifa matni</b>
+        <div class="a-muted13-mb14">Sahifaning butun mazmuni. Bo'sh qolsa saytda "matn kiritilmagan" deb turadi.</div>
+        ${bodyBlock}
       </div>
       <div class="form-actions"><button class="btn primary" id="aboutSave">${ic('save')} Saqlash</button><div class="sp"></div></div>`;
 
@@ -1846,12 +1835,19 @@
     $('#aboutAutoTr').onclick = () => { const b = $('#setLang button.on'); autoTranslatePanes($('#content'), b ? b.dataset.l : 'uz', $('#aboutAutoTr')); };
 
     $('#aboutSave').onclick = () => {
-      const newIntro = {}; ['uz','ru','en'].forEach(l => newIntro[l] = ($('#introTxt_'+l)||{}).value || '');
-      Store.setSettings({ aboutIntro: newIntro });
-      const grabRich = (prefix) => { const o = {}; ['uz','ru','en'].forEach(l => { const el = $(`[data-editor="${prefix}_${l}"] .editor-area`); o[l] = el ? el.innerHTML : ''; }); return o; };
-      aboutPg.body = grabRich('aboutBody'); Store.upsert('pages', aboutPg);
-      goalPg.body = grabRich('goalBody'); Store.upsert('pages', goalPg);
-      wayPg.body = grabRich('wayBody'); Store.upsert('pages', wayPg);
+      const t = {}, b = {};
+      ['uz', 'ru', 'en'].forEach(l => {
+        t[l] = ($('#whoTitle_' + l) || {}).value || '';
+        const ed = $(`[data-editor="whoBody_${l}"] .editor-area`);
+        b[l] = ed ? ed.innerHTML : '';
+      });
+      pg.title = t; pg.body = b;
+      // Slug va holat ATAYLAB shu yerda qotirilgan: sayt aynan shu slug'ni
+      // qidiradi va faqat `published` yozuvni chizadi. Ularni tahrirlash
+      // uchun maydon bermaymiz — noto'g'ri qiymat sahifani bo'shatib qo'yardi.
+      pg.slug = pg.slug || 'biz-kimmiz';
+      pg.status = 'published';
+      Store.upsert('pages', pg);
       renderSidebar();
       toast('Saqlandi');
     };
@@ -1868,10 +1864,15 @@
     const m = String(url || '').match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/);
     return m ? m[1] : '';
   }
+  /* Muqova FAQAT o'z serverimizdan. 2026-08-24 gacha bu yerda zaxira sifatida
+     `img.youtube.com` turardi — admin panel ochilganda ham YouTube'ga so'rov
+     ketardi. Endi muqova video qo'shilgan paytda serverga yuklab olinadi
+     (backend/thumbs.php), yo'q bo'lsa esa bo'sh qaytadi va karta o'rinbosar
+     bilan chiziladi. Tashqi manzilni QAYTA QO'SHMANG — CSP dagi
+     `img-src` ro'yxatidan `img.youtube.com` olib tashlangan, rasm baribir
+     bloklanadi. */
   function videoThumb(item) {
-    if (item.thumb) return item.thumb;
-    const id = ytId(item.url);
-    return id ? 'https://img.youtube.com/vi/' + id + '/hqdefault.jpg' : '';
+    return item.thumb || '';
   }
   let mediaTab = 'photo';
   let albumEditId = null;
@@ -2103,9 +2104,22 @@
     bg.onclick = (e) => { if (e.target === bg) bg.remove(); };
     bg.querySelector('[data-yes]').onclick = () => {
       const url = $('#vUrl', bg).value.trim(); const title = $('#vTitle', bg).value.trim();
-      if (!url || !ytId(url)) { toast('To\'g\'ri YouTube havolasini kiriting', 1); return; }
-      Store.upsert('media', { type: 'video', url, title: Store.ml(title, '', ''), date: new Date().toISOString().slice(0, 10) });
-      bg.remove(); renderSidebar(); render(); toast('Video qo\'shildi');
+      const vid = ytId(url);
+      if (!url || !vid) { toast('To\'g\'ri YouTube havolasini kiriting', 1); return; }
+      // Muqova SERVER orqali olinadi va `uploads/` ga saqlanadi — shundan
+      // keyin saytda YouTube'ga so'rov ketmaydi (backend/thumbs.php).
+      // So'rov bir necha soniya olishi mumkin, shuning uchun tugma bloklanadi.
+      const yes = bg.querySelector('[data-yes]');
+      yes.disabled = true; yes.textContent = 'Muqova olinmoqda...';
+      Store.videoThumb(vid, (thumb) => {
+        Store.upsert('media', {
+          type: 'video', url, thumb: thumb || '',
+          title: Store.ml(title, '', ''), date: new Date().toISOString().slice(0, 10)
+        });
+        bg.remove(); renderSidebar(); render();
+        // Muqova olinmasa video baribir qo'shiladi — admin buni bilib tursin.
+        toast(thumb ? 'Video qo\'shildi' : 'Video qo\'shildi (muqova olinmadi)', thumb ? 0 : 1);
+      });
     };
   }
 

@@ -131,20 +131,21 @@
       if(!items.length){ empty(tab); return; }
 
       if(tab==='video'){
-        // Karta 16:9 (video ramkasiga mos) + 16:9 thumbnail — qora chiziq (letterbox) ko'rinmaydi.
-        // maxresdefault eng sifatli, lekin har doim mavjud emas; o'shanda mqdefault (16:9) ga o'tamiz.
+        /* Karta 16:9 (video ramkasiga mos) — qora chiziq (letterbox) ko'rinmaydi.
+
+           2026-08-24: muqova FAQAT o'z serverimizdan (`m.thumb` -> uploads/).
+           Ilgari bu yerda `img.youtube.com/.../maxresdefault.jpg` turardi va
+           zaxira sifatida `mqdefault` ga o'tardi — natijada sahifani ochgan
+           HAR BIR tashrifchining IP manzili hech nima bosmasdan Google'ga
+           ketardi. Endi muqovani admin video qo'shganda server yuklab oladi
+           (backend/thumbs.php) va sahifa YouTube'ga umuman murojaat qilmaydi;
+           pleyer esa faqat "play" bosilganda ochiladi (lbRender).
+           Tashqi manzilni QAYTA QO'SHMANG: CSP `img-src` dan img.youtube.com
+           olib tashlangan, rasm baribir bloklanadi. */
         gal.innerHTML = items.map(m=>{
-          const id=ytId(m.url); const custom=m.thumb||'';
-          const th = custom || (id?`https://img.youtube.com/vi/${id}/maxresdefault.jpg`:'');
-          const fb = (!custom && id)?`https://img.youtube.com/vi/${id}/mqdefault.jpg`:'';
-          return `<div class="gtile vid rv" data-vid="${id}" data-title="${esc(ml(m.title)||'')}">${th?`<img src="${safeUrl(th)}"${fb?` data-fb="${safeUrl(fb)}"`:''} alt="">`:''}<div class="play"><span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8z"/></svg></span></div>${ml(m.title)?`<div class="vt">${esc(ml(m.title))}</div>`:''}</div>`;
+          const id=ytId(m.url); const th=m.thumb||'';
+          return `<div class="gtile vid rv" data-vid="${id}" data-title="${esc(ml(m.title)||'')}">${th?`<img src="${safeUrl(th)}" alt="" loading="lazy">`:''}<div class="play"><span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8z"/></svg></span></div>${ml(m.title)?`<div class="vt">${esc(ml(m.title))}</div>`:''}</div>`;
         }).join('');
-        // maxresdefault yo'q bo'lsa: 404 (error) yoki 120x90 kulrang placeholder (load) — ikkalasida ham mqdefault'ga o'tamiz.
-        gal.querySelectorAll('img[data-fb]').forEach(img=>{
-          const swap = ()=>{ const fb=img.getAttribute('data-fb'); if(fb){ img.removeAttribute('data-fb'); img.src=fb; } };
-          img.addEventListener('error', swap);
-          img.addEventListener('load', ()=>{ if(img.naturalWidth && img.naturalWidth<=120) swap(); });
-        });
         // Video bosilganda markazdagi lightboxда ochiladi (X + prev/next bilan).
         const vidItems = items.map(m=>({ type:'video', id:ytId(m.url), title:ml(m.title)||'' }));
         gal.querySelectorAll('.gtile').forEach((t,i)=> t.onclick=()=>{ if(vidItems[i] && vidItems[i].id) openLb(vidItems, i); });
