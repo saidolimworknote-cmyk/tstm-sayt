@@ -1,4 +1,4 @@
-# TSTM — hostingga yuklash paketini yig'ish
+# TSTM - hostingga yuklash paketini yig'ish
 # ==================================================================
 # Loyihadan FAQAT serverga kerakli fayllarni ajratib, zip qiladi.
 #
@@ -8,14 +8,14 @@
 #   powershell -ExecutionPolicy Bypass -File tools\deploy.ps1 -NoZip   # faqat papka
 #
 # NEGA SKRIPT, QO'LDA EMAS:
-#   1) `.htaccess` va `uploads\.htaccess` — nuqta bilan boshlanadi. FTP
+#   1) `.htaccess` va `uploads\.htaccess` - nuqta bilan boshlanadi. FTP
 #      mijozlari va Windows Explorer ularni ko'pincha YASHIRADI. Ular
 #      ko'chmasa saytning BUTUN himoya qatlami yo'qoladi (CSP, maxfiy
 #      fayllarni to'sish, uploads ichida PHP ishlamasligi). Skript ularni
 #      ataylab qo'shadi va oxirida borligini TEKSHIRADI.
-#   2) `backups\` 114 MB va ichida parol xeshi bor — u hech qachon veb
+#   2) `backups\` 114 MB va ichida parol xeshi bor - u hech qachon veb
 #      papkaga tushmasligi kerak.
-#   3) `config.php` da mahalliy baza paroli bor — serverdagisi boshqacha.
+#   3) `config.php` da mahalliy baza paroli bor - serverdagisi boshqacha.
 # ==================================================================
 param(
   [string]$Out = "$env:USERPROFILE\Desktop\tstm-deploy",
@@ -36,7 +36,7 @@ Write-Host ""
 
 # ---- Serverga KETMAYDIGAN narsalar --------------------------------
 # Papkalar. 2026-08-20 dan ishlab chiqish vositalari `tools\` da, hujjatlar
-# esa `docs\` da — ilgari ular ildizda yotgani uchun har birini NOMI bo'yicha
+# esa `docs\` da - ilgari ular ildizda yotgani uchun har birini NOMI bo'yicha
 # sanab chiqish kerak edi va yangi skript qo'shilganda unutilib, serverga
 # chiqib ketishi mumkin edi. Endi butun papka chetlab o'tiladi.
 $skipDirs = @('backups', '.git', '.idea', '.claude', '.vscode',

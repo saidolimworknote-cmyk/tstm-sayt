@@ -242,6 +242,39 @@ dagi `admin_bootstrap_password` yana ishlaydi.
 Admin → Sozlamalar → "Barcha ma'lumotlarni tiklash" (parol saqlanadi).
 Yoki bazani butunlay tozalash: `DROP DATABASE tstm;` — keyingi ochilishda qaytadan yaratiladi.
 
+### Kontent boshqa kompyuterga qanday ko'chadi — va kodlash qoidasi
+
+Kontent `data\baza.sql` orqali ko'chadi: admin'da o'zgartirgach
+`tools\kontent-eksport.ps1` ni ishga tushirasiz, so'ng commit qilasiz.
+Boshqa kompyuterda `git clone` + `ISHGA_TUSHIRISH.bat` — baza bo'sh bo'lsa
+o'sha fayldan to'ldiriladi.
+
+**Bir marta kuyganimiz (2026-08-24).** Eksport skripti `mariadb-dump`
+chiqishini PowerShell o'zgaruvchisiga ushlagan edi. PowerShell 5.1 native
+dasturning chiqishini **matn** deb qabul qiladi va uni **konsol kod sahifasi**
+bilan dekodlaydi — o'sha kompyuterda u CP857 (turkcha DOS) edi. Natijada
+dump'ning UTF-8 baytlari buzilib qaytadan yozildi: butun bazadagi **ruscha
+matnlar** hamda **« » ‘ ’ – °** kabi belgilar nobud bo'ldi va git orqali
+ikkinchi kompyuterga ko'chdi. Baza **buzilmagan** edi — faqat eksport quvuri
+buzgan; asl matn shu sababli to'liq tiklandi.
+
+Shundan kelib chiqqan **uchta qoida**:
+
+1. **Native dasturning chiqishini hech qachon o'zgaruvchiga ushlamang**, agar
+   unda ASCII'dan tashqari matn bo'lsa. `--result-file` (yoki faylga to'g'ridan
+   yozish) ishlating — baytlar PowerShell'ga umuman kirmasin.
+2. **`Get-Content` ni kodlashsiz chaqirmang.** PS 5.1 da u faylni ANSI kod
+   sahifasi bilan o'qiydi. `-Encoding UTF8` yozing yoki
+   `[System.IO.File]::ReadAllText(...)` ishlating.
+3. **`.ps1` fayllar sof ASCII bo'lsin.** PS 5.1 BOM'siz skriptni ANSI deb
+   o'qiydi, ya'ni kodda turgan uzun tire yoki kirill belgi skriptning
+   **o'zida** buziladi. Tekshirish: `grep -n '[^ -~\t]' tools/*.ps1`
+
+Uchta to'siq qo'yilgan: eksport buzilishni sezsa **to'xtaydi** va `baza.sql` ga
+tegmaydi; `tests\smoke.ps1` dagi **[11]** testi buzuq faylni commit'dan oldin
+ushlaydi; `.gitattributes` esa qator oxirlarini har kompyuterda bir xil
+qiladi (`core.autocrlf` ga tayanmaydi).
+
 ---
 
 ## 🖼️ Rasmlar

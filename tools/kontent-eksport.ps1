@@ -114,8 +114,50 @@ if (-not (Test-Path $sqlDir)) { New-Item -ItemType Directory -Force $sqlDir | Ou
 
 # stderr ni 2>&1 bilan yig'maymiz: PS 5.1 uni NativeCommandError ga
 # aylantirib, exit kodi 0 bo'lsa ham xato ko'rsatadi.
-$out = & $dump $a
+#
+# DIQQAT - CHIQISHNI O'ZGARUVCHIGA USHLAMANG (`$out = & $dump $a`).
+#   PowerShell 5.1 native dasturning chiqishini MATN deb qabul qiladi va uni
+#   konsol kod sahifasi ([Console]::OutputEncoding) bilan dekodlaydi. Bu
+#   kompyuterda u CP857 (turkcha DOS) edi: dump'ning UTF-8 baytlari CP857 deb
+#   o'qilib, so'ng qaytadan UTF-8 ga yozilgan. Natijada 2026-08-24 da BUTUN
+#   bazadagi ruscha matnlar hamda tire, qo'shtirnoq, daraja va (c) belgilari
+#   buzilib git'ga tushdi (commit 2065a36).
+#   `--result-file` baytlarni TO'G'RIDAN-TO'G'RI faylga yozadi - PowerShell
+#   ularga umuman tegmaydi. tools\backup.ps1 ham aynan shunday ishlaydi.
+$vaqtli = Join-Path $env:TEMP "tstm-eksport-$PID.sql"
+& $dump ($a + "--result-file=$vaqtli")
 if ($LASTEXITCODE -ne 0) { Xato "eksport yiqildi (kod $LASTEXITCODE)"; exit 1 }
+if (-not (Test-Path $vaqtli)) { Xato "dump fayli yasalmadi: $vaqtli"; exit 1 }
+
+# Baytlarni QAT'IY UTF-8 sifatida o'qiymiz (throwOnInvalidBytes = $true).
+# Dump negadir UTF-8 bo'lmasa - jim o'tkazib yubormay shu yerda to'xtaymiz:
+# buzuq fayl git'ga tushgandan ko'ra eksportning yiqilgani yaxshi.
+$utf8Qat = New-Object System.Text.UTF8Encoding($false, $true)
+try     { $tana = $utf8Qat.GetString([System.IO.File]::ReadAllBytes($vaqtli)) }
+catch   { Xato "dump UTF-8 emas - eksport to'xtatildi ($($_.Exception.Message))"; exit 1 }
+finally { Remove-Item $vaqtli -Force -ErrorAction SilentlyContinue }
+
+# Qator oxirlari HAMISHA LF. Fayl git orqali boshqa kompyuterga o'tadi va u
+# yerda bayt-baytiga AYNI shu bo'lishi kerak (qarang: .gitattributes).
+$tana = $tana -replace "`r`n", "`n"
+if (-not $tana.EndsWith("`n")) { $tana += "`n" }
+
+# ---- Buzilish qo'riqchisi ----------------------------------------
+# CP857/OEM buzilishi matnda ramka va blok belgilarini (U+2500..U+25A0:
+# gorizontal chiziq, burchak, soyalangan kvadrat) qoldiradi, yo'qolgan
+# belgilar esa U+FFFD ga aylanadi. Tirik kontentda bunday narsa BO'LMAYDI,
+# shuning uchun bu ishonchli alomat. Topilsa - baza.sql ga tegmaymiz:
+# eski, to'g'ri nusxa joyida qoladi.
+#
+# Naqsh SHU YERDA belgi KODLARIDAN quriladi, ataylab: bu skript sof ASCII
+# bo'lishi kerak. PowerShell 5.1 BOM'siz .ps1 faylni ANSI deb o'qiydi, ya'ni
+# kodda jonli belgi tursa, u skriptning o'zida buzilib ketardi.
+$naqsh = "[" + [char]0xFFFD + [char]0x2500 + "-" + [char]0x25A0 + "]"
+if ($tana -match $naqsh) {
+  Xato "dump ichida buzilgan belgilar topildi - eksport TO'XTATILDI"
+  Write-Host "     Sabab odatda konsol kodlashi. data\baza.sql O'ZGARTIRILMADI." -ForegroundColor Yellow
+  exit 1
+}
 
 # `--databases` USE/CREATE DATABASE qatorlarini qo'shadi - ular kerak,
 # chunki import bo'sh serverga ham tushishi mumkin.
@@ -139,7 +181,11 @@ $sarlavha = @"
 -- ==================================================================
 
 "@
-[System.IO.File]::WriteAllText($Chiqish, $sarlavha + ($out -join "`r`n") + "`r`n", (New-Object System.Text.UTF8Encoding($false)))
+# Sarlavha ham LF bilan: here-string shu faylning qator oxirini oladi,
+# fayl esa .gitattributes bo'yicha LF (qarang: *.ps1 emas, *.sql qoidasi -
+# skript CRLF, lekin uning ichidagi sarlavha matni baza.sql ga tushadi).
+$sarlavha = $sarlavha -replace "`r`n", "`n"
+[System.IO.File]::WriteAllText($Chiqish, $sarlavha + $tana, (New-Object System.Text.UTF8Encoding($false)))
 
 $kb = [math]::Round((Get-Item $Chiqish).Length / 1KB, 1)
 Ok "$($KONTENT.Count) jadval, $kb KB"

@@ -1,4 +1,4 @@
-# TSTM — zaxira nusxa olish skripti
+# TSTM - zaxira nusxa olish skripti
 # ------------------------------------------------------------------
 # Bazani (mysqldump) + yuklangan fayllarni (uploads/) bitta papkaga arxivlaydi.
 # Ishlatish:   powershell -ExecutionPolicy Bypass -File tools\backup.ps1
@@ -31,7 +31,7 @@ $dbHost = '127.0.0.1'; $dbPort = '3307'; $dbName = 'tstm'; $dbUser = 'tstm'; $db
 
 $cfg = Join-Path $root 'backend\config.php'
 if (Test-Path $cfg) {
-  $txt = Get-Content $cfg -Raw
+  $txt = [System.IO.File]::ReadAllText($cfg, (New-Object System.Text.UTF8Encoding($false)))
   if ($txt -match "'db_name'\s*=>\s*'([^']*)'") { $dbName = $Matches[1] }
   if ($txt -match "'db_user'\s*=>\s*'([^']*)'") { $dbUser = $Matches[1] }
   if ($txt -match "'db_pass'\s*=>\s*'([^']*)'") { $dbPass = $Matches[1] }
@@ -97,7 +97,7 @@ Set-Content -Path (Join-Path $dir 'meta.txt') -Value $meta -Encoding utf8
 Say "  [3/4] meta.txt yozildi" 'Green'
 
 # --- 4. Boshqa diskka ikkinchi nusxa ---
-# C: ni yo'qotsak yoki xato buyruq C: dagi hamma narsani o'chirsa — bu nusxa qoladi.
+# C: ni yo'qotsak yoki xato buyruq C: dagi hamma narsani o'chirsa - bu nusxa qoladi.
 $mirrorOk = $false
 if ($MirrorTo -ne '') {
   try {
@@ -106,7 +106,7 @@ if ($MirrorTo -ne '') {
     Copy-Item $dir $dst -Recurse -Force -ErrorAction Stop
     $mirrorOk = $true
     Say "  [4/4] Ikkinchi nusxa: $dst" 'Green'
-    # Tozalash pastda, Invoke-Prune orqali — ikkala joyda bir xil siyosat bilan
+    # Tozalash pastda, Invoke-Prune orqali - ikkala joyda bir xil siyosat bilan
   } catch {
     Say "  [4/4] OGOHLANTIRISH: ikkinchi nusxa olinmadi ($MirrorTo) - $($_.Exception.Message)" 'Yellow'
   }
@@ -117,9 +117,9 @@ if ($MirrorTo -ne '') {
 # --- Eski zaxiralarni tozalash ---
 # Skript kuniga bir necha marta ishlagani uchun "oxirgi 14 ta" degan qoida
 # atigi 2 kunlik tarix qoldirardi. Buning o'rniga bosqichli (pog'onali) saqlash:
-#   * oxirgi 3 kunniki  — HAMMASI (soatlik aniqlik: "bugun buzilgan"ni qaytarish)
-#   * 3-90 kun oralig'i — har kunning ENG OXIRGISI (kunlik aniqlik)
-#   * 90 kundan eski    — o'chiriladi
+#   * oxirgi 3 kunniki  - HAMMASI (soatlik aniqlik: "bugun buzilgan"ni qaytarish)
+#   * 3-90 kun oralig'i - har kunning ENG OXIRGISI (kunlik aniqlik)
+#   * 90 kundan eski    - o'chiriladi
 # 6 MB x ~100 nusxa = ~600 MB. Diskda joy bor, ma'lumot esa qaytmaydi.
 function Invoke-Prune($base) {
   $items = Get-ChildItem $base -Directory -ErrorAction SilentlyContinue |
@@ -133,8 +133,8 @@ function Invoke-Prune($base) {
     $day = $Matches[1]
     $when = [datetime]::ParseExact("$($Matches[1])$($Matches[2])", 'yyyyMMddHHmmss', $null)
     $age = ($now - $when).TotalDays
-    if ($age -le 3) { $keep[$i.Name] = $true; continue }      # yaqin tarix — hammasi
-    if ($age -gt 90) { continue }                              # juda eski — o'chadi
+    if ($age -le 3) { $keep[$i.Name] = $true; continue }      # yaqin tarix - hammasi
+    if ($age -gt 90) { continue }                              # juda eski - o'chadi
     if (-not $byDay.ContainsKey($day) -or $i.Name -gt $byDay[$day]) { $byDay[$day] = $i.Name }
   }
   foreach ($n in $byDay.Values) { $keep[$n] = $true }          # har kunning oxirgisi
