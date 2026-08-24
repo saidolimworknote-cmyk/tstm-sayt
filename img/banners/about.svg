@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 420" width="1600" height="420" role="presentation" aria-hidden="true">
+<defs>
+  <linearGradient id="fon" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#071528"/>
+    <stop offset=".55" stop-color="#0b2a4e"/>
+    <stop offset="1" stop-color="#11467f"/>
+  </linearGradient>
+  <pattern id="tur" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M40 0H0V40" fill="none" stroke="#9ecdf0" stroke-width=".7" opacity=".075"/>
+  </pattern>
+  <radialGradient id="nur" cx=".735" cy=".5" r=".33">
+    <stop offset="0" stop-color="#9ecdf0" stop-opacity=".22"/>
+    <stop offset="1" stop-color="#9ecdf0" stop-opacity="0"/>
+  </radialGradient>
+</defs>
+<rect width="1600" height="420" fill="url(#fon)"/>
+<rect width="1600" height="420" fill="url(#tur)"/>
+  <g stroke="CHIZ" fill="none" opacity=".17">
+    <circle cx="1720" cy="210" r="430" stroke-width="1.6"/>
+    <ellipse cx="1720" cy="210" rx="400" ry="430" stroke-width="1.1"/>
+    <ellipse cx="1720" cy="210" rx="320" ry="430" stroke-width="1.1"/>
+    <ellipse cx="1720" cy="210" rx="200" ry="430" stroke-width="1.1"/>
+    <ellipse cx="1720" cy="210" rx="70" ry="430" stroke-width="1.1"/>
+    <path d="M1290 210h860" stroke-width="1.1"/>
+    <path d="M1299 299h842" stroke-width="1.1"/>
+    <path d="M1299 121h842" stroke-width="1.1"/>
+    <path d="M1330 392h780" stroke-width="1.1"/>
+    <path d="M1330 28h780" stroke-width="1.1"/>
+    <path d="M1389 485h662" stroke-width="1.1"/>
+    <path d="M1389 -65h662" stroke-width="1.1"/>
+  </g>
+
+<rect width="1600" height="420" fill="url(#nur)"/>
+<!-- Matn zonasi bilan chizma zonasini ajratuvchi ingichka chiziq. -->
+<g stroke="#9ecdf0" fill="none" opacity=".16">
+  <path d="M944 118v184" stroke-width="1.2"/>
+  <rect x="940" y="206" width="8" height="8" fill="#9ecdf0" stroke="none"/>
+</g>
+<g fill="none" stroke="#9ecdf0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M1180 108l138 68h-276z" opacity=".85"/>
+  <path d="M1168 148h24l7 28h-38z" fill="#2f9be0" opacity=".85" stroke="none"/>
+  <rect x="1040" y="180" width="280" height="16" rx="3" opacity=".85"/>
+  <path d="M1046 200h268" opacity=".3" stroke-width="1.4"/>
+  <rect x="1062" y="206" width="24" height="78" rx="3" opacity=".8"/>
+  <path d="M1070 214v62M1078 214v62" opacity=".26" stroke-width="1.4"/>
+  <rect x="1119" y="206" width="24" height="78" rx="3" opacity=".8"/>
+  <path d="M1127 214v62M1135 214v62" opacity=".26" stroke-width="1.4"/>
+  <rect x="1176" y="206" width="24" height="78" rx="3" opacity=".8"/>
+  <path d="M1184 214v62M1192 214v62" opacity=".26" stroke-width="1.4"/>
+  <rect x="1233" y="206" width="24" height="78" rx="3" opacity=".8"/>
+  <path d="M1241 214v62M1249 214v62" opacity=".26" stroke-width="1.4"/>
+  <rect x="1290" y="206" width="24" height="78" rx="3" opacity=".8"/>
+  <path d="M1298 214v62M1306 214v62" opacity=".26" stroke-width="1.4"/>
+  <rect x="1030" y="288" width="300" height="10" rx="2" opacity=".7"/>
+  <rect x="1018" y="298" width="324" height="10" rx="2" opacity=".7"/>
+  <rect x="1006" y="308" width="348" height="10" rx="2" opacity=".7"/>
+
+</g>
+</svg>

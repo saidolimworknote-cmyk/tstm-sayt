@@ -511,6 +511,72 @@
     banner.insertAdjacentElement('afterend', el);
   }
 
+  // ---------- Non ushoqlari (breadcrumb) ----------
+  // Zanjir MENYUDAN (NAV) quriladi va boshqa hech qayerdan emas.
+  //
+  // NEGA (2026-08-24): ilgari har bir sahifa o'z zanjirini qo'lda yozardi va
+  // yozuv sahifalari (nashr/tadbir/sharh/ekspert) zanjirning oxiriga
+  // KONTENTNING O'Z TOIFASINI qo'yardi — "Bosh sahifa / Nashrlar / Siyosat"
+  // kabi. Na "Nashrlar", na "Siyosat" menyuda bor: birinchisi menyuda
+  // "Tadqiqotlar" deb ataladi, ikkinchisi esa umuman bo'lim emas, admin
+  // kiritadigan erkin yorliq. Tashrifchi zanjirni bosib borsa, mavjud
+  // bo'lmagan bo'limga ishonib qolardi.
+  //
+  // Endi qoida bitta: zanjirdagi HAR BIR band — menyuda haqiqatan bor
+  // bo'lim. Oxirgi band joriy sahifaning O'ZI bo'lsa havola emas (u yerdasiz),
+  // aks holda havola (yozuv sahifasidan ro'yxatga qaytish yo'li).
+  //
+  // Menyuda yo'q, lekin bo'limga tegishli sahifalar shu yerda qo'lda
+  // bog'lanadi — ular menyuda ko'rinmaydi, ammo zanjirda o'z o'rni bor.
+  const CRUMB_EXTRA = {
+    'tadqiqotlar.html': [{ tk:'nav_analytics', href:'nashrlar.html' }, { tk:'p_research_title', href:'tadqiqotlar.html' }],
+    'yonalish.html':    [{ tk:'nav_analytics', href:'nashrlar.html' }, { tk:'p_research_title', href:'tadqiqotlar.html' }]
+  };
+  function crumbTrail(file){
+    for (const top of NAV){
+      const th = (top.href || '').split('?')[0].toLowerCase();
+      if (th && th === file) return [{ tk: top.tk, href: top.href }];
+      for (const ch of (top.children || [])){
+        if (ch.href.split('?')[0].toLowerCase() === file){
+          // `group` bandning sahifasi yo'q — matn bo'lib qoladi, havola emas.
+          return [{ tk: top.tk, href: top.group ? '' : top.href }, { tk: ch.tk, href: ch.href }];
+        }
+      }
+    }
+    return CRUMB_EXTRA[file] || null;
+  }
+  // file — zanjir QAYSI sahifagacha borishi (yozuv sahifasida: uning ro'yxati).
+  // tail — oxiriga qo'shiladigan erkin matn (ism, sarlavha). Havola bo'lmaydi.
+  function crumbHTML(file, tail){
+    const cur = currentFile();
+    const trail = crumbTrail(String(file || cur).toLowerCase());
+    let h = `<a href="index.html" data-i18n="home">${esc(T('home'))}</a>`;
+    (trail || []).forEach(p => {
+      const same = p.href && p.href.split('?')[0].toLowerCase() === cur;
+      const lab = esc(T(p.tk));
+      h += '<span class="sep">/</span>';
+      h += (p.href && !same)
+        ? `<a href="${p.href}" data-i18n="${p.tk}">${lab}</a>`
+        : `<span data-i18n="${p.tk}">${lab}</span>`;
+    });
+    if (tail) h += `<span class="sep">/</span><span>${esc(tail)}</span>`;
+    return h;
+  }
+  // Statik sahifalarning HTML dagi zanjirini shu qoidaga moslab qayta chizadi.
+  // Yozuv sahifalari (nashr.html va h.k.) NAV da yo'q — ularga tegilmaydi,
+  // ular Site.crumbHTML() ni o'zlari, o'z ro'yxat sahifasi bilan chaqiradi.
+  function renderCrumb(){
+    const el = document.querySelector('.page-banner .crumb');
+    if (!el || !crumbTrail(currentFile())) return;
+    // yonalish.html oxirgi bandni o'zi yozadi (#cr) — uni saqlab qolamiz.
+    const keep = el.querySelector('#cr');
+    el.innerHTML = crumbHTML();
+    if (keep){
+      el.insertAdjacentHTML('beforeend', '<span class="sep">/</span>');
+      el.appendChild(keep);
+    }
+  }
+
   // ---------- banner background ----------
   // sahifa fayli -> banner kaliti
   const BANNER_MAP = {
@@ -520,8 +586,20 @@
     // "Tahlillar" bo'limining uch sahifasi nashrlar bilan bir xil bannerni oladi
     'tahlillar.html':'pubs','maqolalar.html':'pubs','kitoblar.html':'pubs','maruzalar.html':'pubs',
     'biz-kimmiz.html':'about','rahbariyat.html':'leadership','ekspertlar.html':'experts','hamkorlar.html':'about','media.html':'media',
+    // Xodim sahifasi: `active` kaliti 'about' (peshtoq) edi — odam sahifasiga
+    // bino rasmi mos kelmaydi, ekspertlar tarmog'i mos keladi.
+    'expert.html':'experts',
     'aloqa.html':'contact','qidiruv.html':'search',
     'oav.html':'oav','sharh.html':'oav'
+  };
+  // Har bo'limning STANDART banneri — `img/banners/` dagi vektor infografikalar
+  // (`tools\bannerlar-yasa.php` yasaydi). Admin panelda uya bo'sh bo'lsa shu
+  // ishlatiladi; admin o'z rasmini yuklasa, u ustidan yozadi.
+  // NEGA KERAK: aks holda sozlamalar bo'sh bo'lgan har bir sahifa tekis ko'k
+  // fon bilan ochilardi va 10 ta bannerni qo'lda yuklamaguncha shunday qolardi.
+  const BANNER_DEF = {
+    events:1, pubs:1, research:1, about:1, leadership:1,
+    experts:1, media:1, contact:1, search:1, oav:1
   };
   function applyBanner(activeKey){
     const banners = (settings() || {}).banners || {};
@@ -536,12 +614,22 @@
       else if (loadedOk) localStorage.removeItem(CK); // admin o'chirgan — zaxirani tozalaymiz
       else url = localStorage.getItem(CK) || ''; // store bo'sh (reload lahzasi) — zaxiradan
     } catch{}
+    if (!url && BANNER_DEF[key]) url = 'img/banners/' + key + '.svg';
     const el = document.querySelector('.page-banner');
     if (el && url){
       el.classList.add('has-img');
-      // CSS qiymatiga qo'shtirnoq/qavs tushsa url() dan chiqib boshqa e'lon
-      // qo'shish mumkin edi — shuning uchun kodlab beramiz.
-      el.style.setProperty('--banner-img', `url("${encodeURI(url).replace(/"/g, '%22')}")`);
+      // TUZOQ (2026-08-24 da topildi): CSS o'ZGARUVCHISI ichidagi nisbiy
+      // `url()` brauzerda HUJJATGA emas, o'zgaruvchi ISHLATILGAN stylesheet
+      // manziliga nisbatan hisoblanadi. `background-image:var(--banner-img)`
+      // esa `css/site.css` da — ya'ni `uploads/x.jpg` deb bersak, brauzer
+      // `css/uploads/x.jpg` ni so'raydi va 404 oladi. Shu sabab admin
+      // yuklagan bannerlar HECH QACHON ko'rinmagan: sahifa tekis ko'k
+      // qolaverib, sabab ko'rinmas edi (xato konsolda ham chiqmaydi).
+      // Yechim: to'liq (mutlaq) manzilga aylantiramiz — u holda hech qanday
+      // "nisbatan" qolmaydi. new URL() manzilni o'zi to'g'ri kodlaydi.
+      let abs = url;
+      try { abs = new URL(url, document.baseURI).href; } catch{}
+      el.style.setProperty('--banner-img', `url("${abs.replace(/"/g, '%22')}")`);
     }
   }
 
@@ -678,6 +766,7 @@
     if (typeof opts.render === 'function') {
       try { opts.render(); } catch(e){ console.error(e); }
     }
+    try { renderCrumb(); } catch(e){ console.error('renderCrumb:', e); }
     try { applyBanner(opts.active); } catch(e){ console.error('applyBanner:', e); }
     try { renderSectionNav(); } catch(e){ console.error('renderSectionNav:', e); }
     try { renderFooter(); } catch(e){ console.error('renderFooter:', e); }
@@ -821,5 +910,5 @@
     (root || document).querySelectorAll('select:not(.a11y-sel)').forEach(enhanceSelect);
   }
 
-  w.Site = { initPage, renderHeader, renderFooter, renderSectionNav, EVENT_KINDS, eventKind, eventKindById, PUB_KINDS, pubKind, pubKindById, mlGet, dispTitle, esc, safeUrl, fmtDate, dayMonth, qs, settings, lang, brandLogo, brandLines, orgName, shortName, socialLinks, copyrightText, t: T, ICON, NAV, initReveal, showSubscribe, printDoc, printHeadHTML, printFootHTML, enhanceSelect, enhanceSelects };
+  w.Site = { initPage, renderHeader, renderFooter, renderSectionNav, crumbHTML, EVENT_KINDS, eventKind, eventKindById, PUB_KINDS, pubKind, pubKindById, mlGet, dispTitle, esc, safeUrl, fmtDate, dayMonth, qs, settings, lang, brandLogo, brandLines, orgName, shortName, socialLinks, copyrightText, t: T, ICON, NAV, initReveal, showSubscribe, printDoc, printHeadHTML, printFootHTML, enhanceSelect, enhanceSelects };
 })(window);

@@ -7,7 +7,7 @@
     const p = id ? Store.find('publications', id) : null;
     const main = document.getElementById('main');
     if(!p || p.status!=='published'){
-      main.innerHTML = `<div class="page-banner"><div class="wrap"><div class="crumb"><a href="index.html">${T('home')}</a><span class="sep">/</span><a href="nashrlar.html">${T('nav_pubs')}</a></div><h1>${T('not_found_t')}</h1></div></div>
+      main.innerHTML = `<div class="page-banner"><div class="wrap"><div class="crumb">${Site.crumbHTML('nashrlar.html')}</div><h1>${T('not_found_t')}</h1></div></div>
         <section class="block"><div class="wrap"><div class="empty"><div class="t">${T('not_found_t')}</div><div class="mt-20"><a class="btn outline" href="nashrlar.html">← ${T('all_pubs')}</a></div></div></div></section>`;
       return;
     }
@@ -56,9 +56,13 @@
     const related = Store.all('publications').filter(x=>x.status==='published' && x.id!==p.id && (!p.category || x.category===p.category))
       .sort((a,b)=>String(b.year||'').localeCompare(String(a.year||''))).slice(0,3);
 
+    // Non zanjiri nashr QAYSI kichik sahifada turishiga qarab quriladi
+    // (Maqolalar / Ma'ruzalar / Tahlillar / Kitoblar). Ilgari oxirgi band
+    // nashrning O'Z TOIFASI edi ("Siyosat" kabi) — menyuda bunday bo'lim yo'q.
+    const pk = Site.pubKind(p.type);
     main.innerHTML = `${printHead}
       <div class="page-banner tight${showFull?' has-full':''}"><div class="wrap">
-        <div class="crumb"><a href="index.html">${T('home')}</a><span class="sep">/</span><a href="nashrlar.html">${T('nav_pubs')}</a><span class="sep">/</span><span>${p.category?Site.esc(Site.mlGet(p.category)):Site.esc(T('search_k_pub'))}</span></div>
+        <div class="crumb">${Site.crumbHTML(pk ? pk.page : 'nashrlar.html')}</div>
         <h1>${Site.esc(dispT)}</h1>
         ${showFull?`<div class="ptitle">${Site.esc(fullTitle)}</div>`:''}
       </div></div>

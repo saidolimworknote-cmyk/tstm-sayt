@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 420" width="1600" height="420" role="presentation" aria-hidden="true">
+<defs>
+  <linearGradient id="fon" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#071528"/>
+    <stop offset=".55" stop-color="#0b2a4e"/>
+    <stop offset="1" stop-color="#11467f"/>
+  </linearGradient>
+  <pattern id="tur" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M40 0H0V40" fill="none" stroke="#9ecdf0" stroke-width=".7" opacity=".075"/>
+  </pattern>
+  <radialGradient id="nur" cx=".735" cy=".5" r=".33">
+    <stop offset="0" stop-color="#9ecdf0" stop-opacity=".22"/>
+    <stop offset="1" stop-color="#9ecdf0" stop-opacity="0"/>
+  </radialGradient>
+</defs>
+<rect width="1600" height="420" fill="url(#fon)"/>
+<rect width="1600" height="420" fill="url(#tur)"/>
+  <g stroke="CHIZ" fill="none" opacity=".17">
+    <circle cx="1720" cy="210" r="430" stroke-width="1.6"/>
+    <ellipse cx="1720" cy="210" rx="400" ry="430" stroke-width="1.1"/>
+    <ellipse cx="1720" cy="210" rx="320" ry="430" stroke-width="1.1"/>
+    <ellipse cx="1720" cy="210" rx="200" ry="430" stroke-width="1.1"/>
+    <ellipse cx="1720" cy="210" rx="70" ry="430" stroke-width="1.1"/>
+    <path d="M1290 210h860" stroke-width="1.1"/>
+    <path d="M1299 299h842" stroke-width="1.1"/>
+    <path d="M1299 121h842" stroke-width="1.1"/>
+    <path d="M1330 392h780" stroke-width="1.1"/>
+    <path d="M1330 28h780" stroke-width="1.1"/>
+    <path d="M1389 485h662" stroke-width="1.1"/>
+    <path d="M1389 -65h662" stroke-width="1.1"/>
+  </g>
+
+<rect width="1600" height="420" fill="url(#nur)"/>
+<!-- Matn zonasi bilan chizma zonasini ajratuvchi ingichka chiziq. -->
+<g stroke="#9ecdf0" fill="none" opacity=".16">
+  <path d="M944 118v184" stroke-width="1.2"/>
+  <rect x="940" y="206" width="8" height="8" fill="#9ecdf0" stroke="none"/>
+</g>
+<g fill="none" stroke="#9ecdf0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M1064 206h56M1240 206h56M1180 122v34M1180 256v34" opacity=".3" stroke-dasharray="6 6"/>
+  <circle cx="1180" cy="206" r="104" opacity=".16"/>
+  <circle cx="1180" cy="206" r="72" opacity=".24"/>
+  <circle cx="1180" cy="206" r="40" opacity=".34"/>
+  <path d="M1180 132c-26 0-46 20-46 45 0 33 46 78 46 78s46-45 46-78c0-25-20-45-46-45z" fill="#2f9be0" stroke="none"/>
+  <circle cx="1180" cy="177" r="15" fill="#071528" opacity=".78" stroke="none"/>
+  <ellipse cx="1180" cy="272" rx="52" ry="13" opacity=".26"/>
+  <path d="M1000 288q86 26 132-46" opacity=".34" stroke-dasharray="4 7" stroke-width="1.8"/>
+  <circle cx="1000" cy="288" r="6" fill="#7fd1ff" stroke="none" opacity=".85"/>
+  <rect x="1300" y="150" width="92" height="112" rx="8" opacity=".45"/>
+  <rect x="1318" y="172" width="56" height="5" rx="2.5" fill="#9ecdf0" opacity=".3" stroke="none"/>
+  <rect x="1318" y="192" width="40" height="5" rx="2.5" fill="#9ecdf0" opacity=".3" stroke="none"/>
+  <rect x="1318" y="212" width="48" height="5" rx="2.5" fill="#9ecdf0" opacity=".3" stroke="none"/>
+  <path d="M1318 240h56" opacity=".22" stroke-width="1.4"/>
+
+</g>
+</svg>

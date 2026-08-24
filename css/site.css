@@ -711,6 +711,21 @@ body.inner{overflow-x:clip;}
   section.block{padding:36px 0;}
   /* sarlavhalar mobilda ixcham */
   .page-banner{min-height:163px;}
+  /* Mobilda banner juda past va tor: `cover` rasmning chap va o'ng chetini
+     kesib tashlaydi. Markazni emas, o'ng tomonni ushlab qolamiz — infografika
+     aynan o'sha yerda (chap yarmi gradient bilan qoraytirilgan, u yerda
+     baribir hech narsa ko'rinmaydi). */
+  .page-banner.has-img{background-position:78% center;}
+  /* Mobilda banner past va tor bo'lgani uchun `cover` rasmni kuchli
+     kattalashtiradi — infografika chizig'i sarlavha ostiga kirib, matnni
+     o'qishga xalaqit beradi. Shuning uchun bu yerda parda O'NG CHETGACHA
+     boradi va hech qayerda to'liq shaffof bo'lmaydi: chizma fon naqshi
+     bo'lib qoladi, matn esa hamma joyda o'qiladi. */
+  .page-banner.has-img::after{
+    background:linear-gradient(to right,
+      rgba(7,16,30,.95) 0,
+      rgba(8,20,38,.88) 50%,
+      rgba(8,22,44,.66) 100%);}
   .page-banner .wrap{padding:28px 16px 26px;}
   .page-banner h1{font-size:1.375rem;line-height:1.2;}
   .page-banner .lead{font-size:0.875rem;line-height:1.5;margin-top:10px;}

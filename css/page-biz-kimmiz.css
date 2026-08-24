@@ -13,20 +13,27 @@
      kattaroq shrift va ishlangan sarlavha kerak. */
 
   /* ---- Matn ustuni ----
-     `ch` — o'lchov shriftga bog'liq: qatorda ~70 belgi qoladi. Bu tipografiyada
-     qulay deb hisoblangan 60-75 oralig'i: kengroq qatorda ko'z keyingi qator
-     boshini yo'qotadi, torroqda esa matn juda tez sinadi. */
-  .who-text{max-width:70ch;margin:0 auto;}
+     `ch` — o'lchov shriftga bog'liq: qatorda ~90 belgi qoladi.
+     2026-08-24: ilgari 70ch edi. Katta ekranda (1920px) bu ~830px ustun
+     bo'lib, sahifaning uchdan ikki qismi bo'sh qolardi va matn bloki
+     "yo'qolib" ketardi. `min()` bilan yuqori chegara ham bor: cheksiz
+     cho'zilsa qator uzayib, ko'z keyingi qator boshini yo'qotadi. */
+  .who-text{max-width:min(90ch,1180px);margin:0 auto;}
 
   /* ---- Sarlavha ----
-     Ostidagi qisqa chiziq ::after orqali: matn bloki uzun bo'lgani uchun
-     sarlavha bilan birinchi xatboshi o'rtasida ko'rinadigan "chegara" kerak. */
+     Ostidagi chiziq: butun ustun bo'ylab ingichka chiziq (::before) +
+     o'rtasida qalin urg'u bo'lagi (::after). 2026-08-24 gacha sarlavha
+     `max-width:20ch` ga qisilgan va chiziq 64px edi — keng ekranda
+     sarlavha uch qatorga sinib, ostida kichkina chizmoq qolardi.
+     Endi sarlavha ustun kengligini oladi, chiziq esa u bilan barobar. */
   .who-text>h2{position:relative;font-family:var(--serif);font-weight:600;
-    font-size:clamp(25px,3vw,40px);line-height:1.18;letter-spacing:-.015em;
-    text-align:center;color:var(--accent);max-width:20ch;
+    font-size:clamp(25px,3.2vw,46px);line-height:1.16;letter-spacing:-.015em;
+    text-align:center;color:var(--accent);
     margin:0 auto clamp(34px,3.6vw,52px);padding-bottom:clamp(22px,2.4vw,32px);}
+  .who-text>h2::before{content:"";position:absolute;left:0;right:0;bottom:1px;
+    height:1px;background:var(--line);}
   .who-text>h2::after{content:"";position:absolute;left:50%;bottom:0;transform:translateX(-50%);
-    width:64px;height:3px;border-radius:2px;background:var(--accent2);}
+    width:clamp(90px,14%,170px);height:3px;border-radius:2px;background:var(--accent2);}
 
   /* ---- Matn tanasi ---- */
   .who-body{color:var(--ink-2);font-size:1.0625rem;line-height:1.9;
@@ -69,7 +76,7 @@
   .who-body p:empty{display:none;}
 
   @media(max-width:760px){
-    .who-text>h2{max-width:none;font-size:clamp(21px,5.4vw,26px);padding-bottom:20px;margin-bottom:28px;}
+    .who-text>h2{font-size:clamp(21px,5.4vw,26px);padding-bottom:20px;margin-bottom:28px;}
     .who-text>h2::after{width:48px;height:2px;}
     .who-body{font-size:0.96875rem;line-height:1.78;}
     .who-body p{margin-bottom:18px;}

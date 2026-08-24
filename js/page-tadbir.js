@@ -19,7 +19,7 @@ Site.initPage({ active: 'events', render(){
   // bo'lishi mumkin — shu sababli "topilmadi" holati ham qamrab olinadi.
   if(!ev || ev.status !== 'published'){
     main.innerHTML = `<div class="page-banner"><div class="wrap">
-        <div class="crumb"><a href="index.html">${esc(T('home'))}</a><span class="sep">/</span><a href="tadbirlar.html">${esc(T('nav_happenings'))}</a></div>
+        <div class="crumb">${Site.crumbHTML('tadbirlar.html')}</div>
         <h1>${esc(T('not_found_t'))}</h1>
       </div></div>
       <section class="block"><div class="wrap"><div class="empty">
@@ -99,7 +99,7 @@ Site.initPage({ active: 'events', render(){
 
   main.innerHTML = `${printHead}
     <div class="page-banner"><div class="wrap">
-      <div class="crumb"><a href="index.html">${esc(T('home'))}</a><span class="sep">/</span><a href="tadbirlar.html">${esc(T('nav_happenings'))}</a><span class="sep">/</span><a href="${backHref}">${esc(backLbl)}</a></div>
+      <div class="crumb">${Site.crumbHTML(backHref)}</div>
       <h1>${esc(title)}</h1>
     </div></div>
     <section class="block"><div class="wrap"><div class="article">

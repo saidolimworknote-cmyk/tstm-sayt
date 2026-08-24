@@ -9,7 +9,7 @@
     if(!e){
       // Xodim topilmadi — qaysi bo'limga tegishli ekanini bilib bo'lmaydi,
       // shuning uchun kengroq ro'yxatga (ekspertlar) qaytaramiz.
-      main.innerHTML = `<div class="page-banner"><div class="wrap"><div class="crumb"><a href="index.html">${T('home')}</a><span class="sep">/</span><a href="ekspertlar.html">${T('nav_about_experts')}</a></div><h1>${T('not_found_t')||'Topilmadi'}</h1></div></div>
+      main.innerHTML = `<div class="page-banner"><div class="wrap"><div class="crumb">${Site.crumbHTML('ekspertlar.html')}</div><h1>${T('not_found_t')}</h1></div></div>
         <section class="block"><div class="wrap"><div class="empty"><div class="t">${T('not_found_t')}</div><div class="mt-20"><a class="btn outline" href="ekspertlar.html">← ${T('all_team')}</a></div></div></div></section>`;
       return;
     }
@@ -63,9 +63,21 @@
     const backHref = e.kind === 'Rahbariyat' ? 'rahbariyat.html' : 'ekspertlar.html';
     const backLbl  = e.kind === 'Rahbariyat' ? T('nav_about_leadership') : T('nav_about_experts');
 
+    // Banner sarlavhasi: ism + lavozim.
+    // 2026-08-24 gacha bu yerda FAQAT non zanjiri turardi — xodim sahifasi
+    // "Bosh sahifa / Markaz haqida / Ekspertlar / Ism" degan bitta qatordan
+    // keyin darhol suratga o'tib ketardi va bo'sh ko'rinardi. Ism va lavozim
+    // pastda, o'ng ustunda edi; endi ular saytdagi boshqa hamma sahifa kabi
+    // bannerga chiqdi (pastdagi nusxasi olib tashlandi — takror bo'lmasin).
+    // `sub` — bo'lim/qo'shimcha unvon; ko'pincha bo'sh, shuning uchun
+    // faqat to'ldirilgan bo'lsa lavozimga qo'shiladi.
+    const lavozim = [ml(e.role), ml(e.sub)].map(s => String(s || '').trim()).filter(Boolean).join(' · ');
+
     main.innerHTML = `
       <div class="page-banner"><div class="wrap">
-        <div class="crumb"><a href="index.html">${T('home')}</a><span class="sep">/</span><a href="${backHref}">${backLbl}</a><span class="sep">/</span><span>${esc(name)}</span></div>
+        <div class="crumb">${Site.crumbHTML(backHref, name)}</div>
+        <h1>${esc(name)}</h1>
+        ${lavozim ? `<p class="lead">${esc(lavozim)}</p>` : ''}
       </div></div>
       <section class="block"><div class="wrap"><div class="exp-detail">
         <div>
@@ -73,9 +85,6 @@
           ${contactRows?`<div class="exp-contact"><div class="lab">${T('expert_contact')}</div>${contactRows}</div>`:''}
         </div>
         <div>
-          <div class="role">${esc(ml(e.role))}</div>
-          <h1>${esc(name)}</h1>
-          <div class="sub">${esc(ml(e.sub))}</div>
           ${tags.length?`<div class="kicker kick-m0-12">${T('expert_expertise')}</div>
             <div class="exp-tags">${tags.map(t=>`<a href="nashrlar.html?cat=${encodeURIComponent(t)}">${esc(t)}</a>`).join('')}</div>`:''}
           ${bio?`<div class="kicker kick-m8-14">${T('expert_bio')}</div><div class="prose">${bio}</div>`:''}

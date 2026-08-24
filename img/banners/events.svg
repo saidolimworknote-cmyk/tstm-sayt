@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 420" width="1600" height="420" role="presentation" aria-hidden="true">
+<defs>
+  <linearGradient id="fon" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#071528"/>
+    <stop offset=".55" stop-color="#0b2a4e"/>
+    <stop offset="1" stop-color="#11467f"/>
+  </linearGradient>
+  <pattern id="tur" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M40 0H0V40" fill="none" stroke="#9ecdf0" stroke-width=".7" opacity=".075"/>
+  </pattern>
+  <radialGradient id="nur" cx=".735" cy=".5" r=".33">
+    <stop offset="0" stop-color="#9ecdf0" stop-opacity=".22"/>
+    <stop offset="1" stop-color="#9ecdf0" stop-opacity="0"/>
+  </radialGradient>
+</defs>
+<rect width="1600" height="420" fill="url(#fon)"/>
+<rect width="1600" height="420" fill="url(#tur)"/>
+  <g stroke="CHIZ" fill="none" opacity=".17">
+    <circle cx="1720" cy="210" r="430" stroke-width="1.6"/>
+    <ellipse cx="1720" cy="210" rx="400" ry="430" stroke-width="1.1"/>
+    <ellipse cx="1720" cy="210" rx="320" ry="430" stroke-width="1.1"/>
+    <ellipse cx="1720" cy="210" rx="200" ry="430" stroke-width="1.1"/>
+    <ellipse cx="1720" cy="210" rx="70" ry="430" stroke-width="1.1"/>
+    <path d="M1290 210h860" stroke-width="1.1"/>
+    <path d="M1299 299h842" stroke-width="1.1"/>
+    <path d="M1299 121h842" stroke-width="1.1"/>
+    <path d="M1330 392h780" stroke-width="1.1"/>
+    <path d="M1330 28h780" stroke-width="1.1"/>
+    <path d="M1389 485h662" stroke-width="1.1"/>
+    <path d="M1389 -65h662" stroke-width="1.1"/>
+  </g>
+
+<rect width="1600" height="420" fill="url(#nur)"/>
+<!-- Matn zonasi bilan chizma zonasini ajratuvchi ingichka chiziq. -->
+<g stroke="#9ecdf0" fill="none" opacity=".16">
+  <path d="M944 118v184" stroke-width="1.2"/>
+  <rect x="940" y="206" width="8" height="8" fill="#9ecdf0" stroke="none"/>
+</g>
+<g fill="none" stroke="#9ecdf0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="986" y="110" width="214" height="196" rx="10" opacity=".8"/>
+  <path d="M986 156h214" opacity=".55"/>
+  <path d="M1026 98v22" stroke-width="5" opacity=".7"/>
+  <path d="M1093 98v22" stroke-width="5" opacity=".7"/>
+  <path d="M1160 98v22" stroke-width="5" opacity=".7"/>
+  <path d="M1014 168h14" stroke-width="2" opacity=".3"/>
+  <path d="M1056 168h14" stroke-width="2" opacity=".3"/>
+  <path d="M1098 168h14" stroke-width="2" opacity=".3"/>
+  <path d="M1140 168h14" stroke-width="2" opacity=".3"/>
+  <path d="M1182 168h14" stroke-width="2" opacity=".3"/>
+  <circle cx="1021" cy="190" r="3.6" fill="#9ecdf0" opacity=".36" stroke="none"/>
+  <circle cx="1063" cy="190" r="3.6" fill="#9ecdf0" opacity=".36" stroke="none"/>
+  <circle cx="1105" cy="190" r="3.6" fill="#9ecdf0" opacity=".36" stroke="none"/>
+  <circle cx="1147" cy="190" r="3.6" fill="#9ecdf0" opacity=".36" stroke="none"/>
+  <circle cx="1189" cy="190" r="3.6" fill="#9ecdf0" opacity=".36" stroke="none"/>
+  <circle cx="1021" cy="220" r="3.6" fill="#9ecdf0" opacity=".36" stroke="none"/>
+  <circle cx="1063" cy="220" r="3.6" fill="#9ecdf0" opacity=".36" stroke="none"/>
+  <circle cx="1105" cy="220" r="3.6" fill="#9ecdf0" opacity=".36" stroke="none"/>
+  <circle cx="1147" cy="220" r="3.6" fill="#9ecdf0" opacity=".36" stroke="none"/>
+  <circle cx="1189" cy="220" r="3.6" fill="#9ecdf0" opacity=".36" stroke="none"/>
+  <circle cx="1021" cy="250" r="3.6" fill="#9ecdf0" opacity=".36" stroke="none"/>
+  <circle cx="1063" cy="250" r="3.6" fill="#9ecdf0" opacity=".36" stroke="none"/>
+  <circle cx="1147" cy="250" r="3.6" fill="#9ecdf0" opacity=".36" stroke="none"/>
+  <circle cx="1189" cy="250" r="3.6" fill="#9ecdf0" opacity=".36" stroke="none"/>
+  <circle cx="1021" cy="280" r="3.6" fill="#9ecdf0" opacity=".36" stroke="none"/>
+  <circle cx="1063" cy="280" r="3.6" fill="#9ecdf0" opacity=".36" stroke="none"/>
+  <circle cx="1105" cy="280" r="3.6" fill="#9ecdf0" opacity=".36" stroke="none"/>
+  <circle cx="1147" cy="280" r="3.6" fill="#9ecdf0" opacity=".36" stroke="none"/>
+  <circle cx="1189" cy="280" r="3.6" fill="#9ecdf0" opacity=".36" stroke="none"/>
+  <circle cx="1105" cy="250" r="13" fill="#2f9be0" stroke="none"/>
+  <circle cx="1200" cy="126" r="25" fill="#0b2a4e" stroke="none"/>
+  <circle cx="1200" cy="126" r="25" stroke="#7fd1ff" stroke-width="2.2" opacity=".9"/>
+  <path d="M1200 111v15l11 7" stroke="#7fd1ff" stroke-width="2.2"/>
+  <path d="M1256 132v168" opacity=".4"/>
+  <circle cx="1256" cy="142" r="6" fill="#9ecdf0" stroke="none" opacity=".34"/>
+  <rect x="1278" y="137" width="100" height="10" rx="5" fill="#9ecdf0" opacity=".28" stroke="none"/>
+  <circle cx="1256" cy="194" r="6" fill="#9ecdf0" stroke="none" opacity=".34"/>
+  <rect x="1278" y="189" width="74" height="10" rx="5" fill="#9ecdf0" opacity=".28" stroke="none"/>
+  <circle cx="1256" cy="246" r="7" fill="#7fd1ff" stroke="none" opacity="1"/>
+  <rect x="1278" y="241" width="116" height="10" rx="5" fill="#9ecdf0" opacity=".5" stroke="none"/>
+  <path d="M1278 262h74" opacity=".22" stroke-width="1.4"/>
+  <circle cx="1256" cy="296" r="6" fill="#9ecdf0" stroke="none" opacity=".34"/>
+  <rect x="1278" y="291" width="66" height="10" rx="5" fill="#9ecdf0" opacity=".28" stroke="none"/>
+
+</g>
+</svg>

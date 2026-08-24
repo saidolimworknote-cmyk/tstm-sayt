@@ -2215,20 +2215,25 @@
     // banners
     const BSEC = { oav:'Bizning ekspertlar OAVlarda', events:'Tadbirlar', pubs:'Nashrlar', research:'Tadqiqotlar', about:'Markaz haqida', leadership:'Rahbariyat', experts:'Ekspertlar', media:'Media', contact:'Aloqa', search:'Qidiruv' };
     const banners = Object.assign({}, s.banners || {});
+    // Uya bo'sh bo'lsa saytda `img/banners/<kalit>.svg` — markazning o'z
+    // vektor infografikasi — chiqadi (js/site-common.js: BANNER_DEF).
+    // Shuning uchun bu yerda ham bo'sh kvadrat emas, AYNAN O'SHA rasm
+    // ko'rsatiladi: admin sahifada nima turganini ko'rib turadi.
+    const bStd = k => 'img/banners/' + k + '.svg';
     $('#bannerGrid').innerHTML = Object.keys(BSEC).map(k => `
       <div class="banner-cell" data-bk="${k}">
-        <div class="bprev">${banners[k]?'':ic('image')}</div>
+        <div class="bprev"></div>
         <div class="binfo"><div class="blabel">${BSEC[k]}</div>
-          <div class="bacts"><button type="button" class="btn sm" data-bpick>${ic('upload')} Rasm</button>${banners[k]?`<button type="button" class="btn sm ghost" data-bclear>O'chirish</button>`:''}</div></div>
+          <div class="bacts"><button type="button" class="btn sm" data-bpick>${ic('upload')} Rasm</button>${banners[k]?`<button type="button" class="btn sm ghost" data-bclear>Standartga qaytarish</button>`:''}</div></div>
         <input type="file" accept="image/*" hidden data-binput>
       </div>`).join('');
     $$('#bannerGrid .banner-cell').forEach(cell => {
       const k = cell.dataset.bk, inp = $('[data-binput]', cell), prev = $('.bprev', cell);
       // dastlabki fon rasmi (inline style o'rniga .style — CSP)
-      if (banners[k]) prev.style.backgroundImage = `url(${banners[k]})`;
+      prev.style.backgroundImage = `url(${banners[k] || bStd(k)})`;
       $('[data-bpick]', cell).onclick = () => inp.click();
       inp.onchange = (e) => { const f = e.target.files[0]; if (!f) return; resizeImage(f, 1800, (url) => { Store.uploadImage(url, (saved) => { if (!saved) { toast('Banner yuklanmadi', 1); return; } banners[k] = saved; prev.style.backgroundImage = `url(${saved})`; prev.innerHTML = ''; }, 'banner-' + k); }); };
-      const clr = $('[data-bclear]', cell); if (clr) clr.onclick = () => { delete banners[k]; prev.style.backgroundImage = ''; prev.innerHTML = ic('image'); clr.remove(); };
+      const clr = $('[data-bclear]', cell); if (clr) clr.onclick = () => { delete banners[k]; prev.style.backgroundImage = `url(${bStd(k)})`; clr.remove(); };
     });
 
     // stats editor
