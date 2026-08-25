@@ -48,7 +48,7 @@
 
     main.innerHTML = `${printHead}
       <div class="page-banner"><div class="wrap">
-        <div class="crumb">${Site.crumbHTML('oav.html')}</div><h1>${T('not_found_t')}</h1></div></div>
+        <div class="crumb">${Site.crumbHTML('oav.html')}</div>
         <h1>${Site.esc(Site.mlGet(p.title))}</h1>
       </div></div>
       <section class="block"><div class="wrap"><div class="article">

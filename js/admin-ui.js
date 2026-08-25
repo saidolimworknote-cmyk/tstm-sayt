@@ -316,6 +316,11 @@
   /* -------------------- State / boot -------------------- */
   let state = { view: 'dashboard', coll: null, kind: null, q: '', statusFilter: '' };
   let gsr = null, gsrActive = -1; // global qidiruv dropdown
+  // Sessiya saqlash paytida tugab qolsa (uzoq maqola yozish, 401/403) - qayta
+  // kirish oynasi ochiladi, lekin showApp() CHAQIRILMAYDI: u route()ni qayta
+  // ishga tushirib, tahrirlanayotgan formani (saqlanmagan matn bilan) yo'q
+  // qilib yuborardi. Shu bayroq bilan "oddiy kirish" dan farqlanadi.
+  let reauthMode = false;
 
   function logoSrc() {
     const s = Store.settings();
@@ -364,7 +369,22 @@
     // Faqat login qilingan holatda ko'rsatamiz — login qilinmasdan oldingi fonda ishlaydigan
     // avtomatik sxema-tuzatish urinishi endi serverda bloklanadi (xavfsizlik), bu normal holat,
     // xato sifatida ko'rsatilmasligi kerak.
-    window.addEventListener('tstm-save-failed', () => { if (Store.isAuthed()) toast('Saqlashda xato — fayl juda katta bo\'lishi mumkin. Kichikroq rasm yuklang.', 1); });
+    window.addEventListener('tstm-save-failed', (e) => {
+      if (!Store.isAuthed()) return;
+      const status = e && e.detail && e.detail.status;
+      // 401/403 — sessiya tugagan yoki CSRF eskirgan (odatda: admin uzoq
+      // vaqt - standart 24 daqiqadan ko'p - formani to'ldirib o'tirgan).
+      // Ilgari bu holatda ham "fayl juda katta" deb noto'g'ri ko'rsatilardi
+      // va admin nega saqlanmayotganini bilolmasdi. Endi qayta kirish oynasi
+      // ochiladi, forma esa TEGILMAYDI - kirgach "Saqlash"ni qayta bosadi.
+      if (status === 401 || status === 403) {
+        reauthMode = true;
+        toast('Sessiya tugadi. Formangiz saqlanib turibdi — qaytadan kiring va "Saqlash"ni qayta bosing.', 1);
+        $('#login').classList.add('show');
+        return;
+      }
+      toast('Saqlashda xato — fayl juda katta bo\'lishi mumkin. Kichikroq rasm yuklang.', 1);
+    });
     // login
     $('#loginForm').addEventListener('submit', (e) => {
       e.preventDefault();
@@ -372,7 +392,21 @@
       const btn = $('#loginForm button[type=submit]');
       if (btn) btn.disabled = true;
       Promise.resolve(Store.checkLogin(u, p)).then((ok) => {
-        if (ok) { Store.login(); showApp(); return; }
+        if (ok) {
+          Store.login();
+          if (reauthMode) {
+            // Sessiya tugab qayta kirilgan holat: forma DOMda saqlanib
+            // qoldi - showApp()/route() chaqirilsa u qayta chizilib,
+            // admin yozgan (hali saqlanmagan) matn yo'qolardi.
+            reauthMode = false;
+            $('#login').classList.remove('show');
+            renderSidebar();
+            toast('Qayta kirildi. Endi "Saqlash"ni bosing.');
+          } else {
+            showApp();
+          }
+          return;
+        }
         // Bloklanish (429), server yo'qligi va oddiy xato parol — UCHTA boshqa
         // holat. Ilgari uchalasiga bir xil "Login yoki parol noto'g'ri" chiqardi
         // va admin nima bo'layotganini tushunmasdi.
