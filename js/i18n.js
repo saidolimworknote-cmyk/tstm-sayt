@@ -158,6 +158,7 @@
     oav_empty_o:  { uz: 'Bu nashrda sharh yo‘q', ru: 'В этом издании нет комментариев', en: 'No commentary from this outlet' },
     all_pubs:     { uz: 'Barcha nashrlar', ru: 'Все публикации', en: 'All publications' },
     all_dirs:     { uz: "Barcha yo'nalishlar", ru: 'Все направления', en: 'All areas' },
+    all_events:   { uz: 'Barcha voqealar', ru: 'Все мероприятия', en: 'All events' },
     all_team:     { uz: 'Butun jamoa', ru: 'Вся команда', en: 'Full team' },
     download_pdf: { uz: 'Faylni yuklab olish', ru: 'Скачать файл', en: 'Download file' },
     soon:         { uz: 'Tez orada', ru: 'Скоро', en: 'Coming soon' },
@@ -207,6 +208,7 @@
     /* ---- homepage: section heads ---- */
     dir_kicker:   { uz: "Faoliyat yo'nalishlari", ru: 'Направления деятельности', en: 'Areas of activity' },
     dir_title:    { uz: "Tadqiqot yo'nalishlarimiz", ru: 'Наши направления исследований', en: 'Our research areas' },
+    events_kicker:{ uz: 'Markaz tadbirlari', ru: 'Мероприятия центра', en: 'Center events' },
     pubs_kicker:  { uz: 'Tadqiqotlar va nashrlar', ru: 'Исследования и публикации', en: 'Research & publications' },
     pubs_title:   { uz: 'Asosiy hisobotlar', ru: 'Основные доклады', en: 'Key reports' },
     team_kicker:  { uz: 'Jamoa', ru: 'Команда', en: 'Team' },
@@ -413,7 +415,8 @@
        yangilik sarlavhalari, o'ylab topilgan ekspert ismlari) turardi va
        baza bo'sh bo'lsa u haqiqiy ma'lumotdek ko'rinardi. */
     home_no_pubs:    { uz: "Hozircha nashr yo'q", ru: 'Публикаций пока нет', en: 'No publications yet' },
-    home_no_experts: { uz: "Ma'lumot hozircha kiritilmagan", ru: 'Данные пока не добавлены', en: 'No information added yet' }
+    home_no_experts: { uz: "Ma'lumot hozircha kiritilmagan", ru: 'Данные пока не добавлены', en: 'No information added yet' },
+    home_no_events:  { uz: "Hozircha voqea yo'q", ru: 'Мероприятий пока нет', en: 'No events yet' }
   };
 
   function t(key, l) {

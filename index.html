@@ -13,7 +13,7 @@
 <meta property="og:image" content="img/logo-mark.png">
 <meta name="twitter:card" content="summary">
 <link rel="stylesheet" href="css/fonts.css?v=1">
-<link rel="stylesheet" href="css/home.css?v=24">
+<link rel="stylesheet" href="css/home.css?v=25">
 <link rel="stylesheet" href="css/subscribe.css?v=4">
 </head>
 <body>
@@ -171,6 +171,24 @@
   </div>
 </section>
 
+<!-- ===================== VOQEALAR (bosh sahifa) =====================
+     2026-08-25: sobiq "Yangiliklar" bo'limi (news-grid, 2026-08-22 da olib
+     tashlangan) shu joyga, xuddi shu tuzilishda (1 katta + 4 ro'yxat)
+     qaytarildi, lekin endi Voqealar (events) bilan ulangan - real ma'lumot,
+     renderHome() -> js/page-home.js. HTML ichida namuna matn YO'Q (bo'sh
+     bo'lsa emptyState chiqadi) - sabab yuqoridagi PUBLICATIONS/EXPERTS
+     bo'limlarida ham bir xil: soxta matn haqiqiy ma'lumotdek ko'rinib
+     qolmasin. -->
+<section class="pt0">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div><div class="kicker" data-i18n="events_kicker">Markaz tadbirlari</div><h2 data-i18n="nav_happenings">Voqealar</h2></div>
+      <a class="arrow-link" href="tadbirlar.html"><span data-i18n="all_events">Barcha voqealar</span> →</a>
+    </div>
+    <div class="news-grid"></div>
+  </div>
+</section>
+
 <!-- ===================== PUBLICATIONS ===================== -->
 <section class="pubs">
   <div class="wrap">
@@ -273,12 +291,12 @@
 </footer>
 
 <script src="js/diag.js?v=2"></script>
-<script src="js/i18n.js?v=76"></script>
+<script src="js/i18n.js?v=77"></script>
 <script src="js/admin-store.js?v=57"></script>
 <script src="js/content-kinds.js?v=4"></script>
 <script src="js/a11y.js?v=56"></script>
 <script src="js/search.js?v=53"></script>
 <script src="js/subscribe.js?v=2"></script>
-<script src="js/page-home.js?v=19"></script>
+<script src="js/page-home.js?v=20"></script>
 </body>
 </html>

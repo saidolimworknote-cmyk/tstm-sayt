@@ -362,12 +362,13 @@
     return src ? '<img src="'+safeUrl(src)+'" alt="" class="img-cover">' : '';
   }
   function renderHome(){
-    // Tadbirlar bu yerda o'qilmaydi — bosh sahifada tadbirlar bo'limi yo'q
-    // (pastdagi izohga qarang). Ular `tadbirlar.html` sahifasida ko'rsatiladi.
-    let pubs=[],exps=[];
+    let pubs=[],exps=[],evs=[];
     try{
       pubs = Store.all('publications').filter(p=>p.status==='published').slice(0,3);
       exps = Store.all('experts').sort((a,b)=>(a.order||0)-(b.order||0)).slice(0,4);
+      // Voqealar bo'limidagi eng oxirgi 5 tasi — hero bilan bir xil manba/tartib
+      // (heroItems() dagi izohga qarang: Store.all('events') seq DESC keladi).
+      evs = Store.all('events').filter(e=>e.status==='published').slice(0,5);
     }catch{ return; }
 
     // ---- Bo'sh holat ----
@@ -394,13 +395,48 @@
       }
     }catch{}
 
-    /* NEWS bo'limi 2026-08-22 da butun saytdan olib tashlandi (admin panelda
-       ham). Bosh sahifadagi `.news-grid` bloki, `yangiliklar.html` va
-       `yangilik.html` sahifalari, qidiruv indeksi va push manbasi bilan birga.
-       Sabab: saytning menyusida "Yangiliklar" bandi yo'q edi, ya'ni bo'lim
-       amalda faqat adminda yashardi va kontent qayerga tushishi tushunarsiz
-       edi. Yangiliklar bazadan O'CHIRILMADI — `news` jadvali arxiv sifatida
-       joyida turibdi (zaxira: backups\news_2026-08-22_olib-tashlashdan-oldin.sql). */
+    /* NEWS bo'limi 2026-08-22 da butun saytdan olib tashlandi (sabab: menyuda
+       "Yangiliklar" bandi hech qachon bo'lmagan, bo'lim faqat adminda yashardi).
+       `yangiliklar.html`/`yangilik.html` sahifalari, qidiruv indeksi va eski
+       `news` jadvali o'sha holicha qoladi.
+
+       2026-08-25: shu joydagi `.news-grid` bloki (1 katta + 4 ro'yxat)
+       QAYTARILDI, lekin endi VOQEALAR bilan ulangan — Voqealar saytning
+       haqiqiy menyu bandi (Voqealar -> Uchrashuvlar/Davra suhbatlari/...),
+       shuning uchun "sayt - etalon" qoidasini buzmaydi (news buzgan edi). */
+    const ng = document.querySelector('.news-grid');
+    if(ng && !evs.length){ ng.innerHTML = emptyState('home_no_events'); }
+    else if(ng){
+      const kindLabel = (e) => {
+        const k = (window.ContentKinds && ContentKinds.eventKind) ? ContentKinds.eventKind(e.type) : null;
+        return k ? T(k.tk) : (e.type || '');
+      };
+      const evCover = (e) => e.cover || (Array.isArray(e.photos) && e.photos[0] && e.photos[0].url) || '';
+      // Voqea "body"si boy HTML — teglarni olib tashlab, qisqa parcha qilamiz
+      // (nashrlardagi kabi tayyor "excerpt" maydoni yo'q).
+      const excerpt = (html, max) => {
+        const txt = String(html||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
+        return txt.length > max ? txt.slice(0,max).replace(/\s+\S*$/,'') + '…' : txt;
+      };
+      const PH = '<div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></svg></div>';
+      const main = evs[0], rest = evs.slice(1);
+      const exc = excerpt(mlGet(main.body), 160);
+      const featHTML = '<a class="feat rv" href="tadbir.html?id='+encodeURIComponent(main.id)+'">'
+        + (evCover(main) ? '<div class="ph">'+imgTag(evCover(main))+'</div>' : PH)
+        + '<div class="fbody"><div class="meta"><span class="tag">'+esc(kindLabel(main))+'</span>'
+        + (main.date ? '<span class="d mono muted">'+esc(fmtDate(main.date))+'</span>' : '') + '</div>'
+        + '<h3>'+esc(mlGet(main.title))+'</h3>'
+        + (exc ? '<p>'+esc(exc)+'</p>' : '')
+        + '</div></a>';
+      const listHTML = rest.map(e => {
+        const kick = [esc(kindLabel(e)), e.date?esc(fmtDate(e.date)):''].filter(Boolean).join(' · ');
+        return '<a class="nitem rv" href="tadbir.html?id='+encodeURIComponent(e.id)+'">'
+          + (evCover(e) ? '<div class="ph">'+imgTag(evCover(e))+'</div>' : PH)
+          + '<div class="nbody">'+(kick?'<div class="d">'+kick+'</div>':'')+'<h4>'+esc(mlGet(e.title))+'</h4></div>'
+          + '</a>';
+      }).join('');
+      ng.innerHTML = featHTML + '<div class="nlist">'+listHTML+'</div>';
+    }
 
     // PUBLICATIONS
     const pg = document.querySelector('.pub-grid');
