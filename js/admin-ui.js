@@ -272,7 +272,7 @@
     { group: 'Asosiy', items: [{ key: 'dashboard', label: 'Boshqaruv paneli', icon: 'dashboard', view: 'dashboard' }] },
     // Saytda: Markaz haqida -> Biz kimmiz · Rahbariyat · Ekspertlar · Hamkorlar
     { group: 'Markaz haqida', items: [
-      { key: 'aboutPage', label: 'Biz kimmiz', icon: 'pages', view: 'aboutPage', page: 'biz-kimmiz.html' },
+      { key: 'aboutPage', label: 'Biz haqimizda', icon: 'pages', view: 'aboutPage', page: 'biz-kimmiz.html' },
       { kindsOf: 'experts' },
       'partners'
     ] },
@@ -1824,7 +1824,7 @@
      Eski `markaz-haqida` / `maqsad` yozuvlari bazada qolsa ham saytda
      chizilmaydi va bu yerdan tahrirlanmaydi. */
   function viewAboutPage(c) {
-    setTitle('Biz kimmiz');
+    setTitle('Biz haqimizda');
 
     // Sayt `biz-kimmiz` ni ham, eski `tarix` ni ham o'qiydi (page-biz-kimmiz.js)
     // — shuning uchun mavjudini o'sha tartibda qidiramiz va o'sha yozuv
@@ -1849,7 +1849,7 @@
     });
 
     c.innerHTML = `
-      <div class="page-head"><div><div class="h">Biz kimmiz</div><div class="d">Saytdagi "Biz kimmiz" sahifasining sarlavhasi va matni${siteLinkHTML(navPageOf('aboutPage'))}</div></div><div class="sp"></div>
+      <div class="page-head"><div><div class="h">Biz haqimizda</div><div class="d">Saytdagi "Biz haqimizda" sahifasining sarlavhasi va matni${siteLinkHTML(navPageOf('aboutPage'))}</div></div><div class="sp"></div>
         <div class="langtabs" id="setLang"><button type="button" data-l="uz" class="on">UZ</button><button type="button" data-l="ru">RU</button><button type="button" data-l="en">EN</button></div>${autoTrButton('aboutAutoTr')}</div>
       <div class="card a-p24-mb20">
         <b class="a-serif17-mb6">Sahifa sarlavhasi</b>
