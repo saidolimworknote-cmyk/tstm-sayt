@@ -9,15 +9,22 @@
     return on.length ? on : ['uz'];   // sayt tilsiz qolmasin
   }
   // ---- til (i18n) ----
+  // Kod (UZB/RUS/ENG) — qidiruv yonidagi .lang-switch tugmasida va
+  // ochiluvchi ro'yxatda. site-common.js dagi LANG_CODE3 bilan bir xil
+  // (bosh sahifa site-common.js ni yuklamaydi, shuning uchun takrorlanadi).
+  var LANG_CODE3 = { uz: 'UZB', ru: 'RUS', en: 'ENG' };
   if (window.I18N) {
     var _on = enabledLangs();
     // Joriy til o'chirib qo'yilgan bo'lsa — ruxsat etilgan birinchi tilga o'tamiz
     if (_on.indexOf(I18N.lang) < 0) { I18N.setLang(_on[0]); }
     I18N.translate(document);
-    document.querySelectorAll('.langs span[data-l], #mLangs span[data-l]').forEach(sp => {
+    document.querySelectorAll('.lang-switch-code').forEach(function(el){
+      el.textContent = LANG_CODE3[I18N.lang] || I18N.lang.toUpperCase();
+    });
+    document.querySelectorAll('.lang-switch-menu span[data-l]').forEach(function(sp){
       if (_on.indexOf(sp.dataset.l) < 0) { sp.remove(); return; }   // o'chirilgan til ko'rinmasin
       sp.classList.toggle('on', sp.dataset.l === I18N.lang);
-      sp.addEventListener('click', () => I18N.setLang(sp.dataset.l));
+      sp.addEventListener('click', function(){ I18N.setLang(sp.dataset.l); });
     });
   }
   // ---- brend nomi + qisqa nom (admin -> Sozlamalar -> "Markaz nomi" / "Qisqa nom") ----
@@ -126,7 +133,7 @@
     var bg = document.getElementById('navBurger');
     var cl = document.getElementById('mClose');
     // klaviatura: role=button elementlar Enter/Space bilan ishlasin
-    document.querySelectorAll('.ic[role=button], .langs span[role=button], #navBurger').forEach(function(b){
+    document.querySelectorAll('.ic[role=button], .lang-switch-menu span[role=button], #navBurger').forEach(function(b){
       b.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); b.click(); } });
     });
     if (bg && mnav) bg.addEventListener('click', function(){ mnav.classList.add('open'); });
@@ -504,9 +511,34 @@
     document.querySelectorAll('.rv').forEach(el=>el.classList.add('in'));
   }
 
-  // ---- language switch (visual) ----
-  document.querySelectorAll('.langs').forEach(g=>{
-    g.addEventListener('click',e=>{
-      if(e.target.tagName==='SPAN'){ [...g.children].forEach(s=>s.classList.remove('on')); e.target.classList.add('on'); }
+  // ---- til almashtirgich: bosilganda ochilish/yopilish ----
+  // Ichki sahifalardagi egizagi: site-common.js -> renderHeader. Bosh sahifa
+  // site-common.js ni yuklamaydi, shuning uchun bu yerda takrorlanadi.
+  (function(){
+    var switches = document.querySelectorAll('.lang-switch');
+    function closeAll(except){
+      switches.forEach(function(ls){
+        if (ls === except) return;
+        ls.classList.remove('open');
+        var b = ls.querySelector('.lang-switch-btn'); if (b) b.setAttribute('aria-expanded', 'false');
+      });
+    }
+    switches.forEach(function(ls){
+      var btn = ls.querySelector('.lang-switch-btn');
+      if (!btn) return;
+      btn.addEventListener('click', function(e){
+        e.stopPropagation();
+        var on = !ls.classList.contains('open');
+        closeAll(ls);
+        ls.classList.toggle('open', on);
+        btn.setAttribute('aria-expanded', on ? 'true' : 'false');
+      });
     });
-  });
+    if (switches.length) {
+      document.addEventListener('click', function(e){
+        var t = e.target;
+        if (!t || typeof t.closest !== 'function' || !t.closest('.lang-switch')) closeAll();
+      });
+      document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeAll(); });
+    }
+  })();

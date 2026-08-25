@@ -122,10 +122,28 @@
   })();
   // Til almashtirgich tugmalari — faqat yoqilgan tillar
   const LANG_LABEL = { uz: "O'zbekcha", ru: 'Русский', en: 'English' };
-  function langButtons(cls){
+  // 3 harfli kod (UZB/RUS/ENG) — qidiruv yonidagi tugmada va ochiluvchi
+  // ro'yxatda ishlatiladi (2026-08-25: ilgari 2 harf, doim uchtasi ham
+  // yonma-yon ko'rinardi; endi joriy til bitta tugma, qolgan ikkitasi
+  // bosilganda ochiladi — .lang-switch, quyida renderHeader ichida).
+  const LANG_CODE3 = { uz: 'UZB', ru: 'RUS', en: 'ENG' };
+  function langButtons(){
     return enabledLangs().map(l =>
-      `<span class="${lang === l ? 'on' : ''}" data-l="${l}" role="button" tabindex="0" aria-label="${esc(LANG_LABEL[l])}" aria-pressed="${lang === l}">${l.toUpperCase()}</span>`
+      `<span class="${lang === l ? 'on' : ''}" data-l="${l}" role="button" tabindex="0" aria-label="${esc(LANG_LABEL[l])}" aria-pressed="${lang === l}">${LANG_CODE3[l]}</span>`
     ).join('');
+  }
+  // Butun widget: joriy til (3 harf) tugma + bosilganda ochiladigan panel,
+  // unda faqat QOLGAN tillar ko'rinadi (joriysi CSS bilan yashiriladi —
+  // `.lang-switch-menu span.on{display:none}`, site.css).
+  function langSwitchHTML(){
+    return `<div class="lang-switch">
+        <button type="button" class="lang-switch-btn" aria-haspopup="true" aria-expanded="false" aria-label="Til / Язык / Language">
+          <svg class="lang-switch-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.3"/><path d="M3.7 12h16.6M12 3.7c2.3 2.3 3.6 5.3 3.6 8.3s-1.3 6-3.6 8.3c-2.3-2.3-3.6-5.3-3.6-8.3s1.3-6 3.6-8.3Z"/></svg>
+          <span class="lang-switch-code">${LANG_CODE3[lang] || lang.toUpperCase()}</span>
+          <i class="lang-switch-car"></i>
+        </button>
+        <div class="lang-switch-menu" role="group" aria-label="Til / Язык / Language">${langButtons()}</div>
+      </div>`;
   }
 
   // ---------- nav model ----------
@@ -262,8 +280,6 @@
         <span>${esc(T('util_country'))}</span>
         <a href="mailto:${esc(s.email||'info@cfps.uz')}">${esc(s.email||'info@cfps.uz')}</a>
         <a href="tel:${esc((s.phone||'').replace(/\s/g,''))}">${esc(s.phone||'+998 71 239 36 55')}</a>
-        <span class="sp"></span>
-        <div class="langs" role="group" aria-label="Til / Язык / Language">${langButtons()}</div>
       </div></div>
       <div class="bar"><div class="wrap">
         <a class="brand brand-row" href="index.html" aria-label="${esc(SN)}">
@@ -276,6 +292,7 @@
           <div class="ic theme-tog" title="Rejim" role="button" tabindex="0" aria-label="${esc(T('theme_toggle')||'Yorug\u2018/quyuq rejim')}"></div>
           <div class="ic a11y-btn" title="${esc(T('a11y_title'))}" role="button" tabindex="0" aria-label="${esc(T('a11y_title'))}">${ICON.a11y}</div>
           <a class="ic" href="#" data-gs-open role="button" title="${esc(T('search_title'))}" aria-label="${esc(T('search_title'))}">${ICON.search}</a>
+          ${langSwitchHTML()}
         </nav>
         <div class="nav-burger" id="navBurger" role="button" tabindex="0" aria-label="${esc(T('a11y_menu')||'Menyu')}" aria-expanded="false">${ICON.burger}</div>
       </div></div>`;
@@ -303,7 +320,7 @@
         <span class="ic theme-tog" role="button" tabindex="0" aria-label="${esc(T('theme_toggle')||'Yorug‘/quyuq rejim')}"></span>
         <span class="ic a11y-btn" role="button" tabindex="0" title="${esc(T('a11y_title'))}" aria-label="${esc(T('a11y_title'))}">${ICON.a11y}</span>
         <a class="ic" href="#" data-gs-open role="button" title="${esc(T('search_title'))}" aria-label="${esc(T('search_title'))}">${ICON.search}</a>
-        <div class="mnav-langs" role="group" aria-label="Til / Язык / Language">${langButtons()}</div>
+        ${langSwitchHTML()}
         <div class="close" id="mClose" role="button" tabindex="0" aria-label="${esc(T('close')||'Yopish')}">${ICON.close}</div>
       </div>` +
       NAV.map(n => (n.group
@@ -359,12 +376,40 @@
     // theme toggles
     applyTheme(document.documentElement.getAttribute('data-theme'));
     document.querySelectorAll('.theme-tog').forEach(b => b.addEventListener('click', toggleTheme));
-    // language (header util paneli + mobil drawer ichidagi tugmalar)
-    document.querySelectorAll('.langs span, .mnav-langs span').forEach(sp => {
-      const go = () => { try { localStorage.setItem('tstm_site_lang', sp.dataset.l); } catch{} location.reload(); };
-      sp.addEventListener('click', go);
-      sp.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+    // language (header nav.main + mobil drawer ichidagi .lang-switch widget)
+    // Tugma bosilganda ochiladi/yopiladi, tashqariga bosilsa yoki Escape
+    // bilan yopiladi, ro'yxatdagi til bosilsa saqlanadi va sahifa qayta
+    // yuklanadi (I18N shu yerda TO'LIQ qayta chizilmaydi — reload eng
+    // ishonchli yo'l, chunki sahifa mundarijasi ko'p joyda tilga bog'liq).
+    const langSwitches = document.querySelectorAll('.lang-switch');
+    const closeLangSwitches = (except) => langSwitches.forEach(ls => {
+      if (ls === except) return;
+      ls.classList.remove('open');
+      const b = ls.querySelector('.lang-switch-btn'); if (b) b.setAttribute('aria-expanded', 'false');
     });
+    langSwitches.forEach(ls => {
+      const btn = ls.querySelector('.lang-switch-btn');
+      if (!btn) return;
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const on = !ls.classList.contains('open');
+        closeLangSwitches(ls);
+        ls.classList.toggle('open', on);
+        btn.setAttribute('aria-expanded', on ? 'true' : 'false');
+      });
+      ls.querySelectorAll('.lang-switch-menu span[data-l]').forEach(sp => {
+        const go = () => { try { localStorage.setItem('tstm_site_lang', sp.dataset.l); } catch{} location.reload(); };
+        sp.addEventListener('click', go);
+        sp.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+      });
+    });
+    if (langSwitches.length) {
+      document.addEventListener('click', (e) => {
+        const t = e.target;
+        if (!t || typeof t.closest !== 'function' || !t.closest('.lang-switch')) closeLangSwitches();
+      });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLangSwitches(); });
+    }
     // klaviatura: ic role=button elementlari Enter/Space bilan ishlasin (header + drawer)
     el.querySelectorAll('.ic[role=button], #navBurger').forEach(b => {
       b.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); b.click(); } });

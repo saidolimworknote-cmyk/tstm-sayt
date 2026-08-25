@@ -146,11 +146,6 @@
   header .util .sp{flex:1;}
   header .util a{transition:color .2s;}
   header .util a:hover{color:#fff;}
-  .langs{display:flex;gap:2px;align-items:center;}
-  /* min-height: til almashtirgich 22px edi — WCAG 2.5.8 (eng kam 24) dan past */
-  .langs span{padding:2px 7px;border-radius:var(--r-pill);cursor:pointer;transition:.2s;min-height:24px;display:inline-flex;align-items:center;justify-content:center;}
-  .langs span.on{background:var(--accent);color:#fff;}
-  .langs span:not(.on):hover{color:#fff;}
   .util-tog{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;margin-left:14px;border:0;background:none;color:inherit;cursor:pointer;opacity:.7;transition:opacity .2s;padding:0;}
   .util-tog:hover{opacity:1;}
   .util-tog svg{width:16px;height:16px;}
@@ -186,6 +181,22 @@
   .ic{width:20px;height:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.85;transition:opacity .2s;}
   .ic:hover{opacity:1;}
   .ic svg{width:18px;height:18px;}
+
+  /* Til almashtirgich — qidiruv ikonkasidan keyin: joriy til 3 harfda tugma
+     (masalan "UZB"), bosilganda ostiga qolgan ikkita til ochiladi. Nav.main
+     dropdown (.drop) bilan bir xil vizual til (panel, accent chiziq, soya). */
+  .lang-switch{position:relative;flex:none;}
+  .lang-switch-btn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border:1px solid var(--line);border-radius:var(--r-pill);background:none;color:inherit;font:inherit;font-family:var(--mono);font-size:0.71875rem;font-weight:700;letter-spacing:.05em;cursor:pointer;transition:border-color .2s,color .2s,background .2s;}
+  .lang-switch-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .lang-switch-globe{width:15px;height:15px;flex:none;opacity:.7;}
+  .lang-switch-car{width:6px;height:6px;flex:none;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);transition:transform .2s;margin-top:-3px;}
+  .lang-switch.open .lang-switch-btn{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);}
+  .lang-switch.open .lang-switch-car{transform:rotate(225deg);margin-top:3px;}
+  .lang-switch-menu{position:absolute;top:calc(100% + 12px);right:0;min-width:100px;background:var(--panel);border:1px solid var(--line);border-top:2px solid var(--accent);box-shadow:0 26px 56px -22px rgba(8,24,46,.45);padding:6px;display:flex;flex-direction:column;gap:2px;opacity:0;visibility:hidden;transform:translateY(8px);transition:.22s;z-index:70;border-radius:var(--r-ctl);overflow:hidden;}
+  .lang-switch.open .lang-switch-menu{opacity:1;visibility:visible;transform:none;}
+  .lang-switch-menu span{display:flex;align-items:center;min-height:24px;padding:9px 12px;font-family:var(--mono);font-size:0.75rem;font-weight:700;letter-spacing:.05em;color:var(--ink-2);cursor:pointer;border-left:2px solid transparent;transition:.16s;}
+  .lang-switch-menu span:hover{background:var(--accent-soft);color:var(--accent);border-left-color:var(--accent);}
+  .lang-switch-menu span.on{display:none;}
   /* Bosiladigan nishon (WCAG 2.5.8 — eng kam 24x24). Ikonka 20px ko'rinishicha
      qoladi, faqat bosiladigan maydon 44x44 ga kengayadi (overlay absolute —
      maket o'zgarmaydi). Drawer <header> dan tashqarida, u allaqachon 40x40. */
@@ -213,7 +224,6 @@
      `body.inner header .util`) — bosh sahifa ham endi shunga mos keladi. */
   header.solid .bar .wrap{height:80px;}
   header.solid nav.main .item{padding:24px 0;}
-  header.solid .langs span:not(.on){color:var(--muted);}
 
   /* ============ HERO SLIDER ============ */
   .hero{position:relative;height:100vh;min-height:620px;overflow:hidden;background:var(--footer);}
@@ -733,9 +743,7 @@
   .mnav-head .ic{width:40px;height:40px;display:flex;align-items:center;justify-content:center;opacity:.85;color:var(--ink);flex:none;border-radius:var(--r-ctl);transition:opacity .15s, color .15s, background .15s;}
   .mnav-head .ic:hover{opacity:1;color:var(--accent);background:var(--bg-2);}
   .mnav-head .ic svg{width:22px;height:22px;}
-  .mnav-langs{display:flex;gap:5px;margin-left:auto;}
-  .mnav-langs span{font-family:var(--mono);font-size:0.8125rem;padding:9px 12px;border:1px solid var(--line);border-radius:var(--r-pill);cursor:pointer;color:var(--ink-2);}
-  .mnav-langs span.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .mnav-head .lang-switch{margin-left:auto;}
   .mnav-close{width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);}
   .mnav-close svg{width:26px;height:26px;}
   .mnav a{display:block;font-family:var(--serif);font-size:1.375rem;padding:15px 0;border-bottom:1px solid var(--line);color:var(--ink);}

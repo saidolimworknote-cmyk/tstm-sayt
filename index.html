@@ -13,7 +13,7 @@
 <meta property="og:image" content="img/logo-mark.png">
 <meta name="twitter:card" content="summary">
 <link rel="stylesheet" href="css/fonts.css?v=1">
-<link rel="stylesheet" href="css/home.css?v=22">
+<link rel="stylesheet" href="css/home.css?v=23">
 <link rel="stylesheet" href="css/subscribe.css?v=4">
 </head>
 <body>
@@ -29,8 +29,6 @@
       <span data-i18n="util_country">O'zbekiston Respublikasi</span>
       <a href="#" id="utilEmail">info@cfps.uz</a>
       <a href="#" id="utilPhone">+998 71 239 36 55</a>
-      <span class="sp"></span>
-      <div class="langs" role="group" aria-label="Til / Язык / Language"><span data-l="uz" role="button" tabindex="0" aria-label="O'zbekcha">UZ</span><span data-l="ru" role="button" tabindex="0" aria-label="Русский">RU</span><span data-l="en" role="button" tabindex="0" aria-label="English">EN</span></div>
     </div>
   </div>
   <div class="bar">
@@ -65,6 +63,18 @@
         <a class="ic" href="#" data-gs-open role="button" title="Qidiruv" aria-label="Qidiruv" data-i18n-aria="search_title" data-i18n-title="search_title">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="ico-18"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3" stroke-linecap="round"/></svg>
         </a>
+        <div class="lang-switch">
+          <button type="button" class="lang-switch-btn" aria-haspopup="true" aria-expanded="false" aria-label="Til / Язык / Language">
+            <svg class="lang-switch-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.3"/><path d="M3.7 12h16.6M12 3.7c2.3 2.3 3.6 5.3 3.6 8.3s-1.3 6-3.6 8.3c-2.3-2.3-3.6-5.3-3.6-8.3s1.3-6 3.6-8.3Z"/></svg>
+            <span class="lang-switch-code">UZB</span>
+            <i class="lang-switch-car"></i>
+          </button>
+          <div class="lang-switch-menu" role="group" aria-label="Til / Язык / Language">
+            <span data-l="uz" role="button" tabindex="0" aria-label="O'zbekcha">UZB</span>
+            <span data-l="ru" role="button" tabindex="0" aria-label="Русский">RUS</span>
+            <span data-l="en" role="button" tabindex="0" aria-label="English">ENG</span>
+          </div>
+        </div>
       </nav>
       <div class="nav-burger" id="navBurger" role="button" tabindex="0" aria-label="Menyu" aria-expanded="false">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -79,7 +89,18 @@
     <span class="ic theme-tog" title="Rejim" role="button" tabindex="0" aria-label="Yorug‘/quyuq rejim" data-i18n-aria="theme_title" data-i18n-title="theme_title"></span>
     <span class="ic a11y-btn" title="Maxsus imkoniyatlar" role="button" tabindex="0" aria-label="Maxsus imkoniyatlar" data-i18n-aria="a11y_title" data-i18n-title="a11y_title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="4" r="2"/><path d="M4 8h16M12 8v8M8.5 20l3.5-6 3.5 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
     <a class="ic" href="#" data-gs-open title="Qidiruv" role="button" aria-label="Qidiruv" data-i18n-aria="search_title" data-i18n-title="search_title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3" stroke-linecap="round"/></svg></a>
-    <div class="mnav-langs" id="mLangs"><span data-l="uz">UZ</span><span data-l="ru">RU</span><span data-l="en">EN</span></div>
+    <div class="lang-switch">
+      <button type="button" class="lang-switch-btn" aria-haspopup="true" aria-expanded="false" aria-label="Til / Язык / Language">
+        <svg class="lang-switch-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.3"/><path d="M3.7 12h16.6M12 3.7c2.3 2.3 3.6 5.3 3.6 8.3s-1.3 6-3.6 8.3c-2.3-2.3-3.6-5.3-3.6-8.3s1.3-6 3.6-8.3Z"/></svg>
+        <span class="lang-switch-code">UZB</span>
+        <i class="lang-switch-car"></i>
+      </button>
+      <div class="lang-switch-menu" role="group" aria-label="Til / Язык / Language">
+        <span data-l="uz" role="button" tabindex="0" aria-label="O'zbekcha">UZB</span>
+        <span data-l="ru" role="button" tabindex="0" aria-label="Русский">RUS</span>
+        <span data-l="en" role="button" tabindex="0" aria-label="English">ENG</span>
+      </div>
+    </div>
     <div class="mnav-close" id="mClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6 6 18"/></svg></div>
   </div>
   <div class="mgroup" data-i18n="nav_about">Markaz haqida</div>
@@ -264,6 +285,6 @@
 <script src="js/a11y.js?v=56"></script>
 <script src="js/search.js?v=53"></script>
 <script src="js/subscribe.js?v=2"></script>
-<script src="js/page-home.js?v=16"></script>
+<script src="js/page-home.js?v=17"></script>
 </body>
 </html>
