@@ -1,4 +1,4 @@
-# TSTM — zaxiradan tiklash skripti
+# TSTM - zaxiradan tiklash skripti
 # ------------------------------------------------------------------
 # backup.ps1 yaratgan zaxirani tiklaydi (baza + uploads).
 # Ishlatish:
@@ -35,7 +35,7 @@ $dbHost = '127.0.0.1'; $dbPort = '3307'; $dbName = 'tstm'; $dbUser = 'tstm'; $db
 
 $cfg = Join-Path $root 'backend\config.php'
 if (Test-Path $cfg) {
-  $txt = Get-Content $cfg -Raw
+  $txt = [System.IO.File]::ReadAllText($cfg, (New-Object System.Text.UTF8Encoding($false)))
   if ($txt -match "'db_name'\s*=>\s*'([^']*)'") { $dbName = $Matches[1] }
   if ($txt -match "'db_user'\s*=>\s*'([^']*)'") { $dbUser = $Matches[1] }
   if ($txt -match "'db_pass'\s*=>\s*'([^']*)'") { $dbPass = $Matches[1] }
@@ -69,7 +69,7 @@ if (-not $Force) {
 # ham bo'lmaydi. Bunday holda mahalliy `root` bilan ulanamiz - baza
 # yaratish ma'muriy amal va MariaDB faqat 127.0.0.1 ni tinglaydi.
 $cfgDb = $dbName
-if (Test-Path $cfg) { if ((Get-Content $cfg -Raw) -match "'db_name'\s*=>\s*'([^']*)'") { $cfgDb = $Matches[1] } }
+if (Test-Path $cfg) { if ([System.IO.File]::ReadAllText($cfg, (New-Object System.Text.UTF8Encoding($false))) -match "'db_name'\s*=>\s*'([^']*)'") { $cfgDb = $Matches[1] } }
 if ($dbName -ne $cfgDb) {
   $mysqlArgs = @('-h', $dbHost, '-P', $dbPort, '-u', 'root')
   Write-Host "  (boshqa bazaga tiklash - mahalliy 'root' bilan ulanadi)" -ForegroundColor DarkGray
@@ -84,7 +84,13 @@ if ($LASTEXITCODE -ne 0) { throw "'$dbName' bazasini yaratib bo'lmadi (huquq yet
 # Dump `--databases` bilan olingan, ya'ni ichida `CREATE DATABASE tstm` va
 # `USE tstm` bor. Ularni olib tashlaymiz va maqsad bazani o'zimiz aniq
 # ko'rsatamiz - aks holda -Db bilan sinov tiklashi ASL bazaga tushib ketardi.
-$sqlText = Get-Content $sqlFile -Raw
+# QAT'IY UTF-8 da o'qiymiz. `Get-Content -Raw` (kodlashsiz) PS 5.1 da faylni
+# ANSI kod sahifasi bilan dekodlaydi - dump esa UTF-8. Natijada ruscha matn
+# va tire/qo'shtirnoq/daraja belgilari tiklashda buzilardi, ya'ni zaxiradan
+# tiklangan sayt buzuq kontent bilan ochilardi (2026-08-24 dagi eksport
+# xatosining aynan o'zi, faqat teskari tomondan).
+$sqlText = [System.IO.File]::ReadAllText($sqlFile, (New-Object System.Text.UTF8Encoding($false)))
+$sqlText = $sqlText -replace "`r`n", "`n"
 $sqlText = ($sqlText -split "`n" | Where-Object { $_ -notmatch '^\s*(CREATE DATABASE|USE `)' }) -join "`n"
 $tmp = Join-Path $env:TEMP "tstm-restore-$PID.sql"
 # BOM SIZ yozamiz: Set-Content -Encoding utf8 PS 5.1 da BOM qo'shadi va u

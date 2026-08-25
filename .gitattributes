@@ -1,0 +1,78 @@
+# ==================================================================
+# TSTM - fayl turlari va qator oxirlari
+# ------------------------------------------------------------------
+# NEGA BU FAYL BOR
+#   Git'ning `core.autocrlf` sozlamasi HAR BIR kompyuterda alohida
+#   turadi va Windows'da odatda `true` bo'ladi. U bo'lsa, `git clone`
+#   paytida barcha matnli fayllar CRLF ga o'giriladi. Natijada bir
+#   kompyuterdagi fayl ikkinchisidagidan BAYT jihatidan farq qiladi:
+#   sha1 mos kelmaydi, `git diff` sabab ko'rsatmay "butun fayl
+#   o'zgargan" deydi, tekshiruv skriptlari ishonchsizlanadi.
+#
+#   `.gitattributes` esa OMBOR bilan birga ko'chadi va har qanday
+#   mahalliy sozlamadan USTUN turadi. Ya'ni loyihaning qanday
+#   ko'chishini endi loyihaning O'ZI hal qiladi, kompyuter emas.
+#
+# QOIDA
+#   Sukut bo'yicha hamma narsa LF. Windows'da CRLF SHART bo'lgan
+#   fayllar quyida alohida sanab o'tilgan.
+# ==================================================================
+
+# Sukut: git matnli faylni o'zi aniqlaydi, omborda ham, ishchi
+# nusxada ham LF saqlaydi. Ikkilik fayllar avtomatik chetda qoladi.
+* text=auto eol=lf
+
+# ---- Windows CRLF talab qiladigan fayllar ------------------------
+# .bat/.cmd - eski cmd.exe LF li faylni noto'g'ri bo'lakka bo'lishi
+#   mumkin, CRLF esa uning ona formati.
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+
+# .ps1 ATAYLAB bu ro'yxatda YO'Q - u ham LF (yuqoridagi umumiy qoida).
+#   PowerShell 5.1 LF li skriptni bemalol o'qiydi, LF esa loyihadagi
+#   qolgan hamma narsa bilan bir xil bo'lishini ta'minlaydi.
+#   DIQQAT, .ps1 haqida boshqa qoida: ular SOF ASCII bo'lishi kerak.
+#   PS 5.1 BOM'siz skriptni ANSI kod sahifasi bilan o'qiydi, ya'ni
+#   kodda turgan uzun tire yoki kirill belgi skriptning O'ZIDA
+#   buziladi. Tekshirish (hech narsa chiqarmasligi kerak):
+#       grep -n '[^ -~\t]' tools/*.ps1 tests/*.ps1
+
+# ---- Hech qachon o'girilmasin ------------------------------------
+# data/baza.sql - sayt kontenti shu fayl orqali ko'chadi. Qator
+#   oxiri o'zgarsa butun fayl "o'zgargan" ko'rinadi va haqiqiy
+#   kontent farqini ko'rib bo'lmaydi. Uni kontent-eksport.ps1
+#   hamisha LF bilan yozadi.
+*.sql  text eol=lf
+
+# runtime/ - bu yerda PHP va MariaDB ning TAYYOR tarqatmasi yotadi
+#   (.exe, .dll, .ini, .cnf, .xml, .pem). Ular sotuvchidan qanday
+#   kelgan bo'lsa, shundayligicha, bayt-baytiga saqlanishi kerak -
+#   git ularga umuman tegmasin.
+runtime/** -text
+
+# uploads/ - admin orqali yuklangan rasm va hujjatlar. Bular
+#   kontent artefaktlari: git ularni faqat saqlaydi, tahlil qilmaydi.
+uploads/** -text
+
+# ---- Ikkilik fayllar (aniq belgilab qo'yamiz) --------------------
+# `text=auto` ularni odatda o'zi topadi, lekin taxminga tayanmaymiz:
+# noto'g'ri "matn" deb topilgan rasm yoki shrift CRLF o'girilishida
+# BUZILADI va buni sezish qiyin.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.ico  binary
+*.svgz binary
+*.pdf  binary
+*.docx binary
+*.xlsx binary
+*.zip  binary
+*.woff binary
+*.woff2 binary
+*.ttf  binary
+*.otf  binary
+*.eot  binary
+*.mp4  binary
+*.webm binary

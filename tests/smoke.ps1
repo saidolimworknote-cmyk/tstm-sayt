@@ -1,6 +1,6 @@
-﻿# TSTM — avtomatlashtirilgan smoke / xavfsizlik testi
+# TSTM - avtomatlashtirilgan smoke / xavfsizlik testi
 # ==================================================================
-# Har o'zgarishdan keyin ishga tushiring — sayt buzilmaganini va asosiy
+# Har o'zgarishdan keyin ishga tushiring - sayt buzilmaganini va asosiy
 # xavfsizlik himoyalari joyida ekanini tekshiradi.
 #
 # Ishlatish:
@@ -9,7 +9,7 @@
 #
 # Chiqish kodi: 0 = hammasi o'tdi, 1 = kamida bitta test yiqildi (CI uchun).
 #
-# ESLATMA: bu testlar FAQAT ommaviy (autentifikatsiyasiz) yuzani tekshiradi —
+# ESLATMA: bu testlar FAQAT ommaviy (autentifikatsiyasiz) yuzani tekshiradi -
 # admin paroli talab qilinmaydi, shuning uchun xavfsiz va istalgan vaqtda
 # ishga tushirsa bo'ladi. Admin CRUD testlari alohida (qo'lda parol bilan).
 # ==================================================================
@@ -81,11 +81,11 @@ Check "admin noindex (X-Robots-Tag)" ($ha -match 'X-Robots-Tag:.*noindex')
 # ---- 4. Maxfiy fayllar HTTP orqali bloklangan ----
 Write-Host "`n[4] Maxfiy fayllar bloklangan (403/404)"
 # 2026-08-20: hujjatlar `docs\` ga ko'chdi. `.htaccess` dagi to'siq FAYL NOMIGA
-# qaraydi (FilesMatch), ya'ni papka ichida ham ishlaydi — shuni tekshiramiz.
+# qaraydi (FilesMatch), ya'ni papka ichida ham ishlaydi - shuni tekshiramiz.
 #
 # 2026-08-22: `db.php`, `seed.php`, `config.php` ildizdan `backend\` ga ko'chdi.
 # Ikkala manzil ham sinaladi: YANGI yo'l (papka to'sig'i ishlayaptimi) va ESKI
-# ildiz yo'li (fayl nomi bo'yicha to'siq saqlanib qolganmi — kimdir fayllarni
+# ildiz yo'li (fayl nomi bo'yicha to'siq saqlanib qolganmi - kimdir fayllarni
 # ildizga qaytarsa himoya o'z-o'zidan yo'qolmasligi kerak).
 foreach ($f in 'backend/config.php','backend/db.php','backend/seed.php','backend/config.sample.php',
                'config.php','db.php','seed.php',
@@ -117,7 +117,7 @@ $rg = Get2 "$Base/api.php?action=item&coll=users&id=1"
 Check "maxfiy kolleksiya item rad (401/404)" ((Code $rg) -in 401,404) "status=$(Code $rg)"
 
 # ---- 8. Menyu havolalari o'lik emas ----
-# NEGA KERAK: menyu ikki joyda yoziladi — site-common.js dagi NAV (ichki
+# NEGA KERAK: menyu ikki joyda yoziladi - site-common.js dagi NAV (ichki
 # sahifalar) va index.html dagi qo'lda yozilgan nusxa (bosh sahifa). Biri
 # yangilanib ikkinchisi qolib ketsa yoki band sahifasi yaratilmasa, tashrifchi
 # menyudan 404 ga tushadi (2026-08-17 da "Biz kimmiz"/"Hamkorlar" bilan aynan
@@ -138,12 +138,12 @@ foreach ($l in $navLinks) {
 # bandi `site-common.js` dagi NAV ga ham, `index.html` ga ham yozilmagan edi,
 # holbuki `yangiliklar.html` sahifasi bor va admin panelda "Yangiliklar"
 # bo'limi ishlar edi. Natijada admin yangilik qo'shsa, uni saytning menyusidan
-# topib bo'lmasdi. Yuqoridagi [8] buni TUTA OLMAYDI — u faqat havola tirikmi
+# topib bo'lmasdi. Yuqoridagi [8] buni TUTA OLMAYDI - u faqat havola tirikmi
 # deb qaraydi, havolaning menyuda BOR-YO'QLIGINI emas.
 Write-Host "`n[9] Menyuning ikki nusxasi mos keladi"
 $root = Split-Path $PSScriptRoot -Parent
-$sc = Get-Content (Join-Path $root 'js\site-common.js') -Raw
-$ix = Get-Content (Join-Path $root 'index.html') -Raw
+$sc = Get-Content (Join-Path $root 'js\site-common.js') -Raw -Encoding UTF8
+$ix = Get-Content (Join-Path $root 'index.html') -Raw -Encoding UTF8
 # `const NAV = [ ... ];` blokidagi barcha href
 $navBlock = [regex]::Match($sc, '(?s)const NAV = \[.*?\n  \];')
 if (-not $navBlock.Success) {
@@ -158,14 +158,14 @@ if (-not $navBlock.Success) {
 }
 
 # ---- 10. Admin menyusi sayt menyusiga mos keladimi ----
-# Alohida skript (`tests\menyu-mos.js`), chunki u HTTP emas — MANBA fayllarni
+# Alohida skript (`tests\menyu-mos.js`), chunki u HTTP emas - MANBA fayllarni
 # o'qiydi. Node bo'lmasa o'tkazib yuboriladi: smoke.ps1 hech qanday tashqi
 # vositaga bog'liq bo'lmasligi kerak.
 Write-Host "`n[10] Admin menyusi sayt menyusiga mos"
 $nodeCmd = Get-Command node -ErrorAction SilentlyContinue
 $navTest = Join-Path $PSScriptRoot 'menyu-mos.js'
 if (-not $nodeCmd) {
-  Write-Host "  [O'TKAZILDI] node topilmadi — qo'lda: node tests\menyu-mos.js" -ForegroundColor DarkGray
+  Write-Host "  [O'TKAZILDI] node topilmadi - qo'lda: node tests\menyu-mos.js" -ForegroundColor DarkGray
 } elseif (-not (Test-Path $navTest)) {
   Check "menyu-mos.js mavjud" $false 'fayl yo''q'
 } else {
@@ -173,6 +173,37 @@ if (-not $nodeCmd) {
   $code = $LASTEXITCODE
   Check "admin va sayt menyusi mos" ($code -eq 0) 'batafsili: node tests\menyu-mos.js'
   if ($code -ne 0) { $out | Where-Object { $_ -match '\[XATO\]' } | ForEach-Object { Write-Host "         $_" -ForegroundColor Red } }
+}
+
+Write-Host "`n[11] data\baza.sql kodlashi butun"
+# NEGA BU TEST BOR
+#   2026-08-24 da tools\kontent-eksport.ps1 dump chiqishini PowerShell
+#   o'zgaruvchisiga ushlagan edi. PS 5.1 native dasturning chiqishini
+#   konsol kod sahifasi (o'sha kompyuterda CP857) bilan dekodlaydi, ya'ni
+#   UTF-8 baytlar buzilib qaytadan yozilgan. Natijada BUTUN bazadagi
+#   ruscha matnlar va tire/qo'shtirnoq/daraja belgilari nobud bo'lib
+#   git orqali ikkinchi kompyuterga ko'chgan. Buzilish faylga TINCHGINA
+#   tushgani uchun uni faqat sayt ochilganda payqash mumkin edi.
+#   Endi eksportning o'zi to'xtaydi, bu test esa ikkinchi to'siq:
+#   buzuq baza.sql commit'ga yetib borsa ham, shu yerda ushlanadi.
+$bazaSql = Join-Path $root 'data\baza.sql'
+if (-not (Test-Path $bazaSql)) {
+  Check "data\baza.sql mavjud" $false 'fayl yo''q'
+} else {
+  # QAT'IY UTF-8: bitta yaroqsiz bayt ham istisno ko'taradi.
+  $utf8Qat = New-Object System.Text.UTF8Encoding($false, $true)
+  $matn = $null
+  try { $matn = $utf8Qat.GetString([System.IO.File]::ReadAllBytes($bazaSql)) } catch { }
+  Check "baza.sql haqiqiy UTF-8" ($null -ne $matn) 'yaroqsiz baytlar bor'
+  if ($null -ne $matn) {
+    # Ramka/blok belgilari (U+2500..U+25A0) va U+FFFD - OEM buzilishining izi.
+    # Naqsh belgi KODLARIDAN quriladi: bu skript sof ASCII bo'lishi kerak.
+    $naqsh = "[" + [char]0xFFFD + [char]0x2500 + "-" + [char]0x25A0 + "]"
+    Check "baza.sql da buzilgan belgi yo'q" (-not ($matn -match $naqsh)) 'CP857/OEM buzilishi alomati'
+    # Qator oxiri: fayl .gitattributes bo'yicha LF. CR paydo bo'lsa,
+    # demak kimdir uni CRLF bilan qayta yozgan va git farqi shishadi.
+    Check "baza.sql qator oxirlari LF" (-not $matn.Contains([char]13)) 'ichida CR bor'
+  }
 }
 
 # ---- Xulosa ----
