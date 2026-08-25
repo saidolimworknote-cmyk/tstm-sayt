@@ -226,33 +226,38 @@
     'radial-gradient(1050px 540px at 84% 10%, rgba(52,182,255,.17), transparent 58%),radial-gradient(780px 500px at 6% 102%, rgba(18,64,96,.42), transparent 56%),linear-gradient(140deg,#103a54 0%,#0a2130 48%,#08161f 100%)'
   ];
   /* Hero manbasi \u2014 ikki bosqichli:
-     1) Admin "Hero slayder" bo'limidagi published slaydlar (muharrir nazorati)
-     2) Ular bo'lmasa \u2014 so'nggi 5 published NASHR (avtomatik zaxira)
+     1) VOQEALAR bo'limidagi eng oxirgi 5 ta published yozuv (avtomatik)
+     2) Ular bo'lmasa \u2014 so'nggi 5 published NASHR (zaxira)
 
-     2026-08-22 gacha 2-bosqich YANGILIKLARdan olinardi. Yangiliklar bo'limi
-     saytdan butunlay olib tashlangach, zaxira nashrlarga o'tkazildi \u2014 aks
-     holda hero_slides bo'sh bo'lganda bosh sahifaning yuqorisi matnsiz
-     gradient bo'lib qolardi (hozir bazada 0 ta hero slayd bor).
-     Nashrlar buning uchun mos: ular menyuda ("Tadqiqotlar"), muqovasi va
-     o'z sahifasi bor (`nashr.html?id=...`).
+     2026-08-25: ilgari 1-bosqich admin "Hero slayder" bo'limidan (qo'lda
+     tanlangan slaydlar) kelardi. U jadval deyarli doim bo'sh/rasmsiz
+     turgani uchun (2026-08-19 da bazadagi 3 ta published slaydning
+     HAMMASIDA `image` bo'sh edi, hozir esa 0 ta) endi butunlay olib
+     tashlandi \u2014 hero endi Voqealar panelidan O'ZI to'ldiriladi,
+     muharrir alohida boshqarmaydi. `heroSlides` jadvali va admin
+     bo'limi bazada qoladi (kod uni endi o'qimaydi) \u2014 xuddi shu
+     tarzda tashlab qo'yilgan `news` kabi.
 
-     RASM SHART EMAS. Ilgari filtr `&& s.image` ham talab qilardi \u2014 "rasmsiz
-     slayd hero'ni gradient fonga tushirib yuboradi" degan mulohaza bilan. Amalda
-     bu 1-bosqichni butunlay o'ldirdi: 2026-08-19 da bazadagi 3 ta published
-     slaydning HAMMASIDA `image` bo'sh edi, shuning uchun muharrir tanlagan
-     sarlavhalar hech qachon ko'rinmay, sayt jimgina yangiliklar zaxirasiga
-     tushib turgan edi \u2014 admin'da esa "Hero slayder 3" deb turardi.
-     Gradient fon nosozlik emas: heroBgVal() rasmsiz slaydga heroFallbacks[i]
-     dagi institutsional gradientni beradi (pastda), ya'ni ko'rinish baribir
-     to'liq. Rasm qo'shilgan zahoti o'sha slayd avtomatik rasmga o'tadi. */
+     Voqea "eng oxirgi qo'shilgani" \u2014 Store.all('events') massivi
+     backend'dan ALLAQACHON shu tartibda keladi (backend/db.php:
+     coll_load, `ORDER BY seq DESC` \u2014 "eng yangi qo'shilgani
+     birinchi"), shuning uchun qo'shimcha saralash shart emas: birinchi
+     5 ta = so'nggi 5 ta qo'shilgan. */
   function heroItems(){
     try {
-      const slides = Store.all('heroSlides')
-        .filter(s => s.status === 'published')
-        .sort((a,b) => (a.order||0) - (b.order||0));
-      if(slides.length) return slides.map(s => ({
-        cat: s.category || '', title: s.headline, href: s.link || '', img: s.image || '', date: ''
-      }));
+      const evs = Store.all('events')
+        .filter(e => e.status === 'published')
+        .slice(0, 5);
+      if (evs.length) return evs.map(e => {
+        const k = (window.ContentKinds && ContentKinds.eventKind) ? ContentKinds.eventKind(e.type) : null;
+        return {
+          cat: k ? T(k.tk) : (e.type || ''),
+          title: e.title,
+          href: 'tadbir.html?id=' + encodeURIComponent(e.id),
+          img: e.cover || (Array.isArray(e.photos) && e.photos[0] && e.photos[0].url) || '',
+          date: e.date || ''
+        };
+      });
     } catch{}
     try {
       // Nashrda `date` yo'q — faqat `year`. Teng yillar ichida ro'yxatdagi
