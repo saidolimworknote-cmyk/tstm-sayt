@@ -151,18 +151,16 @@
     var _logo = (_st.logos && _st.logos[_lg]) || _st.logo || _defLogo[_lg] || _defLogo.uz;
     if (_logo) document.querySelectorAll('.brand-logo').forEach(function(img){ img.src = _logo; });
   } catch{}
-  // ---- aloqa ma'lumotlari (sozlamalardan — header util + footer) ----
+  // ---- aloqa ma'lumotlari (sozlamalardan — footer) ----
+  // 2026-08-25: header'dagi "util" qatori (davlat nomi + email + telefon)
+  // butunlay olib tashlandi — bu ma'lumot Aloqa sahifasida (aloqa.html)
+  // to'liq bor, tepada takrorlanishi ortiqcha edi.
   try {
     var _cs = (window.Store && Store.settings && Store.settings()) || {};
     var _cml = function(v){ if(v && typeof v==='object'){ var L=(window.I18N?I18N.lang:'uz'); return v[L]||v.uz||v.ru||v.en||''; } return v||''; };
     var _email = _cs.email || 'info@cfps.uz';
-    var _phone = _cs.phone || '+998 71 239 36 55';
-    var _tel   = 'tel:' + _phone.replace(/[^\d+]/g,'');
     var _setLink = function(id, txt, href){ var el=document.getElementById(id); if(!el) return; if(txt!=null) el.textContent=txt; if(href!=null) el.href=href; };
-    _setLink('utilEmail', _email, 'mailto:'+_email);
-    _setLink('utilPhone', _phone, _tel);
     // Footerdagi ixcham aloqa bloki (.f-meta): manzil + e-pochta.
-    // Telefon ataylab yo'q — u tepadagi util qatorida turibdi.
     _setLink('fEmail', _email, 'mailto:'+_email);
     var _fa = document.getElementById('fAddr');
     if(_fa) _fa.textContent = _cml(_cs.address) || "Toshkent sh., O'zbekiston";

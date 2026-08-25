@@ -276,11 +276,6 @@
     el.id = 'hdr';
     el.className = 'solid';
     el.innerHTML = `
-      <div class="util"><div class="wrap">
-        <span>${esc(T('util_country'))}</span>
-        <a href="mailto:${esc(s.email||'info@cfps.uz')}">${esc(s.email||'info@cfps.uz')}</a>
-        <a href="tel:${esc((s.phone||'').replace(/\s/g,''))}">${esc(s.phone||'+998 71 239 36 55')}</a>
-      </div></div>
       <div class="bar"><div class="wrap">
         <a class="brand brand-row" href="index.html" aria-label="${esc(SN)}">
           <img class="logo logo-c" src="img/logo-mark.png" alt="${esc(SN)}">

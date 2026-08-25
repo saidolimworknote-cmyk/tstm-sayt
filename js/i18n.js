@@ -24,8 +24,6 @@
 
 
   const D = {
-    /* ---- util bar ---- */
-    util_country: { uz: "O'zbekiston Respublikasi", ru: 'Республика Узбекистан', en: 'Republic of Uzbekistan' },
     theme_title:  { uz: 'Yorug\'/quyuq rejim', ru: 'Светлая/тёмная тема', en: 'Light/dark mode' },
     search_title: { uz: 'Qidiruv', ru: 'Поиск', en: 'Search' },
 
