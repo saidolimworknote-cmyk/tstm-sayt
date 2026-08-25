@@ -206,7 +206,13 @@ header.solid nav.main .item{padding:24px 0;}
 .nav-burger svg{width:24px;height:24px;}
 
 /* ============ INNER PAGE BANNER ============ */
-body.inner{padding-top:116px;}
+/* 2026-08-25: qattiq 116px (header.solid .util bilan o'lchangan) o'rniga
+   --hdr-h ishlatiladi — xuddi pastdagi .secnav kabi. Util qatori olib
+   tashlangach header pasaydi, qattiq raqam bannerdan oldin bo'sh joy
+   qoldirib qo'ygan edi (sabab: renderHeader header balandligini
+   o'lchab shu o'zgaruvchiga yozadi, lekin bu qoida hali eski sonni
+   ishlatardi). */
+body.inner{padding-top:var(--hdr-h,80px);}
 .page-banner{background:var(--footer);color:#fff;position:relative;overflow:hidden;min-height:250px;}
 .page-banner.has-img{background-image:var(--banner-img);background-size:cover;background-position:center;}
 /* Gradient bannerning taxminan yarmigacha keladi: chap yarmi qorong'i (sarlavha
@@ -233,7 +239,7 @@ body.inner{padding-top:116px;}
    4 sahifasi o'rtasida yurish shu qator orqali bo'ladi. Header'ga yopishadi:
    `--hdr-h` ni renderHeader o'lchab yozadi (header balandligi ekran kengligiga
    qarab o'zgaradi, shuning uchun qattiq raqam yaramaydi). */
-.secnav{position:sticky;top:var(--hdr-h,118px);z-index:40;background:var(--panel);border-bottom:1px solid var(--line);}
+.secnav{position:sticky;top:var(--hdr-h,80px);z-index:40;background:var(--panel);border-bottom:1px solid var(--line);}
 .secnav .wrap{display:flex;align-items:stretch;gap:2px;padding:0 40px;overflow-x:auto;scrollbar-width:none;}
 .secnav .wrap::-webkit-scrollbar{display:none;}
 .secnav-t{align-self:center;flex:none;font-family:var(--mono);font-size:0.65625rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding-right:20px;margin-right:14px;border-right:1px solid var(--line);}
