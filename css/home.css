@@ -305,22 +305,6 @@
   .stat .c{font-family:var(--mono);font-size:0.625rem;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,255,255,.72);margin-top:14px;line-height:1.5;}
   html[data-theme="dark"] .stat .c{color:var(--muted);}
 
-  /* directions */
-  .dir-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
-  .dir{padding:38px 34px 60px;position:relative;transition:transform .25s, box-shadow .25s, border-color .25s;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);display:block;}
-  .dir h3{color:var(--ink);}
-  .dir:hover{transform:translateY(-6px);box-shadow:var(--lift);background:var(--panel);}
-  .dir-top{display:flex;align-items:center;justify-content:space-between;}
-  .dico{width:54px;height:54px;border-radius:var(--r-ctl);background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;transition:.25s;}
-  .dico svg{width:26px;height:26px;}
-  /* Hover'da ikonka qutisi to'liq moviyga bo'yalardi — olib tashlandi.
-     Karta bosiladigan ekani ko'tarilish va sarlavha rangi orqali bilinadi. */
-  .dir .num{font-family:var(--serif);font-size:1.875rem;font-weight:500;color:color-mix(in srgb,var(--ink) 18%,transparent);letter-spacing:-.02em;}
-  .dir h3{font-family:var(--serif);font-weight:500;font-size:1.3125rem;margin:24px 0 12px;line-height:1.28;}
-  .dir p{color:var(--ink-2);font-size:0.90625rem;line-height:1.65;margin:0;}
-  .dir .go{position:absolute;right:34px;bottom:34px;opacity:0;transform:translateX(-6px);transition:.25s;color:var(--accent);font-size:1.125rem;}
-  .dir:hover .go{opacity:1;transform:none;}
-
   /* news-grid (2026-08-25: "Voqealar" — bosh sahifadagi so'nggi tadbirlar bloki) */
   .news-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:56px;}
   /* Rasm kartaning ramkasiga tegib turadi (.nitem bilan bir xil mantiq).
@@ -562,7 +546,7 @@
   }
   html,body{overflow-x:hidden;}
   @media(max-width:1080px){
-    .dir-grid,.pub-grid{grid-template-columns:repeat(2,1fr);}
+    .pub-grid{grid-template-columns:repeat(2,1fr);}
     nav.main{display:none;}
     .nav-burger{display:flex !important;align-items:center;justify-content:center;width:44px;height:44px;margin-left:auto;cursor:pointer;color:inherit;flex:none;}
     .nav-burger svg{width:26px;height:26px;}
@@ -596,15 +580,8 @@
     /* tugma/teg/havola — mobil ixcham */
     .arrow-link{font-size:0.6875rem;}
     .tag{font-size:0.5625rem;padding:3px 9px;}
-    .dir-grid,.pub-grid,.plogos{grid-template-columns:1fr;}
+    .pub-grid,.plogos{grid-template-columns:1fr;}
     /* mobil: kartalar ixcham — kichik padding, kichik sarlavha, barqaror rasm nisbatlari */
-    .dir-grid{gap:12px;}
-    .dir{padding:20px 18px 24px;border-radius:var(--r-card);}
-    .dir h3{font-size:1.0625rem;margin:14px 0 7px;}
-    .dir p{font-size:0.84375rem;line-height:1.55;}
-    .dir .num{font-size:1.375rem;}
-    .dico{width:42px;height:42px;border-radius:var(--r-ctl);}
-    .dir .go{right:18px;bottom:14px;}
     .feat .ph,.feat .img{height:200px;}
     .feat .meta{margin:16px 0 10px;}
     .feat h3{font-size:1.25rem;margin:0 0 8px;}
@@ -713,8 +690,7 @@
   /* Teginli qurilmalar: tap'dan keyin "yopishib qoladigan" hover siljishlari bo'lmasin —
      kartalar/rasmlar barmoq tegishi bilan o'ynab ketmaydi */
   @media(hover:none){
-    .dir:hover,.pub:hover,.feat:hover,.nitem:hover,.exp:hover,.plogo:hover{transform:none;}
-    .dir:hover .go{opacity:0;}
+    .pub:hover,.feat:hover,.nitem:hover,.exp:hover,.plogo:hover{transform:none;}
   }
 
   /* Sahifa tepasidagi o'qish jarayoni chizig'i (#scrollProgress) OLIB TASHLANDI —
@@ -826,12 +802,12 @@
   .tag{border-radius:var(--r-pill);}
   /* hover — barcha kartalar bir xil: ko'tarilish + neytral soya.
      border-color va fon rangi hover'da O'ZGARMAYDI (ilgari moviy tusga kirardi). */
-  .dir,.pub,.feat,.nitem,.exp{transition:transform .28s cubic-bezier(.2,.7,.2,1), box-shadow .28s, border-color .28s, background .28s;}
-  .dir:hover,.pub:hover,.feat:hover,.exp:hover{transform:translateY(-6px);box-shadow:var(--lift);}
+  .pub,.feat,.nitem,.exp{transition:transform .28s cubic-bezier(.2,.7,.2,1), box-shadow .28s, border-color .28s, background .28s;}
+  .pub:hover,.feat:hover,.exp:hover{transform:translateY(-6px);box-shadow:var(--lift);}
   .nitem:hover{transform:translateY(-4px);box-shadow:var(--lift-soft);}
   @media(prefers-reduced-motion:reduce){
-    .dir,.pub,.feat,.nitem,.exp{transition:box-shadow .2s, border-color .2s;}
-    .dir:hover,.pub:hover,.feat:hover,.nitem:hover,.exp:hover{transform:none;}
+    .pub,.feat,.nitem,.exp{transition:box-shadow .2s, border-color .2s;}
+    .pub:hover,.feat:hover,.nitem:hover,.exp:hover{transform:none;}
   }
   /* WCAG 2.5.8: tap-nishonlar kamida 24px — padding + manfiy margin, maket siljimaydi */
   .arrow-link,.f-bot a,.f-meta a{padding-top:4px;padding-bottom:4px;margin-top:-4px;margin-bottom:-4px;}
@@ -870,7 +846,7 @@
        tushmagan bo'limlar qog'ozda BO'SH chiqardi. Chop etishda hammasi
        ko'rinsin (site.css da ham xuddi shunday qoida bor). */
     .rv{opacity:1 !important;transform:none !important;}
-    .dir,.pub,.feat,.nitem,.exp,.stats{break-inside:avoid;border-color:#ccc !important;
+    .pub,.feat,.nitem,.exp,.stats{break-inside:avoid;border-color:#ccc !important;
       background:#fff !important;transform:none !important;}
     /* Statistika lentasi ekranda QUYUQ ko'k fonda, matni OQ. Fonni oqartirgach
        matn ham oq qolib, qog'ozda butun blok bo'sh chiqardi — shuning uchun

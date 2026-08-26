@@ -157,7 +157,6 @@
     oav_empty:    { uz: 'Hozircha sharhlar yo‘q', ru: 'Комментариев пока нет', en: 'No commentary yet' },
     oav_empty_o:  { uz: 'Bu nashrda sharh yo‘q', ru: 'В этом издании нет комментариев', en: 'No commentary from this outlet' },
     all_pubs:     { uz: 'Barcha nashrlar', ru: 'Все публикации', en: 'All publications' },
-    all_dirs:     { uz: "Barcha yo'nalishlar", ru: 'Все направления', en: 'All areas' },
     all_events:   { uz: 'Barcha voqealar', ru: 'Все мероприятия', en: 'All events' },
     all_team:     { uz: 'Butun jamoa', ru: 'Вся команда', en: 'Full team' },
     download_pdf: { uz: 'Faylni yuklab olish', ru: 'Скачать файл', en: 'Download file' },
@@ -206,11 +205,9 @@
     stat_years:    { uz: 'Yillik tajriba', ru: 'Лет опыта', en: 'Years of experience' },
 
     /* ---- homepage: section heads ---- */
-    dir_kicker:   { uz: "Faoliyat yo'nalishlari", ru: 'Направления деятельности', en: 'Areas of activity' },
-    dir_title:    { uz: "Tadqiqot yo'nalishlarimiz", ru: 'Наши направления исследований', en: 'Our research areas' },
     events_kicker:{ uz: 'Markaz tadbirlari', ru: 'Мероприятия центра', en: 'Center events' },
     pubs_kicker:  { uz: 'Tadqiqotlar va nashrlar', ru: 'Исследования и публикации', en: 'Research & publications' },
-    pubs_title:   { uz: 'Asosiy hisobotlar', ru: 'Основные доклады', en: 'Key reports' },
+    pubs_title:   { uz: 'Asosiy tahlillar', ru: 'Основная аналитика', en: 'Key analysis' },
     team_kicker:  { uz: 'Jamoa', ru: 'Команда', en: 'Team' },
     team_title:   { uz: 'Ekspertlar va rahbariyat', ru: 'Эксперты и руководство', en: 'Experts & leadership' },
     partners_kicker:{ uz: 'Hamkorlik', ru: 'Сотрудничество', en: 'Partnership' },
