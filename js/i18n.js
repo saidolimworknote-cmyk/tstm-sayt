@@ -29,7 +29,7 @@
 
     /* ---- navigation ---- */
     nav_about:            { uz: 'Markaz haqida', ru: 'О центре', en: 'About' },
-    nav_about_who:        { uz: 'Biz haqimizda', ru: 'О нас', en: 'Who we are' },
+    nav_about_who:        { uz: 'Biz haqimizda', ru: 'О нас', en: 'About Us' },
     nav_about_leadership: { uz: 'Rahbariyat', ru: 'Руководство', en: 'Leadership' },
     nav_about_partners:   { uz: 'Hamkorlar', ru: 'Партнёры', en: 'Partners' },
     nav_research:         { uz: 'Tadqiqotlar', ru: 'Исследования', en: 'Research' },
@@ -47,7 +47,7 @@
        shuning uchun o'chirilmadi. */
     nav_about_experts:    { uz: 'Ekspertlar', ru: 'Эксперты', en: 'Experts' },
     /* Markaz haqida bo'limining 4 sahifasi uchun sarlavha/lead kalitlari */
-    p_who_title:          { uz: 'Biz haqimizda', ru: 'О нас', en: 'Who we are' },
+    p_who_title:          { uz: 'Biz haqimizda', ru: 'О нас', en: 'About Us' },
     /* 2026-08-23: banner ostidagi qator qayta yozildi. Ilgari "Mustaqil
        tahliliy markaz — missiya, qadriyatlar va faoliyat yo'nalishlari" deb
        turardi, lekin (1) sanab o'tilgan bo'limlar sahifadan olib tashlandi va
