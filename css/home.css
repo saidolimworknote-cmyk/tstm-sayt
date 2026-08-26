@@ -144,7 +144,7 @@
   .bar .wrap{display:flex;align-items:center;gap:30px;height:104px;}
   .brand{display:flex;align-items:center;gap:16px;flex:none;}
   .brand .logo{height:66px;width:auto;display:block;transition:height .3s;}
-  header.solid .brand .logo{height:56px;}
+  header.solid .brand .logo{height:70px;}
   .logo-c{display:block;}
   /* flex:none — chiziq 1.5px, flex uni siqib 0 ga tushirmasin. Brend qutisi
      qat'iy kenglikda (.hp-brand) bo'lgani uchun nom uzunroq bo'lsa flex eng
@@ -585,7 +585,7 @@
     header .bar .wrap{height:64px !important;}
     .brand{margin:0 !important;width:auto !important;min-width:0 !important;height:auto !important;gap:9px !important;}
     .brand .logo{height:40px !important;}
-    header.solid .brand .logo{height:38px !important;}
+    header.solid .brand .logo{height:46px !important;}
     .brand .divider{height:34px !important;}
     .brand .nm b{font-size:0.75rem !important;}
     .brand .nm small{font-size:0.75rem !important;}
