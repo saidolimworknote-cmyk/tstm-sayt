@@ -174,15 +174,15 @@ nav.main .item.open .drop{opacity:1;visibility:visible;transform:none;}
    ochiladi. Nav.main dropdown (.drop) bilan bir xil vizual til (panel,
    accent chiziq, soyalar) — alohida "yalang'och" ko'rinmasin degani. */
 .lang-switch{position:relative;flex:none;}
-.lang-switch-btn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border:1px solid var(--line);border-radius:var(--r-pill);background:none;color:inherit;font:inherit;font-family:var(--mono);font-size:0.71875rem;font-weight:700;letter-spacing:.05em;cursor:pointer;transition:border-color .2s,color .2s,background .2s;}
+.lang-switch-btn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border:1px solid var(--line);border-radius:var(--r-ctl);background:none;color:inherit;font:inherit;font-family:var(--mono);font-size:0.71875rem;font-weight:700;letter-spacing:.05em;cursor:pointer;transition:border-color .2s,color .2s,background .2s;}
 .lang-switch-btn:hover{border-color:var(--accent);color:var(--accent);}
 .lang-switch-globe{width:15px;height:15px;flex:none;opacity:.7;}
 .lang-switch-car{width:6px;height:6px;flex:none;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);transition:transform .2s;margin-top:-3px;}
 .lang-switch.open .lang-switch-btn{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);}
 .lang-switch.open .lang-switch-car{transform:rotate(225deg);margin-top:3px;}
-.lang-switch-menu{position:absolute;top:calc(100% + 8px);right:0;min-width:76px;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 26px 56px -22px rgba(8,24,46,.45);padding:5px;display:flex;flex-direction:column;gap:2px;opacity:0;visibility:hidden;transform:translateY(8px) scale(.96);transform-origin:top right;transition:.22s;z-index:70;}
+.lang-switch-menu{position:absolute;top:calc(100% + 8px);right:0;min-width:76px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-ctl);box-shadow:0 26px 56px -22px rgba(8,24,46,.45);padding:5px;display:flex;flex-direction:column;gap:2px;opacity:0;visibility:hidden;transform:translateY(8px) scale(.96);transform-origin:top right;transition:.22s;z-index:70;}
 .lang-switch.open .lang-switch-menu{opacity:1;visibility:visible;transform:none;}
-.lang-switch-menu span{display:flex;align-items:center;justify-content:center;min-height:20px;padding:6px 10px;border-radius:var(--r-pill);font-family:var(--mono);font-size:0.6875rem;font-weight:700;letter-spacing:.05em;color:var(--ink-2);cursor:pointer;transition:.16s;}
+.lang-switch-menu span{display:flex;align-items:center;justify-content:center;min-height:20px;padding:6px 10px;border-radius:var(--r-xs);font-family:var(--mono);font-size:0.6875rem;font-weight:700;letter-spacing:.05em;color:var(--ink-2);cursor:pointer;transition:.16s;}
 .lang-switch-menu span:hover{background:var(--accent);color:#fff;}
 .lang-switch-menu span.on{display:none;}
 /* Bosiladigan nishon (WCAG 2.5.8 — eng kam 24x24). Ikonka 20px ko'rinishicha
@@ -913,7 +913,7 @@ body.inner{overflow-x:clip;}
   --r-card:16px;    /* kartalar */
   --r-media:12px;   /* rasm / media bloklari */
   --r-ctl:10px;     /* tugma, input, ikonka qutilari */
-  --r-pill:999px;   /* chip, til almashtirgich, kategoriya belgisi */
+  --r-pill:999px;   /* chip, kategoriya belgisi */
   /* Karta hover'i: neytral chuqurlik soyasi. Ilgari bu yerda moviy "elektrik"
      porlash (--glow) turardi — u rasmiy sayt uslubiga to'g'ri kelmagani uchun
      olib tashlandi. Rang bermaydi: faqat karta yuzadan ko'tarilgandek ko'rinadi. */
