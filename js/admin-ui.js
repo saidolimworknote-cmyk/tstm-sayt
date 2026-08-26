@@ -24,7 +24,14 @@
     return s >= 60 ? Math.ceil(s / 60) + ' daqiqa' : (s || 1) + ' soniya';
   };
 
-  // Rasmni canvas orqali kichraytirib (JPEG) dataURL qaytaradi — data.json shishib ketmasligi uchun
+  // Rasmni canvas orqali kichraytirib dataURL qaytaradi (hajm shishib
+  // ketmasligi uchun). ILGARI har doim JPEG'ga o'tkazilardi — canvas'ning
+  // sukut bo'yicha orqa foni shaffof-QORA bo'lgani uchun shaffof PNG/WebP
+  // logotiplar JPEG'ga aylanganda orqa foni doimiy QORA bo'lib qolardi
+  // (JPEG'da alfa kanal umuman yo'q). Endi manba fayl shaffof bo'lishi
+  // mumkin bo'lgan formatda (PNG/WebP/GIF) bo'lsa va rostdan ham shaffof
+  // piksellari bo'lsa — natija ham PNG (shaffof) saqlanadi; aks holda
+  // (odatiy foto) yengilroq JPEG'ga o'tkaziladi, xuddi ilgarigidek.
   function resizeImage(file, maxDim, cb) {
     if (!file || !/^image\//.test(file.type)) { cb(''); return; }
     const rd = new FileReader();
@@ -35,10 +42,17 @@
         const m = maxDim || 1600;
         if (w > m || h > m) { const r = Math.min(m / w, m / h); w = Math.round(w * r); h = Math.round(h * r); }
         const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
-        cv.getContext('2d').drawImage(img, 0, 0, w, h);
+        const ctx = cv.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        let hasAlpha = false;
+        if (/^image\/(png|webp|gif)$/.test(file.type)) {
+          try {
+            const d = ctx.getImageData(0, 0, w, h).data;
+            for (let i = 3; i < d.length; i += 4) { if (d[i] < 255) { hasAlpha = true; break; } }
+          } catch { hasAlpha = true; } // o'qib bo'lmasa — xavfsiz tomonga: shaffof deb hisoblanadi
+        }
         let out;
-        try { out = cv.toDataURL('image/jpeg', 0.82); } catch { out = rd.result; }
-        // PNG shaffoflik kerak bo'lsa (logo) — asl saqlanadi
+        try { out = hasAlpha ? cv.toDataURL('image/png') : cv.toDataURL('image/jpeg', 0.82); } catch { out = rd.result; }
         cb(out || rd.result);
       };
       img.onerror = () => cb(rd.result);
