@@ -163,7 +163,7 @@ nav.main .item:hover .drop{opacity:1;visibility:visible;transform:none;}
 nav.main .item.is-group>span{cursor:pointer;user-select:none;}
 nav.main .item.open>span{color:var(--accent);}
 nav.main .item.open .drop{opacity:1;visibility:visible;transform:none;}
-.drop a{display:block;padding:13px 22px;font-size:0.875rem;line-height:1.35;color:var(--ink-2);transition:.16s;border-left:2px solid transparent;}
+.drop a{display:block;padding:13px 22px;font-size:0.9375rem;line-height:1.35;color:var(--ink-2);transition:.16s;border-left:2px solid transparent;}
 .drop a:hover{background:var(--accent-soft);color:var(--accent);border-left-color:var(--accent);}
 .ic{width:20px;height:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.85;transition:opacity .2s;}
 .ic:hover{opacity:1;}
