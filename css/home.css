@@ -182,9 +182,9 @@
   .lang-switch-car{width:6px;height:6px;flex:none;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);transition:transform .2s;margin-top:-3px;}
   .lang-switch.open .lang-switch-btn{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);}
   .lang-switch.open .lang-switch-car{transform:rotate(225deg);margin-top:3px;}
-  .lang-switch-menu{position:absolute;top:calc(100% + 12px);right:0;min-width:104px;background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:0 26px 56px -22px rgba(8,24,46,.45);padding:8px;display:flex;flex-direction:column;gap:3px;opacity:0;visibility:hidden;transform:translateY(8px) scale(.96);transform-origin:top right;transition:.22s;z-index:70;}
+  .lang-switch-menu{position:absolute;top:calc(100% + 8px);right:0;min-width:76px;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 26px 56px -22px rgba(8,24,46,.45);padding:5px;display:flex;flex-direction:column;gap:2px;opacity:0;visibility:hidden;transform:translateY(8px) scale(.96);transform-origin:top right;transition:.22s;z-index:70;}
   .lang-switch.open .lang-switch-menu{opacity:1;visibility:visible;transform:none;}
-  .lang-switch-menu span{display:flex;align-items:center;justify-content:center;min-height:24px;padding:9px 14px;border-radius:var(--r-pill);font-family:var(--mono);font-size:0.75rem;font-weight:700;letter-spacing:.05em;color:var(--ink-2);cursor:pointer;transition:.16s;}
+  .lang-switch-menu span{display:flex;align-items:center;justify-content:center;min-height:20px;padding:6px 10px;border-radius:var(--r-pill);font-family:var(--mono);font-size:0.6875rem;font-weight:700;letter-spacing:.05em;color:var(--ink-2);cursor:pointer;transition:.16s;}
   .lang-switch-menu span:hover{background:var(--accent);color:#fff;}
   .lang-switch-menu span.on{display:none;}
   /* Bosiladigan nishon (WCAG 2.5.8 — eng kam 24x24). Ikonka 20px ko'rinishicha
