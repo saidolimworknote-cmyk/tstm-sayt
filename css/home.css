@@ -373,11 +373,27 @@
   .pub .cover .badge{backdrop-filter:blur(6px);box-shadow:0 2px 10px -3px rgba(0,0,0,.5);}
 
   /* experts */
-  .exp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;}
-  .exp{display:block;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden;padding:0;transition:transform .25s, box-shadow .25s, background .25s, border-color .25s;}
+  /* Ekspertlar/rahbariyat — qo'lda aylantiriladigan karusel (avto emas):
+     rasmlar profil sahifasidagi (.exp-detail .photo) bilan bir xil vertikal
+     3/4 nisbatda — ilgari qat'iy 280px balandlik edi, keng ekranda karta
+     kengroq bo'lganda gorizontalga o'xshab qolardi. */
+  .sec-actions{display:flex;align-items:center;gap:22px;}
+  .exp-nav{display:flex;gap:10px;}
+  .exp-nav[hidden]{display:none;}
+  .exp-arrow{width:40px;height:40px;flex:none;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    transition:background .18s, border-color .18s, color .18s, transform .18s, opacity .18s;}
+  .exp-arrow svg{width:16px;height:16px;}
+  .exp-arrow:hover{background:var(--accent);border-color:var(--accent);color:#fff;transform:translateY(-2px);}
+  .exp-arrow:disabled{opacity:.32;cursor:default;pointer-events:none;transform:none;}
+  .exp-carousel{position:relative;}
+  .exp-grid{display:flex;gap:24px;overflow-x:auto;scroll-snap-type:x proximity;scroll-behavior:smooth;
+    padding:2px 2px 6px;margin:-2px -2px -6px;-ms-overflow-style:none;scrollbar-width:none;}
+  .exp-grid::-webkit-scrollbar{display:none;}
+  .exp{display:block;flex:0 0 clamp(200px,22vw,262px);scroll-snap-align:start;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden;padding:0;transition:transform .25s, box-shadow .25s, background .25s, border-color .25s;}
   .exp.rv{transition:opacity .7s ease, transform .25s, box-shadow .25s, background .25s, border-color .25s;}
   .exp:hover{transform:translateY(-6px);box-shadow:var(--lift);background:var(--panel);}
-  .exp .ph{height:280px;margin-bottom:0;overflow:hidden;border-radius:0;border:0;border-bottom:1px solid var(--line);position:relative;}
+  .exp .ph{aspect-ratio:3/4;margin-bottom:0;overflow:hidden;border-radius:0;border:0;border-bottom:1px solid var(--line);position:relative;}
   .exp .ph img{width:100%;height:100%;object-fit:cover;transition:transform .6s cubic-bezier(.2,.7,.2,1);}
   .exp:hover .ph img{transform:scale(1.055);}
   .exp .role{font-family:var(--mono);font-size:0.6875rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);padding:18px 20px 0;}
@@ -416,23 +432,30 @@
   /* bo'lim foni — tizim rangini yumshatgan nozik, tinch band */
   .partners-sec{background:var(--surface);padding:clamp(38px,4.6vw,56px) 0;}
   html[data-theme="dark"] .partners-sec{background:#131a2b;}
-  .plogo{flex:0 0 auto;width:244px;height:154px;margin-right:24px;display:flex;align-items:center;justify-content:center;padding:16px;
+  .plogo{flex:0 0 auto;width:244px;margin-right:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px 16px 18px;
     border:1px solid rgba(15,86,137,.11);border-radius:var(--r-card);background:#fff;text-decoration:none;
     box-shadow:0 2px 10px rgba(20,40,70,.055);
     transition:transform .28s cubic-bezier(.2,.7,.2,1),box-shadow .28s,border-color .28s;}
   html[data-theme="dark"] .plogo{background:#212c48;border-color:rgba(255,255,255,.08);box-shadow:0 2px 12px rgba(0,0,0,.24);}
   .plogo:hover{transform:translateY(-6px);box-shadow:var(--lift-soft);}
   html[data-theme="dark"] .plogo:hover{box-shadow:0 16px 38px rgba(0,0,0,.46);}
-  /* logo — doim rangli, kartani to'liq egallaydi */
-  .plogo img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;}
+  /* logo — rasm konteyneri, balandligi barqaror (nom pastda o'z joyini oladi) */
+  .plogo-img{width:100%;height:82px;display:flex;align-items:center;justify-content:center;}
+  .plogo-img img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;}
   /* monogramma plitka (logotipi yo'q hamkorlar uchun) */
-  .plogo.mono{flex-direction:column;gap:12px;}
-  .pmono{width:58px;height:58px;border-radius:var(--r-media);display:flex;align-items:center;justify-content:center;flex:none;
-    font-family:var(--serif);font-weight:700;font-size:1.28rem;color:#fff;letter-spacing:.02em;box-shadow:0 4px 13px rgba(0,0,0,.16);}
+  .pmono{width:52px;height:52px;border-radius:var(--r-media);display:flex;align-items:center;justify-content:center;flex:none;
+    font-family:var(--serif);font-weight:700;font-size:1.2rem;color:#fff;letter-spacing:.02em;box-shadow:0 4px 13px rgba(0,0,0,.16);}
   .pname{font-family:var(--serif);font-weight:600;font-size:0.98rem;line-height:1.25;color:var(--ink);text-align:center;max-width:200px;
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;transition:color .2s;}
   .plogo:hover .pname{color:var(--accent);}
-  @media(max-width:560px){.plogo{width:160px;height:116px;padding:10px;margin-right:12px;border-radius:var(--r-card);}.plogo.mono{gap:8px;}.pmono{width:42px;height:42px;font-size:0.95rem;border-radius:var(--r-ctl);}.pname{font-size:0.8125rem;max-width:136px;}}
+  /* logotipli kartadagi qisqa nom yozuvi — nafis, mayda, harf oralig'i keng
+     (kicker/role bilan bir xil "yorliq" uslubi), logotipning o'zi bilan
+     bellashib qolmasin. */
+  .plogo-cap{font-family:var(--mono);font-weight:600;font-size:0.75rem;letter-spacing:.04em;line-height:1.3;color:var(--muted);
+    text-align:center;text-transform:uppercase;max-width:200px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;transition:color .2s;}
+  .plogo:hover .plogo-cap{color:var(--accent);}
+  @media(max-width:560px){.plogo{width:160px;padding:14px 10px 12px;margin-right:12px;border-radius:var(--r-card);gap:8px;}.plogo-img{height:60px;}.pmono{width:42px;height:42px;font-size:0.95rem;border-radius:var(--r-ctl);}.pname{font-size:0.8125rem;max-width:136px;}.plogo-cap{font-size:0.6875rem;max-width:136px;}}
   @media(prefers-reduced-motion:reduce){.pmarquee{overflow-x:auto;scrollbar-width:none;}.pmarquee::-webkit-scrollbar{display:none;}.ptrack{animation:none;}.pset:not(:first-child){display:none;}}
 
   /* placeholder visual */
@@ -539,7 +562,7 @@
   }
   html,body{overflow-x:hidden;}
   @media(max-width:1080px){
-    .dir-grid,.pub-grid,.exp-grid{grid-template-columns:repeat(2,1fr);}
+    .dir-grid,.pub-grid{grid-template-columns:repeat(2,1fr);}
     nav.main{display:none;}
     .nav-burger{display:flex !important;align-items:center;justify-content:center;width:44px;height:44px;margin-left:auto;cursor:pointer;color:inherit;flex:none;}
     .nav-burger svg{width:26px;height:26px;}
@@ -598,11 +621,12 @@
     .pub .body{padding:16px 16px 18px;}
     .pub .body h3{font-size:1.0625rem;margin:10px 0 0;}
     .pub .dl{padding-top:14px;}
-    .exp-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px 12px;}
-    .exp{padding:6px;margin:-6px;}
-    .exp .ph{height:210px;margin-bottom:10px;}
+    .exp-grid{gap:14px;}
     .exp h4{font-size:0.96875rem;margin:7px 0 2px;}
     .exp .sub{font-size:0.75rem;}
+    .exp-arrow{width:34px;height:34px;}
+    .exp-arrow svg{width:14px;height:14px;}
+    .sec-actions{gap:14px;}
     .ev{padding:16px 0;}
     .ev .date .dd{font-size:1.75rem;}
     .ev .date .mm{margin-top:4px;}
@@ -833,7 +857,8 @@
        `.pmarquee` — yuruvchi hamkorlar lentasi. */
     header,footer,.mnav,.nav-burger,.hero,.skip-link,.gs-ov,.gs-bar,
     .sub-ov,.a11y-panel,.a11y-overlay,#a11y-read-overlay,.theme-tog,.arrow-link,
-    .pmarquee,.partners-sec{display:none !important;}
+    .pmarquee,.partners-sec,.exp-nav{display:none !important;}
+    .exp-grid{flex-wrap:wrap !important;overflow:visible !important;}
     section{padding:0 0 16px !important;break-inside:auto;}
     .wrap{max-width:none !important;width:auto !important;margin:0 !important;padding:0 !important;}
     h1,h2,h3{color:#000 !important;page-break-after:avoid;}

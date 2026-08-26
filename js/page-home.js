@@ -365,7 +365,9 @@
     let pubs=[],exps=[],evs=[];
     try{
       pubs = Store.all('publications').filter(p=>p.status==='published').slice(0,3);
-      exps = Store.all('experts').sort((a,b)=>(a.order||0)-(b.order||0)).slice(0,4);
+      // Endi hammasi ko'rsatiladi (qo'lda aylantiriladigan karusel) — ilgari
+      // atigi 4 tasi qat'iy grid'da chiqardi.
+      exps = Store.all('experts').sort((a,b)=>(a.order||0)-(b.order||0));
       // Voqealar bo'limidagi eng oxirgi 5 tasi — hero bilan bir xil manba/tartib
       // (heroItems() dagi izohga qarang: Store.all('events') seq DESC keladi).
       evs = Store.all('events').filter(e=>e.status==='published').slice(0,5);
@@ -458,6 +460,30 @@
         + (e.photo?'<div class="ph ph-flush">'+imgTag(e.photo)+'</div>':'<div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="9" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg></div>')
         + '<div class="role">'+esc(mlg(e.role))+'</div><h4>'+esc(mlg(e.name))+'</h4><div class="sub">'+esc(mlg(e.sub))+'</div></a>').join('');
     }
+    // EXPERTS karuseli — chapga/o'ngga strelkalar bilan QO'LDA aylantiriladi
+    // (hamkorlar lentasidan farqli o'laroq avto-aylanish YO'Q — foydalanuvchi
+    // so'rovi shunday: "avto emas qo'lda aylantiriladigan bo'ladi"). Strelkalar
+    // hammasi bitta ekranga sig'sa yashiriladi — sig'masa ko'rinadi.
+    try{
+      const enav = document.querySelector('.exp-nav');
+      if(eg && enav){
+        const prevBtn = enav.querySelector('.exp-prev'), nextBtn = enav.querySelector('.exp-next');
+        const step = () => (eg.firstElementChild ? eg.firstElementChild.getBoundingClientRect().width + 24 : 280);
+        const updateNav = () => {
+          const overflow = eg.scrollWidth > eg.clientWidth + 4;
+          enav.hidden = !overflow;
+          if(!overflow) return;
+          const max = eg.scrollWidth - eg.clientWidth - 2;
+          if(prevBtn) prevBtn.disabled = eg.scrollLeft <= 2;
+          if(nextBtn) nextBtn.disabled = eg.scrollLeft >= max;
+        };
+        if(prevBtn) prevBtn.addEventListener('click', () => eg.scrollBy({left:-step(), behavior:'smooth'}));
+        if(nextBtn) nextBtn.addEventListener('click', () => eg.scrollBy({left:step(), behavior:'smooth'}));
+        eg.addEventListener('scroll', updateNav, {passive:true});
+        window.addEventListener('resize', updateNav);
+        requestAnimationFrame(updateNav);
+      }
+    }catch{}
 
     // PARTNERS — avto-aylanma lenta (marquee)
     const pm = document.getElementById('partnersMarquee');
@@ -470,14 +496,18 @@
         const MC = ['#0f5689','#1d6a94','#2e7d6b','#8a5a2b','#5b5ea6','#9a3b52','#3a7ca5','#726a95'];
         // Rang indeksi (0..7) — home.css'dagi .pmono-c{idx} klassiga mos (inline style o'rniga).
         const colorIdx = n => { let h=0; const s=String(n||''); for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return h%MC.length; };
+        // Logotip ostiga qisqartma nom yozib qo'yiladi — ilgari faqat
+        // logotipsiz (monogramma) kartalarda nom ko'rinardi, logotipli
+        // kartalarda hech qanday yozuv yo'q edi (hover'dagi title'dan boshqa).
         const tile = p => {
+          const nm = esc(p.name);
           const inner = p.logo
-            ? '<img src="'+safeUrl(p.logo)+'" alt="'+esc(p.name)+'">'
-            : '<span class="pmono pmono-c'+colorIdx(p.name)+'">'+esc(initials(p.name))+'</span><span class="pname">'+esc(p.name)+'</span>';
+            ? '<span class="plogo-img"><img src="'+safeUrl(p.logo)+'" alt="'+nm+'"></span><span class="plogo-cap">'+nm+'</span>'
+            : '<span class="pmono pmono-c'+colorIdx(p.name)+'">'+esc(initials(p.name))+'</span><span class="pname">'+nm+'</span>';
           const cls = 'plogo'+(p.logo?'':' mono');
           return (p.url && p.url!=='#')
-            ? '<a class="'+cls+'" href="'+safeUrl(p.url)+'" target="_blank" rel="noopener" title="'+esc(p.name)+'">'+inner+'</a>'
-            : '<div class="'+cls+'" title="'+esc(p.name)+'">'+inner+'</div>';
+            ? '<a class="'+cls+'" href="'+safeUrl(p.url)+'" target="_blank" rel="noopener" title="'+nm+'">'+inner+'</a>'
+            : '<div class="'+cls+'" title="'+nm+'">'+inner+'</div>';
         };
         const oneSet = partners.map(tile).join('');
         const track = document.createElement('div'); track.className='ptrack';
