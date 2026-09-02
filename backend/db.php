@@ -98,6 +98,9 @@ $SCHEMA = [
     // element, har biri {url, title:{uz,ru,en}} — `media.photos` bilan bir xil
     // shakl, ya'ni ikkala joyda ham bitta ko'rinishdagi ma'lumot.
     ['key' => 'photos', 'type' => 'json'],
+    // Qisqa anons (2026-09-02): sarlavhadan keyin, rasmdan OLDIN chiqadigan
+    // yetakchi paragraf — `news`/`mediaPosts`dagi `excerpt` bilan bir xil rol.
+    ['key' => 'excerpt', 'type' => 'json'],
   ]],
   'experts' => ['table' => 'experts', 'cols' => [
     ['key' => 'name', 'type' => 'json'], ['key' => 'role', 'type' => 'json'],
@@ -336,7 +339,7 @@ function provision_schema($pdo) {
     id VARCHAR(40) PRIMARY KEY,
     title LONGTEXT, date DATE NULL, time VARCHAR(20), location LONGTEXT,
     type VARCHAR(120), status VARCHAR(40), body LONGTEXT, cover VARCHAR(500),
-    photos LONGTEXT,
+    photos LONGTEXT, excerpt LONGTEXT,
     $seq, INDEX(status), INDEX(date)
   )$tail");
 
@@ -540,6 +543,8 @@ function migrate($pdo) {
     'cover' => 'VARCHAR(500)',
     // Rasm to'plami — voqea sahifasidagi slayder (2026-08-20)
     'photos' => 'LONGTEXT',
+    // Qisqa anons — sarlavhadan keyin, rasmdan oldin (2026-09-02)
+    'excerpt' => 'LONGTEXT',
   ]);
   // hamkorlar.html — toifa bo'yicha guruhlash va karta matni (2026-08-17)
   ensure_cols($pdo, 'partners', [

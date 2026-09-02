@@ -138,6 +138,7 @@
       columns: [{ k: 'title', label: 'Tadbir', ml: 1, thumb: 'cover' }, { k: 'date', label: 'Sana', type: 'date' }, { k: 'time', label: 'Vaqt' }, { k: 'type', label: 'Turi' }, { k: 'type', label: 'Saytda', type: 'kind' }, { k: 'status', label: 'Holat', type: 'status' }],
       fields: [
         { k: 'title', label: 'Tadbir nomi', type: 'text', ml: 1, req: 1 },
+        { k: 'excerpt', label: 'Qisqa anons', type: 'textarea', ml: 1 },
         { k: 'body', label: 'Tavsif', type: 'rich', ml: 1 },
         { k: 'date', label: 'Sana', type: 'date', side: 1 },
         { k: 'time', label: 'Boshlanish vaqti', type: 'text', side: 1, ph: '10:00' },

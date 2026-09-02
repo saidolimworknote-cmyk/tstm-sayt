@@ -91,7 +91,7 @@ Site.initPage({
     /* ---------- format 2: muhokama kartalari (davra suhbatlari) ----------
        Mavzu birinchi o'rinda: yirik sarlavha + tavsifdan parcha. */
     const topicCard = (e) => {
-      const d = clip(strip(ml(e.body)), 190);
+      const d = clip(strip(ml(e.excerpt) || ml(e.body)), 190);
       return `<a class="topic-card rv" href="${href(e)}">
         <div class="tc-top"><span class="tc-date">${esc(dmy(e))}</span>${badge(e)}</div>
         <h3>${esc(ml(e.title))}</h3>
@@ -102,7 +102,7 @@ Site.initPage({
     const topics = (list) => `<div class="topic-grid">${list.map(topicCard).join('')}</div>`;
 
     const evCard = (e) => {
-      const d = Site.dayMonth(e.date), yy = year(e), desc = clip(strip(ml(e.body)), 150);
+      const d = Site.dayMonth(e.date), yy = year(e), desc = clip(strip(ml(e.excerpt) || ml(e.body)), 150);
       return `<a class="ev-card rv" href="${href(e)}">
         <div class="ev-cal"><span class="dd">${esc(d.dd || '—')}</span><span class="mm">${esc(d.mm || '')}</span>${yy ? `<span class="yy">${esc(yy)}</span>` : ''}</div>
         <div class="ev-cbody">

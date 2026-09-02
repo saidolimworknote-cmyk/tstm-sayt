@@ -36,6 +36,11 @@ Site.initPage({ active: 'events', render(){
   const typeLbl  = ml(ev.type);
   const loc      = ml(ev.location);
   const bodyHtml = (ml(ev.body) || '').trim();
+  // Qisqa anons — sarlavhadan keyin, rasmdan OLDIN (page-sharh.js dagi
+  // standfirst bilan bir xil naqsh: .art-lead). Asosiy matn shu anonsning
+  // nusxasi bo'lib qolmasin deb, admin kiritmasa hech narsa chiqmaydi.
+  const excerpt = ml(ev.excerpt);
+  const standfirst = excerpt ? `<p class="art-lead">${esc(excerpt)}</p>` : '';
   document.title = title + ' — ' + Site.shortName();
 
   // "Bugun" / "Tez orada" belgisi — ro'yxatlardagi bilan bir xil qoida.
@@ -104,6 +109,7 @@ Site.initPage({ active: 'events', render(){
     </div></div>
     <section class="block article-band"><div class="wrap"><div class="article">
       <div class="meta">${typeLbl ? `<span class="tag">${esc(typeLbl)}</span>` : ''}${badge}<span class="dt mono muted">${esc(Site.fmtDate(ev.date))}</span><span class="dt mono muted vct-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" class="ico-15"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg><b id="viewn">·</b> ${esc(T('views_label'))}</span></div>
+      ${standfirst}
       ${sliderHTML}
       <dl class="ev-facts">${facts}</dl>
       <div class="content">${bodyHtml || '<p class="muted">' + esc(T('soon_text')) + '</p>'}</div>
@@ -211,7 +217,7 @@ Site.initPage({ active: 'events', render(){
     const metaHtml = (typeLbl ? '<span class="tag">' + esc(typeLbl) + '</span>' : '')
                    + '<span>' + esc(Site.fmtDate(ev.date)) + (ev.time ? ', ' + esc(ev.time) : '') + '</span>'
                    + (loc ? '<span>' + esc(loc) + '</span>' : '');
-    Site.printDoc({ title: title, meta: metaHtml, image: ev.cover || '', content: bodyHtml });
+    Site.printDoc({ title: title, meta: metaHtml, lead: excerpt ? esc(excerpt) : '', image: ev.cover || '', content: bodyHtml });
   };
 
   row.querySelector('[data-act=link]').onclick = function(){

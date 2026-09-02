@@ -414,15 +414,16 @@
         return k ? T(k.tk) : (e.type || '');
       };
       const evCover = (e) => e.cover || (Array.isArray(e.photos) && e.photos[0] && e.photos[0].url) || '';
-      // Voqea "body"si boy HTML — teglarni olib tashlab, qisqa parcha qilamiz
-      // (nashrlardagi kabi tayyor "excerpt" maydoni yo'q).
+      // Admin yozgan qisqa anons (2026-09-02) bo'lsa o'shani ko'rsatamiz;
+      // eski voqealarda hali to'ldirilmagan bo'lsa — "body"dan (boy HTML)
+      // teglarni olib tashlab, qisqa parcha qilib chiqaramiz (zaxira yo'l).
       const excerpt = (html, max) => {
         const txt = String(html||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
         return txt.length > max ? txt.slice(0,max).replace(/\s+\S*$/,'') + '…' : txt;
       };
       const PH = '<div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></svg></div>';
       const main = evs[0], rest = evs.slice(1);
-      const exc = excerpt(mlGet(main.body), 160);
+      const exc = mlGet(main.excerpt) || excerpt(mlGet(main.body), 160);
       // 2026-08-27: "meta" (tur + sana) rasmdan OLDIN chiqadi — qisqa anons
       // qatori, katta sarlavha (h3) og'irligini bosish uchun (css/home.css:
       // ".feat .meta" endi rasm tepasida, .fbody ichida emas).
