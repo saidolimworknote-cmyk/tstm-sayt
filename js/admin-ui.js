@@ -245,7 +245,9 @@
       columns: [{ k: 'name', label: 'Ism' }, { k: 'login', label: 'Login' }, { k: 'role', label: 'Rol' }, { k: 'status', label: 'Holat', type: 'status' }],
       fields: [
         { k: 'name', label: 'To\'liq ism', type: 'text', req: 1 },
-        { k: 'login', label: 'Login', type: 'text', req: 1 },
+        // Login boshqa hisob bilan bir xil bo'lsa server rad etadi (har bir
+        // xodim shu nom bilan kiradi — bir xilligi tizim ishlashi uchun shart).
+        { k: 'login', label: 'Login', type: 'text', req: 1, ph: 'noyob bo\'lsin — kirish shu nom bilan' },
         { k: 'email', label: 'E-pochta', type: 'text' },
         { k: 'role', label: 'Rol', type: 'select', side: 1, opts: ['Administrator', 'Muharrir', 'Moderator'] },
         { k: 'status', label: 'Holat', type: 'status', side: 1, statusOpts: ['active', 'inactive'] }
@@ -327,6 +329,25 @@
     ] }
   ];
 
+  /* -------------------- Rollar (interfeys darajasi) --------------------
+     HAQIQIY himoya SERVERDA (api.php -> require_role()) — bu yerdagisi
+     faqat interfeysni tozalash: ruxsat yo'q bo'limni umuman ko'rsatmaslik,
+     to'g'ridan-to'g'ri manzil bilan kirilsa ham (masalan #/settings)
+     bloklash, shunda foydalanuvchi tugma bosib "403" xatosini ko'rmaydi. */
+  const ADMIN_ONLY_VIEWS = ['settings', 'audit', 'errors', 'push'];
+  const EDITOR_COLLS = ['news', 'mediaPosts', 'events', 'experts', 'publications', 'heroSlides', 'partners', 'pages', 'media'];
+  const MOD_COLLS = ['messages', 'subscribers'];
+  function roleOf() { const a = Store.raw().auth; return (a && a.role) || 'admin'; }
+  function canAccess(o) {
+    const role = roleOf();
+    if (role === 'admin') return true;
+    if (o.coll === 'users') return false;
+    if (o.view && ADMIN_ONLY_VIEWS.indexOf(o.view) !== -1) return false;
+    if (o.coll && MOD_COLLS.indexOf(o.coll) !== -1) return true; // editor + moderator
+    if (o.coll && EDITOR_COLLS.indexOf(o.coll) !== -1) return role === 'editor';
+    return true; // dashboard va h.k. — neytral, hammaga ochiq
+  }
+
   /* -------------------- State / boot -------------------- */
   let state = { view: 'dashboard', coll: null, kind: null, q: '', statusFilter: '' };
   let gsr = null, gsrActive = -1; // global qidiruv dropdown
@@ -395,16 +416,30 @@
     window.addEventListener('tstm-save-failed', (e) => {
       if (!Store.isAuthed()) return;
       const status = e && e.detail && e.detail.status;
-      // 401/403 — sessiya tugagan yoki CSRF eskirgan (odatda: admin uzoq
-      // vaqt - standart 24 daqiqadan ko'p - formani to'ldirib o'tirgan).
-      // Ilgari bu holatda ham "fayl juda katta" deb noto'g'ri ko'rsatilardi
-      // va admin nega saqlanmayotganini bilolmasdi. Endi qayta kirish oynasi
-      // ochiladi, forma esa TEGILMAYDI - kirgach "Saqlash"ni qayta bosadi.
+      const err = e && e.detail && e.detail.error;
+      // 403 + 'forbidden' — sessiya TO'G'RI, lekin rol yetarli emas (masalan
+      // Muharrir sozlamalarni saqlamoqchi bo'ldi). Qayta kirish buni hal
+      // qilmaydi — shuning uchun reauth oynasi emas, faqat tushuntirish.
+      if (status === 403 && err === 'forbidden') {
+        toast('Bu amal uchun huquqingiz yetarli emas.', 1);
+        return;
+      }
+      // 401/403 (boshqa sabab) — sessiya tugagan yoki CSRF eskirgan (odatda:
+      // admin uzoq vaqt - standart 24 daqiqadan ko'p - formani to'ldirib
+      // o'tirgan). Ilgari bu holatda ham "fayl juda katta" deb noto'g'ri
+      // ko'rsatilardi va admin nega saqlanmayotganini bilolmasdi. Endi qayta
+      // kirish oynasi ochiladi, forma esa TEGILMAYDI - kirgach "Saqlash"ni
+      // qayta bosadi.
       if (status === 401 || status === 403) {
         reauthMode = true;
         resetLoginStep();
         toast('Sessiya tugadi. Formangiz saqlanib turibdi — qaytadan kiring va "Saqlash"ni qayta bosing.', 1);
         $('#login').classList.add('show');
+        return;
+      }
+      // 409 + 'login_taken' — 'users' upsert: shu login boshqa xodimda band.
+      if (status === 409 && err === 'login_taken') {
+        toast('Bu login boshqa xodimda band — boshqasini tanlang.', 1);
         return;
       }
       toast('Saqlashda xato — fayl juda katta bo\'lishi mumkin. Kichikroq rasm yuklang.', 1);
@@ -517,13 +552,14 @@
     });
   }
 
+  const ROLE_LBL = { admin: 'Administrator', editor: 'Muharrir', moderator: 'Moderator' };
   function showApp() {
     $('#login').classList.remove('show');
     $('#app').classList.add('show');
     const name = Store.raw().auth.username;
-    $('#userChip .un').textContent = 'Administrator';
+    $('#userChip .un').textContent = ROLE_LBL[roleOf()] || 'Administrator';
     $('#userChip .ur').textContent = name;
-    $('#userChip .avatar').textContent = 'A';
+    $('#userChip .avatar').textContent = (name || 'A').charAt(0).toUpperCase();
     applyBrand();
     renderSidebar();
     if (!location.hash) { try { history.replaceState(null, '', '#/dashboard'); } catch {} }
@@ -539,7 +575,23 @@
     const counts = {}; Object.keys(C).forEach(k => counts[k] = Store.all(k).length);
     let h = '';
     NAV.forEach(g => {
-      h += `<div class="sb-group">${g.group}</div>`;
+      const groupHtml = renderNavGroup(g, counts);
+      if (groupHtml) h += `<div class="sb-group">${g.group}</div>` + groupHtml;
+    });
+    $('#sbNav').innerHTML = h;
+    $$('#sbNav .sb-item').forEach(el => el.addEventListener('click', () => {
+      const coll = el.dataset.coll, kind = el.dataset.kind, tab = el.dataset.tab;
+      // `data-tab` — media kutubxonaning ichki varag'i (`#/media/t/photo`).
+      // Manzilga yozamiz, holatga emas: varaq yangilanganda ham saqlanadi va
+      // yon menyudagi faol band shu manzildan aniqlanadi.
+      location.hash = coll ? (kind ? `#/${coll}/k/${kind}` : `#/${coll}`)
+        : (tab ? `#/media/t/${tab}` : `#/${el.dataset.key}`);
+      $('#sidebar').classList.remove('open');
+    }));
+    updateNotifBadge();
+  }
+  function renderNavGroup(g, counts) {
+      let h = '';
       /* `{ kindsOf: 'publications' }` — bitta band emas, BO'LIMLAR RO'YXATI.
          Saytda "Nashrlar" degan bo'lim yo'q: "Tadqiqotlar" bor va ichida
          Maqolalar / Ma'ruzalar / Tahlillar / Kitoblar. Admin ham xuddi shu
@@ -579,6 +631,7 @@
         const o = isColl
           ? Object.assign({ label: C[base.key].label, icon: C[base.key].icon, view: 'list', coll: base.key }, base)
           : base;
+        if (!canAccess(o)) return; // joriy rolga yopiq bo'lim — menyuda ko'rinmaydi
         // Bo'lim bandida FAQAT o'sha bo'limga tushadigan yozuvlar sanaladi
         const n = o.kind ? Store.all(o.coll).filter(x => kindIdOf(o.coll, x) === o.kind).length
                 : (o.coll ? counts[o.coll] : null);
@@ -589,18 +642,7 @@
         }
         h += `<div class="sb-item${o.kind || o.sub ? ' is-sub' : ''}" data-key="${o.key}" data-view="${o.view}" ${o.coll ? `data-coll="${o.coll}"` : ''} ${o.kind ? `data-kind="${o.kind}"` : ''} ${o.tab ? `data-tab="${o.tab}"` : ''}>${ic(o.icon)}<span>${esc(o.label)}</span>${ct}</div>`;
       });
-    });
-    $('#sbNav').innerHTML = h;
-    $$('#sbNav .sb-item').forEach(el => el.addEventListener('click', () => {
-      const coll = el.dataset.coll, kind = el.dataset.kind, tab = el.dataset.tab;
-      // `data-tab` — media kutubxonaning ichki varag'i (`#/media/t/photo`).
-      // Manzilga yozamiz, holatga emas: varaq yangilanganda ham saqlanadi va
-      // yon menyudagi faol band shu manzildan aniqlanadi.
-      location.hash = coll ? (kind ? `#/${coll}/k/${kind}` : `#/${coll}`)
-        : (tab ? `#/media/t/${tab}` : `#/${el.dataset.key}`);
-      $('#sidebar').classList.remove('open');
-    }));
-    updateNotifBadge();
+      return h;
   }
   function setActive(key) {
     $$('#sbNav .sb-item').forEach(el => el.classList.toggle('active', el.dataset.key === key));
@@ -734,6 +776,15 @@
 
   function render() {
     const c = $('#content');
+    // To'g'ridan-to'g'ri manzil bilan (masalan #/settings ni qo'lda yozib)
+    // ruxsatsiz bo'limga kirishga urinish — menyuda yashirilgan bo'lsa ham.
+    // Haqiqiy himoya baribir serverda (yozuv amali 403 qaytaradi); bu yerda
+    // faqat foydalanuvchi bo'sh/xato sahifa ko'rmasin deb boshqaruv paneliga qaytariladi.
+    if (state.view !== 'dashboard' && !canAccess({ view: state.view, coll: state.coll })) {
+      toast('Bu bo\'lim uchun ruxsatingiz yo\'q', 1);
+      location.hash = '#/dashboard';
+      return;
+    }
     if (state.view === 'dashboard') return viewDashboard(c);
     if (state.view === 'media') return viewMedia(c);
     if (state.view === 'messages') return viewMessages(c);
@@ -1033,6 +1084,26 @@
     const langBar = hasML ? `<div class="langtabs" id="langTabs">
       <button type="button" data-l="uz" class="on">UZ</button><button type="button" data-l="ru">RU</button><button type="button" data-l="en">EN</button></div><button type="button" class="btn sm ghost a-ml10" id="autoTr" title="Bir tilni to'ldiring — bir bosishda qolgan 2 tilga avtomatik tarjima qiladi (manba avtomatik aniqlanadi)">⇄ Avto-tarjima</button>` : '';
 
+    // 'users' — xodim hisobi. Parol/2FA generik forma maydonlari EMAS
+    // (server $SCHEMA'da yo'q, qarang: backend/db.php izohi) — alohida
+    // amallar (account_set_password/account_reset_2fa) orqali, faqat
+    // profil allaqachon saqlangan (id bor) bo'lsa ko'rinadi.
+    const usersSecurityHTML = state.coll !== 'users' ? '' : (isNew
+      ? `<div class="card a-p24-mt20"><b class="a-serif17-mb6">Kirish va xavfsizlik</b>
+          <div class="a-muted13-mb16">Bu xodim profilini avval saqlang — parol va 2FA boshqaruvi profil saqlangandan keyin, shu yozuvni qayta ochganda paydo bo'ladi.</div>
+        </div>`
+      : `<div class="card a-p24-mt20"><b class="a-serif17-mb6">Kirish va xavfsizlik</b>
+          <div class="a-muted13-mb16">Bu xodim tizimga <b>Login</b> maydonidagi nom bilan kiradi. Parol o'rnatilmaguncha (yoki holat "Faol" bo'lmaguncha) kirish imkonsiz.</div>
+          <div class="a-grid-auto">
+            <div class="field"><label>Yangi parol</label><input class="ctl" type="password" id="uPw" autocomplete="new-password" placeholder="kamida 12 belgi"></div>
+          </div>
+          <div class="a-fac-g14-wrap-mt16">
+            <button type="button" class="btn" id="uPwSave">${ic('save')} Parolni o'rnatish/tiklash</button>
+            <span id="uPwMsg" class="a-t13"></span>
+          </div>
+          <div class="a-fac-g14-wrap-mt16" id="uTotpBox">Yuklanmoqda…</div>
+        </div>`);
+
     c.innerHTML = `
       <div class="page-head">
         <button class="btn ghost" data-go="${listHash()}">${ic('back')} Orqaga</button>
@@ -1049,10 +1120,12 @@
           <div class="sp"></div>
           ${!isNew ? `<button class="btn danger" type="button" id="delBtn">${ic('trash')} O'chirish</button>` : ''}
         </div>
-      </form>`;
+      </form>
+      ${usersSecurityHTML}`;
 
     // init editors
     editors.forEach(e => e.init());
+    if (state.coll === 'users' && !isNew) wireUserSecurityCard(item);
     // lang tabs
     if (hasML) {
       const setLang = (l) => {
@@ -1076,6 +1149,36 @@
     // submit
     $('#entForm').addEventListener('submit', (e) => { e.preventDefault(); if (pendingUploads > 0) { toast('Rasm yuklanmoqda, biroz kuting…', 1); return; } saveForm(cfg, item, isNew); });
     if (!isNew) $('#delBtn').onclick = () => confirmDelete(state.coll, item.id);
+  }
+
+  // 'users' tahrir sahifasidagi "Kirish va xavfsizlik" kartasi — parol
+  // o'rnatish/tiklash va (kerak bo'lsa) 2FA'ni majburan o'chirish.
+  function wireUserSecurityCard(item) {
+    const pwBtn = $('#uPwSave'), pwMsg = $('#uPwMsg');
+    const say = (el, t, bad) => { el.textContent = t; el.style.color = bad ? 'var(--danger, #c0392b)' : ''; };
+    pwBtn.onclick = () => {
+      const pw = $('#uPw').value;
+      if (pw.length < 12) return say(pwMsg, 'Kamida 12 ta belgi', 1);
+      pwBtn.disabled = true; say(pwMsg, 'Yuborilmoqda…');
+      Store.accountSetPassword(item.id, pw).then(r => {
+        pwBtn.disabled = false;
+        if (r && r.ok) { $('#uPw').value = ''; say(pwMsg, 'Parol o\'rnatildi'); toast('Parol o\'rnatildi'); }
+        else say(pwMsg, r && r.error === 'weak' ? 'Parol juda qisqa' : 'Xato — qayta urinib ko\'ring', 1);
+      });
+    };
+    const totpBox = $('#uTotpBox');
+    Store.twoFAStatus(item.id).then(r => {
+      const enabled = !!(r && r.enabled);
+      totpBox.innerHTML = `<span class="badge ${enabled ? 'active' : 'inactive'}">2FA: ${enabled ? 'Yoqilgan' : "O'chirilgan"}</span>`
+        + (enabled ? ` <button type="button" class="btn danger sm a-ml10" id="uTotpOff">Majburan o'chirish</button>` : '');
+      const offBtn = $('#uTotpOff');
+      if (offBtn) offBtn.onclick = () => confirmModal('2FA\'ni o\'chirish', 'Bu xodimning ikki bosqichli tekshiruvi o\'chiriladi (masalan telefoni yo\'qolgan va zaxira kodlari ham tugagan bo\'lsa). Davom etasizmi?', () => {
+        Store.accountReset2FA(item.id).then(r2 => {
+          if (r2 && r2.ok) { toast('2FA o\'chirildi'); wireUserSecurityCard(item); }
+          else toast('Xato — qayta urinib ko\'ring', 1);
+        });
+      });
+    });
   }
 
   // ===== AVTO-TARJIMA (Google, bepul, kalitsiz) =====
@@ -1464,7 +1567,10 @@
             uploadBusy(-1);
             if (err || !path) {
               if (fn) fn.textContent = valEl.value ? 'Joriy: ' + valEl.value : '';
-              const msg = /not a valid/.test(err || '') ? 'Fayl haqiqiy PDF yoki Word hujjati emas' : err === 'too large' ? 'Fayl juda katta (30MB dan oshmasin)' : 'Fayl yuklashda xatolik yuz berdi';
+              const msg = /not a valid/.test(err || '') ? 'Fayl haqiqiy PDF yoki Word hujjati emas'
+                : err === 'too large' ? 'Fayl juda katta (30MB dan oshmasin)'
+                : err === 'malicious_file' ? 'Fayl antivirus tekshiruvidan o\'tmadi — zararli deb topildi va rad etildi'
+                : 'Fayl yuklashda xatolik yuz berdi';
               toast(msg, 1);
               input.value = '';
               return;
@@ -1605,7 +1711,8 @@
     login: 'Kirish', logout: 'Chiqish', upsert: 'Qo\'shish/tahrir', remove: 'O\'chirish',
     settings: 'Sozlama', save: 'To\'liq saqlash', reset: 'Tiklash', change_password: 'Parol almashtirish',
     upload: 'Fayl yuklash', enable_2fa: '2FA yoqildi', disable_2fa: '2FA o\'chirildi',
-    login_recovery_code: 'Kirish (zaxira kod)'
+    login_recovery_code: 'Kirish (zaxira kod)', upload_blocked: 'Yuklash rad etildi (virus)',
+    account_set_password: 'Xodim paroli o\'rnatildi', account_reset_2fa: 'Xodim 2FA\'si o\'chirildi'
   };
   // Yuklangan fayl turlari uchun "Bo'lim" ustunidagi o'qishli nomlar
   const AUDIT_COLL = { image: 'Rasm', document: 'Hujjat', infographic: 'Infografika' };
@@ -1613,7 +1720,8 @@
   const AUDIT_TONE = {
     login: '#1d6a94', logout: '#6b7280', upsert: '#2e7d6b', remove: '#9a3b52',
     settings: '#8a5a2b', save: '#5b5ea6', reset: '#9a3b52', change_password: '#9a3b52',
-    upload: '#4a6fa5', enable_2fa: '#2e7d6b', disable_2fa: '#9a3b52', login_recovery_code: '#8a5a2b'
+    upload: '#4a6fa5', enable_2fa: '#2e7d6b', disable_2fa: '#9a3b52', login_recovery_code: '#8a5a2b',
+    upload_blocked: '#9a3b52', account_set_password: '#8a5a2b', account_reset_2fa: '#9a3b52'
   };
   function auditTs(s) {
     // "2026-07-30 11:14:31" -> "30.06.2026 11:14" (server DATE emas, TIMESTAMP)

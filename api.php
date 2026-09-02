@@ -30,6 +30,7 @@ error_reporting(E_ALL);
 
 require_once __DIR__ . '/backend/db.php';
 require_once __DIR__ . '/backend/thumbs.php';
+require_once __DIR__ . '/backend/virustotal.php';
 
 // ---- Sessiya cookie (xavfsiz) ----
 $__https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
@@ -148,6 +149,24 @@ function upload_nomi($hint, $standart, $bin, $ext) {
 
 function require_auth() {
   if (empty($_SESSION['tstm_admin'])) jexit(['ok' => false, 'error' => 'unauthorized'], 401);
+}
+// Faqat berilgan rollardan biriga ruxsat beradi (masalan ['admin']).
+// $_SESSION['tstm_role'] eski sessiyalarda yo'q bo'lishi mumkin — rollar
+// qo'shilishidan OLDIN kirgan har bir sessiya asosiy admin edi, shuning
+// uchun bo'sh qiymat 'admin' deb hisoblanadi (oldingi xatti-harakat
+// buzilmasin, aks holda deploy paytida joriy sessiya to'satdan huquqsiz
+// qolib qolardi).
+function require_role($roles) {
+  require_auth();
+  $role = isset($_SESSION['tstm_role']) && $_SESSION['tstm_role'] !== '' ? $_SESSION['tstm_role'] : 'admin';
+  if (!in_array($role, $roles, true)) jexit(['ok' => false, 'error' => 'forbidden'], 403);
+}
+// Joriy tizimga kirgan hisobni to'liq shaklda qaytaradi (load_account() —
+// backend/db.php). Sessiya bo'lmasa yoki hisob (masalan o'chirilgan xodim)
+// endi topilmasa — null.
+function current_account($pdo) {
+  $uid = isset($_SESSION['tstm_uid']) ? (string)$_SESSION['tstm_uid'] : '';
+  return load_account($pdo, $uid === '' ? 'primary' : 'user', $uid);
 }
 function require_csrf() {
   $h = isset($_SERVER['HTTP_X_CSRF_TOKEN']) ? $_SERVER['HTTP_X_CSRF_TOKEN'] : '';
@@ -298,7 +317,7 @@ switch ($action) {
     // qolganlarga bo'sh massiv. Qarang: db.php -> $PRIVATE_COLLS.
     if (!empty($_SESSION['tstm_admin'])) {
       // Admin: to'liq ma'lumot, KESHSIZ — tahrirdan keyin darhol yangi holat.
-      echo json_encode(db_load_all($pdo, true), JSON_UNESCAPED_UNICODE);
+      echo json_encode(db_load_all($pdo, true, current_account($pdo)), JSON_UNESCAPED_UNICODE);
     } else {
       // Ommaviy: tayyor javob keshdan (db.php -> db_load_public_cached).
       echo db_load_public_cached($pdo);
@@ -310,7 +329,11 @@ switch ($action) {
     break;
 
   case 'session':
-    echo json_encode(['authed' => !empty($_SESSION['tstm_admin']), 'csrf' => $_SESSION['csrf']]);
+    echo json_encode([
+      'authed' => !empty($_SESSION['tstm_admin']),
+      'role' => isset($_SESSION['tstm_role']) ? $_SESSION['tstm_role'] : '',
+      'csrf' => $_SESSION['csrf'],
+    ]);
     break;
 
   case 'upsert': {
@@ -318,8 +341,24 @@ switch ($action) {
     $b = body_json();
     $coll = isset($b['coll']) ? $b['coll'] : '';
     $item = isset($b['item']) && is_array($b['item']) ? $b['item'] : null;
-    global $SCHEMA;
+    global $SCHEMA, $COLL_ROLES;
     if (!isset($SCHEMA[$coll]) || $item === null) jexit(['ok' => false, 'error' => 'bad_request'], 400);
+    // 'users' — faqat admin. Boshqa har bir kolleksiya $COLL_ROLES'da
+    // belgilangan rollarga ochiq; ro'yxatda yo'q bo'lsa standart — admin.
+    require_role($coll === 'users' ? ['admin'] : (isset($COLL_ROLES[$coll]) ? $COLL_ROLES[$coll] : ['admin']));
+    // Login noyob bo'lishi shart — aks holda load_account_by_login() qaysi
+    // hisobni tanlashi noaniq bo'lib qolardi (kirish paytida). `users`
+    // jadvalida bazaviy UNIQUE cheklov yo'q (eski o'rnatishlarda tasodifan
+    // takrorlangan login bo'lishi mumkin edi — bunday holatda migratsiya
+    // sinishini istamaymiz), shuning uchun tekshiruv shu yerda, ilova
+    // darajasida.
+    if ($coll === 'users' && !empty($item['login'])) {
+      $login = trim((string)$item['login']);
+      $id = isset($item['id']) ? (string)$item['id'] : '';
+      $st = $pdo->prepare("SELECT id FROM users WHERE login = :l AND id != :id LIMIT 1");
+      $st->execute([':l' => $login, ':id' => $id]);
+      if ($st->fetch()) jexit(['ok' => false, 'error' => 'login_taken'], 409);
+    }
     try {
       $saved = coll_upsert($pdo, $coll, $item);
       cache_invalidate(); // commit'dan keyin: parallel so'rov eski holatni keshlab qo'ymasin
@@ -334,8 +373,9 @@ switch ($action) {
     $b = body_json();
     $coll = isset($b['coll']) ? $b['coll'] : '';
     $id = isset($b['id']) ? $b['id'] : '';
-    global $SCHEMA;
+    global $SCHEMA, $COLL_ROLES;
     if (!isset($SCHEMA[$coll]) || $id === '') jexit(['ok' => false, 'error' => 'bad_request'], 400);
+    require_role($coll === 'users' ? ['admin'] : (isset($COLL_ROLES[$coll]) ? $COLL_ROLES[$coll] : ['admin']));
     try {
       coll_delete($pdo, $coll, $id);
       cache_invalidate(); // commit'dan keyin: parallel so'rov eski holatni keshlab qo'ymasin
@@ -346,7 +386,7 @@ switch ($action) {
   }
 
   case 'settings': {
-    require_auth(); require_csrf();
+    require_auth(); require_csrf(); require_role(['admin']);
     $b = body_json();
     $s = isset($b['settings']) && is_array($b['settings']) ? $b['settings'] : null;
     if ($s === null) jexit(['ok' => false, 'error' => 'bad_request'], 400);
@@ -361,7 +401,7 @@ switch ($action) {
 
   case 'save': {
     // To'liq db almashtirish (reset/patch uchun zaxira yo'l). Auth serverda qoladi.
-    require_auth(); require_csrf();
+    require_auth(); require_csrf(); require_role(['admin']);
     $b = body_json();
     if (!$b) jexit(['ok' => false, 'error' => 'empty'], 400);
     unset($b['auth']); // client auth e'tiborga olinmaydi
@@ -375,7 +415,7 @@ switch ($action) {
   }
 
   case 'reset': {
-    require_auth(); require_csrf();
+    require_auth(); require_csrf(); require_role(['admin']);
     require_once __DIR__ . '/backend/seed.php';
     $seed = default_seed();
     $seed['auth'] = auth_load($pdo); // parol saqlanadi
@@ -405,37 +445,55 @@ switch ($action) {
     $u = isset($b['u']) ? trim((string)$b['u']) : '';
     $p = isset($b['p']) ? (string)$b['p'] : '';
 
+    // 1) Asosiy (bootstrap) administrator — `auth` jadvali.
+    $acc = null;
     $a = auth_load($pdo);
     $validUser = ($a && !empty($a['username'])) ? $a['username'] : $DEFAULT_USER;
     $hash = ($a && !empty($a['password_hash'])) ? $a['password_hash'] : '';
-
-    $ok = false;
     if ($u !== '' && hash_equals((string)$validUser, $u)) {
       if ($hash !== '' && password_verify($p, $hash)) {
-        $ok = true;
+        $acc = load_account($pdo, 'primary', '');
       } elseif ($hash === '' && $DEFAULT_PASS !== '' && $p !== '' && hash_equals($DEFAULT_PASS, $p)) {
         // Baza yangi (xesh bo'sh) va config.php da birinchi kirish paroli
         // berilgan — u bilan kirildi, endi bcrypt xeshlab saqlaymiz.
         // $DEFAULT_PASS/$p bo'sh bo'lsa bu shox UMUMAN ishlamaydi: aks holda
         // hash_equals('','') === true bo'lib, parolsiz kirish ochilardi.
-        $ok = true;
         auth_save($pdo, $validUser, password_hash($p, PASSWORD_DEFAULT));
+        $acc = load_account($pdo, 'primary', '');
+      }
+    }
+    // 2) Qo'shimcha xodim hisoblari (`users` jadvali, rollar — 2026-09-02).
+    // Faqat aktiv holat va parol allaqachon o'rnatilgan bo'lsa (admin uni
+    // account_set_password orqali bergan bo'lishi shart — parolsiz hisob
+    // bilan kirib bo'lmaydi).
+    if (!$acc && $u !== '') {
+      $ua = load_account_by_login($pdo, $u);
+      if ($ua && $ua['status'] === 'active' && $ua['password_hash'] !== '' && password_verify($p, $ua['password_hash'])) {
+        $acc = $ua;
       }
     }
 
-    if ($ok) {
+    if ($acc) {
       $pdo->prepare("DELETE FROM login_attempts WHERE ip = :ip")->execute([':ip' => $ip]);
       session_regenerate_id(true);
-      if (!empty($a['totp_enabled'])) {
+      if (!empty($acc['totp_enabled'])) {
         // Parol to'g'ri, lekin 2FA yoqilgan — sessiya hali ADMIN deb
         // belgilanmaydi, faqat "parol tasdiqlandi" oraliq holati saqlanadi
         // (5 daqiqa amal qiladi). To'liq kirish faqat login_2fa orqali,
-        // to'g'ri kod bilan yakunlanadi.
+        // to'g'ri kod bilan yakunlanadi. Qaysi hisob ekani (asosiy yoki
+        // xodim) shu oraliq holatda saqlanadi — login_2fa shuni o'qiydi.
         $_SESSION['tstm_2fa_pending'] = true;
         $_SESSION['tstm_2fa_at'] = $now;
+        $_SESSION['tstm_2fa_kind'] = $acc['kind'];
+        $_SESSION['tstm_2fa_id'] = $acc['id'];
         echo json_encode(['ok' => false, 'need_2fa' => true, 'csrf' => $_SESSION['csrf']]);
       } else {
         $_SESSION['tstm_admin'] = true;
+        $_SESSION['tstm_role'] = $acc['role'];
+        $_SESSION['tstm_uid'] = $acc['id'];
+        if ($acc['kind'] === 'user') {
+          $pdo->prepare("UPDATE users SET last=:l WHERE id=:id")->execute([':l' => date('Y-m-d'), ':id' => $acc['id']]);
+        }
         audit($pdo, 'login');
         echo json_encode(['ok' => true, 'csrf' => $_SESSION['csrf']]);
       }
@@ -473,33 +531,43 @@ switch ($action) {
 
     if (empty($_SESSION['tstm_2fa_pending']) || empty($_SESSION['tstm_2fa_at'])
         || ($now - (int)$_SESSION['tstm_2fa_at']) > 300) {
-      unset($_SESSION['tstm_2fa_pending'], $_SESSION['tstm_2fa_at']);
+      unset($_SESSION['tstm_2fa_pending'], $_SESSION['tstm_2fa_at'], $_SESSION['tstm_2fa_kind'], $_SESSION['tstm_2fa_id']);
       jexit(['ok' => false, 'error' => 'expired'], 401);
     }
 
     $b = body_json();
     $code = isset($b['code']) ? (string)$b['code'] : '';
-    $a = auth_load($pdo);
-    $secret = ($a && !empty($a['totp_secret'])) ? $a['totp_secret'] : '';
-    $ok = totp_verify($secret, $code);
+    $acc = load_account($pdo, $_SESSION['tstm_2fa_kind'] ?? 'primary', $_SESSION['tstm_2fa_id'] ?? '');
+    $secret = ($acc && !empty($acc['totp_secret'])) ? $acc['totp_secret'] : '';
+    $ok = $acc && totp_verify($secret, $code);
     $usedRecovery = false;
 
-    if (!$ok && $a && !empty($a['totp_recovery'])) {
-      $hashes = json_decode($a['totp_recovery'], true);
+    if ($ok === false && $acc && !empty($acc['totp_recovery'])) {
+      $hashes = json_decode($acc['totp_recovery'], true);
       $hashes = is_array($hashes) ? $hashes : [];
       $idx = array_search(recovery_hash($code), $hashes, true);
       if ($idx !== false) {
         array_splice($hashes, $idx, 1); // bir martalik — darhol bekor qilinadi
-        auth_consume_recovery($pdo, $hashes);
+        account_consume_recovery($pdo, $acc, $hashes);
         $ok = true; $usedRecovery = true;
       }
     }
 
+    // Hisob 2FA kutilayotgan payt DAVOMIDA o'chirilgan/faolsizlantirilgan
+    // bo'lishi mumkin (masalan admin xodimni chetlashtirdi) — shunday holatda
+    // ham kirishga yo'l qo'ymaymiz.
+    if ($ok && $acc['kind'] === 'user' && $acc['status'] !== 'active') $ok = false;
+
     if ($ok) {
       $pdo->prepare("DELETE FROM login_attempts WHERE ip = :ip")->execute([':ip' => $ip]);
-      unset($_SESSION['tstm_2fa_pending'], $_SESSION['tstm_2fa_at']);
+      unset($_SESSION['tstm_2fa_pending'], $_SESSION['tstm_2fa_at'], $_SESSION['tstm_2fa_kind'], $_SESSION['tstm_2fa_id']);
       session_regenerate_id(true);
       $_SESSION['tstm_admin'] = true;
+      $_SESSION['tstm_role'] = $acc['role'];
+      $_SESSION['tstm_uid'] = $acc['id'];
+      if ($acc['kind'] === 'user') {
+        $pdo->prepare("UPDATE users SET last=:l WHERE id=:id")->execute([':l' => date('Y-m-d'), ':id' => $acc['id']]);
+      }
       audit($pdo, $usedRecovery ? 'login_recovery_code' : 'login');
       echo json_encode(['ok' => true, 'csrf' => $_SESSION['csrf']]);
     } else {
@@ -517,8 +585,16 @@ switch ($action) {
 
   case '2fa_status': {
     require_auth();
-    $a = auth_load($pdo);
-    jexit(['ok' => true, 'enabled' => !empty($a['totp_enabled'])]);
+    // `id` berilsa — BOSHQA (xodim) hisobning holatini so'ramoqda, faqat
+    // admin panelning "Foydalanuvchilar" tahrir sahifasida ishlatiladi.
+    $id = isset($_GET['id']) ? (string)$_GET['id'] : '';
+    if ($id !== '') {
+      require_role(['admin']);
+      $acc = load_account($pdo, 'user', $id);
+    } else {
+      $acc = current_account($pdo);
+    }
+    jexit(['ok' => true, 'enabled' => !empty($acc && $acc['totp_enabled'])]);
     break;
   }
 
@@ -527,13 +603,14 @@ switch ($action) {
     // faqat 2fa_confirm to'g'ri kod bilan tasdiqlagach totp_enabled=1 bo'ladi.
     // Shuning uchun sozlashni boshlab tugallamaslik xavfsiz: hisobga hech
     // narsa ta'sir qilmaydi, keyingi urinishda yangi kalit shunchaki almashadi.
+    // Har bir hisob (asosiy yoki xodim) FAQAT O'ZINING 2FA'sini sozlaydi —
+    // current_account() joriy sessiyaga qarab tegishli jadvalga yozadi.
     require_auth(); require_csrf();
-    $a = auth_load($pdo);
+    $acc = current_account($pdo);
+    if (!$acc) jexit(['ok' => false, 'error' => 'no_account'], 401);
     $secret = totp_secret_gen();
-    auth_save_totp_secret($pdo, $secret);
-    global $DEFAULT_USER;
-    $uname = ($a && !empty($a['username'])) ? $a['username'] : $DEFAULT_USER;
-    jexit(['ok' => true, 'secret' => $secret, 'uri' => totp_otpauth_uri($secret, $uname)]);
+    account_save_totp_secret($pdo, $acc, $secret);
+    jexit(['ok' => true, 'secret' => $secret, 'uri' => totp_otpauth_uri($secret, $acc['username'])]);
     break;
   }
 
@@ -545,11 +622,11 @@ switch ($action) {
     require_auth(); require_csrf();
     $b = body_json();
     $code = isset($b['code']) ? (string)$b['code'] : '';
-    $a = auth_load($pdo);
-    $secret = ($a && !empty($a['totp_secret'])) ? $a['totp_secret'] : '';
+    $acc = current_account($pdo);
+    $secret = ($acc && !empty($acc['totp_secret'])) ? $acc['totp_secret'] : '';
     if (!totp_verify($secret, $code)) jexit(['ok' => false, 'error' => 'bad_code'], 400);
     $codes = recovery_codes_gen();
-    auth_enable_totp($pdo, array_map('recovery_hash', $codes));
+    account_enable_totp($pdo, $acc, array_map('recovery_hash', $codes));
     audit($pdo, 'enable_2fa');
     jexit(['ok' => true, 'recovery' => $codes]);
     break;
@@ -562,16 +639,17 @@ switch ($action) {
     require_auth(); require_csrf();
     $b = body_json();
     $pw = isset($b['password']) ? (string)$b['password'] : '';
-    $a = auth_load($pdo);
-    $hash = ($a && !empty($a['password_hash'])) ? $a['password_hash'] : '';
+    $acc = current_account($pdo);
+    $hash = ($acc && !empty($acc['password_hash'])) ? $acc['password_hash'] : '';
     if ($hash === '' || !password_verify($pw, $hash)) jexit(['ok' => false, 'error' => 'wrong_password'], 403);
-    auth_disable_totp($pdo);
+    account_disable_totp($pdo, $acc);
     audit($pdo, 'disable_2fa');
     jexit(['ok' => true]);
     break;
   }
 
   case 'change_password': {
+    // Har bir hisob (asosiy yoki xodim) FAQAT O'ZINING parolini almashtiradi.
     require_auth(); require_csrf();
     $b = body_json();
     $cur = isset($b['current']) ? (string)$b['current'] : '';
@@ -580,16 +658,58 @@ switch ($action) {
     // o'tib to'g'ridan-to'g'ri API'ga so'rov yuborish mumkin.
     if (strlen($new) < 12) jexit(['ok' => false, 'error' => 'weak'], 400);
     if ($new === $cur) jexit(['ok' => false, 'error' => 'same'], 400);
-    $a = auth_load($pdo);
-    $hash = ($a && !empty($a['password_hash'])) ? $a['password_hash'] : '';
+    $acc = current_account($pdo);
+    if (!$acc) jexit(['ok' => false, 'error' => 'no_account'], 401);
+    $hash = $acc['password_hash'];
     global $DEFAULT_PASS;
-    // Xesh bo'sh bo'lganda ham bo'sh joriy parol qabul qilinmaydi (hash_equals('','') === true tuzog'i)
+    // Xesh bo'sh bo'lganda ham bo'sh joriy parol qabul qilinmaydi (hash_equals('','') === true tuzog'i).
+    // Bootstrap-parol ($DEFAULT_PASS) FAQAT asosiy hisobga tegishli — xodim
+    // hisoblari hech qachon config.php'dagi umumiy paroldan foydalanmaydi.
     $curOk = ($hash !== '')
       ? password_verify($cur, $hash)
-      : ($DEFAULT_PASS !== '' && $cur !== '' && hash_equals($DEFAULT_PASS, $cur));
+      : ($acc['kind'] === 'primary' && $DEFAULT_PASS !== '' && $cur !== '' && hash_equals($DEFAULT_PASS, $cur));
     if (!$curOk) jexit(['ok' => false, 'error' => 'wrong_current'], 403);
-    auth_save($pdo, ($a ? $a['username'] : $DEFAULT_USER), password_hash($new, PASSWORD_DEFAULT));
+    account_save_password($pdo, $acc, password_hash($new, PASSWORD_DEFAULT));
     audit($pdo, 'change_password');
+    jexit(['ok' => true]);
+    break;
+  }
+
+  case 'account_set_password': {
+    // Admin tomonidan xodim hisobiga parol o'rnatish/tiklash — yangi hisob
+    // yaratilganda (parolsiz holda kirib bo'lmaydi) yoki xodim parolini
+    // unutganda. Faqat 'users' jadvalidagi hisoblar uchun — asosiy hisob
+    // o'z parolini FAQAT change_password orqali (joriy parolni bilib) almashtiradi.
+    require_auth(); require_csrf(); require_role(['admin']);
+    $b = body_json();
+    $id = isset($b['id']) ? (string)$b['id'] : '';
+    $new = isset($b['password']) ? (string)$b['password'] : '';
+    if ($id === '') jexit(['ok' => false, 'error' => 'bad_request'], 400);
+    if (strlen($new) < 12) jexit(['ok' => false, 'error' => 'weak'], 400);
+    $st = $pdo->prepare("SELECT id FROM users WHERE id = :id");
+    $st->execute([':id' => $id]);
+    if (!$st->fetch()) jexit(['ok' => false, 'error' => 'not_found'], 404);
+    $pdo->prepare("UPDATE users SET password_hash = :h WHERE id = :id")
+        ->execute([':h' => password_hash($new, PASSWORD_DEFAULT), ':id' => $id]);
+    audit($pdo, 'account_set_password', 'users', $id);
+    jexit(['ok' => true]);
+    break;
+  }
+
+  case 'account_reset_2fa': {
+    // Admin xodimning 2FA'sini majburan o'chiradi — telefon yo'qolib,
+    // zaxira kodlar ham tugagan holatlar uchun (aks holda hisob butunlay
+    // bloklanib qolardi).
+    require_auth(); require_csrf(); require_role(['admin']);
+    $b = body_json();
+    $id = isset($b['id']) ? (string)$b['id'] : '';
+    if ($id === '') jexit(['ok' => false, 'error' => 'bad_request'], 400);
+    $st = $pdo->prepare("SELECT id FROM users WHERE id = :id");
+    $st->execute([':id' => $id]);
+    if (!$st->fetch()) jexit(['ok' => false, 'error' => 'not_found'], 404);
+    $pdo->prepare("UPDATE users SET totp_secret = NULL, totp_enabled = 0, totp_recovery = NULL WHERE id = :id")
+        ->execute([':id' => $id]);
+    audit($pdo, 'account_reset_2fa', 'users', $id);
     jexit(['ok' => true]);
     break;
   }
@@ -598,7 +718,7 @@ switch ($action) {
     // Faqat haqiqiy sessiya bo'lgandagina yozamiz — aks holda autentifikatsiyasiz
     // so'rovlar bilan jurnalni to'ldirib yuborish mumkin bo'lardi.
     if (!empty($_SESSION['tstm_admin'])) audit($pdo, 'logout');
-    unset($_SESSION['tstm_admin']);
+    unset($_SESSION['tstm_admin'], $_SESSION['tstm_role'], $_SESSION['tstm_uid']);
     session_regenerate_id(true);
     echo json_encode(['ok' => true]);
     break;
@@ -671,6 +791,24 @@ switch ($action) {
     elseif (substr($bin, 0, 4) === "\xD0\xCF\x11\xE0") { $ext = 'doc'; }  // eski .doc (OLE2 konteyner)
     elseif (substr($bin, 0, 4) === "PK\x03\x04") { $ext = 'docx'; }      // .docx (ZIP asosli)
     else { jexit(['ok' => false, 'error' => 'not a valid pdf or word file'], 400); }
+    // Antivirus (VirusTotal, ixtiyoriy — config.php'da kalit bo'lmasa 'skip'
+    // qaytadi va bu bosqich sezilmay o'tadi). Faqat HAQIQIY zararli topilsa
+    // rad etiladi; xizmat sekin/ishlamay qolsa fayl baribir qabul qilinadi
+    // (imzo tekshiruvi baribir o'tgan) — tashqi xizmat butun yuklashni
+    // to'xtatib qo'ymasin. Skanerlash 25s gacha cho'zilishi mumkin — PHP
+    // sessiya faylini shu davrda QULFLAB turmasin deb oldindan yopamiz
+    // (bu nuqtadan keyin $_SESSION'ga tegilmaydi, qayta ochish shart emas);
+    // aks holda o'sha admin boshqa oynada/tabda hech narsa qila olmay turardi.
+    session_write_close();
+    $vt = vt_scan_file(cfg('virustotal_api_key', ''), $bin, 'upload.' . $ext);
+    if ($vt['status'] === 'malicious') {
+      log_error($pdo, 'warn', 'VirusTotal: yuklangan hujjat zararli deb topildi (' . $vt['n'] . ' dvigatel)', 'virustotal.php', 0, 0, '', 'api.php?action=upload_pdf');
+      audit($pdo, 'upload_blocked', 'document', '');
+      jexit(['ok' => false, 'error' => 'malicious_file'], 422);
+    }
+    if ($vt['status'] === 'timeout') {
+      log_error($pdo, 'warn', 'VirusTotal: tekshiruv vaqt ichida tugamadi, fayl imzo tekshiruvi bilan qabul qilindi', 'virustotal.php', 0, 0, '', 'api.php?action=upload_pdf');
+    }
     $dir = __DIR__ . '/uploads';
     if (!is_dir($dir)) @mkdir($dir, 0775, true);
     $name = upload_nomi(isset($b['hint']) ? $b['hint'] : '', 'doc', $bin, $ext);
@@ -837,7 +975,7 @@ switch ($action) {
   case 'audit_log': {
     // FAQAT admin: kim/qachon/nima o'zgartirdi jurnali (davlat auditi talabi).
     // O'qish amali — CSRF talab qilinmaydi, lekin sessiya majburiy.
-    require_auth();
+    require_role(['admin']);
     // limit: 1..500 (standart 200). Ixtiyoriy `action` filtri (faqat harf/pastki chiziq).
     $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 200;
     if ($limit < 1) $limit = 1; if ($limit > 500) $limit = 500;
@@ -914,7 +1052,7 @@ switch ($action) {
 
   case 'push_stats': {
     // FAQAT admin: obunachilar soni (admin panel uchun).
-    require_auth();
+    require_role(['admin']);
     $n = (int)$pdo->query("SELECT COUNT(*) FROM push_subs")->fetch(PDO::FETCH_COLUMN);
     $k = vapid_keys($pdo);
     echo json_encode(['ok' => true, 'count' => $n, 'ready' => (bool)$k]);
@@ -923,7 +1061,7 @@ switch ($action) {
 
   case 'push_send': {
     // FAQAT admin: barcha obunachilarga "turtki" yuboradi.
-    require_auth(); require_csrf();
+    require_role(['admin']); require_csrf();
     $k = vapid_keys($pdo);
     if (!$k) jexit(['ok' => false, 'error' => 'no_keys'], 500);
     $rows = $pdo->query("SELECT id, endpoint FROM push_subs")->fetchAll();
@@ -994,7 +1132,7 @@ switch ($action) {
 
   case 'error_log': {
     // FAQAT admin: diagnostika jurnalini o'qish. O'qish — CSRF shart emas.
-    require_auth();
+    require_role(['admin']);
     $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 200;
     if ($limit < 1) $limit = 1; if ($limit > 500) $limit = 500;
     $kind = isset($_GET['kind']) ? preg_replace('/[^a-z-]/i', '', (string)$_GET['kind']) : '';
@@ -1018,7 +1156,7 @@ switch ($action) {
 
   case 'error_resolve': {
     // FAQAT admin: xatoni "hal qilindi" deb belgilash yoki jurnalni tozalash.
-    require_auth(); require_csrf();
+    require_role(['admin']); require_csrf();
     $b = $_GET;
     if (isset($b['all']) && $b['all'] === '1') {
       $pdo->exec("UPDATE error_log SET resolved = 1");

@@ -36,10 +36,44 @@ ham xuddi parol kabi bir xil IP-bo'yicha brute-force hisoblagichi ostida
 8 ta bir martalik zaxira kod beriladi (faqat o'sha daqiqada, ochiq matnda —
 bazada faqat SHA-256 xeshi saqlanadi, ishlatilgach darhol bekor qilinadi).
 
+### 1.1. Ko'p hisobli kirish — rollar (2026-09-02)
+
+Ikki turdagi hisob bor, ikkalasi ham bir xil `login`/`login_2fa` oqimidan
+o'tadi:
+
+| | Asosiy administrator | Xodim hisobi |
+|---|---|---|
+| Qayerda | `auth` jadvali, yagona qator (id=1) | `users` jadvali (admin panel → Foydalanuvchilar) |
+| Rol | Har doim `admin`, o'zgartirib bo'lmaydi | Rol ustunidan: Administrator/Muharrir/Moderator |
+| Yaratish/o'chirish | Yo'q — bootstrap hisobi, doim mavjud | Admin panelda, faqat admin roli |
+| Parol o'rnatish | O'zi, joriy parolni bilib (`change_password`) | Admin tomonidan (`account_set_password`) — birinchi marta shu orqali, aks holda parolsiz kirib bo'lmaydi |
+| 2FA | O'zi yoqadi/o'chiradi | O'zi yoqadi/o'chiradi; admin majburan o'chira oladi (`account_reset_2fa`, telefon yo'qolib zaxira kod ham tugagan holat uchun) |
+
+**Ruxsat darajalari** (`api.php` → `require_role()`, standart — noma'lum
+rolga/kolleksiyaga eng kam huquq beriladi):
+
+| Rol | Kirish |
+|---|---|
+| `admin` | Hammasi: sozlamalar, tiklash, foydalanuvchilar, audit, xatoliklar, push, barcha kontent |
+| `editor` (Muharrir) | Kontent kolleksiyalari (yangilik, tadbir, ekspert, nashr va h.k.) + murojaat/obunachilar |
+| `moderator` | Faqat murojaat/obunachilarni belgilash-o'chirish |
+
+Interfeys darajasida (`admin-ui.js` → `canAccess()`) ruxsat yo'q bo'limlar
+yon menyudan yashiriladi va to'g'ridan-to'g'ri manzil bilan kirilsa ham
+(masalan `#/settings`) boshqaruv paneliga qaytariladi — lekin bu FAQAT
+qulaylik uchun, haqiqiy tekshiruv har doim serverda.
+
+`users` jadvalidagi `password_hash`/`totp_*` ustunlari `$SCHEMA`da ATAYLAB
+yo'q, shuning uchun umumiy `coll_upsert`/`db_export` orqali ular hech qachon
+o'qilmaydi/yozilmaydi va klientga hech qachon chiqmaydi — xuddi asosiy
+administratorning parol xeshi kabi.
+
 ## 2. Ruxsatlar va maxfiylik
 
 `api.php` dagi har bir yozuv amali `require_auth()` va `require_csrf()` bilan
-himoyalangan. Ommaviy (autentifikatsiyasiz) amallar faqat: `load`, `message`,
+himoyalangan; ko'pchiligi (kontent kolleksiyalari, sozlamalar, tiklash,
+foydalanuvchilar) qo'shimcha `require_role()` bilan ham — 1.1-bo'limga
+qarang. Ommaviy (autentifikatsiyasiz) amallar faqat: `load`, `message`,
 `subscribe`, `view`, `views`, `csrf`, `session`.
 
 **Shaxsiy ma'lumot ajratilgan.** `load` amali ommaviy, lekin quyidagi bo'limlar
@@ -97,11 +131,32 @@ yuborilgan POST so'roviga umuman qo'shilmaydi.
 | Tur | Tekshiruv |
 |---|---|
 | Rasm | MIME `getimagesizefromstring()` bilan tasdiqlanadi; faqat png/jpg/webp/gif; **SVG ataylab rad etiladi** (ichida skript bo'lishi mumkin); ≤ 12 MB |
-| Hujjat | Kengaytma/MIME'ga ishonilmaydi — **fayl imzosi (magic bytes)** tekshiriladi: `%PDF-`, OLE2, ZIP; ≤ 30 MB |
+| Hujjat | Kengaytma/MIME'ga ishonilmaydi — **fayl imzosi (magic bytes)** tekshiriladi: `%PDF-`, OLE2, ZIP; ≤ 30 MB; **antivirus (VirusTotal, ixtiyoriy)** — quyiga qarang |
 | Infografika (HTML) | ≤ 3 MB |
 
 Fayl nomini foydalanuvchi belgilamaydi — server `img_<sana>_<hash>.<ext>`
 ko'rinishida o'zi yaratadi (yo'l bo'ylab chiqish — path traversal — mumkin emas).
+
+### 6.1. Antivirus (VirusTotal, ixtiyoriy — 2026-09-02)
+
+`backend/config.php`da `virustotal_api_key` berilgan bo'lsa, har bir yuklangan
+PDF/Word hujjat saqlanishdan OLDIN VirusTotal'ga yuboriladi
+(`backend/virustotal.php` → `vt_scan_file()`). Natija:
+
+- **Zararli topilsa** — fayl saqlanmaydi, `422 malicious_file` qaytadi,
+  audit jurnaliga `upload_blocked` yozuvi tushadi.
+- **Tekshiruv vaqt ichida (25s) tugamasa yoki VirusTotal ishlamasa** — fayl
+  baribir qabul qilinadi (imzo tekshiruvi baribir o'tgan), lekin
+  "Xatoliklar" jurnaliga ogohlantirish yoziladi. Tashqi xizmatning
+  sekinligi/ishdan chiqishi butun yuklash funksiyasini to'xtatib
+  qo'ymasligi kerak.
+- **Kalit berilmagan bo'lsa** — bu bosqich sezilmay o'tkazib yuboriladi,
+  faqat yuqoridagi imzo tekshiruvi ishlaydi (standart holat).
+
+Rasm yuklashda ISHLATILMAYDI — VirusTotal bepul limiti (4 so'rov/daqiqa) tez
+tugab qolardi, rasm esa hujjatga qaraganda ancha ko'p yuklanadi. Rasmlar
+uchun asosiy himoya baribir kifoya: qat'iy MIME tekshiruvi, SVG rad etilishi,
+`uploads/`da PHP bajarilmasligi.
 
 `uploads/.htaccess`:
 - PHP dvigateli o'chirilgan, skript kengaytmalari bloklangan
@@ -258,23 +313,27 @@ hujjat qo'yish kerak bo'lsa — uni `uploads/` ga **umuman qo'ymaslik** kerak,
 
 ## 12. Ma'lum cheklovlar
 
-Halol bo'lish uchun — hozircha bajarilmagan, lekin bilib turilgan narsalar:
+Halol bo'lish uchun — hozircha bajarilmagan yoki to'liq emas, lekin bilib
+turilgan narsalar:
 
-1. **Ko'p foydalanuvchili rollar yo'q** — bitta admin hisobi (`auth` jadvali,
-   bitta qator). `users` jadvali bor, lekin u sayt kontenti (masalan xodimlar
-   ro'yxati) sifatida ko'rsatiladi — kirish huquqini bermaydi, real
-   autentifikatsiyaga ulanmagan.
-2. **Yuklangan fayllarga antivirus tekshiruvi yo'q** — imzo (magic bytes) va
-   kengaytma bo'yicha tekshiriladi (6-bo'lim), lekin PDF/Word ichidagi
-   zararli makros aniqlanmaydi. Haqiqiy antivirus skaneri (ClamAV yoki
-   VirusTotal kabi tashqi xizmat) server tomonda qo'shimcha imkoniyat
-   (`shell_exec` yoki tashqi API kaliti) talab qiladi — hosting muhiti va
-   qaysi yechim tanlanishi aniqlanmaguncha amalga oshirilmagan.
+1. **VirusTotal API kaliti standart holatda bo'sh** (6.1-bo'lim) — kalit
+   qo'yilmaguncha yuklangan hujjatlar faqat imzo (magic bytes) bo'yicha
+   tekshiriladi, haqiqiy antivirus skaneri ishlamaydi. Bepul kalit olish va
+   `backend/config.php`ga qo'yish — sayt egasining o'zi bajaradigan qadam
+   (`config.sample.php`da yo'riqnoma bor).
+2. **ClamAV integratsiyasi yo'q** — VirusTotal o'rniga/ustiga mahalliy
+   skaner kerak bo'lsa, bu hosting `shell_exec` yoki ClamAV daemon'ga
+   ruxsat berishini talab qiladi (ko'p shared hosting bermaydi) — hozircha
+   amalga oshirilmagan.
 
 Bajarilgan (avval shu yerda ro'yxatda edi):
 
 - ~~`style-src 'unsafe-inline'`~~ — 2026-08-03'da olib tashlangan (7-bo'lim).
 - ~~2FA yo'q~~ — 2026-09-02'da qo'shildi (1-bo'lim): TOTP, ixtiyoriy,
   admin panel → Sozlamalar → Xavfsizlik orqali yoqiladi.
-4. **Fayllarga antivirus tekshiruvi yo'q** — yuklangan PDF/Word fayllar imzosi
-   bo'yicha tekshiriladi, lekin ichidagi zararli makros aniqlanmaydi.
+- ~~Ko'p foydalanuvchili rollar yo'q~~ — 2026-09-02'da qo'shildi (1.1-bo'lim):
+  Administrator/Muharrir/Moderator, admin panel → Foydalanuvchilar orqali
+  boshqariladi.
+- ~~Yuklangan fayllarga antivirus tekshiruvi yo'q~~ — 2026-09-02'da
+  VirusTotal integratsiyasi qo'shildi (6.1-bo'lim), ixtiyoriy (API kalit
+  bilan yoqiladi).

@@ -158,6 +158,23 @@ $COLL_ORDER = ['users', 'news', 'mediaPosts', 'events', 'experts', 'publications
 // Yangi shaxsiy bo'lim qo'shsangiz, uni shu yerga ham yozing.
 $PRIVATE_COLLS = ['users', 'messages', 'subscribers'];
 
+// Kolleksiya bo'yicha kim upsert/remove qila oladi (2026-09-02, rollar).
+// 'users' bu yerda ATAYLAB yo'q: hisoblarni FAQAT admin boshqaradi, alohida
+// tekshiruv bilan (api.php -> case 'upsert'/'remove') — aks holda Muharrir/
+// Moderator o'zining 'users' yozuvini "Administrator" qilib upsert qilib,
+// huquqini oshirib olishi mumkin bo'lardi. Ro'yxatda yo'q kolleksiya —
+// standart bo'yicha faqat admin (xavfsiz standart).
+$COLL_ROLES = [
+  'news' => ['admin', 'editor'], 'mediaPosts' => ['admin', 'editor'],
+  'events' => ['admin', 'editor'], 'experts' => ['admin', 'editor'],
+  'publications' => ['admin', 'editor'], 'heroSlides' => ['admin', 'editor'],
+  'partners' => ['admin', 'editor'], 'pages' => ['admin', 'editor'],
+  'media' => ['admin', 'editor'],
+  // Murojaat/obunachilarni belgilash-o'chirish — moderatsiya vazifasi,
+  // shuning uchun Moderator ham kiradi.
+  'messages' => ['admin', 'editor', 'moderator'], 'subscribers' => ['admin', 'editor', 'moderator'],
+];
+
 /* -------------------- Ulanish -------------------- */
 function db() {
   static $pdo = null;
@@ -282,11 +299,21 @@ function provision_schema($pdo) {
   // seq = qo'shilish tartibi (auto-increment). ORDER BY seq DESC => eng yangisi birinchi (frontend unshift bilan mos)
   $seq = "seq BIGINT NOT NULL AUTO_INCREMENT, UNIQUE KEY seq_idx (seq)";
 
+  /* password_hash/totp_* — haqiqiy kirish uchun (2026-09-02, rollar).
+     $SCHEMA['users']['cols'] da ATAYLAB YO'Q, shuning uchun umumiy
+     coll_upsert()/row_to_item() (demak — db_export ham) bu ustunlarga
+     hech qachon tegmaydi va ularni klientga hech qachon chiqarmaydi (parol
+     xeshi kabi). Faqat load_account()/account_save_*() to'g'ridan-to'g'ri
+     ishlaydi. Qarang: SECURITY.md 1-bo'lim. */
   $pdo->exec("CREATE TABLE IF NOT EXISTS users (
     id VARCHAR(40) PRIMARY KEY,
     name VARCHAR(255), login VARCHAR(191), email VARCHAR(191),
     role VARCHAR(80), status VARCHAR(40), last VARCHAR(20),
-    $seq, INDEX(status)
+    $seq, INDEX(status),
+    password_hash VARCHAR(255) NOT NULL DEFAULT '',
+    totp_secret VARCHAR(64) DEFAULT NULL,
+    totp_enabled TINYINT(1) NOT NULL DEFAULT 0,
+    totp_recovery LONGTEXT DEFAULT NULL
   )$tail");
 
   $pdo->exec("CREATE TABLE IF NOT EXISTS news (
@@ -522,6 +549,14 @@ function migrate($pdo) {
   ]);
   // Ikki bosqichli autentifikatsiya — TOTP (2026-09-02)
   ensure_cols($pdo, 'auth', [
+    'totp_secret'   => 'VARCHAR(64) DEFAULT NULL',
+    'totp_enabled'  => 'TINYINT(1) NOT NULL DEFAULT 0',
+    'totp_recovery' => 'LONGTEXT DEFAULT NULL',
+  ]);
+  // Ko'p hisobli kirish — 'users' endi haqiqiy xodim hisoblari (rol bilan
+  // huquq cheklanadi), avval faqat vitrina yozuvi edi (2026-09-02)
+  ensure_cols($pdo, 'users', [
+    'password_hash' => "VARCHAR(255) NOT NULL DEFAULT ''",
     'totp_secret'   => 'VARCHAR(64) DEFAULT NULL',
     'totp_enabled'  => 'TINYINT(1) NOT NULL DEFAULT 0',
     'totp_recovery' => 'LONGTEXT DEFAULT NULL',
@@ -800,6 +835,86 @@ function auth_consume_recovery($pdo, array $remainingHashes) {
   $pdo->prepare("UPDATE auth SET totp_recovery=:r WHERE id=1")->execute([':r' => json_encode($remainingHashes)]);
 }
 
+/* -------------------- Ko'p hisobli kirish (rollar, 2026-09-02) --------------------
+   Asosiy administrator — `auth` jadvali (yagona qator, id=1). Bootstrap
+   hisobi: har doim to'liq huquqli, admin panel orqali o'chirib/pasaytirib
+   bo'lmaydi (faqat DB'ga to'g'ridan-to'g'ri kirib). Qo'shimcha xodim
+   hisoblari `users` jadvalida — avval faqat vitrina yozuvi edi (Rol ustuni
+   matn sifatida ko'rsatilardi, kirish huquqi bermasdi), endi haqiqiy login.
+
+   Ikkalasi ham BIR XIL shakldagi massiv bilan qaytariladi (kind/id/username/
+   role/password_hash/totp_*) — chaqiruvchi kod (login, 2FA, parol almashtirish)
+   "qaysi jadvaldan kelganini" bilishi shart emas, faqat account_save_*()
+   orqali yozadi. */
+
+// users.role ustunidagi matn (admin-ui.js: Administrator/Muharrir/Moderator)
+// -> ruxsat darajasi. Noma'lum/bo'sh qiymat ATAYLAB eng kam huquqqa tushadi
+// (xavfsiz standart) — rol maydoni bo'sh qoldirilgan yozuv tasodifan admin
+// bo'lib qolmasin.
+function role_tier($label) {
+  $l = strtolower(trim((string)$label));
+  if ($l === 'administrator' || $l === 'admin') return 'admin';
+  if ($l === 'muharrir' || $l === 'editor') return 'editor';
+  return 'moderator';
+}
+
+function load_account($pdo, $kind, $id) {
+  if ($kind !== 'user') {
+    $a = auth_load($pdo);
+    if (!$a) return null;
+    return [
+      'kind' => 'primary', 'id' => '', 'username' => $a['username'], 'role' => 'admin', 'status' => 'active',
+      'password_hash' => (string)$a['password_hash'], 'totp_secret' => $a['totp_secret'],
+      'totp_enabled' => !empty($a['totp_enabled']), 'totp_recovery' => $a['totp_recovery'],
+    ];
+  }
+  $st = $pdo->prepare("SELECT id, login, password_hash, totp_secret, totp_enabled, totp_recovery, role, status
+                        FROM users WHERE id = :id");
+  $st->execute([':id' => (string)$id]);
+  $r = $st->fetch();
+  return $r ? account_row_to_arr($r) : null;
+}
+// Kirish paytida — foydalanuvchi hali sessiyada emas, login bo'yicha izlanadi.
+function load_account_by_login($pdo, $login) {
+  $st = $pdo->prepare("SELECT id, login, password_hash, totp_secret, totp_enabled, totp_recovery, role, status
+                        FROM users WHERE login = :u LIMIT 1");
+  $st->execute([':u' => $login]);
+  $r = $st->fetch();
+  return $r ? account_row_to_arr($r) : null;
+}
+function account_row_to_arr($r) {
+  return [
+    'kind' => 'user', 'id' => $r['id'], 'username' => $r['login'], 'role' => role_tier($r['role']),
+    'status' => (string)$r['status'], 'password_hash' => (string)$r['password_hash'],
+    'totp_secret' => $r['totp_secret'], 'totp_enabled' => !empty($r['totp_enabled']),
+    'totp_recovery' => $r['totp_recovery'],
+  ];
+}
+
+function account_save_password($pdo, $acc, $hash) {
+  if ($acc['kind'] === 'primary') auth_save($pdo, $acc['username'], $hash);
+  else $pdo->prepare("UPDATE users SET password_hash=:h WHERE id=:id")->execute([':h' => $hash, ':id' => $acc['id']]);
+}
+function account_save_totp_secret($pdo, $acc, $secret) {
+  if ($acc['kind'] === 'primary') auth_save_totp_secret($pdo, $secret);
+  else $pdo->prepare("UPDATE users SET totp_secret=:s WHERE id=:id")->execute([':s' => $secret, ':id' => $acc['id']]);
+}
+function account_enable_totp($pdo, $acc, array $recoveryHashes) {
+  if ($acc['kind'] === 'primary') auth_enable_totp($pdo, $recoveryHashes);
+  else $pdo->prepare("UPDATE users SET totp_enabled=1, totp_recovery=:r WHERE id=:id")
+           ->execute([':r' => json_encode($recoveryHashes), ':id' => $acc['id']]);
+}
+function account_disable_totp($pdo, $acc) {
+  if ($acc['kind'] === 'primary') auth_disable_totp($pdo);
+  else $pdo->prepare("UPDATE users SET totp_secret=NULL, totp_enabled=0, totp_recovery=NULL WHERE id=:id")
+           ->execute([':id' => $acc['id']]);
+}
+function account_consume_recovery($pdo, $acc, array $remainingHashes) {
+  if ($acc['kind'] === 'primary') auth_consume_recovery($pdo, $remainingHashes);
+  else $pdo->prepare("UPDATE users SET totp_recovery=:r WHERE id=:id")
+           ->execute([':r' => json_encode($remainingHashes), ':id' => $acc['id']]);
+}
+
 /* -------------------- Butun bazani o'qish (frontend uchun to'liq obyekt) -------------------- */
 // $private = TRUE faqat tizimga kirgan admin uchun (api.php sessiyani tekshiradi).
 //
@@ -878,15 +993,22 @@ function db_load_public_cached($pdo) {
   return $json;
 }
 
-function db_load_all($pdo, $private = false) {
+// $identity — joriy sessiyaning haqiqiy hisobi (load_account() shaklida:
+// asosiy admin yoki `users` jadvalidagi xodim). api.php beradi (u $_SESSION
+// ni o'qiydi, db.php esa sessiyaga umuman tegmaydi). Berilmasa (masalan eski
+// chaqiruv) — asosiy adminga tushiladi, oldingi xatti-harakat saqlanadi.
+function db_load_all($pdo, $private = false, $identity = null) {
   global $COLL_ORDER, $PRIVATE_COLLS, $HEAVY_FIELDS;
   $out = [];
   $s = settings_load($pdo);
   if ($s !== null) $out['settings'] = $s;
-  $a = auth_load($pdo);
-  // Parol xeshi HECH QACHON clientga chiqmaydi. Admin login nomi ham faqat
-  // kirgandan keyin — aks holda u brute-force uchun tayyor yarim ma'lumot.
-  $out['auth'] = ['username' => ($private && $a) ? $a['username'] : ''];
+  if ($identity === null) $identity = load_account($pdo, 'primary', '');
+  // Parol xeshi HECH QACHON clientga chiqmaydi. Login nomi/rol ham faqat
+  // kirgandan keyin — aks holda ular brute-force uchun tayyor yarim ma'lumot.
+  $out['auth'] = [
+    'username' => ($private && $identity) ? $identity['username'] : '',
+    'role'     => ($private && $identity) ? $identity['role'] : '',
+  ];
   foreach ($COLL_ORDER as $coll) {
     if (!$private && in_array($coll, $PRIVATE_COLLS, true)) { $out[$coll] = []; continue; }
     $items = coll_load($pdo, $coll);

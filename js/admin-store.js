@@ -178,7 +178,11 @@
       x.onreadystatechange = () => {
         if (x.readyState === 4) {
           if (!(x.status >= 200 && x.status < 300)) {
-            try { window.dispatchEvent(new CustomEvent('tstm-save-failed', { detail: { status: x.status, action: job.action } })); } catch {}
+            // `error` — 403 sabab: 'forbidden' (rol yetarli emas, qayta kirish
+            // buni tuzatmaydi) 'bad_csrf'/'unauthorized' dan farqlanishi kerak
+            // (UI shu ikkalasini boshqacha ko'rsatadi).
+            let err = ''; try { err = (JSON.parse(x.responseText || '{}') || {}).error || ''; } catch {}
+            try { window.dispatchEvent(new CustomEvent('tstm-save-failed', { detail: { status: x.status, error: err, action: job.action } })); } catch {}
           }
           wBusy = false; pumpWrite();
         }
@@ -366,9 +370,11 @@
       .catch(() => { _loginErr = { code: 'network' }; return false; });
   }
   // ---------- 2FA sozlash (Sozlamalar -> Xavfsizlik) ----------
-  function twoFAStatus() {
+  // $id berilsa — boshqa (xodim) hisobning 2FA holati (faqat admin, "Foydalanuvchilar" tahriri uchun)
+  function twoFAStatus(id) {
     if (!API_OK) return Promise.resolve({ ok: false, enabled: false });
-    return fetch(API + '?action=2fa_status', { headers: { 'Accept': 'application/json' } })
+    const qs = id ? '&id=' + encodeURIComponent(id) : '';
+    return fetch(API + '?action=2fa_status' + qs, { headers: { 'Accept': 'application/json' } })
       .then(r => r.ok ? r.json() : null)
       .then(j => (j && j.ok) ? j : { ok: false, enabled: false })
       .catch(() => ({ ok: false, enabled: false }));
@@ -399,6 +405,29 @@
     return fetch(API + '?action=2fa_disable', {
       method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrf() || '' },
       body: JSON.stringify({ password: password || '' })
+    })
+      .then(r => r.json().catch(() => ({})))
+      .then(j => (j && j.ok) ? { ok: true } : { ok: false, error: (j && j.error) || 'failed' })
+      .catch(() => ({ ok: false, error: 'network' }));
+  }
+  // ---------- Xodim hisoblari (Foydalanuvchilar bo'limi, faqat admin) ----------
+  // Yangi hisobga parol o'rnatish yoki mavjudini tiklash.
+  function accountSetPassword(id, password) {
+    if (!API_OK) return Promise.resolve({ ok: false });
+    return fetch(API + '?action=account_set_password', {
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrf() || '' },
+      body: JSON.stringify({ id: id, password: password || '' })
+    })
+      .then(r => r.json().catch(() => ({})))
+      .then(j => (j && j.ok) ? { ok: true } : { ok: false, error: (j && j.error) || 'failed' })
+      .catch(() => ({ ok: false, error: 'network' }));
+  }
+  // Xodim 2FA'sini majburan o'chirish (telefon yo'qolgan, zaxira kod ham tugagan holatlar uchun).
+  function accountReset2FA(id) {
+    if (!API_OK) return Promise.resolve({ ok: false });
+    return fetch(API + '?action=account_reset_2fa', {
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrf() || '' },
+      body: JSON.stringify({ id: id })
     })
       .then(r => r.json().catch(() => ({})))
       .then(j => (j && j.ok) ? { ok: true } : { ok: false, error: (j && j.error) || 'failed' })
@@ -714,6 +743,6 @@
 
   w.Store = {
     uid, ml, all, find, upsert, remove, settings, setSettings,
-    checkLogin, loginError, verify2fa, twoFAStatus, twoFASetup, twoFAConfirm, twoFADisable, changePassword, login, logout, isAuthed, verifySession, auditLog, errorLog, errorResolve, item, pushStats, pushSend, addMessage, subscribe, uploadImage, uploadPdf, uploadHtml, videoThumb, bumpView, getView, reset, raw: load
+    checkLogin, loginError, verify2fa, twoFAStatus, twoFASetup, twoFAConfirm, twoFADisable, accountSetPassword, accountReset2FA, changePassword, login, logout, isAuthed, verifySession, auditLog, errorLog, errorResolve, item, pushStats, pushSend, addMessage, subscribe, uploadImage, uploadPdf, uploadHtml, videoThumb, bumpView, getView, reset, raw: load
   };
 })(window);
