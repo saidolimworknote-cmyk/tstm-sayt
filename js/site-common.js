@@ -738,7 +738,7 @@
     // Iframe about:blank bo'lgani uchun nisbiy URL ishlamaydi -> abs() bilan.
     // Versiya SHART: bu fayl HTML'da <link> bilan ulanmagani uchun boshqa
     // joyda kesh buzilmaydi — o'zgartirsangiz raqamni oshiring.
-    var cssHref = abs('css/print.css?v=4');
+    var cssHref = abs('css/print.css?v=6');
 
     // Asl manba (tashqi nashr havolasi) — ekspert sharhlarida hujjatning
     // ishonchliligi uchun muhim, shuning uchun footerga chiqadi.
