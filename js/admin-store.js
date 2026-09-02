@@ -288,6 +288,7 @@
   // loginError() orqali o'qiydi.
   //   { code: 'locked', retryAfter } — juda ko'p xato urinish (429)
   //   { code: 'network' }            — serverga umuman yetib borilmadi
+  //   { code: 'need_2fa' }           — parol to'g'ri, autentifikator kodi kerak
   //   null                           — oddiy xato login yoki parol
   let _loginErr = null;
   function loginError() { return _loginErr; }
@@ -316,7 +317,10 @@
           return r.ok ? r.json() : null;
         })
         .then(r => {
-          if (r && r.ok && r.csrf) CSRF = r.csrf;
+          if (r && r.csrf) CSRF = r.csrf;
+          // Parol to'g'ri, lekin 2FA kod kutilmoqda — bu "xato" emas, UI
+          // alohida qadam sifatida ko'rsatishi kerak.
+          if (r && r.need_2fa) { _loginErr = { code: 'need_2fa' }; return false; }
           // Kirishdan OLDIN yuklangan ma'lumotda shaxsiy bo'limlar (murojaatlar,
           // obunachilar, foydalanuvchilar) bo'sh edi — server ularni faqat
           // sessiyasi bor adminga beradi. Kirgach keshni tashlab, to'liq
@@ -333,6 +337,72 @@
     // (haqiqiy autentifikatsiya faqat server tomonda — api.php orqali bo'ladi).
     const a = load().auth;
     return Promise.resolve(!!pw && u.trim() === a.username && pw === a.password);
+  }
+  // 2FA kodi (yoki bir martalik zaxira kod) bilan kirishni yakunlaydi.
+  // checkLogin() need_2fa qaytargandan keyin, o'sha sessiya ichida chaqiriladi.
+  function verify2fa(code) {
+    if (!API_OK) return Promise.resolve(false);
+    _loginErr = null;
+    return fetch(API + '?action=login_2fa', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: String(code || '').trim() })
+    })
+      .then(r => {
+        if (r.status === 429) {
+          return r.json().catch(() => ({})).then(j => {
+            _loginErr = { code: 'locked', retryAfter: Math.max(0, parseInt(j.retry_after, 10) || 0) };
+            return null;
+          });
+        }
+        return r.json().catch(() => null);
+      })
+      .then(r => {
+        if (r && r.csrf) CSRF = r.csrf;
+        if (r && r.error === 'expired') _loginErr = { code: 'expired' };
+        if (r && r.ok) { _db = null; load(); }
+        return !!(r && r.ok);
+      })
+      .catch(() => { _loginErr = { code: 'network' }; return false; });
+  }
+  // ---------- 2FA sozlash (Sozlamalar -> Xavfsizlik) ----------
+  function twoFAStatus() {
+    if (!API_OK) return Promise.resolve({ ok: false, enabled: false });
+    return fetch(API + '?action=2fa_status', { headers: { 'Accept': 'application/json' } })
+      .then(r => r.ok ? r.json() : null)
+      .then(j => (j && j.ok) ? j : { ok: false, enabled: false })
+      .catch(() => ({ ok: false, enabled: false }));
+  }
+  // Yangi maxfiy kalitni boshlaydi (hali yoqmaydi). { ok, secret, uri }
+  function twoFASetup() {
+    if (!API_OK) return Promise.resolve({ ok: false });
+    return fetch(API + '?action=2fa_setup', {
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrf() || '' }, body: '{}'
+    })
+      .then(r => r.json().catch(() => ({})))
+      .then(j => (j && j.ok) ? j : { ok: false })
+      .catch(() => ({ ok: false, error: 'network' }));
+  }
+  // Sozlashni bitta amaldagi kod bilan tasdiqlaydi va yoqadi. { ok, recovery: [...] }
+  function twoFAConfirm(code) {
+    if (!API_OK) return Promise.resolve({ ok: false });
+    return fetch(API + '?action=2fa_confirm', {
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrf() || '' },
+      body: JSON.stringify({ code: String(code || '').trim() })
+    })
+      .then(r => r.json().catch(() => ({})))
+      .then(j => (j && j.ok) ? j : { ok: false, error: (j && j.error) || 'failed' })
+      .catch(() => ({ ok: false, error: 'network' }));
+  }
+  function twoFADisable(password) {
+    if (!API_OK) return Promise.resolve({ ok: false });
+    return fetch(API + '?action=2fa_disable', {
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrf() || '' },
+      body: JSON.stringify({ password: password || '' })
+    })
+      .then(r => r.json().catch(() => ({})))
+      .then(j => (j && j.ok) ? { ok: true } : { ok: false, error: (j && j.error) || 'failed' })
+      .catch(() => ({ ok: false, error: 'network' }));
   }
   // Parolni almashtirish. Tekshiruv va xeshlash butunlay serverda
   // (api.php -> change_password): joriy parol tasdiqlanadi, yangisi bcrypt
@@ -644,6 +714,6 @@
 
   w.Store = {
     uid, ml, all, find, upsert, remove, settings, setSettings,
-    checkLogin, loginError, changePassword, login, logout, isAuthed, verifySession, auditLog, errorLog, errorResolve, item, pushStats, pushSend, addMessage, subscribe, uploadImage, uploadPdf, uploadHtml, videoThumb, bumpView, getView, reset, raw: load
+    checkLogin, loginError, verify2fa, twoFAStatus, twoFASetup, twoFAConfirm, twoFADisable, changePassword, login, logout, isAuthed, verifySession, auditLog, errorLog, errorResolve, item, pushStats, pushSend, addMessage, subscribe, uploadImage, uploadPdf, uploadHtml, videoThumb, bumpView, getView, reset, raw: load
   };
 })(window);

@@ -426,9 +426,19 @@ switch ($action) {
     if ($ok) {
       $pdo->prepare("DELETE FROM login_attempts WHERE ip = :ip")->execute([':ip' => $ip]);
       session_regenerate_id(true);
-      $_SESSION['tstm_admin'] = true;
-      audit($pdo, 'login');
-      echo json_encode(['ok' => true, 'csrf' => $_SESSION['csrf']]);
+      if (!empty($a['totp_enabled'])) {
+        // Parol to'g'ri, lekin 2FA yoqilgan — sessiya hali ADMIN deb
+        // belgilanmaydi, faqat "parol tasdiqlandi" oraliq holati saqlanadi
+        // (5 daqiqa amal qiladi). To'liq kirish faqat login_2fa orqali,
+        // to'g'ri kod bilan yakunlanadi.
+        $_SESSION['tstm_2fa_pending'] = true;
+        $_SESSION['tstm_2fa_at'] = $now;
+        echo json_encode(['ok' => false, 'need_2fa' => true, 'csrf' => $_SESSION['csrf']]);
+      } else {
+        $_SESSION['tstm_admin'] = true;
+        audit($pdo, 'login');
+        echo json_encode(['ok' => true, 'csrf' => $_SESSION['csrf']]);
+      }
     } else {
       $cnt = (int)$rec['cnt'] + 1;
       $locked = 0;
@@ -442,6 +452,122 @@ switch ($action) {
       if ($locked) jexit(['ok' => false, 'error' => 'locked', 'retry_after' => $locked - $now], 429);
       echo json_encode(['ok' => false]);
     }
+    break;
+  }
+
+  case 'login_2fa': {
+    // 2-bosqich: parol tasdiqlangach (tstm_2fa_pending), autentifikator
+    // ilovasidagi 6 xonali kod yoki bir martalik zaxira kod tekshiriladi.
+    // Bir xil brute-force hisoblagichi ishlatiladi — kodni "taxmin qilish"
+    // ham parolni taxmin qilish kabi xavfli.
+    global $LOGIN_MAX_ATTEMPTS, $LOGIN_LOCK_SECONDS;
+    $ip = client_ip(); $now = time();
+
+    $pdo->prepare("DELETE FROM login_attempts WHERE t < :t")->execute([':t' => $now - 3600]);
+    $st = $pdo->prepare("SELECT cnt, t, locked_until FROM login_attempts WHERE ip = :ip");
+    $st->execute([':ip' => $ip]);
+    $rec = $st->fetch() ?: ['cnt' => 0, 't' => $now, 'locked_until' => 0];
+    if (!empty($rec['locked_until']) && $rec['locked_until'] > $now) {
+      jexit(['ok' => false, 'error' => 'locked', 'retry_after' => (int)$rec['locked_until'] - $now], 429);
+    }
+
+    if (empty($_SESSION['tstm_2fa_pending']) || empty($_SESSION['tstm_2fa_at'])
+        || ($now - (int)$_SESSION['tstm_2fa_at']) > 300) {
+      unset($_SESSION['tstm_2fa_pending'], $_SESSION['tstm_2fa_at']);
+      jexit(['ok' => false, 'error' => 'expired'], 401);
+    }
+
+    $b = body_json();
+    $code = isset($b['code']) ? (string)$b['code'] : '';
+    $a = auth_load($pdo);
+    $secret = ($a && !empty($a['totp_secret'])) ? $a['totp_secret'] : '';
+    $ok = totp_verify($secret, $code);
+    $usedRecovery = false;
+
+    if (!$ok && $a && !empty($a['totp_recovery'])) {
+      $hashes = json_decode($a['totp_recovery'], true);
+      $hashes = is_array($hashes) ? $hashes : [];
+      $idx = array_search(recovery_hash($code), $hashes, true);
+      if ($idx !== false) {
+        array_splice($hashes, $idx, 1); // bir martalik — darhol bekor qilinadi
+        auth_consume_recovery($pdo, $hashes);
+        $ok = true; $usedRecovery = true;
+      }
+    }
+
+    if ($ok) {
+      $pdo->prepare("DELETE FROM login_attempts WHERE ip = :ip")->execute([':ip' => $ip]);
+      unset($_SESSION['tstm_2fa_pending'], $_SESSION['tstm_2fa_at']);
+      session_regenerate_id(true);
+      $_SESSION['tstm_admin'] = true;
+      audit($pdo, $usedRecovery ? 'login_recovery_code' : 'login');
+      echo json_encode(['ok' => true, 'csrf' => $_SESSION['csrf']]);
+    } else {
+      $cnt = (int)$rec['cnt'] + 1;
+      $locked = 0;
+      if ($cnt >= $LOGIN_MAX_ATTEMPTS) { $locked = $now + $LOGIN_LOCK_SECONDS; $cnt = 0; }
+      $up = $pdo->prepare("INSERT INTO login_attempts (ip, cnt, t, locked_until) VALUES (:ip,:c,:t,:l)
+                           ON DUPLICATE KEY UPDATE cnt=VALUES(cnt), t=VALUES(t), locked_until=VALUES(locked_until)");
+      $up->execute([':ip' => $ip, ':c' => $cnt, ':t' => $now, ':l' => $locked]);
+      if ($locked) jexit(['ok' => false, 'error' => 'locked', 'retry_after' => $locked - $now], 429);
+      echo json_encode(['ok' => false, 'error' => 'bad_code']);
+    }
+    break;
+  }
+
+  case '2fa_status': {
+    require_auth();
+    $a = auth_load($pdo);
+    jexit(['ok' => true, 'enabled' => !empty($a['totp_enabled'])]);
+    break;
+  }
+
+  case '2fa_setup': {
+    // Yangi maxfiy kalit hosil qiladi va saqlaydi, lekin HALI YOQMAYDI —
+    // faqat 2fa_confirm to'g'ri kod bilan tasdiqlagach totp_enabled=1 bo'ladi.
+    // Shuning uchun sozlashni boshlab tugallamaslik xavfsiz: hisobga hech
+    // narsa ta'sir qilmaydi, keyingi urinishda yangi kalit shunchaki almashadi.
+    require_auth(); require_csrf();
+    $a = auth_load($pdo);
+    $secret = totp_secret_gen();
+    auth_save_totp_secret($pdo, $secret);
+    global $DEFAULT_USER;
+    $uname = ($a && !empty($a['username'])) ? $a['username'] : $DEFAULT_USER;
+    jexit(['ok' => true, 'secret' => $secret, 'uri' => totp_otpauth_uri($secret, $uname)]);
+    break;
+  }
+
+  case '2fa_confirm': {
+    // Sozlash oxiri: autentifikator ilovasi haqiqatan ham to'g'ri sozlanganini
+    // (bitta amaldagi kod bilan) tasdiqlaydi, so'ng 2FA yoqiladi va bir
+    // martalik zaxira kodlar yaratiladi (faqat shu javobda, ochiq matnda —
+    // keyin qayta ko'rsatib bo'lmaydi, DB'da faqat xeshi saqlanadi).
+    require_auth(); require_csrf();
+    $b = body_json();
+    $code = isset($b['code']) ? (string)$b['code'] : '';
+    $a = auth_load($pdo);
+    $secret = ($a && !empty($a['totp_secret'])) ? $a['totp_secret'] : '';
+    if (!totp_verify($secret, $code)) jexit(['ok' => false, 'error' => 'bad_code'], 400);
+    $codes = recovery_codes_gen();
+    auth_enable_totp($pdo, array_map('recovery_hash', $codes));
+    audit($pdo, 'enable_2fa');
+    jexit(['ok' => true, 'recovery' => $codes]);
+    break;
+  }
+
+  case '2fa_disable': {
+    // Sezgir amal — joriy parol qayta so'raladi (masalan, admin kompyuteri
+    // qulflanmagan holda tashlab ketilgan bo'lsa, o'tkinchi 2FA'ni shunchaki
+    // "O'chirish" tugmasi bilan o'chira olmasin).
+    require_auth(); require_csrf();
+    $b = body_json();
+    $pw = isset($b['password']) ? (string)$b['password'] : '';
+    $a = auth_load($pdo);
+    $hash = ($a && !empty($a['password_hash'])) ? $a['password_hash'] : '';
+    if ($hash === '' || !password_verify($pw, $hash)) jexit(['ok' => false, 'error' => 'wrong_password'], 403);
+    auth_disable_totp($pdo);
+    audit($pdo, 'disable_2fa');
+    jexit(['ok' => true]);
     break;
   }
 

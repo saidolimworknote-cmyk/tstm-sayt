@@ -335,6 +335,15 @@
   // ishga tushirib, tahrirlanayotgan formani (saqlanmagan matn bilan) yo'q
   // qilib yuborardi. Shu bayroq bilan "oddiy kirish" dan farqlanadi.
   let reauthMode = false;
+  // Kirish parol bosqichidan o'tib, 2FA kod bosqichida turibdimi (forma
+  // ikkinchi marta yuborilganda checkLogin() emas, verify2fa() chaqiriladi).
+  let twofaPending = false;
+  function resetLoginStep() {
+    twofaPending = false;
+    if ($('#loginStep1')) $('#loginStep1').hidden = false;
+    if ($('#loginStep2')) $('#loginStep2').hidden = true;
+    if ($('#l2fa')) $('#l2fa').value = '';
+  }
 
   function logoSrc() {
     const s = Store.settings();
@@ -393,6 +402,7 @@
       // ochiladi, forma esa TEGILMAYDI - kirgach "Saqlash"ni qayta bosadi.
       if (status === 401 || status === 403) {
         reauthMode = true;
+        resetLoginStep();
         toast('Sessiya tugadi. Formangiz saqlanib turibdi — qaytadan kiring va "Saqlash"ni qayta bosing.', 1);
         $('#login').classList.add('show');
         return;
@@ -400,37 +410,58 @@
       toast('Saqlashda xato — fayl juda katta bo\'lishi mumkin. Kichikroq rasm yuklang.', 1);
     });
     // login
+    function loginSucceeded() {
+      twofaPending = false;
+      Store.login();
+      if (reauthMode) {
+        // Sessiya tugab qayta kirilgan holat: forma DOMda saqlanib
+        // qoldi - showApp()/route() chaqirilsa u qayta chizilib,
+        // admin yozgan (hali saqlanmagan) matn yo'qolardi.
+        reauthMode = false;
+        $('#login').classList.remove('show');
+        renderSidebar();
+        toast('Qayta kirildi. Endi "Saqlash"ni bosing.');
+      } else {
+        showApp();
+      }
+    }
     $('#loginForm').addEventListener('submit', (e) => {
       e.preventDefault();
-      const u = $('#lu').value, p = $('#lp').value;
       const btn = $('#loginForm button[type=submit]');
       if (btn) btn.disabled = true;
-      Promise.resolve(Store.checkLogin(u, p)).then((ok) => {
-        if (ok) {
-          Store.login();
-          if (reauthMode) {
-            // Sessiya tugab qayta kirilgan holat: forma DOMda saqlanib
-            // qoldi - showApp()/route() chaqirilsa u qayta chizilib,
-            // admin yozgan (hali saqlanmagan) matn yo'qolardi.
-            reauthMode = false;
-            $('#login').classList.remove('show');
-            renderSidebar();
-            toast('Qayta kirildi. Endi "Saqlash"ni bosing.');
-          } else {
-            showApp();
-          }
+      const el = $('#loginErr');
+      const step = twofaPending
+        ? Promise.resolve(Store.verify2fa($('#l2fa').value))
+        : Promise.resolve(Store.checkLogin($('#lu').value, $('#lp').value));
+      step.then((ok) => {
+        if (ok) { loginSucceeded(); return; }
+        const err = Store.loginError && Store.loginError();
+        // Parol to'g'ri, endi 2FA kodi kerak — bu xato emas, keyingi qadam.
+        if (!twofaPending && err && err.code === 'need_2fa') {
+          twofaPending = true;
+          $('#loginStep1').hidden = true;
+          $('#loginStep2').hidden = false;
+          el.classList.remove('show');
+          $('#l2fa').focus();
           return;
         }
-        // Bloklanish (429), server yo'qligi va oddiy xato parol — UCHTA boshqa
-        // holat. Ilgari uchalasiga bir xil "Login yoki parol noto'g'ri" chiqardi
-        // va admin nima bo'layotganini tushunmasdi.
-        const err = Store.loginError && Store.loginError();
-        const el = $('#loginErr');
+        // 2FA oraliq sessiyasi muddati o'tgan (5 daq.) — parolni qaytadan so'raymiz.
+        if (twofaPending && err && err.code === 'expired') {
+          resetLoginStep();
+          el.textContent = 'Vaqt tugadi, parolni qaytadan kiriting.';
+          el.classList.add('show');
+          return;
+        }
+        // Bloklanish (429), server yo'qligi, 2FA kod xato va oddiy xato parol —
+        // holatlar. Ilgari hammasiga bir xil "Login yoki parol noto'g'ri"
+        // chiqardi va admin nima bo'layotganini tushunmasdi.
         el.textContent =
           (err && err.code === 'locked')
             ? `Juda ko'p xato urinish. ${fmtWait(err.retryAfter)}dan keyin qayta urinib ko'ring.`
           : (err && err.code === 'network')
             ? 'Serverga ulanib bo\'lmadi. Aloqani tekshiring va qayta urinib ko\'ring.'
+          : twofaPending
+            ? 'Kod noto\'g\'ri. Qaytadan urinib ko\'ring.'
             : 'Login yoki parol noto\'g\'ri.';
         el.classList.add('show');
       }).finally(() => { if (btn) btn.disabled = false; });
@@ -1573,7 +1604,8 @@
   const AUDIT_LBL = {
     login: 'Kirish', logout: 'Chiqish', upsert: 'Qo\'shish/tahrir', remove: 'O\'chirish',
     settings: 'Sozlama', save: 'To\'liq saqlash', reset: 'Tiklash', change_password: 'Parol almashtirish',
-    upload: 'Fayl yuklash'
+    upload: 'Fayl yuklash', enable_2fa: '2FA yoqildi', disable_2fa: '2FA o\'chirildi',
+    login_recovery_code: 'Kirish (zaxira kod)'
   };
   // Yuklangan fayl turlari uchun "Bo'lim" ustunidagi o'qishli nomlar
   const AUDIT_COLL = { image: 'Rasm', document: 'Hujjat', infographic: 'Infografika' };
@@ -1581,7 +1613,7 @@
   const AUDIT_TONE = {
     login: '#1d6a94', logout: '#6b7280', upsert: '#2e7d6b', remove: '#9a3b52',
     settings: '#8a5a2b', save: '#5b5ea6', reset: '#9a3b52', change_password: '#9a3b52',
-    upload: '#4a6fa5'
+    upload: '#4a6fa5', enable_2fa: '#2e7d6b', disable_2fa: '#9a3b52', login_recovery_code: '#8a5a2b'
   };
   function auditTs(s) {
     // "2026-07-30 11:14:31" -> "30.06.2026 11:14" (server DATE emas, TIMESTAMP)
@@ -2263,6 +2295,10 @@
           <span id="pwMsg" class="a-t13"></span>
         </div>
       </div>
+      <div class="card a-p24-mt20"><b class="a-serif17-mb6">Ikki bosqichli autentifikatsiya (2FA)</b>
+        <div class="a-muted13-mb16">Yoqilgan bo'lsa, kirishda parolga qo'shimcha ravishda autentifikator ilovasidagi (Google Authenticator, Authy va h.k.) 6 xonali kod ham so'raladi.</div>
+        <div id="totpBox">Yuklanmoqda…</div>
+      </div>
       <div class="form-actions"><button class="btn primary" id="setSave">${ic('save')} Sozlamalarni saqlash</button><div class="sp"></div>
         <button class="btn danger" id="setReset">${ic('trash')} Barcha ma'lumotlarni tiklash</button></div>`;
 
@@ -2396,6 +2432,100 @@
       });
     };
 
+    // ---- 2FA (TOTP) ----
+    // Uch holat: o'chirilgan (yoqish tugmasi) -> sozlash (kalit + tasdiqlash
+    // kodi) -> yoqilgan (o'chirish, parol bilan tasdiqlanadi). Har bir holat
+    // #totpBox ichini to'liq qayta chizadi — alohida ko'rinish holati yo'q.
+    function renderTotpBox() {
+      const box = $('#totpBox');
+      if (!box) return;
+      box.innerHTML = 'Yuklanmoqda…';
+      Store.twoFAStatus().then(r => drawTotpIdle(!!(r && r.enabled)));
+
+      function drawTotpIdle(enabled) {
+        box.innerHTML = `
+          <div class="a-fac-g14-wrap">
+            <span class="badge ${enabled ? 'active' : 'inactive'}">${enabled ? 'Yoqilgan' : "O'chirilgan"}</span>
+            ${enabled ? `<button type="button" class="btn danger sm" id="totpOff">O'chirish</button>`
+                      : `<button type="button" class="btn sm" id="totpOn">${ic('save')} Yoqish</button>`}
+          </div>`;
+        const onBtn = $('#totpOn'), offBtn = $('#totpOff');
+        if (onBtn) onBtn.onclick = () => { onBtn.disabled = true; Store.twoFASetup().then(r => { if (r && r.ok) drawTotpSetup(r); else { onBtn.disabled = false; toast('Boshlab bo\'lmadi — qayta urinib ko\'ring', 1); } }); };
+        if (offBtn) offBtn.onclick = drawTotpOff;
+      }
+
+      function drawTotpSetup(r) {
+        box.innerHTML = `
+          <div class="a-muted13-mb16">1. Autentifikator ilovasida (Google Authenticator, Authy va h.k.) yangi hisob qo'shing va quyidagi kalitni <b>qo'lda kiriting</b>:</div>
+          <div class="field"><label>Maxfiy kalit</label><input class="ctl mono" id="totpSecret" readonly value="${esc(r.secret)}"></div>
+          <div class="a-muted13-mb16">2. Ilova ko'rsatgan 6 xonali kodni kiriting:</div>
+          <div class="a-grid-auto">
+            <div class="field a-w110-none"><label>Tasdiqlash kodi</label><input class="ctl mono" id="totpCode" inputmode="numeric" maxlength="6" placeholder="000000"></div>
+          </div>
+          <div class="a-fac-g14-wrap-mt16">
+            <button type="button" class="btn primary" id="totpConfirm">Tasdiqlash va yoqish</button>
+            <button type="button" class="btn ghost" id="totpCancel">Bekor qilish</button>
+            <span id="totpMsg" class="a-t13"></span>
+          </div>`;
+        $('#totpSecret').onclick = (e) => e.target.select();
+        $('#totpCancel').onclick = renderTotpBox;
+        $('#totpConfirm').onclick = () => {
+          const btn = $('#totpConfirm'), msg = $('#totpMsg');
+          const say = (t, bad) => { msg.textContent = t; msg.style.color = bad ? 'var(--danger, #c0392b)' : ''; };
+          const code = ($('#totpCode').value || '').trim();
+          if (!/^\d{6}$/.test(code)) return say('6 xonali kodni kiriting', 1);
+          btn.disabled = true; say('Tekshirilmoqda…');
+          Store.twoFAConfirm(code).then(res => {
+            btn.disabled = false;
+            if (res && res.ok) showRecoveryCodes(res.recovery || []);
+            else say('Kod noto\'g\'ri — qaytadan urinib ko\'ring', 1);
+          });
+        };
+      }
+
+      function drawTotpOff() {
+        box.innerHTML = `
+          <div class="a-muted13-mb16">O'chirish uchun joriy parolni tasdiqlang.</div>
+          <div class="a-grid-auto">
+            <div class="field"><label>Joriy parol</label><input class="ctl" type="password" id="totpOffPw" autocomplete="current-password"></div>
+          </div>
+          <div class="a-fac-g14-wrap-mt16">
+            <button type="button" class="btn danger" id="totpOffGo">O'chirish</button>
+            <button type="button" class="btn ghost" id="totpOffCancel">Bekor qilish</button>
+            <span id="totpOffMsg" class="a-t13"></span>
+          </div>`;
+        $('#totpOffCancel').onclick = renderTotpBox;
+        $('#totpOffGo').onclick = () => {
+          const btn = $('#totpOffGo'), msg = $('#totpOffMsg');
+          const say = (t, bad) => { msg.textContent = t; msg.style.color = bad ? 'var(--danger, #c0392b)' : ''; };
+          const pw = $('#totpOffPw').value;
+          if (!pw) return say('Parolni kiriting', 1);
+          btn.disabled = true; say('Yuborilmoqda…');
+          Store.twoFADisable(pw).then(res => {
+            btn.disabled = false;
+            if (res && res.ok) { toast('2FA o\'chirildi'); renderTotpBox(); }
+            else say('Parol noto\'g\'ri', 1);
+          });
+        };
+      }
+
+      // Zaxira kodlar FAQAT shu javobda ochiq matnda keladi (DB'da faqat
+      // xeshi turadi) — shuning uchun bitta martalik modalda ko'rsatiladi,
+      // admin buni saqlab qolishi shart, keyin qayta ko'rish imkoni yo'q.
+      function showRecoveryCodes(codes) {
+        const bg = document.createElement('div'); bg.className = 'modal-bg';
+        bg.innerHTML = `<div class="modal a-mw520">
+          <h3>Zaxira kodlar</h3>
+          <p class="a-msgbody">2FA yoqildi. Telefon yo'qolsa yoki ilova ishlamay qolsa, quyidagi bir martalik kodlardan biri parol o'rniga kod so'ralganda kiritiladi. <b>Har biri faqat bir marta ishlaydi va bu ro'yxat qayta ko'rsatilmaydi</b> — xavfsiz joyga yozib qo'ying.</p>
+          <div class="a-recovery-grid mono">${codes.map(c => '<span>' + esc(c) + '</span>').join('')}</div>
+          <div class="acts"><button class="btn primary" data-close>Saqladim, yopish</button></div>
+        </div>`;
+        document.body.appendChild(bg);
+        bg.querySelector('[data-close]').onclick = () => { bg.remove(); toast('2FA yoqildi'); renderTotpBox(); };
+      }
+    }
+    renderTotpBox();
+
     $('#setReset').onclick = () => confirmModal('Ma\'lumotlarni tiklash', 'Barcha o\'zgarishlar o\'chiriladi va boshlang\'ich holatga qaytadi. Davom etasizmi?', () => { Store.reset(); applyTheme(Store.settings().theme); renderSidebar(); location.hash = '#/dashboard'; toast('Ma\'lumotlar tiklandi'); });
     { const bt = $('#bulkTr'); if (bt) bt.onclick = () => confirmModal('Kontent tarjimasi', 'Barcha kontentdagi bo\'sh EN/RU maydonlari o\'zbekchadan avtomatik to\'ldiriladi. Bu bir necha daqiqa olishi mumkin. Davom etasizmi?', () => bulkFillTranslations(bt, $('#bulkTrLog'))); }
   }
@@ -2409,7 +2539,7 @@
     document.body.appendChild(m);
     $('#mProfile', m).onclick = () => { m.remove(); location.hash = '#/users'; };
     $('#mSite', m).onclick = () => { m.remove(); window.open('index.html', '_blank'); };
-    $('#mOut', m).onclick = () => { Store.logout(); m.remove(); $('#app').classList.remove('show'); $('#login').classList.add('show'); $('#lp').value = ''; location.hash = ''; };
+    $('#mOut', m).onclick = () => { Store.logout(); m.remove(); $('#app').classList.remove('show'); resetLoginStep(); $('#login').classList.add('show'); $('#lp').value = ''; location.hash = ''; };
     setTimeout(() => document.addEventListener('click', function h(e) { if (!m.contains(e.target) && !$('#userChip').contains(e.target)) { m.remove(); document.removeEventListener('click', h); } }), 0);
   }
 

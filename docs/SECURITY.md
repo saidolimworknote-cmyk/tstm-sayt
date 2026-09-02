@@ -20,9 +20,21 @@ Apache. Server tomonda shablon dvigateli yo'q — sahifalar statik HTML, kontent
 | Brute-force himoyasi | IP bo'yicha 5 xato urinishdan keyin 10 daqiqa blok (`login_attempts` jadvali) |
 | Sessiya | PHP sessiyasi; kirishda `session_regenerate_id(true)` — sessiya fiksatsiyasiga qarshi |
 | Cookie | `HttpOnly`, `SameSite=Lax`, HTTPS'da avtomatik `Secure` |
+| Ikki bosqichli autentifikatsiya (2FA) | Ixtiyoriy, TOTP (RFC 6238, 30s/6 xona) — istalgan standart autentifikator ilovasi (Google Authenticator, Authy va h.k.) bilan ishlaydi. Yoqish/o'chirish: admin panel → Sozlamalar → Xavfsizlik |
 
 Parol xeshi va admin login nomi **hech qachon** klientga yuborilmaydi —
-`backend/db.php` → `db_load_all()` ga qarang.
+`backend/db.php` → `db_load_all()` ga qarang. Xuddi shu qoida 2FA maxfiy
+kalitiga (`totp_secret`) ham tegishli: u faqat sozlash paytida (`2fa_setup`)
+bir marta ADMIN SESSIYASIGA qaytariladi, boshqa hech qanday javobda
+ko'rinmaydi.
+
+2FA ikki bosqichli kirish oqimi bilan ishlaydi: parol to'g'ri bo'lsa-da, 2FA
+yoqilgan bo'lsa sessiya HALI admin deb belgilanmaydi — faqat 5 daqiqalik
+oraliq holat (`login_2fa` amali kod so'raydi) saqlanadi. Kod ham, zaxira kod
+ham xuddi parol kabi bir xil IP-bo'yicha brute-force hisoblagichi ostida
+(5 urinish → 10 daqiqa blok). Telefon yo'qolgan holat uchun 2FA yoqilganda
+8 ta bir martalik zaxira kod beriladi (faqat o'sha daqiqada, ochiq matnda —
+bazada faqat SHA-256 xeshi saqlanadi, ishlatilgach darhol bekor qilinadi).
 
 ## 2. Ruxsatlar va maxfiylik
 
@@ -102,22 +114,27 @@ ko'rinishida o'zi yaratadi (yo'l bo'ylab chiqish — path traversal — mumkin e
 Sayt bo'ylab CSP `.htaccess` da. **`script-src` da `'unsafe-inline'` ham,
 `'unsafe-eval'` ham YO'Q** — barcha sahifa skriptlari alohida `.js` fayllarga
 ko'chirilgan (`page-*.js`), inline hodisa handlerlari (`onclick=`) hodisa
-delegatsiyasiga o'tkazilgan.
+delegatsiyasiga o'tkazilgan. **`style-src`da ham `'unsafe-inline'` YO'Q**
+(2026-08-03'dan beri) — barcha inline `style=""` atributlari va `<style>`
+bloklari tashqi CSS fayllarga yoki `.style` DOM API'ga ko'chirilgan; admin
+panel ham xuddi shu qat'iy qoida ostida (qarang: `.htaccess`dagi CSP
+sarlavhasi yonidagi izoh).
 
 ```
 default-src 'self';
 script-src  'self' + Google Translate hostlari;
-style-src   'self' 'unsafe-inline' + Google Fonts;
-img-src     'self' data: blob: + YouTube/Google;
-frame-src   'self' + YouTube, Google Maps;
+style-src   'self' + Google (Translate vidjeti uchun);
+font-src    'self' data:;
+img-src     'self' data: blob: + Google (xarita/Translate);
+frame-src   'self' + YouTube (faqat youtube-nocookie.com), Google Maps;
 connect-src 'self' + translate.googleapis.com;
 object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'
 ```
 
-> `style-src` da `'unsafe-inline'` qolgan, chunki sahifalarda inline `style=""`
-> atributlari ko'p. Bu XSS uchun yo'l ochmaydi (CSS kod ishga tushira olmaydi),
-> faqat vizual buzish xavfi bor — u ham `script-src` yopiq bo'lgani uchun
-> amalda foydasiz.
+> Shriftlar 2026-08-11'dan o'z serverimizda (`fonts/*.woff2`) — CSP'da Google
+> Fonts umuman yo'q. YouTube video muqovalari ham server orqali uzatiladi
+> (`backend/thumbs.php`), shuning uchun `img-src`da YouTube domenlari yo'q —
+> tashrifchi "play" bosmaguncha YouTube'ga umuman murojaat qilinmaydi.
 
 Boshqa sarlavhalar: `X-Content-Type-Options: nosniff`,
 `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin`,
@@ -243,10 +260,21 @@ hujjat qo'yish kerak bo'lsa — uni `uploads/` ga **umuman qo'ymaslik** kerak,
 
 Halol bo'lish uchun — hozircha bajarilmagan, lekin bilib turilgan narsalar:
 
-1. **`style-src 'unsafe-inline'`** — 7-bo'limga qarang. Olib tashlash uchun
-   yuzlab inline `style=""` atributini CSS sinflariga ko'chirish kerak.
-2. **Ko'p foydalanuvchili rollar yo'q** — bitta admin hisobi. `users` jadvali
-   bor, lekin u ma'lumotnoma sifatida ishlatiladi, kirish huquqini bermaydi.
-3. **Ikki bosqichli autentifikatsiya (2FA) yo'q.**
+1. **Ko'p foydalanuvchili rollar yo'q** — bitta admin hisobi (`auth` jadvali,
+   bitta qator). `users` jadvali bor, lekin u sayt kontenti (masalan xodimlar
+   ro'yxati) sifatida ko'rsatiladi — kirish huquqini bermaydi, real
+   autentifikatsiyaga ulanmagan.
+2. **Yuklangan fayllarga antivirus tekshiruvi yo'q** — imzo (magic bytes) va
+   kengaytma bo'yicha tekshiriladi (6-bo'lim), lekin PDF/Word ichidagi
+   zararli makros aniqlanmaydi. Haqiqiy antivirus skaneri (ClamAV yoki
+   VirusTotal kabi tashqi xizmat) server tomonda qo'shimcha imkoniyat
+   (`shell_exec` yoki tashqi API kaliti) talab qiladi — hosting muhiti va
+   qaysi yechim tanlanishi aniqlanmaguncha amalga oshirilmagan.
+
+Bajarilgan (avval shu yerda ro'yxatda edi):
+
+- ~~`style-src 'unsafe-inline'`~~ — 2026-08-03'da olib tashlangan (7-bo'lim).
+- ~~2FA yo'q~~ — 2026-09-02'da qo'shildi (1-bo'lim): TOTP, ixtiyoriy,
+  admin panel → Sozlamalar → Xavfsizlik orqali yoqiladi.
 4. **Fayllarga antivirus tekshiruvi yo'q** — yuklangan PDF/Word fayllar imzosi
    bo'yicha tekshiriladi, lekin ichidagi zararli makros aniqlanmaydi.

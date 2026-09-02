@@ -273,7 +273,10 @@ function provision_schema($pdo) {
   $pdo->exec("CREATE TABLE IF NOT EXISTS auth (
     id TINYINT PRIMARY KEY DEFAULT 1,
     username VARCHAR(191) NOT NULL,
-    password_hash VARCHAR(255) NOT NULL DEFAULT ''
+    password_hash VARCHAR(255) NOT NULL DEFAULT '',
+    totp_secret VARCHAR(64) DEFAULT NULL,
+    totp_enabled TINYINT(1) NOT NULL DEFAULT 0,
+    totp_recovery LONGTEXT DEFAULT NULL
   )$tail");
 
   // seq = qo'shilish tartibi (auto-increment). ORDER BY seq DESC => eng yangisi birinchi (frontend unshift bilan mos)
@@ -517,6 +520,12 @@ function migrate($pdo) {
     'country'  => 'VARCHAR(120)',
     'descr'    => 'LONGTEXT',
   ]);
+  // Ikki bosqichli autentifikatsiya — TOTP (2026-09-02)
+  ensure_cols($pdo, 'auth', [
+    'totp_secret'   => 'VARCHAR(64) DEFAULT NULL',
+    'totp_enabled'  => 'TINYINT(1) NOT NULL DEFAULT 0',
+    'totp_recovery' => 'LONGTEXT DEFAULT NULL',
+  ]);
 }
 
 // Jadvalda yo'q ustunlarni qo'shadi (bor bo'lsa tegmaydi)
@@ -681,13 +690,114 @@ function settings_save($pdo, $obj) {
 
 /* -------------------- Auth -------------------- */
 function auth_load($pdo) {
-  $r = $pdo->query("SELECT username, password_hash FROM auth WHERE id=1")->fetch();
+  $r = $pdo->query("SELECT username, password_hash, totp_secret, totp_enabled, totp_recovery FROM auth WHERE id=1")->fetch();
   return $r ?: null;
 }
 function auth_save($pdo, $username, $hash) {
   $st = $pdo->prepare("INSERT INTO auth (id, username, password_hash) VALUES (1, :u, :h)
                        ON DUPLICATE KEY UPDATE username=VALUES(username), password_hash=VALUES(password_hash)");
   $st->execute([':u' => $username, ':h' => $hash]);
+}
+
+/* -------------------- 2FA (TOTP, RFC 6238) --------------------
+   Loyihada composer/npm yo'q (TOPSHIRISH.md: build bosqichi yo'q), shuning
+   uchun uchinchi tomon kutubxonasi o'rniga standart HMAC-SHA1 asosidagi
+   TOTP hisob-kitobi shu yerda qo'lda amalga oshirilgan — natija Google
+   Authenticator, Authy va h.k. har qanday standart ilova bilan mos ishlaydi
+   (30 soniyalik oyna, 6 xonali kod — RFC 6238 standart qiymatlari). */
+
+function totp_secret_gen() {
+  return base32_encode(random_bytes(20)); // 160 bit — standart tavsiya etilgan uzunlik
+}
+
+function base32_encode($bin) {
+  $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  $bits = '';
+  for ($i = 0; $i < strlen($bin); $i++) $bits .= str_pad(decbin(ord($bin[$i])), 8, '0', STR_PAD_LEFT);
+  $out = '';
+  foreach (str_split($bits, 5) as $chunk) {
+    $out .= $alphabet[bindec(str_pad($chunk, 5, '0', STR_PAD_RIGHT))];
+  }
+  return $out;
+}
+
+function base32_decode($b32) {
+  $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  $b32 = strtoupper(preg_replace('/[^A-Z2-7]/i', '', (string)$b32));
+  $bits = '';
+  for ($i = 0; $i < strlen($b32); $i++) {
+    $pos = strpos($alphabet, $b32[$i]);
+    if ($pos === false) continue;
+    $bits .= str_pad(decbin($pos), 5, '0', STR_PAD_LEFT);
+  }
+  $bytes = '';
+  foreach (str_split($bits, 8) as $byte) {
+    if (strlen($byte) < 8) continue; // oxirgi to'liqsiz qism — padding, tashlab yuboriladi
+    $bytes .= chr(bindec($byte));
+  }
+  return $bytes;
+}
+
+// Berilgan 30s "vaqt oynasi" uchun 6 xonali TOTP kod
+function totp_code($secret, $timeSlice) {
+  $key = base32_decode($secret);
+  $bin = pack('N', 0) . pack('N', $timeSlice); // 8 baytli hisoblagich, katta-oxirli (RFC 4226)
+  $hash = hash_hmac('sha1', $bin, $key, true);
+  $offset = ord($hash[19]) & 0x0F;
+  $part = ((ord($hash[$offset]) & 0x7F) << 24)
+        | ((ord($hash[$offset + 1]) & 0xFF) << 16)
+        | ((ord($hash[$offset + 2]) & 0xFF) << 8)
+        | (ord($hash[$offset + 3]) & 0xFF);
+  return str_pad((string)($part % 1000000), 6, '0', STR_PAD_LEFT);
+}
+
+// Server va telefon soati bir-biridan biroz farq qilishi mumkin — oldingi va
+// keyingi 30s oynani ham tekshiramiz (jami ±30s tolerantlik).
+function totp_verify($secret, $code) {
+  $code = preg_replace('/\s+/', '', (string)$code);
+  if ($secret === '' || !preg_match('/^\d{6}$/', $code)) return false;
+  $slice = (int)floor(time() / 30);
+  for ($i = -1; $i <= 1; $i++) {
+    if (hash_equals(totp_code($secret, $slice + $i), $code)) return true;
+  }
+  return false;
+}
+
+function totp_otpauth_uri($secret, $username) {
+  $label = rawurlencode('TSTM admin:' . $username);
+  return 'otpauth://totp/' . $label . '?secret=' . $secret . '&issuer=TSTM&algorithm=SHA1&digits=6&period=30';
+}
+
+// Zaxira (bir martalik) kodlar — 2FA yoqilganda telefon yo'qolsa yagona
+// admin hisobi butunlay bloklanib qolmasligi uchun. O'qilishi qulay bo'lsin
+// deb chalkash belgilar (0/O, 1/I) alifbodan olib tashlangan.
+function recovery_codes_gen($n = 8) {
+  $alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  $codes = [];
+  for ($i = 0; $i < $n; $i++) {
+    $s = '';
+    for ($j = 0; $j < 10; $j++) $s .= $alphabet[random_int(0, strlen($alphabet) - 1)];
+    $codes[] = substr($s, 0, 5) . '-' . substr($s, 5, 5);
+  }
+  return $codes;
+}
+// Solishtirish/xeshlash oldidan kod normalizatsiya qilinadi — foydalanuvchi
+// tire bilan yoki tiresiz, kichik yoki katta harfda kiritishi mumkin.
+function recovery_norm($s) { return strtoupper(preg_replace('/[^A-Za-z0-9]/', '', (string)$s)); }
+function recovery_hash($s) { return hash('sha256', recovery_norm($s)); }
+
+function auth_save_totp_secret($pdo, $secret) {
+  $pdo->prepare("UPDATE auth SET totp_secret=:s WHERE id=1")->execute([':s' => $secret]);
+}
+function auth_enable_totp($pdo, array $recoveryHashes) {
+  $pdo->prepare("UPDATE auth SET totp_enabled=1, totp_recovery=:r WHERE id=1")
+      ->execute([':r' => json_encode($recoveryHashes)]);
+}
+function auth_disable_totp($pdo) {
+  $pdo->prepare("UPDATE auth SET totp_secret=NULL, totp_enabled=0, totp_recovery=NULL WHERE id=1")->execute();
+}
+function auth_consume_recovery($pdo, array $remainingHashes) {
+  $pdo->prepare("UPDATE auth SET totp_recovery=:r WHERE id=1")->execute([':r' => json_encode($remainingHashes)]);
 }
 
 /* -------------------- Butun bazani o'qish (frontend uchun to'liq obyekt) -------------------- */
