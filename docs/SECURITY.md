@@ -68,6 +68,16 @@ yo'q, shuning uchun umumiy `coll_upsert`/`db_export` orqali ular hech qachon
 o'qilmaydi/yozilmaydi va klientga hech qachon chiqmaydi — xuddi asosiy
 administratorning parol xeshi kabi.
 
+**Hisob bekor qilinsa — sessiya DARHOL o'chadi.** `require_auth()` (demak —
+deyarli barcha amallar, shu jumladan `load` va `session`) xodim hisobi
+uchun har so'rovda `users.status`ni qayta tekshiradi (`session_active()`).
+Admin xodimni "Nofaol" qilsa yoki o'chirsa, o'sha xodimning ALLAQACHON
+ochiq turgan sessiyasi (masalan boshqa qurilmada) sessiya muddati
+tugashini (standart ~24 daqiqa) kutmay, keyingi so'rovdayoq bekor bo'ladi.
+Asosiy (bootstrap) hisob uchun bu tekshiruv ishlamaydi — u panel orqali
+o'chirilmaydi/faolsizlantirilmaydi, shuning uchun uning so'rovlarida
+qo'shimcha DB so'rovi sarflanmaydi.
+
 ## 2. Ruxsatlar va maxfiylik
 
 `api.php` dagi har bir yozuv amali `require_auth()` va `require_csrf()` bilan

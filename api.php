@@ -147,8 +147,28 @@ function upload_nomi($hint, $standart, $bin, $ext) {
   return $slug . '_' . date('Ymd_His') . '_' . substr(md5($bin . random_bytes(8)), 0, 8) . '.' . $ext;
 }
 
+// Sessiya HALI amalda ekanini tekshiradi. Xodim hisobi (`users` jadvali)
+// uchun har so'rovda hisob HALI FAOL ekani qayta tekshiriladi — aks holda:
+// admin xodimni o'chirsa yoki faolsizlantirsa, o'sha xodimning ALLAQACHON
+// ochiq turgan sessiyasi (masalan boshqa qurilmada) darhol emas, faqat
+// sessiya muddati tugagach (standart ~24 daqiqa) bekor bo'lardi. Asosiy
+// (bootstrap) hisob tekshirilmaydi — u panel orqali
+// o'chirilmaydi/faolsizlantirilmaydi, shuning uchun uning har so'rovida
+// ortiqcha DB so'rovi shart emas. Yolg'on qaytarsa sessiyani ham tozalaydi.
+function session_active($pdo) {
+  if (empty($_SESSION['tstm_admin'])) return false;
+  $uid = isset($_SESSION['tstm_uid']) ? (string)$_SESSION['tstm_uid'] : '';
+  if ($uid === '') return true;
+  $st = $pdo->prepare("SELECT status FROM users WHERE id = :id");
+  $st->execute([':id' => $uid]);
+  $r = $st->fetch();
+  if ($r && $r['status'] === 'active') return true;
+  unset($_SESSION['tstm_admin'], $_SESSION['tstm_role'], $_SESSION['tstm_uid']);
+  return false;
+}
 function require_auth() {
-  if (empty($_SESSION['tstm_admin'])) jexit(['ok' => false, 'error' => 'unauthorized'], 401);
+  global $pdo;
+  if (!session_active($pdo)) jexit(['ok' => false, 'error' => 'unauthorized'], 401);
 }
 // Faqat berilgan rollardan biriga ruxsat beradi (masalan ['admin']).
 // $_SESSION['tstm_role'] eski sessiyalarda yo'q bo'lishi mumkin — rollar
@@ -315,7 +335,7 @@ switch ($action) {
     // Ommaviy: sayt kontenti. Shaxsiy bo'limlar (murojaatlar, obunachilar,
     // admin foydalanuvchilar) faqat tizimga kirgan admin uchun to'liq qaytadi —
     // qolganlarga bo'sh massiv. Qarang: db.php -> $PRIVATE_COLLS.
-    if (!empty($_SESSION['tstm_admin'])) {
+    if (session_active($pdo)) {
       // Admin: to'liq ma'lumot, KESHSIZ — tahrirdan keyin darhol yangi holat.
       echo json_encode(db_load_all($pdo, true, current_account($pdo)), JSON_UNESCAPED_UNICODE);
     } else {
@@ -330,7 +350,7 @@ switch ($action) {
 
   case 'session':
     echo json_encode([
-      'authed' => !empty($_SESSION['tstm_admin']),
+      'authed' => session_active($pdo),
       'role' => isset($_SESSION['tstm_role']) ? $_SESSION['tstm_role'] : '',
       'csrf' => $_SESSION['csrf'],
     ]);
