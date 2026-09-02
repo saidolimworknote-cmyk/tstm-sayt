@@ -66,7 +66,7 @@
         <h1>${Site.esc(dispT)}</h1>
         ${showFull?`<div class="ptitle">${Site.esc(fullTitle)}</div>`:''}
       </div></div>
-      <section class="block"><div class="wrap"><div class="pub-detail">
+      <section class="block article-band"><div class="wrap"><div class="pub-detail">
         <div>
           <div class="cov">${p.type?`<span class="badge">${Site.esc(Site.mlGet(p.type))}</span>`:''}${p.cover?`<img src="${p.cover}" alt="">`:phSvg}</div>
           ${dlBtn}

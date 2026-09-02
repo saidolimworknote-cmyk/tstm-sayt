@@ -51,7 +51,7 @@
         <div class="crumb">${Site.crumbHTML('oav.html')}</div>
         <h1>${Site.esc(Site.mlGet(p.title))}</h1>
       </div></div>
-      <section class="block"><div class="wrap"><div class="article">
+      <section class="block article-band"><div class="wrap"><div class="article">
         <div class="meta">${p.category?`<span class="tag">${Site.esc(Site.mlGet(p.category))}</span>`:''}<span class="dt mono muted">${Site.fmtDate(p.date)}</span><span class="dt mono muted vct-badge" id="viewct"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" class="ico-15"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg><b id="viewn">·</b> ${T('views_label')}</span></div>
         ${byline}
         ${standfirst}

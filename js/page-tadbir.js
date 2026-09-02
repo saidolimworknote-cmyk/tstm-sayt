@@ -102,7 +102,7 @@ Site.initPage({ active: 'events', render(){
       <div class="crumb">${Site.crumbHTML(backHref)}</div>
       <h1>${esc(title)}</h1>
     </div></div>
-    <section class="block"><div class="wrap"><div class="article">
+    <section class="block article-band"><div class="wrap"><div class="article">
       <div class="meta">${typeLbl ? `<span class="tag">${esc(typeLbl)}</span>` : ''}${badge}<span class="dt mono muted">${esc(Site.fmtDate(ev.date))}</span><span class="dt mono muted vct-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" class="ico-15"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg><b id="viewn">·</b> ${esc(T('views_label'))}</span></div>
       ${sliderHTML}
       <dl class="ev-facts">${facts}</dl>

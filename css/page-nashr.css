@@ -8,8 +8,10 @@
   .pub-detail .metalist .r{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--line);font-size:0.84375rem;}
   .pub-detail .metalist .r .k{font-family:var(--mono);font-size:0.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
   .pub-detail .metalist .r .v{color:var(--ink);font-weight:500;text-align:right;}
-  /* matn ustunning butun kengligini egallasin (site.css'dagi .prose max-width:820px bekor qilinadi) */
-  .pub-detail .prose{max-width:none;border:1px solid var(--line);border-radius:var(--r-media,12px);padding:30px 34px;}
+  /* matn ustunning butun kengligini egallasin (site.css'dagi .prose max-width:820px bekor qilinadi).
+     2026-09-02: .article bilan bir xil "karta" — ICHI oq (--panel), ATROFI
+     esa .article-band orqali yengil bo'yalgan (qarang: site.css -> .article). */
+  .pub-detail .prose{max-width:none;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-media,12px);padding:30px 34px;}
   @media(max-width:860px){.pub-detail{grid-template-columns:1fr;gap:32px;}.pub-detail .cov{max-width:300px;}.pub-detail .prose{padding:20px;}}
   /* To'liq nomi — bannerdagi qisqa sarlavhadan keyin, maqoladan AVVAL alohida blok.
      Chap tomonidagi aksent chizig'i uni matndan ajratib turadi. */

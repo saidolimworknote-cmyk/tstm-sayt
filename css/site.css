@@ -262,6 +262,10 @@ body.inner{padding-top:var(--hdr-h,80px);}
 
 /* section scaffold */
 section.block{padding:74px 0;}
+/* Post (voqea/sharh/nashr) sahifasi — .article/.pub-detail atrofidagi
+   chekkadan-chekkagacha yengil bo'yalgan zamin, karta (oq) shu zaminda
+   "suzib" turadi. Qarang: .article, .pub-detail .prose. */
+section.block.article-band{background:var(--surface);}
 .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:30px;margin-bottom:46px;flex-wrap:wrap;}
 .sec-head h2{font-family:var(--serif);font-weight:500;font-size:clamp(26px,3vw,38px);margin:14px 0 0;line-height:1.1;max-width:20ch;}
 
@@ -294,8 +298,17 @@ section.block{padding:74px 0;}
 .ph{position:relative;background:repeating-linear-gradient(45deg,var(--ph-1) 0,var(--ph-1) 11px,var(--ph-2) 11px,var(--ph-2) 22px);border:1px solid var(--line-2);display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--muted);}
 .ph svg{width:34px;height:34px;opacity:.5;}
 
-/* article (single) */
-.article{max-width:920px;margin:0 auto;}
+/* article (single) — 2026-09-02: butun post (meta+rasm+matn+amallar) sahifa
+   fonidan "karta" sifatida ajralib turadi (UZA.uz'dagi kabi). Karta ICHI oq
+   (--panel), ATROFI esa yengil bo'yalgan (--surface, .article-band'da,
+   section darajasida — chekkadan-chekkagacha). `.ev-facts` (Sana/Vaqt/
+   Manzil/Tur) ham --surface fon ishlatadi (page-tadbirlar.css) — shuning
+   uchun karta ICHI --surface bo'lsa, o'sha to'rtta katak karta bilan bir xil
+   rangda "yo'qolib" qolardi; oq kartada esa yana kontrastli ko'rinadi.
+   max-width ham 920 -> 1040: qo'shilgan ichki bo'shliq (padding) tufayli
+   Sana/Vaqt/Manzil/Tur to'rtta katak (min 210px) endi bemalol bitta qatorga
+   sig'adi — ilgari torroq bo'lib, 3+1 yoki 2x2'ga siqilib qolardi. */
+.article{max-width:1040px;margin:0 auto;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-media);padding:40px 48px;}
 .article .meta{display:flex;gap:14px;align-items:center;margin-bottom:24px;flex-wrap:wrap;}
 /* admin yozgan qisqa anons — rasm/matn tepasidagi yetakchi paragraf (standfirst) */
 .article .art-lead{font-family:var(--serif);font-weight:500;font-size:1.28rem;line-height:1.55;color:var(--ink);margin:0 0 30px;padding-left:20px;border-left:3px solid var(--accent);}
@@ -307,7 +320,15 @@ section.block{padding:74px 0;}
 .article .content ul,.article .content ol{margin:0 0 20px;padding-left:24px;}
 .article .content li{margin-bottom:8px;}
 .article .content a{color:var(--accent);text-decoration:underline;}
-.article .content img,.article .content video{margin:24px 0;border:1px solid var(--line);width:100%;height:auto;display:block;border-radius:var(--r-media);}
+/* Maqola ICHIDAGI rasm/video — karta (oq, --panel) fonidan farqlanishi uchun
+   yengil bo'yalgan (--surface) "foto-mat" beriladi, aks holda oq kartada
+   "yo'qolib" qolardi. */
+.article .content img,.article .content video,
+.prose img,.prose video{
+  margin:28px 0;padding:10px;box-sizing:border-box;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-media);
+  width:100%;height:auto;display:block;
+}
 /* keng jadval sahifani cho'zmasin — o'z ichida gorizontal suriladi (mobil) */
 .article .content table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border-collapse:collapse;}
 .article .content blockquote{margin:24px 0;padding:8px 0 8px 24px;border-left:3px solid var(--accent);font-family:var(--serif);font-size:1.3125rem;color:var(--ink);font-style:italic;}
@@ -752,6 +773,7 @@ body.inner{overflow-x:clip;}
   .dir h3{font-size:1.125rem;margin:14px 0 8px;}
   .dir p{font-size:0.84375rem;}
   .ncard .body{padding:11px 14px 13px;}
+  .article{padding:22px 18px;}
   .article .hero-img{height:220px;}
   /* footer — ixcham: faqat brend, tavsif va ijtimoiy tarmoqlar */
   footer{padding:38px 0 22px;font-size:0.875rem;}
@@ -1112,7 +1134,9 @@ html[data-theme="dark"]{
   .pub-detail .full-title { display:none !important; }
 
   /* --- maqola (yangilik) --- */
-  .article { max-width:none; }
+  /* Ekrandagi karta foni (--surface) chop etishda bekor qilinadi — toza qog'oz. */
+  .article-band { background:none !important; }
+  .article { max-width:none; background:none !important; border:0 !important; padding:0 !important; }
   .article .meta { color:#444 !important; font-size:9.5pt; margin:12px 0 16px; padding-bottom:10px;
     border-bottom:1px solid #ccc; display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
   .article .meta .tag { background:none !important; color:#0b4f76 !important; border:1px solid #0b4f76; padding:1px 8px; }
@@ -1123,7 +1147,11 @@ html[data-theme="dark"]{
   .article .art-lead { color:#000 !important; border-left-color:#0b4f76 !important; }
   .article .content { color:#000 !important; font-size:11.5pt; line-height:1.55; }
   .article .content h2, .article .content h3 { color:#000 !important; page-break-after:avoid; }
-  .article .content img { max-width:100% !important; page-break-inside:avoid; }
+  /* Ekrandagi fon+bo'shliqli "karta" chop etishda bekor qilinadi — toza
+     qog'oz, keraksiz siyoh sarflanmasin. Qarang: `.article .content img` (ekran). */
+  .article .content img,.article .content video,
+  .pub-detail .prose img,.pub-detail .prose video
+    { max-width:100% !important; page-break-inside:avoid; background:none !important; padding:0 !important; border:1px solid #ccc !important; }
   .article .content blockquote { border-left:3px solid #0b4f76; color:#000 !important; font-style:italic; }
   .article .content a { color:#000 !important; text-decoration:none; }
 
@@ -1152,7 +1180,7 @@ html[data-theme="dark"]{
   .pub-detail .metalist .r .v { color:#000 !important; }
   .pub-detail .kicker { color:#0b4f76 !important; margin-bottom:10px; }
   .pub-detail .prose { color:#000 !important; font-size:11.5pt; line-height:1.55; max-width:none;
-    border:0 !important; padding:0 !important; }
+    background:none !important; border:0 !important; padding:0 !important; }
   /* Dark rejim uchun qo'yilgan `.prose *{color:...!important}` himoyasi (507-513 qatorlar)
      chop etishda ham kuchda qolib, matnni OQ QOG'OZGA och ko'k qilib chiqarardi.
      Bu yerda (keyinroq, bir xil aniqlikda) bekor qilamiz — matn hamisha qora chiqadi,
