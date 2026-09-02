@@ -63,4 +63,16 @@ return [
   ------------------------------------------------------------------------------ */
   'admin_user' => 'markaz_admini',
   'admin_bootstrap_password' => '',
+
+  /* -------------------- VirusTotal (ixtiyoriy) --------------------
+     Yuklangan PDF/Word hujjatlarini antivirus bilan tekshirish uchun.
+     BO'SH QOLDIRILSA — tekshiruv shunchaki O'TKAZIB YUBORILADI (hech narsa
+     buzilmaydi), fayl faqat mavjud imzo/kengaytma tekshiruvidan o'tadi.
+
+     Bepul kalit: virustotal.com/gui/join-us -> profil -> API Key.
+     Bepul (Public API) limiti: 4 so'rov/daqiqa, 500/kun — shuning uchun
+     faqat hujjat yuklashda ishlatiladi (rasm yuklashda EMAS, u ancha
+     tez-tez bo'ladi va limitni zudlik bilan tugatardi).
+  ------------------------------------------------------------------------------ */
+  'virustotal_api_key' => '',
 ];
