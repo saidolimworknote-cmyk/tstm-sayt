@@ -108,7 +108,6 @@ Site.initPage({ active: 'events', render(){
       <dl class="ev-facts">${facts}</dl>
       <div class="content">${bodyHtml || '<p class="muted">' + esc(T('soon_text')) + '</p>'}</div>
       <div class="act-row" id="actRow">
-        <button class="act-btn" data-act="ics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4M9 14h6M12 11v6"/></svg>${esc(T('ev_ics'))}</button>
         <button class="act-btn" data-act="print"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg>${esc(T('act_print'))}</button>
         <button class="act-btn" data-act="link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg><span data-lbl>${esc(T('act_link'))}</span></button>
         <button class="act-btn" data-act="share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>${esc(T('act_share'))}</button>
@@ -207,49 +206,6 @@ Site.initPage({ active: 'events', render(){
   /* ---- amal tugmalari ---- */
   const row = document.getElementById('actRow');
   const url = location.href;
-
-  /* "Taqvimga qo'shish" — .ics fayli brauzerda YASALADI (server kerak emas).
-     Rasmiy tadbir sahifalarining odatiy elementi: tashrifchi sanani qo'lda
-     ko'chirmaydi. Vaqt zonasi ko'rsatilmaydi — voqea mahalliy vaqtda bo'ladi
-     va ko'pchilik taqvim ilovasi zonasiz qiymatni o'z zonasida ochadi. */
-  row.querySelector('[data-act=ics]').onclick = function(){
-    const pad = (n) => String(n).padStart(2, '0');
-    const d = String(ev.date || '').replace(/-/g, '');
-    if(!d) return;
-    const hm = /^(\d{1,2}):(\d{2})/.exec(ev.time || '');
-    const start = hm ? d + 'T' + pad(hm[1]) + hm[2] + '00' : d;
-    // Vaqti ko'rsatilmagan voqea — kun bo'yi (DTEND ertangi kun)
-    let endLine;
-    if(hm){
-      const e = new Date(Number(d.slice(0,4)), Number(d.slice(4,6)) - 1, Number(d.slice(6,8)), Number(hm[1]) + 2, Number(hm[2]));
-      endLine = 'DTEND:' + e.getFullYear() + pad(e.getMonth()+1) + pad(e.getDate()) + 'T' + pad(e.getHours()) + pad(e.getMinutes()) + '00';
-    } else {
-      const e = new Date(Number(d.slice(0,4)), Number(d.slice(4,6)) - 1, Number(d.slice(6,8)) + 1);
-      endLine = 'DTEND;VALUE=DATE:' + e.getFullYear() + pad(e.getMonth()+1) + pad(e.getDate());
-    }
-    // iCalendar matnida ; , \ va yangi qator qochiriladi (RFC 5545)
-    const ics = (v) => String(v || '').replace(/\\/g, '\\\\').replace(/[;,]/g, m => '\\' + m).replace(/\r?\n/g, '\\n');
-    const plain = bodyHtml.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 600);
-    const lines = [
-      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//TSTM//Voqealar//UZ', 'CALSCALE:GREGORIAN',
-      'BEGIN:VEVENT',
-      'UID:' + ev.id + '@tstm',
-      'DTSTAMP:' + new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, ''),
-      (hm ? 'DTSTART:' + start : 'DTSTART;VALUE=DATE:' + start),
-      endLine,
-      'SUMMARY:' + ics(title),
-      loc ? 'LOCATION:' + ics(loc) : '',
-      plain ? 'DESCRIPTION:' + ics(plain) : '',
-      'URL:' + ics(url),
-      'END:VEVENT', 'END:VCALENDAR'
-    ].filter(Boolean);
-    const blob = new Blob([lines.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = (title.replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '').slice(0, 60) || 'voqea') + '.ics';
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-  };
 
   row.querySelector('[data-act=print]').onclick = function(){
     const metaHtml = (typeLbl ? '<span class="tag">' + esc(typeLbl) + '</span>' : '')

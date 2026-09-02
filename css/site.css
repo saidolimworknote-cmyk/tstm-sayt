@@ -140,8 +140,11 @@ header{position:fixed;top:0;left:0;right:0;z-index:60;transition:background .3s,
 
 .bar .wrap{display:flex;align-items:center;gap:30px;height:96px;}
 .brand{display:flex;align-items:center;gap:15px;flex:none;}
-.brand .logo{height:60px;width:auto;display:block;transition:height .3s;}
-header.solid .brand .logo{height:54px;}
+/* 2026-08-27: bosh sahifadagi (home.css) kattalashtirilgan logotip bilan bir
+   xil o'lcham — ilgari bu yerda 60px/54px turardi, ichki sahifalarda logotip
+   bosh sahifadagidan kichikroq ko'rinardi. */
+.brand .logo{height:66px;width:auto;display:block;transition:height .3s;}
+header.solid .brand .logo{height:70px;}
 .logo-c{display:block;}
 /* flex:none — chiziq 1.5px, flex uni siqib 0 ga tushirmasin (brand qutisi
    qat'iy kenglikda bo'lgani uchun nom uzayganda aynan shu yo'qolardi). */
@@ -658,7 +661,7 @@ html[data-theme="light"] .f-bot{color:rgba(255,255,255,.7);}
   nav.main{gap:17px;font-size:0.84375rem;}
   .brand .nm{max-width:190px;}
   .brand .nm b{font-size:0.875rem;}
-  .brand .logo{height:54px;}
+  .brand .logo{height:58px;}
   .wrap{padding:0 30px;}
   /* Media galereya: keng ekranda 4 ta, o'rta ekranda 3 ta karta */
   .gallery{grid-template-columns:repeat(3,1fr);}
@@ -704,7 +707,7 @@ body.inner{overflow-x:clip;}
   .nav-burger{display:flex;margin-left:auto;}
   .brand{margin:0 !important;width:auto !important;min-width:0 !important;height:auto !important;gap:9px !important;}
   .brand .logo{height:40px !important;}
-  header.solid .brand .logo{height:38px !important;}
+  header.solid .brand .logo{height:46px !important;}
   .brand .divider{height:34px !important;}
   .brand .nm b{font-size:0.75rem !important;}
   .brand .nm small{font-size:0.75rem !important;}

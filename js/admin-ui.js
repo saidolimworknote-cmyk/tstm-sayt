@@ -1487,7 +1487,13 @@
         const o = {};
         $$('.lang-pane', fl).forEach(p => { const inp = $('[data-in]', p); o[p.dataset.lang] = type === 'rich' ? inp.innerHTML : inp.value; });
         obj[k] = o;
-        if (f.req && !o.uz.trim()) missing = true;
+        // Faqat "uz" emas — UCHALA tilning birortasi to'ldirilgan bo'lsa yetarli
+        // (avto-tarjima tugmasi ham xuddi shu qoida bilan ishlaydi: "kamida
+        // bitta tilda to'ldiring"). Ilgari faqat o.uz tekshirilardi — admin
+        // sarlavhani, masalan, faqat ruscha yozsa (UZ bo'sh qolsa), forma
+        // "hammasini to'ldirdim" holatida ham "Majburiy maydonlarni to'ldiring"
+        // deb bloklab qo'yardi.
+        if (f.req && !(o.uz || '').trim() && !(o.ru || '').trim() && !(o.en || '').trim()) missing = true;
       } else {
         const inp = $('[data-in]', fl);
         obj[k] = type === 'number' ? (parseInt(inp.value) || 0) : inp.value;

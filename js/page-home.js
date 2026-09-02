@@ -423,10 +423,14 @@
       const PH = '<div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 0 2 2h13"/></svg></div>';
       const main = evs[0], rest = evs.slice(1);
       const exc = excerpt(mlGet(main.body), 160);
+      // 2026-08-27: "meta" (tur + sana) rasmdan OLDIN chiqadi — qisqa anons
+      // qatori, katta sarlavha (h3) og'irligini bosish uchun (css/home.css:
+      // ".feat .meta" endi rasm tepasida, .fbody ichida emas).
       const featHTML = '<a class="feat rv" href="tadbir.html?id='+encodeURIComponent(main.id)+'">'
-        + (evCover(main) ? '<div class="ph">'+imgTag(evCover(main))+'</div>' : PH)
-        + '<div class="fbody"><div class="meta"><span class="tag">'+esc(kindLabel(main))+'</span>'
+        + '<div class="meta"><span class="tag">'+esc(kindLabel(main))+'</span>'
         + (main.date ? '<span class="d mono muted">'+esc(fmtDate(main.date))+'</span>' : '') + '</div>'
+        + (evCover(main) ? '<div class="ph">'+imgTag(evCover(main))+'</div>' : PH)
+        + '<div class="fbody">'
         + '<h3>'+esc(mlGet(main.title))+'</h3>'
         + (exc ? '<p>'+esc(exc)+'</p>' : '')
         + '</div></a>';

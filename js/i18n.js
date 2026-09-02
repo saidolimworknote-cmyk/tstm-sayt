@@ -317,7 +317,6 @@
     ev_where:     { uz: 'Manzil', ru: 'Место проведения', en: 'Venue' },
     ev_type_l:    { uz: 'Voqea turi', ru: 'Тип мероприятия', en: 'Event type' },
     ev_details:   { uz: 'Batafsil', ru: 'Подробнее', en: 'Details' },
-    ev_ics:       { uz: "Taqvimga qo’shish", ru: 'Добавить в календарь', en: 'Add to calendar' },
     ev_related:   { uz: "Shu bo’limdagi boshqa voqealar", ru: 'Другие события этого раздела', en: 'Other events in this section' },
     ev_year_from: { uz: 'Yil', ru: 'Год', en: 'Year' },
 

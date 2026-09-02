@@ -314,7 +314,10 @@
   .feat{display:block;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-media);overflow:hidden;transition:transform .25s, box-shadow .25s, background .25s;padding:0 0 18px;margin:0;}
   .feat .fbody{padding:0 18px 18px;}
   .feat:hover{transform:translateY(-6px);box-shadow:var(--lift);background:var(--panel);}
-  .feat .meta{display:flex;gap:14px;align-items:center;margin:26px 0 14px;}
+  /* 2026-08-27: rasm TEPASIGA ko'chirildi (ilgari .fbody ichida, sarlavhadan
+     oldin, rasmdan KEYIN turardi) — qisqa "anons" qatori: tur + sana. Katta
+     sarlavha (h3, 30px) ostidan oldin ko'zga chalinadigan kichik band beradi. */
+  .feat .meta{display:flex;gap:14px;align-items:center;margin:18px 18px 12px;}
   .tag{font-family:var(--mono);font-size:0.6875rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:4px 11px;}
   .feat h3{font-family:var(--serif);font-weight:500;font-size:1.875rem;line-height:1.18;margin:0 0 14px;}
   .feat p{color:var(--ink-2);margin:0;max-width:52ch;}
@@ -583,7 +586,7 @@
     .pub-grid,.plogos{grid-template-columns:1fr;}
     /* mobil: kartalar ixcham — kichik padding, kichik sarlavha, barqaror rasm nisbatlari */
     .feat .ph,.feat .img{height:200px;}
-    .feat .meta{margin:16px 0 10px;}
+    .feat .meta{margin:14px 18px 10px;}
     .feat h3{font-size:1.25rem;margin:0 0 8px;}
     .feat p{font-size:0.90625rem;}
     .nitem{grid-template-columns:116px 1fr;gap:0;padding:0;}
@@ -857,4 +860,27 @@
     .stat .n{color:#0b4f76 !important;}
     .stat .c{color:#555 !important;}
     img{max-width:100% !important;height:auto !important;page-break-inside:avoid;}
+  }
+
+  /* ============================================================
+     "MAGNIT" SKROLL (bosh sahifa)
+     2026-08-27: hech narsa qayta joylashtirilmaydi, hech qanday bo'lim
+     balandligi/markazga tekislash o'zgarmaydi, JS ham yo'q — faqat brauzer-
+     ning tabiiy `scroll-snap` xususiyati yoqiladi. Natija: har bir asosiy
+     bo'lim chegarasi "magnit nuqta" bo'ladi — kam skroll harakati bilan ham
+     sahifa o'zi o'sha bo'lim sarlavhasi boshlanishigacha tortiladi/tushadi,
+     lekin bo'lim mazmuni, o'lchami va joylashuvi bir xilligicha qoladi.
+     Faqat katta ekranda (mobil/planshetda tabiiy erkin skroll qulayroq) va
+     harakatga sezgir foydalanuvchida (prefers-reduced-motion) o'chiq. */
+  @media(min-width:761px) and (prefers-reduced-motion:no-preference){
+    html{scroll-snap-type:y mandatory;}
+    /* Har bir asosiy bo'limning YUQORI CHETI — magnit nuqta. Header doim
+       suzuvchi (fixed, ~80px) bo'lgani uchun scroll-margin-top bilan
+       sarlavha uning tagida qolib ketmasligi ta'minlanadi. Experts bo'limi
+       (Ekspertlar) uchun alohida klass yo'q — u har doim .pubs dan keyingi
+       yagona <section>, shuning uchun qo'shni selektor bilan aniqlanadi
+       (HTML o'zgarishsiz qoladi). */
+    .hero,.mission,section.pt0,.pubs,.pubs + section,.partners-sec,footer{
+      scroll-snap-align:start;scroll-snap-stop:always;scroll-margin-top:80px;
+    }
   }
